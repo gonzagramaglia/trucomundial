@@ -8,7 +8,7 @@ import { PointSelector } from './PointSelector';
 import { MatchmakingOverlay } from './MatchmakingOverlay';
 
 interface LandingPageProps {
-  onStart: (mode: "1v1" | "2v2" | "multiplayer", points: 15 | 30, rivalName?: string, rivalId?: string, isCreator?: boolean, roomCode?: string) => void;
+  onStart: (mode: "1v1" | "2v2" | "multiplayer", points: 15 | 30, rivalName?: string, rivalId?: string, isCreator?: boolean, roomCode?: string, isReconnecting?: boolean) => void;
   sessionId: string;
 }
 
@@ -92,6 +92,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart, sessionId }) 
     setIsWaiting(true);
     setTimeLeft(300);
 
+    const newRoomInfo = {
+      creatorId: user?.id || sessionId,
+      creatorName: user?.user_metadata?.full_name?.split(' ')[0] || "HOST",
+      points: pointsToUse
+    };
+
     // Register room in table
     const { error } = await supabase
       .from('game_sync')
@@ -100,9 +106,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart, sessionId }) 
         last_move: { 
           type: 'room_state', 
           status: 'waiting', 
-          creatorName: user?.user_metadata?.full_name?.split(' ')[0] || "HOST", 
-          creatorId: sessionId, 
-          points: pointsToUse 
+          roomInfo: newRoomInfo,
+          ...newRoomInfo
         },
         updated_at: new Date().toISOString()
       }, { onConflict: 'match_id' });
@@ -117,65 +122,104 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart, sessionId }) 
     const code = inputCode.toUpperCase();
     console.log("Buscando sala en la tabla:", code);
     
-    // 1. Check if room exists and is waiting
+    // 1. Check if room exists
     const { data, error } = await supabase
       .from('game_sync')
       .select('last_move')
       .eq('match_id', code)
       .maybeSingle();
 
-    if (error) {
-      console.error("Error al buscar sala:", error);
-      alert("Hubo un problema de conexión. Intenta de nuevo.");
-      return;
-    }
-
-    if (!data || data.last_move?.status !== 'waiting') {
-      console.log("Sala no encontrada o no está en espera:", data);
+    if (error || !data || !data.last_move) {
+      console.log("Sala no encontrada:", error || data);
       alert("Código incorrecto o la sala ya no existe.");
       setInputCode("");
       return;
     }
 
-    console.log("¡Sala encontrada! Intentando unirnos...", data.last_move);
+    const state = data.last_move;
 
-    // 2. Join the room by updating status to 'matched'
-    const rivalName = data.last_move.creatorName;
-    const rivalId = data.last_move.creatorId;
-    const matchPoints = data.last_move.points || 30;
+    if (state.status === 'waiting') {
+      console.log("¡Sala encontrada en espera! Intentando unirnos...", state);
 
-    const { error: updateError } = await supabase
-      .from('game_sync')
-      .update({ 
-        last_move: { 
-          type: 'room_state', 
-          status: 'matched', 
-          creatorName: rivalName, 
-          creatorId: rivalId,
-          guestName: user?.user_metadata?.full_name?.split(' ')[0] || "GUEST",
-          guestId: sessionId,
-          points: matchPoints
-        },
-        updated_at: new Date().toISOString()
-      })
-      .eq('match_id', code);
+      const rivalName = state.creatorName;
+      const rivalId = state.creatorId;
+      const matchPoints = state.points || 30;
+      const guestName = user?.user_metadata?.full_name?.split(' ')[0] || "GUEST";
+      const guestId = user?.id || sessionId;
 
-    if (updateError) {
-      alert("No se pudo unir a la sala. Intenta de nuevo.");
-      return;
+      const newRoomInfo = {
+        creatorId: rivalId,
+        creatorName: rivalName,
+        guestId: guestId,
+        guestName: guestName,
+        points: matchPoints
+      };
+
+      const { error: updateError } = await supabase
+        .from('game_sync')
+        .update({ 
+          last_move: { 
+            type: 'room_state', 
+            status: 'matched', 
+            roomInfo: newRoomInfo,
+            ...newRoomInfo
+          },
+          updated_at: new Date().toISOString()
+        })
+        .eq('match_id', code);
+
+      if (updateError) {
+        alert("No se pudo unir a la sala. Intenta de nuevo.");
+        return;
+      }
+
+      setRoomCode(code);
+      setRivalData({ name: rivalName, id: rivalId });
+      setIsWaiting(true);
+      setShowVersus(true);
+      
+      setTimeout(() => {
+        setIsWaiting(false);
+        setShowVersus(false);
+        onStart("multiplayer", matchPoints as 15 | 30, rivalName, rivalId, false, code, false);
+      }, 3500);
     }
+    else {
+      const roomInfo = state.roomInfo || (state.status === 'matched' ? state : null);
+      if (!roomInfo || (!roomInfo.creatorId && !roomInfo.guestId)) {
+        alert("Código incorrecto o la sala ya no existe.");
+        setInputCode("");
+        return;
+      }
 
-    // 3. Success! Start local flow
-    setRoomCode(code);
-    setRivalData({ name: rivalName, id: rivalId });
-    setIsWaiting(true); // Show overlay briefly
-    setShowVersus(true);
-    
-    setTimeout(() => {
-      setIsWaiting(false);
-      setShowVersus(false);
-      onStart("multiplayer", matchPoints as 15 | 30, rivalName, rivalId, false, code);
-    }, 3500);
+      const myId = user?.id || sessionId;
+      if (myId === roomInfo.creatorId) {
+        console.log("¡Reconectando como HOST!");
+        setRoomCode(code);
+        setRivalData({ name: roomInfo.guestName, id: roomInfo.guestId });
+        setIsWaiting(true);
+        setShowVersus(true);
+        setTimeout(() => {
+          setIsWaiting(false);
+          setShowVersus(false);
+          onStart("multiplayer", roomInfo.points as 15 | 30, roomInfo.guestName, roomInfo.guestId, true, code, true);
+        }, 2000);
+      } else if (myId === roomInfo.guestId) {
+        console.log("¡Reconectando como GUEST!");
+        setRoomCode(code);
+        setRivalData({ name: roomInfo.creatorName, id: roomInfo.creatorId });
+        setIsWaiting(true);
+        setShowVersus(true);
+        setTimeout(() => {
+          setIsWaiting(false);
+          setShowVersus(false);
+          onStart("multiplayer", roomInfo.points as 15 | 30, roomInfo.creatorName, roomInfo.creatorId, false, code, true);
+        }, 2000);
+      } else {
+        alert("La sala ya está en juego con otros jugadores.");
+        setInputCode("");
+      }
+    }
   };
 
   useEffect(() => {
@@ -203,7 +247,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart, sessionId }) 
             setTimeout(() => {
               setIsWaiting(false);
               setShowVersus(false);
-              onStart("multiplayer", state.points as 15 | 30, state.guestName, state.guestId, true, roomCode);
+              onStart("multiplayer", state.points as 15 | 30, state.guestName, state.guestId, true, roomCode, false);
             }, 3500);
           }
         }

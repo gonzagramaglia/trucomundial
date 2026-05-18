@@ -22,8 +22,8 @@ export const useMatchmakingNetwork = (
     if (!error && data?.last_move) {
       const type = data.last_move.type;
       // If we haven't started, look for sync. If started, look for score/nextRound.
-      if (!hasStartedRef.current && type === 'sync') handleRemoteMove(data.last_move);
-      else if (hasStartedRef.current && (type === 'scoreSync' || type === 'nextRound')) handleRemoteMove(data.last_move);
+      if (!hasStartedRef.current && (type === 'sync' || type === 'full_state_sync')) handleRemoteMove(data.last_move);
+      else if (hasStartedRef.current && (type === 'scoreSync' || type === 'nextRound' || type === 'reconnect_request' || type === 'full_state_sync')) handleRemoteMove(data.last_move);
     }
   }, [matchId, handleRemoteMove, hasStartedRef]);
 
@@ -39,21 +39,35 @@ export const useMatchmakingNetwork = (
     }
 
     // Realtime channel
-    const channel = supabase.channel(`match_${matchId}`);
+    const channel = supabase.channel(`match_${matchId}`, {
+      config: {
+        presence: { key: props.sessionId }
+      }
+    });
+
     channel
+      .on('presence', { event: 'sync' }, () => {
+        const state = channel.presenceState();
+        const onlineCount = Object.keys(state).length;
+        props.setIsRivalConnected(onlineCount > 1);
+      })
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'game_sync', filter: `match_id=eq.${matchId}` }, (payload) => {
         handleRemoteMove(payload.new.last_move);
       })
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'game_sync', filter: `match_id=eq.${matchId}` }, (payload) => {
         handleRemoteMove(payload.new.last_move);
       })
-      .subscribe();
+      .subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          await channel.track({ online_at: new Date().toISOString(), role: isHost ? 'host' : 'guest' });
+        }
+      });
 
     return () => {
       if (syncRetryRef.current) clearInterval(syncRetryRef.current);
       supabase.removeChannel(channel);
     };
-  }, [gameMode, user, rivalId, matchId, isHost, handleRemoteMove, fetchInitialState, syncRetryRef]);
+  }, [gameMode, user, rivalId, matchId, isHost, handleRemoteMove, fetchInitialState, syncRetryRef, props]);
 
   return { fetchInitialState };
 };

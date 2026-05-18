@@ -7,6 +7,7 @@ export function useTrucoGame(sessionId: string | undefined, onSync?: (data: any)
   const core = useTrucoCore(sessionId || "local");
 
   const [isCpuThinking, setIsCpuThinking] = React.useState(false);
+  const [isRivalConnected, setIsRivalConnected] = React.useState(true);
 
   // AI Logic - Only active in non-multiplayer modes
   useTrucoCPU({
@@ -78,6 +79,8 @@ export function useTrucoGame(sessionId: string | undefined, onSync?: (data: any)
     startGame,
     isCpuThinking: false,
     scorePopups: core.scorePopups,
+    isRivalConnected,
+    setIsRivalConnected,
     handleRestartGame: () => core.resetRound(),
     playCardRemote: (card: Card, owner: PlayerRole) => {
       core.setPlayedCards((prev: any) => [...prev, { 

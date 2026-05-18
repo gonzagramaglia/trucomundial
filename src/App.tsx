@@ -16,6 +16,7 @@ function App() {
   const [isCreator, setIsCreator] = useState(false);
 
   const syncRef = useRef<((data: any) => void) | null>(null);
+  const roomInfoRef = useRef<any>(null);
 
   const stableHandleSync = useCallback((data: any) => {
     if (syncRef.current) syncRef.current(data);
@@ -24,7 +25,7 @@ function App() {
   const core = useTrucoGame(sessionId, stableHandleSync);
   const actualIsHost = currentRoomCode ? isCreator : (sessionId && core.rivalId ? sessionId < core.rivalId : false);
 
-  const { broadcastMove, cleanupMatch } = useMatchmaking({
+  const { broadcastMove } = useMatchmaking({
     sessionId, user, gameMode: core.gameMode, rivalId: core.rivalId, 
     isHost: actualIsHost, 
     matchId: currentRoomCode, // Use the room code as match identifier
@@ -38,8 +39,14 @@ function App() {
     handleMazo: core.handleMazo, setScore: core.setScore, score: core.score,
     setIsGameStarting: core.setIsGameStarting, setShowCountdown: core.setShowCountdown,
     setMaxPoints: core.setMaxPoints,
-    setIsHost: core.setIsHost, setMyIndex: core.setMyIndex
-  });
+    setIsHost: core.setIsHost, setMyIndex: core.setMyIndex,
+    setPlayerHand: core.setPlayerHand, setPlayedCards: core.setPlayedCards,
+    setStarterIdx: core.setStarterIdx, setHandWinners: core.setHandWinners,
+    setTrucoState: core.setTrucoState, setEnvidoState: core.setEnvidoState,
+    setCpuHandCount: core.setCpuHandCount, setIsRivalConnected: core.setIsRivalConnected,
+    handWinners: core.handWinners, trucoState: core.trucoState, envidoState: core.envidoState,
+    maxPoints: core.maxPoints
+  }, roomInfoRef);
 
   useEffect(() => {
     core.setIsHost(actualIsHost);
@@ -98,17 +105,45 @@ function App() {
     }
   };
 
-  const startGameWithSync = (mode: GameMode, points: number, rName?: string, rId?: string, isCreatorFlag?: boolean, roomCode?: string) => {
+  const startGameWithSync = (mode: GameMode, points: number, rName?: string, rId?: string, isCreatorFlag?: boolean, roomCode?: string, isReconnecting?: boolean) => {
     const isHostForThisMatch = mode === "multiplayer" ? (isCreatorFlag || false) : false;
     setIsCreator(isHostForThisMatch);
     setCurrentRoomCode(roomCode || null);
     
     if (mode === "multiplayer") {
       const actualIsHost = isHostForThisMatch;
+      const myId = user?.id || sessionId;
+      const myName = user?.user_metadata?.full_name?.split(' ')[0] || (actualIsHost ? "HOST" : "GUEST");
+
+      roomInfoRef.current = {
+        creatorId: actualIsHost ? myId : rId,
+        creatorName: actualIsHost ? myName : rName,
+        guestId: actualIsHost ? rId : myId,
+        guestName: actualIsHost ? rName : myName,
+        points: points
+      };
+
       core.setIsHost(actualIsHost);
       core.setMyIndex(actualIsHost ? 0 : 1);
 
-      if (actualIsHost) {
+      if (isReconnecting) {
+        core.setGameMode(mode);
+        core.setRivalId(rId || "");
+        core.setRivalName(rName || "RIVAL");
+        core.setMaxPoints(points);
+        core.setGameState("playing");
+        core.setIsGameStarting(true);
+        core.setShowCountdown(true);
+
+        setTimeout(() => {
+          broadcastMove({
+            type: 'reconnect_request',
+            requesterRole: actualIsHost ? 'host' : 'guest',
+            requesterId: myId
+          }, roomCode);
+        }, 1000);
+      }
+      else if (actualIsHost) {
         core.setGameMode(mode);
         core.setRivalId(rId || "");
         core.setRivalName(rName || "RIVAL");
@@ -154,7 +189,6 @@ function App() {
   };
 
   const handleConfirmExit = () => {
-    cleanupMatch(); // Clean up the Supabase record
     setShowExitModal(false);
     core.setWinnerModal(null);
     core.handleRestartGame();
@@ -173,6 +207,7 @@ function App() {
             key="game"
             user={user}
             {...core}
+            roomCode={currentRoomCode}
             rivalName={core.rivalName}
             showExitModal={showExitModal}
             onExitRequest={() => setShowExitModal(true)}

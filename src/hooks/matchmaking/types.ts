@@ -28,4 +28,16 @@ export interface MatchmakingProps {
   setMaxPoints: (val: number) => void;
   setIsHost: (val: boolean) => void;
   setMyIndex: (val: number) => void;
+  setPlayerHand: (hand: any) => void;
+  setPlayedCards: (cards: any) => void;
+  setStarterIdx: (idx: number) => void;
+  setHandWinners: (winners: any[]) => void;
+  setTrucoState: (state: any) => void;
+  setEnvidoState: (state: any) => void;
+  setCpuHandCount: (count: number) => void;
+  setIsRivalConnected: (val: boolean) => void;
+  handWinners: any[];
+  trucoState: any;
+  envidoState: any;
+  maxPoints: number;
 }

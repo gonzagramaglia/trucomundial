@@ -5,22 +5,29 @@ import type { GameMode } from "../../lib/truco/types";
 export const useMatchmakingBroadcast = (
   sessionId: string,
   gameMode: GameMode,
-  matchId: string | null
+  matchId: string | null,
+  roomInfoRef: React.MutableRefObject<any>
 ) => {
   const broadcastMove = useCallback(async (payload: any, overrideId?: string) => {
     const finalId = overrideId || matchId;
     if (!finalId || (gameMode !== "multiplayer" && !overrideId)) return;
 
+    const moveData = {
+      ...payload,
+      senderId: sessionId,
+      roomInfo: roomInfoRef?.current || payload.roomInfo
+    };
+
     const { error } = await supabase
       .from('game_sync')
       .upsert({ 
         match_id: finalId, 
-        last_move: { ...payload, senderId: sessionId },
+        last_move: moveData,
         updated_at: new Date().toISOString()
       }, { onConflict: 'match_id' });
 
     if (error) console.error("Error syncing move:", error);
-  }, [gameMode, matchId, sessionId]);
+  }, [gameMode, matchId, sessionId, roomInfoRef]);
 
   const cleanupMatch = useCallback(async (overrideId?: string) => {
     const finalId = overrideId || matchId;

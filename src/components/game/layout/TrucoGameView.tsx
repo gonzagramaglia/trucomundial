@@ -36,6 +36,8 @@ interface TrucoGameViewProps {
   roundWinningCardId: string | null;
   cpuPartnerHandRef: any;
   showExitModal: boolean;
+  roomCode?: string | null;
+  isRivalConnected?: boolean;
   onExitRequest: () => void;
   onRestartGame: () => void;
   onPlayCard: (card: any) => void;
@@ -51,6 +53,7 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
   score, activeCall, trucoState, envidoState, pendingAction, handWinners, handWinningCardIds,
   scorePopups, winnerModal, rivalName, isBusy, isRoundEnding, whoseTurn, maxPoints,
   showCountdown, roundWinningCardId, cpuPartnerHandRef, showExitModal,
+  roomCode, isRivalConnected = true,
   onExitRequest, onRestartGame, onPlayCard, onHandleCall, onHandleResponse, onHandleMazo,
   onCloseExit, onConfirmExit
 }) => {
@@ -78,6 +81,33 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
       }}
     >
       <GameTopBar onExit={onExitRequest} />
+
+      {gameMode === "multiplayer" && !isRivalConnected && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          style={{
+            background: "rgba(255, 60, 0, 0.2)",
+            border: "1px solid #ff3c00",
+            backdropFilter: "blur(12px)",
+            padding: "0.75rem 1.5rem",
+            borderRadius: "1rem",
+            color: "white",
+            fontWeight: 900,
+            fontSize: "0.85rem",
+            display: "flex",
+            alignItems: "center",
+            gap: "0.75rem",
+            marginTop: "0.5rem",
+            zIndex: 1000,
+            boxShadow: "0 0 20px rgba(255, 60, 0, 0.4)",
+            textTransform: "uppercase"
+          }}
+        >
+          <span style={{ fontSize: "1.2rem" }}>⚠️</span>
+          <span>{rivalName.toUpperCase()} SE HA DESCONECTADO. LA PARTIDA SIGUE ACTIVA (CÓDIGO: <span style={{ color: "#00f2ff", fontSize: "1.1rem" }}>{roomCode}</span>)</span>
+        </motion.div>
+      )}
 
       {/* Bottom Left: Points Indicator */}
       <div
@@ -139,17 +169,17 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
               transition={{ duration: 2, repeat: Infinity }}
               style={{
                 padding: "0.3rem 1rem",
-                background: (whoseTurn === "player" && !showCountdown) ? "rgba(0, 242, 255, 0.2)" : "rgba(255, 255, 255, 0.05)",
-                border: `1px solid ${(whoseTurn === "player" && !showCountdown) ? "#00f2ff" : "rgba(255,255,255,0.2)"}`,
+                background: (!isRivalConnected && gameMode === "multiplayer") ? "rgba(255, 60, 0, 0.2)" : ((whoseTurn === "player" && !showCountdown) ? "rgba(0, 242, 255, 0.2)" : "rgba(255, 255, 255, 0.05)"),
+                border: `1px solid ${(!isRivalConnected && gameMode === "multiplayer") ? "#ff3c00" : ((whoseTurn === "player" && !showCountdown) ? "#00f2ff" : "rgba(255,255,255,0.2)")}`,
                 borderRadius: "2rem",
-                color: (whoseTurn === "player" && !showCountdown) ? "#00f2ff" : "white",
+                color: (!isRivalConnected && gameMode === "multiplayer") ? "#ff3c00" : ((whoseTurn === "player" && !showCountdown) ? "#00f2ff" : "white"),
                 fontSize: "0.6rem",
                 fontWeight: 900,
                 textTransform: "uppercase",
                 letterSpacing: "0.2em",
               }}
             >
-              {showCountdown ? "• • •" : (whoseTurn === "player" ? "TU TURNO" : `ESPERANDO A ${rivalName.toUpperCase()}...`)}
+              {(!isRivalConnected && gameMode === "multiplayer") ? `ESPERANDO RECONEXIÓN DE ${rivalName.toUpperCase()}...` : (showCountdown ? "• • •" : (whoseTurn === "player" ? "TU TURNO" : `ESPERANDO A ${rivalName.toUpperCase()}...`))}
             </motion.div>
           </div>
         )}
