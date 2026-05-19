@@ -45,6 +45,14 @@ export const ScrollIndicator: React.FC = () => {
     };
   }, []);
 
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const handleClick = () => {
     const target = getScrollContainer();
     const scrollHeight = target.scrollHeight || document.documentElement.scrollHeight;
@@ -68,8 +76,8 @@ export const ScrollIndicator: React.FC = () => {
           onClick={handleClick}
           style={{
             position: 'fixed',
-            bottom: '25px',
-            right: '35px',
+            bottom: isMobile ? '4.5rem' : '25px',
+            right: isMobile ? '1rem' : '35px',
             zIndex: 9999,
             cursor: 'pointer',
             pointerEvents: 'auto'

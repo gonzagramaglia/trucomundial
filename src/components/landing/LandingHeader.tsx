@@ -8,13 +8,21 @@ interface LandingHeaderProps {
 }
 
 export const LandingHeader: React.FC<LandingHeaderProps> = ({ user }) => {
+  const [isMobile, setIsMobile] = React.useState(window.innerWidth < 768);
+
+  React.useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   return (
     <div style={{ 
       display: 'flex', 
       flexDirection: 'row', 
       alignItems: 'center', 
       justifyContent: 'center', 
-      gap: '2.5rem', 
+      gap: isMobile ? '0.75rem' : '2.5rem', 
       marginBottom: '1rem', 
       width: '100%' 
     }}>

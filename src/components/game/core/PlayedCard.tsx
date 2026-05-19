@@ -34,7 +34,7 @@ export const PlayedCard: React.FC<PlayedCardProps> = ({
       initial={{ scale: 1.2, opacity: 0, y: isPlayer ? 400 : -400 }}
       animate={{ 
         scale: isHero ? 1.3 : isWinner ? 1.1 : isHandWinner ? 1.2 : 1.05, 
-        opacity: isLoser ? 0.45 : 1, 
+        opacity: isLoser ? 0.4 : 1, 
         filter: isLoser ? "grayscale(100%)" : "grayscale(0%)",
         x: xPos, 
         y: yPos, 
@@ -66,7 +66,8 @@ export const PlayedCard: React.FC<PlayedCardProps> = ({
     >
       <Sticker 
         card={card} 
-        hideEnv={isHero} 
+        hideEnv={isHero}
+        winnerMode={isHero}
       />
     </motion.div>
   );

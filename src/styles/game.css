@@ -96,15 +96,26 @@
 /* Mobile Overrides for Navigation */
 @media (max-width: 768px) {
   .home-btn-fixed {
-    top: auto;
-    bottom: 1.5rem;
-    left: 1.5rem;
+    top: 1rem !important;
+    bottom: auto !important;
+    left: 1rem !important;
+    padding: 0 !important;
+    width: 46px !important;
+    height: 46px !important;
+    justify-content: center !important;
   }
 
   .points-indicator-fixed {
-    left: auto;
-    right: 1.5rem;
-    bottom: 1.5rem;
+    left: 1rem !important;
+    right: auto !important;
+    bottom: 1rem !important;
+  }
+
+  .mobile-help-btn {
+    top: 1rem !important;
+    right: 1rem !important;
+    width: 46px !important;
+    height: 46px !important;
   }
 
   .twitch-btn {
@@ -140,6 +151,11 @@
 .sidebar-left { left: 1.5rem; }
 .sidebar-right { right: 1.5rem; }
 
+.mobile-help-btn {
+  display: none !important;
+}
+
 @media (max-width: 1300px) {
-  .sidebar-help { display: none; }
+  .sidebar-help { display: none !important; }
+  .mobile-help-btn { display: flex !important; }
 }

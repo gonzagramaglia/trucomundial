@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import type { PlayedCard as PlayedCardType, GameMode, PlayerRole } from '../../../lib/truco/types';
 import { FieldSlots } from './FieldSlots';
 import { PlayedCard } from './PlayedCard';
@@ -20,6 +20,7 @@ interface GameFieldProps {
   gameState: string;
   isRoundEnding: boolean;
   isGameStarting: boolean;
+  whoseTurn: PlayerRole | null;
 }
 
 export const GameField: React.FC<GameFieldProps> = ({
@@ -31,10 +32,18 @@ export const GameField: React.FC<GameFieldProps> = ({
   activeCall,
   gameState,
   isRoundEnding,
-  isGameStarting
+  isGameStarting,
+  whoseTurn
 }) => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [isCardDragging, setIsCardDragging] = useState(false);
+  const [deckPosition, setDeckPosition] = useState<"left" | "right">("right");
+
+  useEffect(() => {
+    if (playedCards.length === 0 && whoseTurn) {
+      setDeckPosition(whoseTurn === "player" ? "left" : "right");
+    }
+  }, [playedCards.length, whoseTurn]);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -104,6 +113,46 @@ export const GameField: React.FC<GameFieldProps> = ({
           MUCHO MUNDIAL
         </h2>
       </div>
+
+      {/* Visual Deck of Cards (Mazo) - Animates left/right based on whose turn it is at start of round */}
+      <motion.div
+        animate={{
+          left: deckPosition === "left" ? (isMobile ? "12px" : "24px") : (isMobile ? "calc(100% - 12px - 45px)" : "calc(100% - 24px - 65px)"),
+          opacity: isGameStarting ? 0 : 0.8,
+          scale: isGameStarting ? 0.5 : 1
+        }}
+        transition={{ type: "spring", stiffness: 120, damping: 14 }}
+        style={{
+          position: 'absolute',
+          top: isMobile ? '43%' : '50%',
+          transform: 'translateY(-50%)',
+          width: isMobile ? '45px' : '65px',
+          height: isMobile ? '60px' : '90px',
+          zIndex: 2,
+          pointerEvents: 'none',
+          userSelect: 'none'
+        }}
+      >
+        {[0, 1, 2].map((i) => (
+          <div
+            key={`deck-card-${i}`}
+            style={{
+              width: '100%',
+              height: '100%',
+              backgroundImage: "url('/card-back.png')",
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              borderRadius: isMobile ? '4px' : '8px',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              boxShadow: '0 4px 10px rgba(0, 0, 0, 0.5)',
+              position: 'absolute',
+              top: `${i * -3}px`,
+              left: `${i * -2}px`,
+              transform: `rotate(${i * 1.5}deg)`,
+            }}
+          />
+        ))}
+      </motion.div>
 
       <CallOverlay activeCall={activeCall} gameState={gameState} />
       <RoundCountdown isActive={isRoundEnding || isGameStarting} isGameStarting={isGameStarting} />

@@ -1,13 +1,15 @@
-import React from "react";
-import { motion } from "framer-motion";
+import React, { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Scoreboard } from "./Scoreboard";
 import { GameSidebar } from "./GameSidebar";
+import { RankingSidebar } from "./RankingSidebar";
+import { InstructionsPanel } from "./InstructionsPanel";
 import { GameField } from "../core/GameField";
 import { CPUHands } from "../core/CPUHands";
 import { GameModals } from "../modals/GameModals";
 import { GameTopBar } from "../controls/GameTopBar";
 import { GameBottomBar } from "../controls/GameBottomBar";
-import { Zap } from "lucide-react";
+import { Zap, BookOpen, X } from "lucide-react";
 import type { GameMode, PlayerRole } from "../../../lib/truco/types";
 
 interface TrucoGameViewProps {
@@ -58,7 +60,8 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
   onExitRequest, onRestartGame, onPlayCard, onHandleCall, onHandleResponse, onHandleMazo,
   onCloseExit, onConfirmExit
 }) => {
-  // console.log("TrucoGameView rendering with rivalName:", rivalName);
+  const [showMobileHelp, setShowMobileHelp] = useState(false);
+  const [helpTab, setHelpTab] = useState<'rules' | 'ranking'>('rules');
 
   return (
     <motion.div
@@ -195,6 +198,7 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
           gameState={gameState}
           isRoundEnding={isRoundEnding}
           isGameStarting={showCountdown}
+          whoseTurn={whoseTurn}
         />
 
         <GameBottomBar
@@ -229,6 +233,148 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
         onConfirmExit={onConfirmExit}
         onContinue={onCloseExit}
       />
+
+      {/* Floating Rules/Ranking trigger button for mobile/tablet */}
+      <button
+        onClick={() => setShowMobileHelp(true)}
+        className="mobile-help-btn"
+        style={{
+          position: "fixed",
+          top: "1.5rem",
+          right: "1.5rem",
+          zIndex: 2000,
+          background: "rgba(255, 255, 255, 0.1)",
+          backdropFilter: "blur(12px)",
+          width: "40px",
+          height: "40px",
+          borderRadius: "1rem",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "white",
+          border: "1px solid rgba(255, 255, 255, 0.1)",
+          boxShadow: "0 4px 20px rgba(0, 0, 0, 0.4)",
+          cursor: "pointer"
+        }}
+      >
+        <BookOpen size={18} />
+      </button>
+
+      {/* Mobile/Tablet Rules & Ranking Overlay Modal */}
+      <AnimatePresence>
+        {showMobileHelp && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              position: "fixed",
+              inset: 0,
+              background: "rgba(0, 0, 0, 0.85)",
+              backdropFilter: "blur(12px)",
+              zIndex: 3000,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "1.5rem"
+            }}
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              style={{
+                background: "rgba(255, 255, 255, 0.05)",
+                border: "1px solid rgba(255, 255, 255, 0.1)",
+                borderRadius: "2rem",
+                padding: "2rem 2rem 2rem 2rem",
+                paddingTop: "4rem",
+                width: "100%",
+                maxWidth: "500px",
+                maxHeight: "85vh",
+                display: "flex",
+                flexDirection: "column",
+                position: "relative"
+              }}
+            >
+              {/* Close Button X */}
+              <button
+                onClick={() => setShowMobileHelp(false)}
+                style={{
+                  position: "absolute",
+                  top: "1.25rem",
+                  right: "1.25rem",
+                  background: "rgba(255, 255, 255, 0.1)",
+                  border: "none",
+                  color: "white",
+                  width: "36px",
+                  height: "36px",
+                  borderRadius: "50%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                  zIndex: 10
+                }}
+              >
+                <X size={18} />
+              </button>
+
+              {/* Tabs */}
+              <div style={{ 
+                display: "flex", 
+                gap: "0.5rem", 
+                marginBottom: "1.25rem",
+                background: "rgba(255,255,255,0.05)",
+                padding: "0.25rem",
+                borderRadius: "12px",
+                border: "1px solid rgba(255,255,255,0.1)",
+                marginTop: "1rem"
+              }}>
+                <button
+                  onClick={() => setHelpTab('rules')}
+                  style={{
+                    flex: 1,
+                    padding: "0.5rem",
+                    borderRadius: "10px",
+                    border: "none",
+                    background: helpTab === 'rules' ? "rgba(255, 255, 255, 0.1)" : "transparent",
+                    color: helpTab === 'rules' ? "var(--color-accent)" : "rgba(255, 255, 255, 0.5)",
+                    fontSize: "0.85rem",
+                    fontWeight: 800,
+                    cursor: "pointer",
+                    transition: "all 0.2s"
+                  }}
+                >
+                  REGLAS
+                </button>
+                <button
+                  onClick={() => setHelpTab('ranking')}
+                  style={{
+                    flex: 1,
+                    padding: "0.5rem",
+                    borderRadius: "10px",
+                    border: "none",
+                    background: helpTab === 'ranking' ? "rgba(255, 255, 255, 0.1)" : "transparent",
+                    color: helpTab === 'ranking' ? "var(--color-accent)" : "rgba(255, 255, 255, 0.5)",
+                    fontSize: "0.85rem",
+                    fontWeight: 800,
+                    cursor: "pointer",
+                    transition: "all 0.2s"
+                  }}
+                >
+                  RANKING
+                </button>
+              </div>
+
+              {/* Content */}
+              <div style={{ flex: 1, overflowY: "auto", minHeight: 0 }}>
+                {helpTab === 'rules' ? <InstructionsPanel maxPoints={maxPoints} /> : <RankingSidebar />}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 };

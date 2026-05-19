@@ -27,7 +27,7 @@ export const GameTopBar: React.FC<GameTopBarProps> = ({ onExit }) => {
         }}
       >
         <Home size={16} />
-        <span style={{ fontWeight: 900, fontSize: "0.75rem", letterSpacing: "0.05em", textShadow: "0 0 0.5px white" }}>INICIO</span>
+        <span className="desktop-only" style={{ fontWeight: 900, fontSize: "0.75rem", letterSpacing: "0.05em", textShadow: "0 0 0.5px white" }}>INICIO</span>
       </Button>
 
       {/* Top Right: Twitch Button */}

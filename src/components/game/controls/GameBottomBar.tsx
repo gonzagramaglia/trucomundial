@@ -27,6 +27,7 @@ export const GameBottomBar: React.FC<GameBottomBarProps> = ({
   onPlayCard, onHandleMazo, onHandleResponse, onHandleCall
 }) => {
   const isHeroTeamTurn = whoseTurn === "player" || whoseTurn === "partner";
+  const isDraggingRef = React.useRef(false);
 
   return (
     <div style={{
@@ -63,44 +64,74 @@ export const GameBottomBar: React.FC<GameBottomBarProps> = ({
         justifyContent: "center",
         flexWrap: "nowrap"
       }}>
-        <AnimatePresence>
-          {playerHand.map((card, idx) => {
-            const isCardDisabled = isBusy || whoseTurn !== "player" || isRoundEnding;
-            return (
+        <AnimatePresence mode="popLayout">
+          {playerHand.length === 0 && playedCards.length === 0 ? (
+            [0, 1, 2].map((i) => (
               <motion.div
-                key={card.id}
-                initial={{ y: 50, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                exit={{ y: 50, opacity: 0 }}
-                transition={{ delay: idx * 0.05 }}
-                drag={!isCardDisabled}
-                dragSnapToOrigin={true}
-                whileDrag={{ scale: 1.15, rotate: -2, zIndex: 2000, boxShadow: "0px 15px 30px rgba(0,0,0,0.5)" }}
-                onDragStart={() => {
-                  window.dispatchEvent(new CustomEvent("card-drag-start"));
+                key={`loading-card-${i}`}
+                initial={{ y: 80, opacity: 0, rotate: 10 }}
+                animate={{ y: 0, opacity: 0.75, rotate: (i - 1) * 6 }}
+                exit={{ y: -80, opacity: 0, scale: 0.8 }}
+                transition={{ type: "spring", stiffness: 180, damping: 15, delay: i * 0.1 }}
+                className="sticker"
+                style={{
+                  backgroundImage: "url('/card-back.png')",
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                  cursor: "default",
+                  pointerEvents: "none"
                 }}
-                onDragEnd={(_event, info) => {
-                  window.dispatchEvent(new CustomEvent("card-drag-end"));
-                  const fieldEl = document.querySelector(".game-field");
-                  if (fieldEl) {
-                    const rect = fieldEl.getBoundingClientRect();
-                    const x = info.point.x;
-                    const y = info.point.y;
-                    if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
-                      onPlayCard(card);
-                    }
-                  }
-                }}
-                style={{ touchAction: "none" }}
               >
-                <Sticker
-                  card={card}
-                  disabled={isCardDisabled}
-                  onClick={() => onPlayCard(card)}
-                />
+                <div className="sticker-glitter" />
               </motion.div>
-            );
-          })}
+            ))
+          ) : (
+            playerHand.map((card, idx) => {
+              const isCardDisabled = isBusy || whoseTurn !== "player" || isRoundEnding;
+              return (
+                <motion.div
+                  key={card.id}
+                  initial={{ y: 50, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  exit={{ y: 50, opacity: 0 }}
+                  transition={{ delay: idx * 0.05 }}
+                  drag={!isCardDisabled}
+                  dragSnapToOrigin={true}
+                  whileDrag={{ scale: 1.15, rotate: -2, zIndex: 2000, boxShadow: "0px 15px 30px rgba(0,0,0,0.5)" }}
+                  onDragStart={() => {
+                    isDraggingRef.current = true;
+                    window.dispatchEvent(new CustomEvent("card-drag-start"));
+                  }}
+                  onDragEnd={(_event, info) => {
+                    setTimeout(() => {
+                      isDraggingRef.current = false;
+                    }, 100);
+                    window.dispatchEvent(new CustomEvent("card-drag-end"));
+                    const fieldEl = document.querySelector(".game-field");
+                    if (fieldEl) {
+                      const rect = fieldEl.getBoundingClientRect();
+                      const x = info.point.x;
+                      const y = info.point.y;
+                      if (x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom) {
+                        onPlayCard(card);
+                      }
+                    }
+                  }}
+                  style={{ touchAction: "none" }}
+                >
+                  <Sticker
+                    card={card}
+                    disabled={isCardDisabled}
+                    onClick={() => {
+                      if (!isDraggingRef.current) {
+                        onPlayCard(card);
+                      }
+                    }}
+                  />
+                </motion.div>
+              );
+            })
+          )}
         </AnimatePresence>
       </div>
 
