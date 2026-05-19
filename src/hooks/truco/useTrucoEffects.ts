@@ -74,17 +74,13 @@ export const useTrucoEffects = (state: any, logic: any) => {
         if (roundWinner) {
           setIsRoundEnding(true);
           setShowCountdown(true);
+          clearRoundData();
           if (winningCard) setRoundWinningCardId(winningCard.id);
           
           if (gameMode !== "multiplayer" || isHost) {
             const points = trucoState.level + 1;
             addPoints(roundWinner, points);
           }
-
-          // Delay clearing the round cards by 2 seconds so player can see final card match & score updates!
-          setTimeout(() => {
-            clearRoundData();
-          }, 2000);
 
           // Clear visual countdown message shortly after (4s)
           setTimeout(() => {

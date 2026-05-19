@@ -47,7 +47,7 @@ function App() {
     setIsSelfConnected: core.setIsSelfConnected, isSelfConnected: core.isSelfConnected,
     handWinners: core.handWinners, trucoState: core.trucoState, envidoState: core.envidoState,
     maxPoints: core.maxPoints
-  }, roomInfoRef);
+  });
 
   useEffect(() => {
     core.setIsHost(actualIsHost);

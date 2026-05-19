@@ -5,7 +5,7 @@ import { useMatchmakingHandlers } from "./matchmaking/useMatchmakingHandlers";
 import { useMatchmakingNetwork } from "./matchmaking/useMatchmakingNetwork";
 import { useMatchmakingEffects } from "./matchmaking/useMatchmakingEffects";
 
-export const useMatchmaking = (props: MatchmakingProps, roomInfoRef: React.MutableRefObject<any>) => {
+export const useMatchmaking = (props: MatchmakingProps) => {
   const { sessionId, rivalId, matchId: propMatchId, gameMode } = props;
   
   const syncRetryRef = useRef<any>(null);
@@ -13,7 +13,7 @@ export const useMatchmaking = (props: MatchmakingProps, roomInfoRef: React.Mutab
   const matchId = propMatchId || (rivalId ? [sessionId, rivalId].sort().join('_') : null);
 
   // 1. Broadcast logic
-  const { broadcastMove, cleanupMatch } = useMatchmakingBroadcast(sessionId, gameMode, matchId, roomInfoRef);
+  const { broadcastMove, cleanupMatch } = useMatchmakingBroadcast(sessionId, gameMode, matchId);
 
   // 2. Handlers (processing moves)
   const { handleRemoteMove } = useMatchmakingHandlers(props, broadcastMove, syncRetryRef, hasStartedRef);
