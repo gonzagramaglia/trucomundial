@@ -154,7 +154,9 @@ export const PendingChallenge: React.FC<PendingChallengeProps> = ({
               if (window.innerWidth > 768) setShowEnvidoOptions(true);
             }}
             onMouseLeave={() => {
-              if (!confirmEnvido) setShowEnvidoOptions(false);
+              if (window.innerWidth > 768) {
+                if (!confirmEnvido) setShowEnvidoOptions(false);
+              }
             }}
           >
             <AnimatePresence>
@@ -184,7 +186,9 @@ export const PendingChallenge: React.FC<PendingChallengeProps> = ({
               if (window.innerWidth > 768) setShowRealEnvidoOptions(true);
             }}
             onMouseLeave={() => {
-              if (!confirmEnvido) setShowRealEnvidoOptions(false);
+              if (window.innerWidth > 768) {
+                if (!confirmEnvido) setShowRealEnvidoOptions(false);
+              }
             }}
           >
             <AnimatePresence>

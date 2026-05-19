@@ -107,7 +107,9 @@ export const GameActions: React.FC<GameActionsProps> = ({
                   if (window.innerWidth > 768) setShowEnvidoOptions(true);
                 }}
                 onMouseLeave={() => {
-                  if (!confirmEnvido) setShowEnvidoOptions(false);
+                  if (window.innerWidth > 768) {
+                    if (!confirmEnvido) setShowEnvidoOptions(false);
+                  }
                 }}
               >
                 <AnimatePresence>
