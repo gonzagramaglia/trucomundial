@@ -167,7 +167,7 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
 
         {/* Turn Pill (Always centered) */}
         {(gameMode === "1v1" || gameMode === "multiplayer") && (
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.25rem", marginBottom: "5px", zIndex: 100, position: "relative" }}>
+          <div className="turn-pill-sticky" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.25rem", marginBottom: "5px", zIndex: 100, position: "relative" }}>
             <motion.div
               animate={{ scale: [1, 1.05, 1], opacity: [0.8, 1, 0.8] }}
               transition={{ duration: 2, repeat: Infinity }}

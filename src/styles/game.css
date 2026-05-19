@@ -140,16 +140,22 @@
   }
 
   .mobile-help-btn {
-    top: 1rem !important;
-    right: 1.75rem !important;
-    width: 46px !important;
-    height: 46px !important;
+    top: 0.75rem !important;
+    right: 0.75rem !important;
+    width: 38px !important;
+    height: 38px !important;
     padding: 0 !important;
     justify-content: center !important;
   }
 
   .mobile-help-btn .rules-label {
     display: none !important;
+  }
+
+  .turn-pill-sticky {
+    position: sticky;
+    top: 4.5rem;
+    z-index: 200;
   }
   .player-hand-container { min-height: 120px; }
   .game-mode-secondary-row { flex-direction: column !important; }
