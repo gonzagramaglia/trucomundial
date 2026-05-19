@@ -76,7 +76,7 @@ export const ScrollIndicator: React.FC = () => {
           onClick={handleClick}
           style={{
             position: 'fixed',
-            bottom: isMobile ? '4.5rem' : '25px',
+            bottom: isMobile ? '1rem' : '25px',
             right: isMobile ? '1rem' : '35px',
             zIndex: 9999,
             cursor: 'pointer',

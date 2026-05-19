@@ -41,24 +41,26 @@ export const GameActions: React.FC<GameActionsProps> = ({
 
   const onEnvidoClick = () => {
     if (window.innerWidth > 768) {
+      // Desktop: click directly calls envido (hover already showed the submenu)
       handleCall("envido", 1, "player");
       return;
     }
 
-    if (confirmEnvido) {
+    // Mobile: 1st tap → open submenu; 2nd tap → call envido
+    if (showEnvidoOptions) {
       handleCall("envido", 1, "player");
-      setConfirmEnvido(false);
       setShowEnvidoOptions(false);
+      setConfirmEnvido(false);
       if (confirmTimeoutRef.current) clearTimeout(confirmTimeoutRef.current);
     } else {
-      setConfirmEnvido(true);
       setShowEnvidoOptions(true);
-      
+      setConfirmEnvido(true);
+
       if (confirmTimeoutRef.current) clearTimeout(confirmTimeoutRef.current);
       confirmTimeoutRef.current = setTimeout(() => {
-        setConfirmEnvido(false);
         setShowEnvidoOptions(false);
-      }, 2000);
+        setConfirmEnvido(false);
+      }, 3000);
     }
   };
 

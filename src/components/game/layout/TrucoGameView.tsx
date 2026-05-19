@@ -239,16 +239,11 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
         onClick={() => setShowMobileHelp(true)}
         className="mobile-help-btn"
         style={{
-          position: "fixed",
-          top: "1.5rem",
-          right: "1.5rem",
-          zIndex: 2000,
           background: "rgba(255, 255, 255, 0.1)",
           backdropFilter: "blur(12px)",
-          width: "40px",
           height: "40px",
           borderRadius: "1rem",
-          display: "flex",
+          padding: "0 1rem",
           alignItems: "center",
           justifyContent: "center",
           color: "white",
@@ -257,7 +252,8 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
           cursor: "pointer"
         }}
       >
-        <BookOpen size={18} />
+        <BookOpen size={16} />
+        <span className="rules-label" style={{ fontWeight: 900, fontSize: "0.75rem", letterSpacing: "0.05em", textShadow: "0 0 0.5px white" }}>REGLAS</span>
       </button>
 
       {/* Mobile/Tablet Rules & Ranking Overlay Modal */}

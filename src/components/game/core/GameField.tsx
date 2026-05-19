@@ -124,7 +124,7 @@ export const GameField: React.FC<GameFieldProps> = ({
         transition={{ type: "spring", stiffness: 120, damping: 14 }}
         style={{
           position: 'absolute',
-          top: isMobile ? '43%' : '50%',
+          top: isMobile ? '43%' : '44%',
           transform: 'translateY(-50%)',
           width: isMobile ? '45px' : '65px',
           height: isMobile ? '60px' : '90px',

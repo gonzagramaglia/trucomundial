@@ -93,7 +93,41 @@
   display: flex;
 }
 
-/* Mobile Overrides for Navigation */
+/* Rules/Help Button — hidden on large screens (sidebar handles it), shown on ≤1024px */
+.mobile-help-btn {
+  position: fixed;
+  top: 1.5rem;
+  right: 1.5rem;
+  z-index: 2000;
+  display: none !important;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Tablet & below (≤1024px): scoreboard moves to top, Twitch hides, REGLAS appears top-right with text */
+@media (max-width: 1024px), (max-height: 700px) {
+  .mobile-help-btn {
+    display: flex !important;
+    top: 1.5rem;
+    right: 2.25rem;
+    width: auto;
+    height: 40px;
+    padding: 0 1rem;
+    justify-content: center;
+  }
+
+  .twitch-btn {
+    display: none !important;
+  }
+
+  .points-indicator-fixed {
+    left: 1rem !important;
+    right: auto !important;
+    bottom: 1rem !important;
+  }
+}
+
+/* Mobile (≤768px): home button and rules button icon-only */
 @media (max-width: 768px) {
   .home-btn-fixed {
     top: 1rem !important;
@@ -105,23 +139,18 @@
     justify-content: center !important;
   }
 
-  .points-indicator-fixed {
-    left: 1rem !important;
-    right: auto !important;
-    bottom: 1rem !important;
-  }
-
   .mobile-help-btn {
     top: 1rem !important;
-    right: 1rem !important;
+    right: 2.25rem !important;
     width: 46px !important;
     height: 46px !important;
+    padding: 0 !important;
+    justify-content: center !important;
   }
 
-  .twitch-btn {
+  .mobile-help-btn .rules-label {
     display: none !important;
   }
-
   .player-hand-container { min-height: 120px; }
   .game-mode-secondary-row { flex-direction: column !important; }
 }
@@ -151,11 +180,6 @@
 .sidebar-left { left: 1.5rem; }
 .sidebar-right { right: 1.5rem; }
 
-.mobile-help-btn {
-  display: none !important;
-}
-
 @media (max-width: 1300px) {
   .sidebar-help { display: none !important; }
-  .mobile-help-btn { display: flex !important; }
 }
