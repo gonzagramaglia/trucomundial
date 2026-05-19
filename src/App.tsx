@@ -77,12 +77,16 @@ function App() {
     return () => subscription.unsubscribe();
   }, []);
 
+  const isPlayingRef = useRef(false);
+
   const wrappedPlayCard = (card: any) => {
-    if (core.isBusy) return;
+    if (core.isBusy || isPlayingRef.current) return;
+    isPlayingRef.current = true;
     const move = core.playCard(card);
     if (move && core.gameMode === "multiplayer") {
       broadcastMove({ type: 'playCard', card });
     }
+    setTimeout(() => { isPlayingRef.current = false; }, 300);
   };
 
   const wrappedHandleCall = (type: "truco" | "envido", level: number, caller: PlayerRole, isRemote: boolean = false) => {
