@@ -199,11 +199,12 @@ function App() {
 
   return (
     <main style={{ minHeight: "100vh" }}>
-      <ScrollIndicator />
       <AnimatePresence mode="wait">
         {core.gameState === "landing" ? (
           <LandingPage key="landing" sessionId={sessionId} onStart={startGameWithSync} />
         ) : (
+          <>
+            <ScrollIndicator />
           <TrucoGameView
             key="game"
             user={user}
@@ -220,6 +221,7 @@ function App() {
             onCloseExit={() => setShowExitModal(false)}
             onConfirmExit={handleConfirmExit}
           />
+          </>
         )}
       </AnimatePresence>
     </main>

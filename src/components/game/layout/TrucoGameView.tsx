@@ -183,7 +183,17 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
                 letterSpacing: "0.2em",
               }}
             >
-              {(!isRivalConnected && gameMode === "multiplayer") ? `ESPERANDO RECONEXIÓN DE ${rivalName.toUpperCase()}...` : (showCountdown ? "• • •" : (whoseTurn === "player" ? "TU TURNO" : `ESPERANDO A ${rivalName.toUpperCase()}...`))}
+              {(!isRivalConnected && gameMode === "multiplayer")
+                ? `ESPERANDO RECONEXIÓN DE ${rivalName.toUpperCase()}...`
+                : showCountdown
+                  ? "• • •"
+                  : pendingAction && (pendingAction.caller === "player" || pendingAction.caller === "partner")
+                    ? `ESPERANDO A ${rivalName.toUpperCase()}...`
+                    : pendingAction
+                      ? "¡ESPERANDO TU RESPUESTA!"
+                      : whoseTurn === "player"
+                        ? "TU TURNO"
+                        : `ESPERANDO A ${rivalName.toUpperCase()}...`}
             </motion.div>
           </div>
         )}

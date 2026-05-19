@@ -109,7 +109,7 @@
   .mobile-help-btn {
     display: flex !important;
     top: 1.5rem;
-    right: 2.25rem;
+    right: 1.75rem;
     width: auto;
     height: 40px;
     padding: 0 1rem;
@@ -141,7 +141,7 @@
 
   .mobile-help-btn {
     top: 1rem !important;
-    right: 2.25rem !important;
+    right: 1.75rem !important;
     width: 46px !important;
     height: 46px !important;
     padding: 0 !important;
