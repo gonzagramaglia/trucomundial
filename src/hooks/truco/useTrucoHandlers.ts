@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useRef, useEffect } from "react";
 import type { Card } from "../../data/cards";
 import type { PlayerRole } from "../../lib/truco/types";
 
@@ -22,8 +22,19 @@ export const useTrucoHandlers = (state: any, logic: any) => {
     }
   }, [trucoState.level, envidoState.status, triggerCall, addPoints, setIsRoundEnding, resetRound, isHost, gameMode]);
 
+  const playedCardsTracker = useRef(new Set<string>());
+
+  useEffect(() => {
+    if (state.playedCards && state.playedCards.length === 0) {
+      playedCardsTracker.current.clear();
+    }
+  }, [state.playedCards]);
+
   const playCard = useCallback((card: Card) => {
     if (isRoundEnding || isCooldown || pendingAction) return null;
+    if (playedCardsTracker.current.has(card.id)) return null;
+    
+    playedCardsTracker.current.add(card.id);
     setPlayerHand((prev: Card[]) => prev.filter(c => c.id !== card.id));
     setPlayedCards((prev: any[]) => [...prev, { ...card, owner: "player", id: `${card.id}_${Date.now()}` }]);
     return card;
