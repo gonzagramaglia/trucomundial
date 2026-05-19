@@ -6,6 +6,12 @@ interface GameModalsProps {
   winnerModal: "player" | "cpu" | null;
   showExitModal: boolean;
   abandonmentModal: boolean;
+  isMultiplayer?: boolean;
+  isRivalConnected?: boolean;
+  isSelfConnected?: boolean;
+  rivalName?: string;
+  roomCode?: string | null;
+  showCountdown?: boolean;
   onRestart: () => void;
   onCloseExit: () => void;
   onConfirmExit: () => void;
@@ -16,12 +22,22 @@ export const GameModals: React.FC<GameModalsProps> = ({
   winnerModal,
   showExitModal,
   abandonmentModal,
+  isMultiplayer,
+  isRivalConnected = true,
+  isSelfConnected = true,
+  rivalName = "RIVAL",
+  roomCode,
+  showCountdown,
   onRestart,
   onCloseExit,
   onConfirmExit,
   onContinue
 }) => {
+  const [copied, setCopied] = React.useState(false);
   console.log("[MODALS] Winner Modal Status:", winnerModal);
+
+  const isDisconnected = isMultiplayer && (!isRivalConnected || !isSelfConnected) && !showCountdown && !winnerModal && !showExitModal;
+
   return (
     <>
       <Modal open={!!winnerModal} onClose={() => { }} showClose={false}>
@@ -78,6 +94,45 @@ export const GameModals: React.FC<GameModalsProps> = ({
           <Button variant="primary" style={{ fontSize: "1.1rem", padding: "0.7rem 2.5rem" }} onClick={onRestart}>
             Volver al Inicio
           </Button>
+        </div>
+      </Modal>
+
+      <Modal open={!!isDisconnected} onClose={() => { }} showClose={false}>
+        <div style={{ textAlign: "center", padding: "1.5rem 0 0 0" }}>
+          <div style={{ fontSize: "3.5rem", marginBottom: "0.5rem" }}>⚠️</div>
+          <h2 className="text-display" style={{ fontSize: "2.2rem", color: "#ff3c00", marginBottom: 16, lineHeight: 1.1 }}>
+            {!isSelfConnected ? "¡TE HAS DESCONECTADO!" : `¡${rivalName.toUpperCase()} SE DESCONECTÓ!`}
+          </h2>
+          <p style={{ color: "rgba(255,255,255,0.8)", marginBottom: 16, fontSize: "1.1rem", lineHeight: 1.4 }}>
+            {!isSelfConnected 
+              ? "Parece que has perdido la conexión con el servidor o internet. Intentando reconectar..." 
+              : `La partida sigue activa, pero estamos esperando a que ${rivalName} vuelva a conectarse.`}
+          </p>
+
+          {roomCode && (
+            <div style={{ background: "rgba(0, 242, 255, 0.08)", border: "1px solid #00f2ff", padding: "1.25rem", borderRadius: "1rem", margin: "1.5rem 0", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+              <span style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.7)", textTransform: "uppercase", letterSpacing: "0.1em" }}>Código de la Sala</span>
+              <span style={{ fontSize: "2.5rem", fontWeight: 900, color: "#00f2ff", letterSpacing: "0.3em", fontFamily: "monospace" }}>{roomCode}</span>
+              <span style={{ fontSize: "0.85rem", color: "#00f2ff" }}>Guarda o comparte este código para volver a ingresar a la partida</span>
+              <Button
+                variant="secondary"
+                style={{ marginTop: "0.5rem", fontSize: "0.9rem", padding: "0.5rem 1rem", alignSelf: "center" }}
+                onClick={() => {
+                  navigator.clipboard.writeText(roomCode);
+                  setCopied(true);
+                  setTimeout(() => setCopied(false), 2000);
+                }}
+              >
+                {copied ? "¡CÓDIGO COPIADO!" : "COPIAR CÓDIGO"}
+              </Button>
+            </div>
+          )}
+
+          <div style={{ display: "flex", gap: "1rem", justifyContent: "center", marginTop: "1.5rem" }}>
+            <Button variant="white" className="btn-hover-dark" style={{ fontSize: "1.1rem", padding: "0.7rem 2.5rem", fontWeight: 800 }} onClick={onConfirmExit}>
+              SALIR AL INICIO
+            </Button>
+          </div>
         </div>
       </Modal>
     </>

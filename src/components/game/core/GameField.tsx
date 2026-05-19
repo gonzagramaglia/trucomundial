@@ -34,11 +34,23 @@ export const GameField: React.FC<GameFieldProps> = ({
   isGameStarting
 }) => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [isCardDragging, setIsCardDragging] = useState(false);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+
+    const handleDragStart = () => setIsCardDragging(true);
+    const handleDragEnd = () => setIsCardDragging(false);
+
+    window.addEventListener("card-drag-start", handleDragStart);
+    window.addEventListener("card-drag-end", handleDragEnd);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      window.removeEventListener("card-drag-start", handleDragStart);
+      window.removeEventListener("card-drag-end", handleDragEnd);
+    };
   }, []);
 
   const is1v1 = gameMode === "1v1" || gameMode === "multiplayer";
@@ -60,6 +72,11 @@ export const GameField: React.FC<GameFieldProps> = ({
       alignItems: "center",
       justifyContent: "center",
       zIndex: 1,
+      border: isCardDragging ? "2.5px dashed rgba(0, 242, 255, 0.7)" : "2.5px dashed rgba(255, 255, 255, 0.05)",
+      background: isCardDragging ? "rgba(0, 242, 255, 0.04)" : "transparent",
+      boxShadow: isCardDragging ? "0 0 35px rgba(0, 242, 255, 0.2) inset, 0 0 15px rgba(0, 242, 255, 0.1)" : "none",
+      borderRadius: "2rem",
+      transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
     }}>
       <FieldSlots gameMode={gameMode} />
 

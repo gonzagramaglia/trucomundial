@@ -76,7 +76,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart, sessionId }) 
     
     if (mode === 'multiplayer') {
       if (!user) {
-        alert("Debes iniciar sesión para jugar online.");
+        handleAuth();
       } else {
         handleCreateRoom(points); // Pass points directly to avoid state race
       }
@@ -350,7 +350,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart, sessionId }) 
             selectedMode={selectedMode || "multiplayer"}
             onSelect={(mode) => {
               if (mode === "multiplayer" && !user) {
-                alert("Debes iniciar sesión para jugar online.");
                 handleAuth(); // Triggers the Google login
                 return;
               }

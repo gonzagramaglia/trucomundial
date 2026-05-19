@@ -10,6 +10,9 @@
     "preview": "vite preview",
     "prepare": "husky"
   },
+  "engines": {
+    "node": "26.1.0"
+  },
   "dependencies": {
     "@supabase/supabase-js": "^2.105.3",
     "framer-motion": "^12.38.0",
@@ -22,7 +25,7 @@
     "@commitlint/cli": "^20.5.3",
     "@commitlint/config-conventional": "^20.5.3",
     "@eslint/js": "^10.0.1",
-    "@types/node": "^24.12.2",
+    "@types/node": "^25.8.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",

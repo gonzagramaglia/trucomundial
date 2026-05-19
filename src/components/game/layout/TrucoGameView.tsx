@@ -38,6 +38,7 @@ interface TrucoGameViewProps {
   showExitModal: boolean;
   roomCode?: string | null;
   isRivalConnected?: boolean;
+  isSelfConnected?: boolean;
   onExitRequest: () => void;
   onRestartGame: () => void;
   onPlayCard: (card: any) => void;
@@ -53,7 +54,7 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
   score, activeCall, trucoState, envidoState, pendingAction, handWinners, handWinningCardIds,
   scorePopups, winnerModal, rivalName, isBusy, isRoundEnding, whoseTurn, maxPoints,
   showCountdown, roundWinningCardId, cpuPartnerHandRef, showExitModal,
-  roomCode, isRivalConnected = true,
+  roomCode, isRivalConnected = true, isSelfConnected = true,
   onExitRequest, onRestartGame, onPlayCard, onHandleCall, onHandleResponse, onHandleMazo,
   onCloseExit, onConfirmExit
 }) => {
@@ -217,6 +218,12 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
         winnerModal={winnerModal}
         showExitModal={showExitModal}
         abandonmentModal={false}
+        isMultiplayer={gameMode === "multiplayer"}
+        isRivalConnected={isRivalConnected}
+        isSelfConnected={isSelfConnected}
+        rivalName={rivalName}
+        roomCode={roomCode || null}
+        showCountdown={showCountdown}
         onRestart={onRestartGame}
         onCloseExit={onCloseExit}
         onConfirmExit={onConfirmExit}

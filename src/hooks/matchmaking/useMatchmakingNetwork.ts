@@ -59,7 +59,10 @@ export const useMatchmakingNetwork = (
       })
       .subscribe(async (status) => {
         if (status === 'SUBSCRIBED') {
+          props.setIsSelfConnected(true);
           await channel.track({ online_at: new Date().toISOString(), role: isHost ? 'host' : 'guest' });
+        } else if (status === 'TIMED_OUT' || status === 'CHANNEL_ERROR' || status === 'CLOSED') {
+          props.setIsSelfConnected(false);
         }
       });
 

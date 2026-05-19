@@ -36,6 +36,8 @@ export interface MatchmakingProps {
   setEnvidoState: (state: any) => void;
   setCpuHandCount: (count: number) => void;
   setIsRivalConnected: (val: boolean) => void;
+  setIsSelfConnected: (val: boolean) => void;
+  isSelfConnected: boolean;
   handWinners: any[];
   trucoState: any;
   envidoState: any;

@@ -44,6 +44,7 @@ function App() {
     setStarterIdx: core.setStarterIdx, setHandWinners: core.setHandWinners,
     setTrucoState: core.setTrucoState, setEnvidoState: core.setEnvidoState,
     setCpuHandCount: core.setCpuHandCount, setIsRivalConnected: core.setIsRivalConnected,
+    setIsSelfConnected: core.setIsSelfConnected, isSelfConnected: core.isSelfConnected,
     handWinners: core.handWinners, trucoState: core.trucoState, envidoState: core.envidoState,
     maxPoints: core.maxPoints
   }, roomInfoRef);
