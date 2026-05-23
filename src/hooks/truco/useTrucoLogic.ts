@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import type { Card } from "../../data/cards";
 import { CARDS } from "../../data/cards";
 import { calculateEnvido } from "../../lib/truco/engine";
+import i18n from "../../lib/i18n";
 
 export const useTrucoLogic = (state: any) => {
   const {
@@ -95,10 +96,10 @@ export const useTrucoLogic = (state: any) => {
     // 1st speaker (Mano)
     setTimeout(() => {
       if (isPlayerMano) {
-        const text = pPoints >= 10 ? `¡TENGO ${pPoints}!` : `TENGO ${pPoints}`;
+        const text = pPoints >= 10 ? i18n.t("have_points_high", { points: pPoints }) : i18n.t("have_points_low", { points: pPoints });
         triggerCall(text, "var(--color-accent)");
       } else {
-        const text = cPoints >= 10 ? `¡TENGO ${cPoints}!` : `TENGO ${cPoints}`;
+        const text = cPoints >= 10 ? i18n.t("have_points_high", { points: cPoints }) : i18n.t("have_points_low", { points: cPoints });
         triggerCall(text, "var(--color-secondary)");
       }
 
@@ -117,18 +118,18 @@ export const useTrucoLogic = (state: any) => {
         
         if (isPlayerMano) {
           if (pWins) {
-            triggerCall("¡SON BUENAS!", "var(--color-secondary)");
+            triggerCall(i18n.t("call_son_buenas"), "var(--color-secondary)");
             addPoints("player", pts);
           } else {
-            triggerCall(`¡${cPoints} SON MEJORES!`, "var(--color-secondary)");
+            triggerCall(i18n.t("call_son_mejores", { points: cPoints }), "var(--color-secondary)");
             addPoints("cpu", pts);
           }
         } else {
           if (pWins) {
-            triggerCall(`¡${pPoints} SON MEJORES!`, "var(--color-accent)");
+            triggerCall(i18n.t("call_son_mejores", { points: pPoints }), "var(--color-accent)");
             addPoints("player", pts);
           } else {
-            triggerCall("¡SON BUENAS!", "var(--color-accent)");
+            triggerCall(i18n.t("call_son_buenas"), "var(--color-accent)");
             addPoints("cpu", pts);
           }
         }
@@ -138,7 +139,7 @@ export const useTrucoLogic = (state: any) => {
             setPendingAction(state.suspendedTruco);
             setSuspendedTruco(null);
             triggerCall(
-              state.suspendedTruco.level === 1 ? "¡TRUCO!" : (state.suspendedTruco.level === 2 ? "¡RE-TRUCO!" : "¡VALE 4!"),
+              state.suspendedTruco.level === 1 ? i18n.t("call_truco") : (state.suspendedTruco.level === 2 ? i18n.t("call_retruco") : i18n.t("call_vale_4")),
               (state.suspendedTruco.caller === "player" || state.suspendedTruco.caller === "partner") ? "var(--color-accent)" : "var(--color-secondary)"
             );
             setIsCooldown(false);

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Modal } from '../../ui/Modal';
 import { Button } from '../../ui/Button';
+import { useTranslation } from 'react-i18next';
 
 interface GameModalsProps {
   winnerModal: "player" | "cpu" | null;
@@ -33,6 +34,7 @@ export const GameModals: React.FC<GameModalsProps> = ({
   onConfirmExit,
   onContinue
 }) => {
+  const { t } = useTranslation();
   const [copied, setCopied] = React.useState(false);
   console.log("[MODALS] Winner Modal Status:", winnerModal);
 
@@ -43,7 +45,7 @@ export const GameModals: React.FC<GameModalsProps> = ({
       <Modal open={!!winnerModal} onClose={() => { }} showClose={false}>
         <div style={{ textAlign: "center", padding: "0.5rem 0" }}>
           <h2 className="text-display" style={{ fontSize: "3.5rem", color: winnerModal === "player" ? "#00f2ff" : "var(--color-secondary)", marginBottom: 12, lineHeight: 1.2, marginTop: 10 }}>
-            {winnerModal === "player" ? "¡GANASTE!" : "PERDISTE..."}
+            {winnerModal === "player" ? t("you_won") : t("you_lost")}
           </h2>
           <Button
             variant="white"
@@ -51,7 +53,7 @@ export const GameModals: React.FC<GameModalsProps> = ({
             style={{ fontSize: "1.2rem", padding: "0.8rem 3rem", fontWeight: 800 }}
             onClick={onConfirmExit}
           >
-            VOLVER AL INICIO
+            {t("back_to_home")}
           </Button>
         </div>
       </Modal>
@@ -59,17 +61,16 @@ export const GameModals: React.FC<GameModalsProps> = ({
       <Modal open={showExitModal} onClose={onCloseExit}>
         <div style={{ textAlign: "center", padding: "0.5rem 0 0 0" }}>
           <h2 className="text-display" style={{ fontSize: "2rem", color: "#fff", marginBottom: 20, width: "100%", textAlign: "center" }}>
-            ¿Volver al inicio?
+            {t("return_to_home_q")}
           </h2>
           <div style={{ display: "flex", gap: "1rem", justifyContent: "center", width: "100%", alignItems: "stretch" }}>
             <Button
               variant="white"
               className="btn-hover-dark"
               onClick={onConfirmExit}
-              style={{ flex: 1, fontSize: "1.2rem", padding: "0.6rem", lineHeight: 0.8, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}
+              style={{ flex: 1, fontSize: "1.2rem", padding: "0.6rem", lineHeight: 0.8, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", whiteSpace: 'pre-wrap' }}
             >
-              <span style={{ marginBottom: "-2px" }}>VOLVER</span>
-              <span>AL INICIO</span>
+              {t("back_to_home")}
             </Button>
             <Button
               variant="secondary"
@@ -77,7 +78,7 @@ export const GameModals: React.FC<GameModalsProps> = ({
               onClick={onContinue}
               style={{ flex: 1, fontSize: "1.2rem", padding: "0.6rem", display: "flex", alignItems: "center", justifyContent: "center" }}
             >
-              SEGUIR JUGANDO
+              {t("keep_playing")}
             </Button>
           </div>
         </div>
@@ -86,13 +87,13 @@ export const GameModals: React.FC<GameModalsProps> = ({
       <Modal open={abandonmentModal} onClose={() => { }} showClose={false}>
         <div style={{ textAlign: "center", padding: "1.5rem 0 0 0" }}>
           <h2 className="text-display" style={{ fontSize: "2rem", color: "var(--color-secondary)", marginBottom: 16 }}>
-            ¡PARTIDA ABANDONADA!
+            {t("match_abandoned")}
           </h2>
           <p style={{ color: "rgba(255,255,255,0.7)", marginBottom: 24, fontSize: "1.1rem" }}>
-            El otro jugador ha abandonado la partida.
+            {t("rival_abandoned")}
           </p>
           <Button variant="primary" style={{ fontSize: "1.1rem", padding: "0.7rem 2.5rem" }} onClick={onRestart}>
-            Volver al Inicio
+            {t("back_to_home")}
           </Button>
         </div>
       </Modal>
@@ -101,19 +102,19 @@ export const GameModals: React.FC<GameModalsProps> = ({
         <div style={{ textAlign: "center", padding: "1.5rem 0 0 0" }}>
           <div style={{ fontSize: "3.5rem", marginBottom: "0.5rem" }}>⚠️</div>
           <h2 className="text-display" style={{ fontSize: "2.2rem", color: "#ff3c00", marginBottom: 16, lineHeight: 1.1 }}>
-            {!isSelfConnected ? "¡TE HAS DESCONECTADO!" : `¡${rivalName.toUpperCase()} SE DESCONECTÓ!`}
+            {!isSelfConnected ? t("you_disconnected") : t("rival_disconnected_title", { name: rivalName.toUpperCase() })}
           </h2>
           <p style={{ color: "rgba(255,255,255,0.8)", marginBottom: 16, fontSize: "1.1rem", lineHeight: 1.4 }}>
             {!isSelfConnected 
-              ? "Parece que has perdido la conexión con el servidor o internet. Intentando reconectar..." 
-              : `La partida sigue activa, pero estamos esperando a que ${rivalName} vuelva a conectarse.`}
+              ? t("you_disconnected_desc")
+              : t("rival_disconnected_desc", { name: rivalName })}
           </p>
 
           {roomCode && (
             <div style={{ background: "rgba(0, 242, 255, 0.08)", border: "1px solid #00f2ff", padding: "1.25rem", borderRadius: "1rem", margin: "1.5rem 0", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-              <span style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.7)", textTransform: "uppercase", letterSpacing: "0.1em" }}>Código de la Sala</span>
+              <span style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.7)", textTransform: "uppercase", letterSpacing: "0.1em" }}>{t("room_code")}</span>
               <span style={{ fontSize: "2.5rem", fontWeight: 900, color: "#00f2ff", letterSpacing: "0.3em", fontFamily: "monospace" }}>{roomCode}</span>
-              <span style={{ fontSize: "0.85rem", color: "#00f2ff" }}>Guarda o comparte este código para volver a ingresar a la partida</span>
+              <span style={{ fontSize: "0.85rem", color: "#00f2ff" }}>{t("save_code_desc")}</span>
               <Button
                 variant="secondary"
                 style={{ marginTop: "0.5rem", fontSize: "0.9rem", padding: "0.5rem 1rem", alignSelf: "center" }}
@@ -123,14 +124,14 @@ export const GameModals: React.FC<GameModalsProps> = ({
                   setTimeout(() => setCopied(false), 2000);
                 }}
               >
-                {copied ? "¡CÓDIGO COPIADO!" : "COPIAR CÓDIGO"}
+                {copied ? t("code_copied") : t("copy_code")}
               </Button>
             </div>
           )}
 
           <div style={{ display: "flex", gap: "1rem", justifyContent: "center", marginTop: "1.5rem" }}>
             <Button variant="white" className="btn-hover-dark" style={{ fontSize: "1.1rem", padding: "0.7rem 2.5rem", fontWeight: 800 }} onClick={onConfirmExit}>
-              SALIR AL INICIO
+              {t("exit_to_home")}
             </Button>
           </div>
         </div>

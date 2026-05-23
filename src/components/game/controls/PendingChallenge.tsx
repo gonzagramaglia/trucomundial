@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '../../ui/Button';
+import { useTranslation } from 'react-i18next';
 import type { PlayerRole, GameMode, EnvidoState, PlayedCard } from '../../../lib/truco/types';
 import { EnvidoSubMenu } from './EnvidoSubMenu';
 
@@ -21,6 +22,7 @@ export const PendingChallenge: React.FC<PendingChallengeProps> = ({
   handleResponse,
   handleCall
 }) => {
+  const { t } = useTranslation();
   const [showEnvidoOptions, setShowEnvidoOptions] = useState(false);
   const [showRealEnvidoOptions, setShowRealEnvidoOptions] = useState(false);
   const [confirmEnvido, setConfirmEnvido] = useState(false);
@@ -117,7 +119,7 @@ export const PendingChallenge: React.FC<PendingChallengeProps> = ({
             }}
             onClick={() => handleCall("envido", 1, "player")}
           >
-            ¡EL ENVIDO ESTÁ PRIMERO!
+            {t("envido_is_first")}
           </Button>
         </motion.div>
       )}
@@ -130,8 +132,8 @@ export const PendingChallenge: React.FC<PendingChallengeProps> = ({
           onClick={() => handleResponse(true)}
         >
           {isHighStakesEnvido
-            ? (gameMode === "2v2" ? "¡QUEREMOS!" : "¡QUIERO!")
-            : (gameMode === "2v2" ? "QUEREMOS" : "QUIERO")
+            ? (gameMode === "2v2" ? t("call_queremos") : t("call_quiero"))
+            : (gameMode === "2v2" ? t("call_queremos") : t("call_quiero").replace('¡', '').replace('!', ''))
           }
         </Button>
 
@@ -141,8 +143,8 @@ export const PendingChallenge: React.FC<PendingChallengeProps> = ({
           onClick={() => handleResponse(false)}
         >
           {isHighStakesEnvido
-            ? (gameMode === "2v2" ? "NO QUEREMOS..." : "NO QUIERO...")
-            : (gameMode === "2v2" ? "NO QUEREMOS" : "NO QUIERO")
+            ? (gameMode === "2v2" ? t("call_no_queremos") : t("call_no_quiero"))
+            : (gameMode === "2v2" ? t("call_no_queremos") : t("call_no_quiero").replace('¡', '').replace('!', ''))
           }
         </Button>
 
@@ -175,7 +177,7 @@ export const PendingChallenge: React.FC<PendingChallengeProps> = ({
               style={{ fontWeight: 800, border: "none", width: "100%", height: btnHeight, whiteSpace: "nowrap", padding: "0 1.25rem", fontSize: "0.9rem" }}
               onClick={onEnvidoClick}
             >
-              ¡ENVIDO! (x2)
+              {t("call_envido")} (x2)
             </Button>
           </div>
         )}
@@ -218,7 +220,7 @@ export const PendingChallenge: React.FC<PendingChallengeProps> = ({
               }}
               onClick={onRealEnvidoClick}
             >
-              ¡REAL ENVIDO!
+              {t("call_real_envido")}
             </Button>
           </div>
         )}
@@ -239,7 +241,7 @@ export const PendingChallenge: React.FC<PendingChallengeProps> = ({
             }}
             onClick={() => handleCall("envido", 4, "player")}
           >
-            ¡FALTA ENVIDO!
+            {t("call_falta_envido")}
           </Button>
         )}
         {pendingAction.type === "truco" && pendingAction.level < 3 && (
@@ -248,7 +250,7 @@ export const PendingChallenge: React.FC<PendingChallengeProps> = ({
             style={{ border: "none", flex: 1, minWidth: "110px", height: btnHeight, whiteSpace: "nowrap", padding: "0 1.25rem", fontSize: "0.9rem" }}
             onClick={() => handleCall("truco", pendingAction.level + 1, "player")}
           >
-            {pendingAction.level === 1 ? "¡RE-TRUCO!" : "¡VALE 4!"}
+            {pendingAction.level === 1 ? t("call_retruco") : t("call_vale_4")}
           </Button>
         )}
       </div>

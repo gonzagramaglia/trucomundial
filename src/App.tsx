@@ -7,6 +7,7 @@ import { useMatchmaking } from "./hooks/useMatchmaking";
 import { AnimatePresence } from "framer-motion";
 import type { GameMode, PlayerRole } from "./lib/truco/types";
 import { ScrollIndicator } from "./components/ui/ScrollIndicator";
+import i18n from "./lib/i18n";
 
 function App() {
   const [user, setUser] = useState<any>(null);
@@ -118,7 +119,7 @@ function App() {
     if (mode === "multiplayer") {
       const actualIsHost = isHostForThisMatch;
       const myId = user?.id || sessionId;
-      const myName = user?.user_metadata?.full_name?.split(' ')[0] || (actualIsHost ? "HOST" : "GUEST");
+      const myName = user?.user_metadata?.full_name?.split(' ')[0] || (actualIsHost ? i18n.t("host") : i18n.t("guest"));
 
       roomInfoRef.current = {
         creatorId: actualIsHost ? myId : rId,
@@ -163,7 +164,7 @@ function App() {
             cpuHand: syncData.cpuHand,
             maxPoints: points,
             senderId: sessionId,
-            senderName: user?.user_metadata?.full_name?.split(' ')[0] || "HOST"
+            senderName: user?.user_metadata?.full_name?.split(' ')[0] || i18n.t("host")
           }, roomCode);
         }, 1000);
         core.setIsGameStarting(true);

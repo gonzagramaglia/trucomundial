@@ -1,6 +1,7 @@
 import React from 'react';
 import { Button } from '../ui/Button';
 import { Users, User, Globe } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import type { GameMode } from '../../lib/truco/types';
 
 interface GameModeSelectorProps {
@@ -9,6 +10,7 @@ interface GameModeSelectorProps {
 }
 
 export const GameModeSelector: React.FC<GameModeSelectorProps> = ({ selectedMode, onSelect }) => {
+  const { t } = useTranslation();
   const commonStyle = {
     display: "flex",
     alignItems: "center",
@@ -44,7 +46,7 @@ export const GameModeSelector: React.FC<GameModeSelectorProps> = ({ selectedMode
         }}
       >
         <Globe size={22} />
-        JUGAR ONLINE (1 VS 1)
+        {t("play_online")}
       </Button>
 
       {/* Secondary Options: Local Modes */}
@@ -59,7 +61,7 @@ export const GameModeSelector: React.FC<GameModeSelectorProps> = ({ selectedMode
           }}
         >
           <User size={20} />
-          VS CPU
+          {t("vs_cpu")}
         </Button>
         <Button
           onClick={() => onSelect("2v2")}
@@ -74,7 +76,7 @@ export const GameModeSelector: React.FC<GameModeSelectorProps> = ({ selectedMode
           }}
         >
           <Users size={20} />
-          PRÓXIMAMENTE
+          {t("coming_soon")}
         </Button>
       </div>
     </div>

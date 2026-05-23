@@ -1,15 +1,17 @@
 import React from 'react';
 import { Button } from '../ui/Button';
+import { useTranslation } from 'react-i18next';
 
 interface PointSelectorProps {
   onSelect: (points: number) => void;
 }
 
 export const PointSelector: React.FC<PointSelectorProps> = ({ onSelect }) => {
+  const { t } = useTranslation();
   const getButtonStyle = () => ({
-    width: "100%", 
-    height: "75px", 
-    fontSize: "2.8rem", 
+    width: "100%",
+    height: "75px",
+    fontSize: "2.8rem",
     fontWeight: 900,
     display: "flex",
     alignItems: "center",
@@ -34,7 +36,7 @@ export const PointSelector: React.FC<PointSelectorProps> = ({ onSelect }) => {
         >
           <span style={{ width: '100%', textAlign: 'center' }}>15</span>
         </Button>
-        <span style={{ fontSize: '0.8rem', fontWeight: 900, opacity: 0.8, letterSpacing: '0.1em', color: '#fff' }}>RÁPIDA</span>
+        <span style={{ fontSize: '0.8rem', fontWeight: 900, opacity: 0.8, letterSpacing: '0.1em', color: '#fff' }}>{t("FAST")}</span>
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1, alignItems: 'center' }}>
@@ -45,7 +47,7 @@ export const PointSelector: React.FC<PointSelectorProps> = ({ onSelect }) => {
         >
           <span style={{ width: '100%', textAlign: 'center' }}>30</span>
         </Button>
-        <span style={{ fontSize: '0.8rem', fontWeight: 900, opacity: 0.8, letterSpacing: '0.1em', color: '#fff' }}>CLÁSICA</span>
+        <span style={{ fontSize: '0.8rem', fontWeight: 900, opacity: 0.8, letterSpacing: '0.1em', color: '#fff' }}>{t("classic")}</span>
       </div>
     </div>
   );

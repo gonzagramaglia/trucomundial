@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { GameActions } from './GameActions';
 import { Sticker } from '../../shared/Sticker';
 import { Button } from '../../ui/Button';
+import { useTranslation } from 'react-i18next';
 import type { GameMode, PlayerRole, EnvidoState, TrucoState, PlayedCard } from '../../../lib/truco/types';
 
 interface GameBottomBarProps {
@@ -26,6 +27,7 @@ export const GameBottomBar: React.FC<GameBottomBarProps> = ({
   whoseTurn, isRoundEnding, isBusy, playerHand,
   onPlayCard, onHandleMazo, onHandleResponse, onHandleCall
 }) => {
+  const { t } = useTranslation();
   const isHeroTeamTurn = whoseTurn === "player" || whoseTurn === "partner";
   const isDraggingRef = React.useRef(false);
 
@@ -152,7 +154,7 @@ export const GameBottomBar: React.FC<GameBottomBarProps> = ({
             fontWeight: 900
           }}
         >
-          AL MAZO
+          {t("me_voy_al_mazo")}
         </Button>
       </div>
     </div>

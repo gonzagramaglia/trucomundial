@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { RankingSidebar } from './RankingSidebar';
 import { InstructionsPanel } from './InstructionsPanel';
+import { useTranslation } from 'react-i18next';
 
 interface GameSidebarProps {
   maxPoints?: number;
 }
 
 export const GameSidebar: React.FC<GameSidebarProps> = ({ maxPoints = 30 }) => {
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<'ranking' | 'rules'>('rules');
 
   return (
@@ -36,7 +38,7 @@ export const GameSidebar: React.FC<GameSidebarProps> = ({ maxPoints = 30 }) => {
             transition: "all 0.2s"
           }}
         >
-          REGLAS
+          {t("rules")}
         </button>
         <button
           onClick={() => setActiveTab('ranking')}
@@ -53,7 +55,7 @@ export const GameSidebar: React.FC<GameSidebarProps> = ({ maxPoints = 30 }) => {
             transition: "all 0.2s"
           }}
         >
-          RANKING
+          {t("ranking")}
         </button>
       </div>
 

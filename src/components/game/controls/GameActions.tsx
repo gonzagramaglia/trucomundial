@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "../../ui/Button";
+import { useTranslation } from "react-i18next";
 import type { PlayerRole, GameMode, EnvidoState, TrucoState, PlayedCard } from "../../../lib/truco/types";
 import { PendingChallenge } from "./PendingChallenge";
 import { EnvidoSubMenu } from "./EnvidoSubMenu";
@@ -35,6 +36,7 @@ export const GameActions: React.FC<GameActionsProps> = ({
   handleCall,
   handleMazo
 }) => {
+  const { t } = useTranslation();
   const [showEnvidoOptions, setShowEnvidoOptions] = useState(false);
   const [confirmEnvido, setConfirmEnvido] = useState(false);
   const confirmTimeoutRef = React.useRef<any>(null);
@@ -132,7 +134,7 @@ export const GameActions: React.FC<GameActionsProps> = ({
                   disabled={!isHeroTeamTurn || isBusy || pendingAction !== null}
                   onClick={onEnvidoClick}
                 >
-                  ¡ENVIDO!
+                  {t("call_envido")}
                 </Button>
               </div>
             )}
@@ -145,7 +147,7 @@ export const GameActions: React.FC<GameActionsProps> = ({
                   disabled={!isHeroTeamTurn || isBusy || pendingAction !== null}
                   onClick={() => handleCall("truco", trucoState.level === 0 ? 1 : trucoState.level + 1, "player")}
                 >
-                  {trucoState.status === "none" ? "¡TRUCO!" : trucoState.level === 1 ? "¡RE-TRUCO!" : "¡VALE 4!"}
+                  {trucoState.status === "none" ? t("call_truco") : trucoState.level === 1 ? t("call_retruco") : t("call_vale_4")}
                 </Button>
               )
             )}
@@ -158,7 +160,7 @@ export const GameActions: React.FC<GameActionsProps> = ({
                 onClick={() => handleMazo()}
                 style={{ minWidth: '100px' }}
               >
-                AL MAZO
+                {t("me_voy_al_mazo")}
               </Button>
             )}
           </motion.div>

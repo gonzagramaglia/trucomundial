@@ -1,12 +1,14 @@
 import React from 'react';
 import { Home } from 'lucide-react';
 import { Button } from '../../ui/Button';
+import { useTranslation } from 'react-i18next';
 
 interface GameTopBarProps {
   onExit: () => void;
 }
 
 export const GameTopBar: React.FC<GameTopBarProps> = ({ onExit }) => {
+  const { t } = useTranslation();
   return (
     <>
       {/* Top Left: Home Button */}
@@ -28,7 +30,7 @@ export const GameTopBar: React.FC<GameTopBarProps> = ({ onExit }) => {
         }}
       >
         <Home size={16} />
-        <span className="desktop-only" style={{ fontWeight: 900, fontSize: "0.75rem", letterSpacing: "0.05em", fontStyle: "normal", textTransform: "uppercase" }}>INICIO</span>
+        <span className="desktop-only" style={{ fontWeight: 900, fontSize: "0.75rem", letterSpacing: "0.05em", fontStyle: "normal", textTransform: "uppercase" }}>{t("home")}</span>
       </Button>
 
       {/* Top Right: GitHub Button */}

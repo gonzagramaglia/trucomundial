@@ -10,6 +10,7 @@ import { GameModals } from "../modals/GameModals";
 import { GameTopBar } from "../controls/GameTopBar";
 import { GameBottomBar } from "../controls/GameBottomBar";
 import { Zap, BookOpen, X } from "lucide-react";
+import { useTranslation, Trans } from "react-i18next";
 import type { GameMode, PlayerRole } from "../../../lib/truco/types";
 
 interface TrucoGameViewProps {
@@ -60,6 +61,7 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
   onExitRequest, onRestartGame, onPlayCard, onHandleCall, onHandleResponse, onHandleMazo,
   onCloseExit, onConfirmExit
 }) => {
+  const { t } = useTranslation();
   const [showMobileHelp, setShowMobileHelp] = useState(false);
   const [helpTab, setHelpTab] = useState<'rules' | 'ranking'>('rules');
 
@@ -109,7 +111,13 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
           }}
         >
           <span style={{ fontSize: "1.2rem" }}>⚠️</span>
-          <span>{rivalName.toUpperCase()} SE HA DESCONECTADO. LA PARTIDA SIGUE ACTIVA (CÓDIGO: <span style={{ color: "#00f2ff", fontSize: "1.1rem" }}>{roomCode}</span>)</span>
+          <span>
+            <Trans
+              i18nKey="rival_disconnected"
+              values={{ name: rivalName.toUpperCase(), code: roomCode }}
+              components={{ 1: <span style={{ color: "#00f2ff", fontSize: "1.1rem" }} /> }}
+            />
+          </span>
         </motion.div>
       )}
 
@@ -132,7 +140,7 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
         }}
       >
         <Zap size={16} fill="currentColor" />
-        <span style={{ fontWeight: 900, fontSize: "0.75rem", letterSpacing: "0.05em", fontStyle: "normal", textTransform: "uppercase" }}>A {maxPoints} PUNTOS</span>
+        <span style={{ fontWeight: 900, fontSize: "0.75rem", letterSpacing: "0.05em", fontStyle: "normal", textTransform: "uppercase" }}>{t("to_points", { points: maxPoints })}</span>
       </div>
 
       {/* Responsive Scoreboard: Rival on Top (A), Player on Bottom (B) */}
@@ -140,8 +148,8 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
         <Scoreboard
           scoreA={score.cpu}
           scoreB={score.player}
-          labelA={(rivalName || (gameMode === "multiplayer" ? "RIVAL" : "CPU")).toUpperCase()}
-          labelB={user ? (user.user_metadata.full_name?.split(' ')[0] || user.user_metadata.name?.split(' ')[0] || user.email.split('@')[0]).toUpperCase() : "VOS"}
+          labelA={(rivalName || (gameMode === "multiplayer" ? t("rival") : "CPU")).toUpperCase()}
+          labelB={user ? (user.user_metadata.full_name?.split(' ')[0] || user.user_metadata.name?.split(' ')[0] || user.email.split('@')[0]).toUpperCase() : t("you")}
           popups={scorePopups}
         />
       </div>
@@ -184,16 +192,16 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
               }}
             >
               {(!isRivalConnected && gameMode === "multiplayer")
-                ? `ESPERANDO RECONEXIÓN DE ${rivalName.toUpperCase()}...`
+                ? t("waiting_reconnect", { name: rivalName.toUpperCase() })
                 : showCountdown
                   ? "• • •"
                   : pendingAction && (pendingAction.caller === "player" || pendingAction.caller === "partner")
-                    ? `ESPERANDO A ${rivalName.toUpperCase()}...`
+                    ? t("waiting_for", { name: rivalName.toUpperCase() })
                     : pendingAction
-                      ? "¡ESPERANDO TU RESPUESTA!"
+                      ? t("waiting_response")
                       : whoseTurn === "player"
-                        ? "TU TURNO"
-                        : `ESPERANDO A ${rivalName.toUpperCase()}...`}
+                        ? t("your_turn")
+                        : t("waiting_for", { name: rivalName.toUpperCase() })}
             </motion.div>
           </div>
         )}
@@ -263,7 +271,7 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
         }}
       >
         <BookOpen size={16} />
-        <span className="rules-label" style={{ fontWeight: 900, fontSize: "0.75rem", letterSpacing: "0.05em", fontStyle: "normal", textTransform: "uppercase" }}>REGLAS</span>
+        <span className="rules-label" style={{ fontWeight: 900, fontSize: "0.75rem", letterSpacing: "0.05em", fontStyle: "normal", textTransform: "uppercase" }}>{t("rules")}</span>
       </button>
 
       {/* Mobile/Tablet Rules & Ranking Overlay Modal */}
@@ -352,7 +360,7 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
                     transition: "all 0.2s"
                   }}
                 >
-                  REGLAS
+                  {t("rules")}
                 </button>
                 <button
                   onClick={() => setHelpTab('ranking')}
@@ -369,7 +377,7 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
                     transition: "all 0.2s"
                   }}
                 >
-                  RANKING
+                  {t("ranking")}
                 </button>
               </div>
 

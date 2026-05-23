@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '../../ui/Button';
+import { useTranslation } from 'react-i18next';
 
 interface EnvidoSubMenuProps {
   onCall: (level: number) => void;
@@ -9,6 +10,7 @@ interface EnvidoSubMenuProps {
 }
 
 export const EnvidoSubMenu: React.FC<EnvidoSubMenuProps> = ({ onCall, disabled = false, hideRealEnvido = false }) => {
+  const { t } = useTranslation();
   // Lateral position for Real Envido -> Falta Envido
   if (hideRealEnvido) {
     return (
@@ -44,7 +46,7 @@ export const EnvidoSubMenu: React.FC<EnvidoSubMenuProps> = ({ onCall, disabled =
             disabled={disabled}
             onClick={(e) => { e.stopPropagation(); onCall(4); }}
           >
-            ¡FALTA ENVIDO!
+            {t("call_falta_envido")}
           </Button>
         </motion.div>
       </div>
@@ -67,7 +69,7 @@ export const EnvidoSubMenu: React.FC<EnvidoSubMenuProps> = ({ onCall, disabled =
           disabled={disabled}
           onClick={(e) => { e.stopPropagation(); onCall(3); }}
         >
-          ¡REAL ENVIDO!
+          {t("call_real_envido")}
         </Button>
       </motion.div>
 
@@ -84,7 +86,7 @@ export const EnvidoSubMenu: React.FC<EnvidoSubMenuProps> = ({ onCall, disabled =
           disabled={disabled}
           onClick={(e) => { e.stopPropagation(); onCall(4); }}
         >
-          ¡FALTA ENVIDO!
+          {t("call_falta_envido")}
         </Button>
       </motion.div>
     </>

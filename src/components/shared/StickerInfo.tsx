@@ -6,7 +6,10 @@ interface StickerInfoProps {
   isHovered: boolean;
 }
 
+import { useTranslation } from 'react-i18next';
+
 export const StickerInfo: React.FC<StickerInfoProps> = ({ country, club, isHovered }) => {
+  const { t } = useTranslation();
   return (
     <div
       style={{
@@ -27,7 +30,7 @@ export const StickerInfo: React.FC<StickerInfoProps> = ({ country, club, isHover
           lineHeight: 1.2,
         }}
       >
-        {country}
+        {t(`country_${country}`)}
       </span>
       <span
         className="text-display"

@@ -2,6 +2,7 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '../ui/Button';
 import { Zap, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface MatchmakingOverlayProps {
   isWaiting: boolean;
@@ -24,6 +25,7 @@ export const MatchmakingOverlay: React.FC<MatchmakingOverlayProps> = ({
   formatTime,
   roomCode
 }) => {
+  const { t } = useTranslation();
   return (
     <AnimatePresence>
       {isWaiting && (
@@ -77,7 +79,7 @@ export const MatchmakingOverlay: React.FC<MatchmakingOverlayProps> = ({
                       transition={{ type: 'spring', damping: 12, stiffness: 200, delay: 0.2 }}
                       style={{ fontSize: '3.5rem', fontWeight: 950, color: 'var(--color-accent)', textShadow: '0 0 30px rgba(255,223,0,0.4)', fontStyle: 'italic' }}
                     >
-                      VS
+                      {t("versus")}
                     </motion.div>
                     <div className="text-display" style={{ fontSize: '1.8rem', color: '#fff', flex: 1 }}>{rivalData.name.toUpperCase()}</div>
                   </div>
@@ -88,7 +90,7 @@ export const MatchmakingOverlay: React.FC<MatchmakingOverlayProps> = ({
                     className="text-display" 
                     style={{ color: '#00f2ff', fontSize: '1.2rem', letterSpacing: '0.1em' }}
                   >
-                    ¡PARTIDA ENCONTRADA!
+                    {t("match_found")}
                   </motion.div>
                 </motion.div>
               ) : (
@@ -107,12 +109,12 @@ export const MatchmakingOverlay: React.FC<MatchmakingOverlayProps> = ({
                   </motion.div>
                   
                   <h2 className="text-display" style={{ fontSize: '2.5rem', marginBottom: '1rem', color: '#fff', lineHeight: 1 }}>
-                    BUSCANDO<br />
-                    <span style={{ color: 'var(--color-accent)' }}>RIVAL...</span>
+                    {t("waiting_for_rival").split(' ')[0]}<br />
+                    <span style={{ color: 'var(--color-accent)' }}>{t("waiting_for_rival").split(' ').slice(1).join(' ')}</span>
                   </h2>
                   
                   <p style={{ fontSize: '1.1rem', marginBottom: '0.5rem', color: 'rgba(255,255,255,0.7)', fontWeight: 500 }}>
-                    {roomCode ? "Comparte este código con tu amigo:" : "Esperando a que otro jugador se conecte."}
+                    {roomCode ? t("share_code") : t("waiting_for_rival")}
                   </p>
                   
                   {roomCode && (
@@ -132,7 +134,7 @@ export const MatchmakingOverlay: React.FC<MatchmakingOverlayProps> = ({
                   )}
 
                   <p style={{ fontSize: '0.9rem', marginBottom: '1.5rem', color: 'var(--color-accent)', fontStyle: 'italic', opacity: 0.8 }}>
-                    ¡Andá preparando el mate!
+                    
                   </p>
                   
                   <div style={{ 
@@ -168,7 +170,7 @@ export const MatchmakingOverlay: React.FC<MatchmakingOverlayProps> = ({
                     }}
                   >
                     <X size={18} />
-                    CANCELAR
+                    {t("cancel")}
                   </Button>
                 </motion.div>
               )}

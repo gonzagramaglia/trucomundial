@@ -1,6 +1,7 @@
 import { useCallback, useRef, useEffect } from "react";
 import type { Card } from "../../data/cards";
 import type { PlayerRole } from "../../lib/truco/types";
+import i18n from "../../lib/i18n";
 
 export const useTrucoHandlers = (state: any, logic: any) => {
   const {
@@ -11,7 +12,7 @@ export const useTrucoHandlers = (state: any, logic: any) => {
 
   const handleMazo = useCallback((remote: boolean = false) => {
     const win = remote ? "player" : "cpu";
-    triggerCall(remote ? "ME VOY AL MAZO" : "ME VOY AL MAZO", remote ? "var(--color-secondary)" : "var(--color-accent)");
+    triggerCall(i18n.t("me_voy_al_mazo"), remote ? "var(--color-secondary)" : "var(--color-accent)");
     const pts = trucoState.status === "accepted"
       ? (trucoState.level + 1)
       : (trucoState.level + 1 + (envidoState.status === "none" || envidoState.status === "pending" ? 1 : 0));
@@ -43,11 +44,11 @@ export const useTrucoHandlers = (state: any, logic: any) => {
   const handleCall = useCallback((type: "truco" | "envido", level: number, caller: PlayerRole) => {
     let text = "";
     if (type === "truco") {
-      text = level === 1 ? "¡TRUCO!" : (level === 2 ? "¡RE-TRUCO!" : "¡VALE 4!");
+      text = level === 1 ? i18n.t("call_truco") : (level === 2 ? i18n.t("call_retruco") : i18n.t("call_vale_4"));
     } else {
-      if (level === 3) text = "¡REAL ENVIDO!";
-      else if (level === 4) text = "¡FALTA ENVIDO!";
-      else text = "¡ENVIDO!";
+      if (level === 3) text = i18n.t("call_real_envido");
+      else if (level === 4) text = i18n.t("call_falta_envido");
+      else text = i18n.t("call_envido");
     }
 
     triggerCall(text, (caller === "player" || caller === "partner") ? "var(--color-accent)" : "var(--color-secondary)");
@@ -79,7 +80,7 @@ export const useTrucoHandlers = (state: any, logic: any) => {
   const handleResponse = useCallback((accept: boolean, remote: boolean = false) => {
     if (!pendingAction) return 0;
     const resp = remote ? "cpu" : "player";
-    triggerCall(accept ? "¡QUIERO!" : "NO QUIERO", remote ? "var(--color-secondary)" : "var(--color-accent)");
+    triggerCall(accept ? i18n.t("call_quiero") : i18n.t("call_no_quiero"), remote ? "var(--color-secondary)" : "var(--color-accent)");
 
     if (accept) {
       if (pendingAction.type === "truco") {
@@ -111,7 +112,7 @@ export const useTrucoHandlers = (state: any, logic: any) => {
             setPendingAction(suspendedTruco);
             setSuspendedTruco(null);
             triggerCall(
-              suspendedTruco.level === 1 ? "¡TRUCO!" : (suspendedTruco.level === 2 ? "¡RE-TRUCO!" : "¡VALE 4!"),
+              suspendedTruco.level === 1 ? i18n.t("call_truco") : (suspendedTruco.level === 2 ? i18n.t("call_retruco") : i18n.t("call_vale_4")),
               (suspendedTruco.caller === "player" || suspendedTruco.caller === "partner") ? "var(--color-accent)" : "var(--color-secondary)"
             );
             setIsCooldown(false);

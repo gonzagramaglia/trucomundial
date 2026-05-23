@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 interface RoundCountdownProps {
   isActive: boolean;
@@ -7,6 +8,7 @@ interface RoundCountdownProps {
 }
 
 export const RoundCountdown: React.FC<RoundCountdownProps> = ({ isActive, isGameStarting }) => {
+  const { t } = useTranslation();
   const [count, setCount] = useState(3);
 
   useEffect(() => {
@@ -19,7 +21,7 @@ export const RoundCountdown: React.FC<RoundCountdownProps> = ({ isActive, isGame
     }
   }, [isActive]);
 
-  const mainText = isGameStarting ? "ARRANCANDO EN" : "PRÓXIMA EN";
+  const mainText = isGameStarting ? t("starting_in") : t("next_in");
 
   return (
     <AnimatePresence>
@@ -61,7 +63,7 @@ export const RoundCountdown: React.FC<RoundCountdownProps> = ({ isActive, isGame
                   whiteSpace: "nowrap"
                 }}
               >
-                {count > 0 ? `${mainText} ${count}...` : (isGameStarting ? "¡VAMO' A JUGÁ!" : "")}
+                {count > 0 ? `${mainText} ${count}...` : (isGameStarting ? t("lets_play") : "")}
               </div>
             </motion.div>
           </AnimatePresence>

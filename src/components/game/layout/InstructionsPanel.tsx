@@ -1,10 +1,12 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface InstructionsPanelProps {
   maxPoints?: number;
 }
 
 export const InstructionsPanel: React.FC<InstructionsPanelProps> = ({ maxPoints = 30 }) => {
+  const { t } = useTranslation();
   return (
     <>
       <h3
@@ -16,7 +18,7 @@ export const InstructionsPanel: React.FC<InstructionsPanelProps> = ({ maxPoints 
           letterSpacing: "0.05em",
         }}
       >
-        CÓMO JUGAR
+        {t("how_to_play")}
       </h3>
       <div
         style={{
@@ -35,15 +37,14 @@ export const InstructionsPanel: React.FC<InstructionsPanelProps> = ({ maxPoints 
               marginBottom: "0.3rem",
             }}
           >
-            TRUCO
+            {t("truco_title")}
           </p>
           <p>
-            Vale 2 pts (o más con Re-Truco o Vale 4). Jugás 3 manos,
-            gana el que gana 2.{" "}
+            {t("truco_desc_1")}{" "}
             <strong style={{ color: "var(--color-accent)" }}>
-              En cada mano, la carta más alta del ranking gana.
+              {t("truco_desc_2")}
             </strong>{" "}
-            Messi le gana a todos.
+            {t("truco_desc_3")}
           </p>
         </div>
         <div>
@@ -54,12 +55,12 @@ export const InstructionsPanel: React.FC<InstructionsPanelProps> = ({ maxPoints 
               marginBottom: "0.3rem",
             }}
           >
-            ENVIDO
+            {t("envido_title")}
           </p>
           <p style={{ marginBottom: "0.4rem" }}>
-            Sumá los ENV de tus dos mejores jugadores que compartan{" "}
-            <strong style={{ color: "#fff" }}>Selección</strong> o{" "}
-            <strong style={{ color: "#fff" }}>Club</strong>.
+            {t("envido_desc_1")}{" "}
+            <strong style={{ color: "#fff" }}>{t("envido_team")}</strong> o{" "}
+            <strong style={{ color: "#fff" }}>{t("envido_club")}</strong>.
           </p>
           <div
             style={{
@@ -76,10 +77,10 @@ export const InstructionsPanel: React.FC<InstructionsPanelProps> = ({ maxPoints 
                 marginBottom: "0.2rem",
               }}
             >
-              Ej: MESSI (ARG·10) + DIBU (ARG·23)
+              {t("envido_ex_1")}
             </p>
             <p>
-              → Misma Selección (ARG): Sumás ambos + 20 →{" "}
+              {t("envido_ex_1_desc")}{" "}
               <strong style={{ color: "var(--color-primary)" }}>
                 33
               </strong>
@@ -92,10 +93,10 @@ export const InstructionsPanel: React.FC<InstructionsPanelProps> = ({ maxPoints 
                 marginTop: "0.5rem",
               }}
             >
-              Ej: MESSI (ARG·10) + MBAPPÉ (FRA·10)
+              {t("envido_ex_2")}
             </p>
             <p>
-              → Sin matches de país ni club: solo el más alto cuenta →{" "}
+              {t("envido_ex_2_desc")}{" "}
               <strong style={{ color: "var(--color-primary)" }}>
                 10
               </strong>
@@ -110,10 +111,10 @@ export const InstructionsPanel: React.FC<InstructionsPanelProps> = ({ maxPoints 
               marginBottom: "0.3rem",
             }}
           >
-            AL MAZO
+            {t("al_mazo_title")}
           </p>
           <p>
-            Retirarse de la mano. El rival gana los puntos que se estaban jugando.
+            {t("al_mazo_desc")}
           </p>
         </div>
         <div>
@@ -124,10 +125,10 @@ export const InstructionsPanel: React.FC<InstructionsPanelProps> = ({ maxPoints 
               marginBottom: "0.3rem",
             }}
           >
-            FINAL DEL JUEGO
+            {t("game_over_title")}
           </p>
           <p>
-            <strong style={{ color: 'var(--color-accent)' }}>El primero en llegar a {maxPoints} puntos gana la partida.</strong>
+            <strong style={{ color: 'var(--color-accent)' }}>{t("game_over_desc", { points: maxPoints })}</strong>
           </p>
         </div>
       </div>

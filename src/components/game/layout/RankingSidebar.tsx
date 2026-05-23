@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { CARDS } from '../../../data/cards';
+import { useTranslation } from 'react-i18next';
 
 const BASE_PLAYERS = CARDS.map(card => ({
   id: card.id,
@@ -21,6 +22,7 @@ function loadUserVotes(): Record<string, 1 | -1 | 0> {
 }
 
 export const RankingSidebar = () => {
+  const { t } = useTranslation();
   const [search, setSearch] = useState('');
   const [userVotes, setUserVotes] = useState<Record<string, 1 | -1 | 0>>(loadUserVotes);
 
@@ -55,13 +57,13 @@ export const RankingSidebar = () => {
   return (
     <>
       <h3 className="text-display" style={{ color: 'var(--color-accent)', fontSize: '0.9rem', marginBottom: '0.75rem', letterSpacing: '0.05em' }}>
-        RANKING DE LAS CARTAS
+        {t("card_ranking")}
       </h3>
 
       {/* Search */}
       <input
         type="text"
-        placeholder="Buscar jugador..."
+        placeholder={t("search_player")}
         value={search}
         onChange={e => setSearch(e.target.value)}
         style={{
@@ -89,7 +91,7 @@ export const RankingSidebar = () => {
         scrollbarColor: 'rgba(255,255,255,0.2) transparent'
       }}>
         {filtered.length === 0 && (
-          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem', textAlign: 'center' }}>Sin resultados</p>
+          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem', textAlign: 'center' }}>{t("no_results")}</p>
         )}
         {filtered.map((p, i) => {
           const myVote = userVotes[p.id] ?? 0;
@@ -105,7 +107,7 @@ export const RankingSidebar = () => {
                 <div style={{ fontWeight: 'bold', color: '#fff', fontSize: '0.78rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {p.name}
                 </div>
-                <div style={{ opacity: 0.6, fontSize: '0.65rem' }}>{p.country} · {p.club}</div>
+                <div style={{ opacity: 0.6, fontSize: '0.65rem' }}>{t(`country_${p.country}`)} · {p.club}</div>
               </div>
 
               {/* Vote buttons: ▼ score ▲ */}
@@ -158,7 +160,7 @@ export const RankingSidebar = () => {
       </div>
 
       <p style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.3)', textAlign: 'center', marginTop: '0.75rem' }}>
-        Tu voto mueve el ranking · se guarda localmente
+        {t("vote_disclaimer")}
       </p>
     </>
   );

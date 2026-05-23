@@ -2,12 +2,14 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Sticker } from '../shared/Sticker';
 import { CARDS } from '../../data/cards';
+import { useTranslation } from 'react-i18next';
 
 interface LandingHeaderProps {
   user: any;
 }
 
 export const LandingHeader: React.FC<LandingHeaderProps> = ({ user }) => {
+  const { t } = useTranslation();
   const [isMobile, setIsMobile] = React.useState(window.innerWidth < 768);
 
   React.useEffect(() => {
@@ -38,8 +40,8 @@ export const LandingHeader: React.FC<LandingHeaderProps> = ({ user }) => {
       {/* Title + Pill (Right Column) */}
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '0.75rem' }}>
         <h1 className="text-display" style={{ fontSize: 'clamp(2.5rem, 8vw, 4rem)', lineHeight: 0.9, color: '#fff', margin: 0 }}>
-          TRUCO<br />
-          MUNDIAL
+          {t("title").split(' ')[0]}<br />
+          {t("title").split(' ')[1]}
         </h1>
 
         {user && (
@@ -56,8 +58,8 @@ export const LandingHeader: React.FC<LandingHeaderProps> = ({ user }) => {
             fontWeight: 700
           }}>
             <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#00f2ff' }} />
-            <span className="desktop-only">Sesión iniciada como:&nbsp;</span>
-            <span className="mobile-only">Sesión de:&nbsp;</span>
+            <span className="desktop-only">{t("session_desktop")}</span>
+            <span className="mobile-only">{t("session_mobile")}</span>
             <strong>{user.user_metadata.full_name?.split(' ')[0]}</strong>
           </div>
         )}
