@@ -8,7 +8,7 @@ const resources = {
   en: {
     translation: {
       // Landing Page
-      "title": "TRUCO MUNDIAL",
+      "title": "MUCHO MUNDIAL",
       "subtitle": "The Argentine classic, now with World Cup stickers.",
       "login": "Log In",
       "logout": "Log Out",
@@ -92,6 +92,7 @@ const resources = {
       "session_desktop": "Logged in as: ",
       "session_mobile": "Session of: ",
       "classic": "CLASSIC",
+      "fast": "FAST",
       "ranking": "RANKING",
       "to_points": "TO {{points}} POINTS",
       "waiting_reconnect": "WAITING FOR {{name}} TO RECONNECT...",
@@ -147,7 +148,7 @@ const resources = {
   },
   es: {
     translation: {
-      "title": "TRUCO MUNDIAL",
+      "title": "MUCHO MUNDIAL",
       "subtitle": "El clásico argentino, ahora con las figuritas del mundial.",
       "login": "Iniciar Sesión",
       "logout": "Cerrar Sesión",
@@ -225,6 +226,7 @@ const resources = {
       "session_desktop": "Sesión iniciada como: ",
       "session_mobile": "Sesión de: ",
       "classic": "CLÁSICA",
+      "fast": "RÁPIDA",
       "ranking": "RANKING",
       "to_points": "A {{points}} PUNTOS",
       "waiting_reconnect": "ESPERANDO RECONEXIÓN DE {{name}}...",

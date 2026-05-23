@@ -24,7 +24,7 @@ export const calculateEnvido = (hand: Card[]) => {
 };
 
 export const getCardValue = (card: Card): number => {
-  // Truco Mundial uses 'power' where LOWER is BETTER.
+  // Mucho Mundial uses 'power' where LOWER is BETTER.
   // We return a value where HIGHER is BETTER for easier comparison.
   return 100 - card.power;
 };
