@@ -38,7 +38,7 @@ export const LandingHeader: React.FC<LandingHeaderProps> = ({ user }) => {
       {/* Title + Pill (Right Column) */}
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '0.75rem' }}>
         <h1 className="text-display" style={{ fontSize: 'clamp(2.5rem, 8vw, 4rem)', lineHeight: 0.9, color: '#fff', margin: 0 }}>
-          MUCHO<br />
+          TRUCO<br />
           MUNDIAL
         </h1>
 

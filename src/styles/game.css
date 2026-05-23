@@ -140,10 +140,10 @@
   }
 
   .mobile-help-btn {
-    top: 0.75rem !important;
-    right: 0.75rem !important;
-    width: 38px !important;
-    height: 38px !important;
+    top: 1rem !important;
+    right: 1rem !important;
+    width: 46px !important;
+    height: 46px !important;
     padding: 0 !important;
     justify-content: center !important;
   }

@@ -362,9 +362,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart, sessionId }) 
         </div>
       </motion.div>
 
-      {/* Twitch Button - Way Down Bottom & Centered */}
+      {/* GitHub Button - Way Down Bottom & Centered */}
       <a
-        href="https://twitch.tv/muchomovimiento/videos"
+        href="https://github.com/gonzagramaglia"
         target="_blank"
         rel="noopener noreferrer"
         className="btn-hover-dark"
@@ -373,9 +373,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart, sessionId }) 
           bottom: window.innerWidth < 768 ? '1.5rem' : '4.5rem',
           left: '50%',
           transform: 'translateX(-50%)',
-          background: 'rgba(145, 70, 255, 0.2)',
+          background: 'rgba(255, 255, 255, 0.1)',
           backdropFilter: 'blur(12px)',
-          border: '1px solid rgba(145, 70, 255, 0.3)',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
           color: 'white',
           height: '40px',
           padding: '0 1.25rem',
@@ -401,9 +401,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart, sessionId }) 
           strokeLinecap="round"
           strokeLinejoin="round"
         >
-          <path d="M21 2H3v16h5v4l4-4h5l4-4V2zm-10 9V7m5 4V7" />
+          <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
         </svg>
-        MUCHOMOVIMIENTO
+        GONZAGRAMAGLIA
       </a>
 
       {/* Point Selection Modal */}

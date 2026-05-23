@@ -132,7 +132,7 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
         }}
       >
         <Zap size={16} fill="currentColor" />
-        <span style={{ fontWeight: 900, fontSize: "0.85rem", letterSpacing: "0.1em", fontStyle: "italic" }}>A {maxPoints} PUNTOS</span>
+        <span style={{ fontWeight: 900, fontSize: "0.75rem", letterSpacing: "0.05em", fontStyle: "normal", textTransform: "uppercase" }}>A {maxPoints} PUNTOS</span>
       </div>
 
       {/* Responsive Scoreboard: Rival on Top (A), Player on Bottom (B) */}
@@ -258,12 +258,12 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
           justifyContent: "center",
           color: "white",
           border: "1px solid rgba(255, 255, 255, 0.1)",
-          boxShadow: "0 4px 20px rgba(0, 0, 0, 0.4)",
+          boxShadow: "none",
           cursor: "pointer"
         }}
       >
         <BookOpen size={16} />
-        <span className="rules-label" style={{ fontWeight: 900, fontSize: "0.75rem", letterSpacing: "0.05em", textShadow: "0 0 0.5px white" }}>REGLAS</span>
+        <span className="rules-label" style={{ fontWeight: 900, fontSize: "0.75rem", letterSpacing: "0.05em", fontStyle: "normal", textTransform: "uppercase" }}>REGLAS</span>
       </button>
 
       {/* Mobile/Tablet Rules & Ranking Overlay Modal */}

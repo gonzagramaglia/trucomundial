@@ -110,7 +110,7 @@ export const GameField: React.FC<GameFieldProps> = ({
           letterSpacing: '0.05em',
           whiteSpace: 'nowrap'
         }}>
-          MUCHO MUNDIAL
+          TRUCO MUNDIAL
         </h2>
       </div>
 

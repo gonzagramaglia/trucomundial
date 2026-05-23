@@ -1,19 +1,34 @@
-# Mucho Mundial 🏆
+# Truco Mundial 🏆
 
-**Mucho Mundial** es la evolución del Truco Argentino. Un juego donde el ingenio del truco se cruza con la pasión de coleccionar las figuritas del Mundial.
+**Truco Mundial** is the evolution of Argentine Truco. A game where the wit of Truco meets the passion of World Cup stickers.
 
-## 🚀 Concepto
-Adaptación del clásico juego de cartas utilizando figuritas de jugadores reales (estilo Panini). Cada jugador tiene un nivel de poder que respeta la jerarquía tradicional del Truco Argentino (Messi es el 1 de Espada, CR7 el 1 de Basto, etc.).
+## 🚀 Concept
+A fresh take on the classic card game featuring custom-designed stickers of football players (inspired by World Cup albums, but not using real/official stickers). Each player has a power level that respects the traditional hierarchy of Argentine Truco (e.g., Messi is the Ace of Swords, CR7 is the Ace of Clubs, etc.).
 
-## 🛠️ Stack Tecnológico
+The game includes the complete Truco experience, featuring **Truco**, **Retruco**, **Vale Cuatro**, and the full **Envido** system (Envido, Real Envido, Falta Envido). 
+**Envido Mechanics:** Unlike traditional Truco (which uses suits and a +20 base bonus), Envido points in Truco Mundial are calculated by summing the envido values of two cards that share the same **Country** or **Club**. The standard +20 base bonus is omitted, making the calculations direct and unique to the players' stats!
+
+## 🎮 Current Features
+- **Real-Time Multiplayer**: Play online with friends using a 4-letter private room code.
+- **Host/Guest Architecture**: Robust real-time synchronization with seamless reconnection if a player drops.
+- **Local Play**: Play locally against the CPU.
+- **Custom Matches**: Choose between short (15 points) or long (30 points) matches.
+- **Google Authentication**: Quick and easy login via Supabase for multiplayer access.
+
+## 🛠️ Tech Stack
 - **Frontend**: React + Vite (TypeScript)
-- **Gestor de Paquetes**: Yarn
-- **Estilos**: Vanilla CSS + Framer Motion (para animaciones premium)
-- **Estado**: Zustand
-- **Backend/DB**: Supabase (Realtime & Auth)
-- **Calidad**: Husky + Commitlint (Conventional Commits)
+- **Package Manager**: Yarn
+- **Styling**: Vanilla CSS + Framer Motion (for premium animations and responsive design)
+- **State Management**: Zustand
+- **Backend/DB**: Supabase (Realtime, Postgres & Auth)
+- **Code Quality**: Husky + Commitlint (Conventional Commits)
 
 ## 🎨 Look & Feel
-- Estética **Urban Freestyle**: Tipografías audaces, alto contraste y vibrante.
-- Inspiración en el **Álbum del Mundial 2026**.
-- Marcador digital estilo **estadio de fútbol**.
+- **Urban Freestyle** Aesthetics: Bold typography, high contrast, and vibrant colors.
+- Inspired by the **2026 World Cup Album**.
+- **Football stadium** style digital scoreboard.
+- Optimized for both mobile and desktop screens with a premium interface.
+
+## 🤝 Contribution and License
+This project is developed openly (Open development — collaboration inquiries welcome).
+The source code is available for review and learning, but **the concept, design, and brand of "Truco Mundial" are protected and reserved.** If you are interested in collaborating, have ideas for the game, or wish to use part of this code in other projects, please get in touch via GitHub.
