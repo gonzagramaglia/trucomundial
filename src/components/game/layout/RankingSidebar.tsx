@@ -138,9 +138,65 @@ export const RankingSidebar = () => {
         scrollbarColor: 'rgba(255,255,255,0.2) transparent'
       }}>
         {loading ? (
-          <p style={{ color: 'var(--color-accent)', fontSize: '0.75rem', textAlign: 'center', margin: '1rem 0' }}>
-            CARGANDO RANKING...
-          </p>
+          <div style={{ width: '100%' }}>
+            <style>{`
+              @keyframes spin-clockwise {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+              }
+              @keyframes spin-counter {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(-360deg); }
+              }
+              @keyframes pulse-soft {
+                0%, 100% { opacity: 0.45; }
+                50% { opacity: 0.85; }
+              }
+            `}</style>
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '2rem 0',
+              gap: '1rem'
+            }}>
+              <div style={{ position: 'relative', width: '44px', height: '44px' }}>
+                {/* Outer Yellow Ring */}
+                <div style={{
+                  position: 'absolute',
+                  inset: 0,
+                  border: '3px solid transparent',
+                  borderTopColor: '#ffdf00',
+                  borderRadius: '50%',
+                  animation: 'spin-clockwise 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite',
+                  boxShadow: '0 0 10px rgba(255, 223, 0, 0.45)'
+                }} />
+                {/* Inner Yellow Ring */}
+                <div style={{
+                  position: 'absolute',
+                  inset: '5px',
+                  border: '3px solid transparent',
+                  borderTopColor: '#ffdf00',
+                  borderRadius: '50%',
+                  animation: 'spin-counter 0.8s cubic-bezier(0.5, 0, 0.5, 1) infinite',
+                  boxShadow: '0 0 8px rgba(255, 223, 0, 0.35)'
+                }} />
+              </div>
+              <p style={{
+                margin: 0,
+                fontSize: '0.75rem',
+                fontWeight: 800,
+                letterSpacing: '0.05em',
+                color: '#ffdf00',
+                textShadow: '0 0 6px rgba(255, 223, 0, 0.2)',
+                animation: 'pulse-soft 1.5s ease-in-out infinite',
+                textAlign: 'center'
+              }}>
+                CARGANDO RANKING...
+              </p>
+            </div>
+          </div>
         ) : filtered.length === 0 ? (
           <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem', textAlign: 'center' }}>{t("no_results")}</p>
         ) : (

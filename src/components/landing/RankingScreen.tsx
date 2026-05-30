@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Save, Plus, Minus, Search, Trophy, Lock, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Save, Plus, Minus, Search, Trophy, Lock, RefreshCw, Check } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { CARDS } from '../../data/cards';
 import { Sticker } from '../shared/Sticker';
@@ -62,6 +62,8 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [isOrderChanging, setIsOrderChanging] = useState(false);
   const lastOrderRef = useRef<string>("");
+  const lastVotedCardIdRef = useRef<string | null>(null);
+  const lastVoteActionRef = useRef<'add' | 'sub' | null>(null);
 
   const LOCAL_STORAGE_KEY = `trucomundial-uservotes-${user?.id || 'anonymous'}`;
 
@@ -123,6 +125,8 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
     if (!user) return;
     if (availableVotes <= 0) return;
 
+    lastVotedCardIdRef.current = cardId;
+    lastVoteActionRef.current = 'add';
     setMyVotes(prev => {
       const current = prev[cardId] ?? 0;
       const updated = { ...prev, [cardId]: current + 1 };
@@ -135,6 +139,8 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
   const handleSubVote = (cardId: string) => {
     if (!user) return;
 
+    lastVotedCardIdRef.current = cardId;
+    lastVoteActionRef.current = 'sub';
     setMyVotes(prev => {
       const current = prev[cardId] ?? 0;
       if (current <= 0) return prev;
@@ -173,7 +179,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
       }
 
       setSaveSuccess(true);
-      setTimeout(() => setSaveSuccess(false), 3000);
+      setTimeout(() => setSaveSuccess(false), 2000);
 
       // Refresh global list to show new calculations
       await fetchGlobalVotes();
@@ -229,6 +235,21 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
     if (currentOrder !== lastOrderRef.current) {
       setIsOrderChanging(true);
       lastOrderRef.current = currentOrder;
+
+      if (lastVotedCardIdRef.current) {
+        const cardId = lastVotedCardIdRef.current;
+        const tryScroll = () => {
+          const element = document.getElementById(`ranking-card-${cardId}`);
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        };
+
+        // First attempt (early layout transition)
+        setTimeout(tryScroll, 100);
+        // Second attempt (as layout animation is settling)
+        setTimeout(tryScroll, 350);
+      }
 
       const timer = setTimeout(() => {
         setIsOrderChanging(false);
@@ -396,10 +417,10 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
               <button
                 onClick={handleSaveVotes}
-                disabled={saving}
+                disabled={saving || saveSuccess}
                 className="btn-hover-dark"
                 style={{
-                  background: '#a855f7',
+                  background: saveSuccess ? '#10b981' : '#a855f7',
                   border: 'none',
                   color: '#fff',
                   height: '48px',
@@ -410,28 +431,15 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
                   display: 'flex',
                   alignItems: 'center',
                   gap: '0.75rem',
-                  cursor: 'pointer',
+                  cursor: (saving || saveSuccess) ? 'default' : 'pointer',
                   boxShadow: '4px 4px 0px #000',
-                  transition: 'transform 0.1s ease',
+                  transition: 'all 0.2s ease',
                   opacity: saving ? 0.7 : 1
                 }}
               >
-                <Save size={18} />
-                {saving ? 'GUARDANDO...' : 'GUARDAR EN LA NUBE'}
+                {saveSuccess ? <Check size={18} /> : <Save size={18} />}
+                {saveSuccess ? '¡VOTOS GUARDADOS!' : saving ? 'GUARDANDO...' : 'GUARDAR EN LA NUBE'}
               </button>
-
-              <AnimatePresence>
-                {saveSuccess && (
-                  <motion.span
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0 }}
-                    style={{ color: '#10b981', fontSize: '0.85rem', fontWeight: 'bold' }}
-                  >
-                    ¡Votos guardados!
-                  </motion.span>
-                )}
-              </AnimatePresence>
             </div>
           </motion.div>
         ) : (
@@ -691,20 +699,32 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
             return (
               <motion.div
                 key={player.id}
+                id={`ranking-card-${player.id}`}
+                layout
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.3, delay: Math.min(index * 0.03, 0.5) }}
                 style={{
-                  background: 'rgba(255, 255, 255, 0.03)',
-                  border: '1px solid rgba(255, 255, 255, 0.08)',
+                  background: (isOrderChanging && lastVotedCardIdRef.current === player.id)
+                    ? (lastVoteActionRef.current === 'add' ? 'rgba(168, 85, 247, 0.08)' : 'rgba(255, 255, 255, 0.08)')
+                    : 'rgba(255, 255, 255, 0.03)',
+                  border: (isOrderChanging && lastVotedCardIdRef.current === player.id)
+                    ? (lastVoteActionRef.current === 'add' ? '1.5px solid rgba(168, 85, 247, 0.8)' : '1.5px solid rgba(255, 255, 255, 0.8)')
+                    : '1px solid rgba(255, 255, 255, 0.08)',
                   borderRadius: '2.25rem',
                   padding: '1.5rem',
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
                   position: 'relative',
-                  boxShadow: '0 12px 30px rgba(0,0,0,0.15)',
-                  backdropFilter: 'blur(8px)'
+                  boxShadow: (isOrderChanging && lastVotedCardIdRef.current === player.id)
+                    ? (lastVoteActionRef.current === 'add' ? '0 0 30px rgba(168, 85, 247, 0.6), 0 12px 30px rgba(0,0,0,0.2)' : '0 0 30px rgba(255, 255, 255, 0.6), 0 12px 30px rgba(0,0,0,0.2)')
+                    : '0 12px 30px rgba(0,0,0,0.15)',
+                  backdropFilter: 'blur(8px)',
+                  filter: (isOrderChanging && lastVotedCardIdRef.current === player.id)
+                    ? 'brightness(1.3)'
+                    : 'none',
+                  transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
                 }}
               >
                 {/* RANK TROPHY OR SHADOW BADGE */}
