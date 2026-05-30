@@ -8,12 +8,16 @@ A fresh take on the classic card game featuring custom-designed stickers of foot
 The game includes the complete Truco experience, featuring **Truco**, **Retruco**, **Vale Cuatro**, and the full **Envido** system (Envido, Real Envido, Falta Envido). 
 **Envido Mechanics:** Unlike traditional Truco (which uses suits and a +20 base bonus), Envido points in Truco Mundial are calculated by summing the envido values of two cards that share the same **Country** or **Club**. The standard +20 base bonus is omitted, making the calculations direct and unique to the players' stats!
 
-## 🎮 Current Features
+## 🎮 Features
 - **Real-Time Multiplayer**: Play online with friends using a 4-letter private room code.
 - **Host/Guest Architecture**: Robust real-time synchronization with seamless reconnection if a player drops.
 - **Local Play**: Play locally against the CPU.
 - **Custom Matches**: Choose between short (15 points) or long (30 points) matches.
 - **Google Authentication**: Quick and easy login via Supabase for multiplayer access.
+- **Streamer & Rapper Tournaments**: An elegant dedicated screen showing custom 1vs1 qualifying tournaments hosted by community streamers and rappers (Mucho Movimiento, Barbaroja, Dybbuk) for the Mucho Movimiento 2vs2 global finals.
+- **Interactive Roadmap**: A gorgeous vertical timeline detailing upcoming project milestones (Lanzamiento v1.0, Streamer Tournaments, Multi 2v2, Custom decks, etc.).
+- **Card Rankings**: An interactive voting system for the community to rank the best cards, featuring a protective unsaved changes validation modal when returning to the landing screen.
+- **Dynamic SPA Routing & SEO**: Zero-dependency URL mapping and client-side history navigation support for `/torneos`, `/ranking`, and `/ruta` paths with real-time dynamic SEO title and Open Graph metadata updates.
 
 ## 🛠️ Tech Stack
 - **Frontend**: React + Vite (TypeScript)

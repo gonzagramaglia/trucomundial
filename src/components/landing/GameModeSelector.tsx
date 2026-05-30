@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from '../ui/Button';
-import { User, Globe, Trophy, BarChart3 } from 'lucide-react';
+import { User, Globe, Trophy, BarChart3, Milestone } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { GameMode } from '../../lib/truco/types';
 
@@ -90,6 +90,22 @@ export const GameModeSelector: React.FC<GameModeSelectorProps> = ({ selectedMode
           {t("vote")}
         </Button>
       </div>
+
+      {/* Roadmap Option */}
+      <Button
+        onClick={() => onSelect("roadmap" as any)}
+        className="btn-hover-dark"
+        style={{
+          ...getButtonStyle("multiplayer", "rgba(255, 255, 255, 0.08)"),
+          color: "#fff",
+          border: "1px solid rgba(255, 255, 255, 0.15)",
+          width: "100%",
+          gap: "0.75rem",
+        }}
+      >
+        <Milestone size={20} />
+        {t("roadmap")}
+      </Button>
     </div>
   );
 };

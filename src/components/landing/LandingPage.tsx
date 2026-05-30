@@ -9,6 +9,7 @@ import { PointSelector } from './PointSelector';
 import { MatchmakingOverlay } from './MatchmakingOverlay';
 import { RankingScreen } from './RankingScreen';
 import { TournamentScreen } from './TournamentScreen';
+import { RoadmapScreen } from './RoadmapScreen';
 
 interface LandingPageProps {
   onStart: (mode: "1v1" | "2v2" | "multiplayer", points: 15 | 30, rivalName?: string, rivalId?: string, isCreator?: boolean, roomCode?: string, isReconnecting?: boolean) => void;
@@ -28,14 +29,70 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart, sessionId }) 
   const [isJoining, setIsJoining] = useState(false);
   const [inputCode, setInputCode] = useState("");
   const [isCreator, setIsCreator] = useState(false);
-  const [showRanking, setShowRanking] = useState(false);
-  const [showTournament, setShowTournament] = useState(false);
+  const [showRanking, setShowRanking] = useState(() =>
+    typeof window !== 'undefined' && (window.location.pathname === '/ranking' || window.location.pathname === '/en/ranking')
+  );
+  const [showTournament, setShowTournament] = useState(() =>
+    typeof window !== 'undefined' && (window.location.pathname === '/torneos' || window.location.pathname === '/en/torneos')
+  );
+  const [showRoadmap, setShowRoadmap] = useState(() =>
+    typeof window !== 'undefined' && (window.location.pathname === '/ruta' || window.location.pathname === '/en/ruta')
+  );
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }: any) => setUser(session?.user ?? null));
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: any, session: any) => setUser(session?.user ?? null));
     return () => subscription.unsubscribe();
   }, []);
+
+  // Dynamic SEO, Open Graph & Twitter metadata updates
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+
+    const updateMetaTag = (nameOrProperty: string, content: string) => {
+      // Try finding by name attribute
+      let tag = document.querySelector(`meta[name="${nameOrProperty}"]`);
+      if (tag) {
+        tag.setAttribute('content', content);
+        return;
+      }
+      // Try finding by property attribute (Open Graph style)
+      tag = document.querySelector(`meta[property="${nameOrProperty}"]`);
+      if (tag) {
+        tag.setAttribute('content', content);
+      }
+    };
+
+    if (showRanking) {
+      document.title = "Ranking de Cartas de Truco Mundial";
+      updateMetaTag('description', "Votá en el ranking oficial de cartas de Truco Mundial y decidí cuáles son las mejores y peores figuras del mundial.");
+      updateMetaTag('og:title', "Ranking de Cartas de Truco Mundial");
+      updateMetaTag('og:description', "Votá en el ranking oficial de cartas de Truco Mundial y decidí cuáles son las mejores y peores figuras del mundial.");
+      updateMetaTag('twitter:title', "Ranking de Cartas de Truco Mundial");
+      updateMetaTag('twitter:description', "Votá en el ranking oficial de cartas de Truco Mundial y decidí cuáles son las mejores y peores figuras del mundial.");
+    } else if (showRoadmap) {
+      document.title = "Hoja de Ruta de Truco Mundial";
+      updateMetaTag('description', "Conocé la hoja de ruta de Truco Mundial. Descubrí el futuro competitivo, torneos con sponsors, personalizaciones y el juego cooperativo 2v2.");
+      updateMetaTag('og:title', "Hoja de Ruta de Truco Mundial");
+      updateMetaTag('og:description', "Conocé la hoja de ruta de Truco Mundial. Descubrí el futuro competitivo, torneos con sponsors, personalizaciones y el juego cooperativo 2v2.");
+      updateMetaTag('twitter:title', "Hoja de Ruta de Truco Mundial");
+      updateMetaTag('twitter:description', "Conocé la hoja de ruta de Truco Mundial. Descubrí el futuro competitivo, torneos con sponsors, personalizaciones y el juego cooperativo 2v2.");
+    } else if (showTournament) {
+      document.title = "Torneos de Truco Mundial";
+      updateMetaTag('description', "Competí en los torneos y clasificatorios de streamers de Truco Mundial. Copa Mucho Movimiento, Dybbuk y Barbaroja 1vs1.");
+      updateMetaTag('og:title', "Torneos de Truco Mundial");
+      updateMetaTag('og:description', "Competí en los torneos y clasificatorios de streamers de Truco Mundial. Copa Mucho Movimiento, Dybbuk y Barbaroja 1vs1.");
+      updateMetaTag('twitter:title', "Torneos de Truco Mundial");
+      updateMetaTag('twitter:description', "Competí en los torneos y clasificatorios de streamers de Truco Mundial. Copa Mucho Movimiento, Dybbuk y Barbaroja 1vs1.");
+    } else {
+      document.title = "Truco Mundial";
+      updateMetaTag('description', "Truco Mundial: La evolución del Truco argentino. Un juego de cartas tácticas donde el ingenio del truco se fusiona con la pasión de las figuritas mundialistas. ¡Jugá online con amigos o local contra la CPU!");
+      updateMetaTag('og:title', "Truco Mundial");
+      updateMetaTag('og:description', "Viví la evolución del Truco argentino con figuritas coleccionables de tus jugadores de fútbol favoritos. ¡Jugá partidas online en tiempo real de 15 o 30 puntos gratis contra amigos o local contra la CPU!");
+      updateMetaTag('twitter:title', "Truco Mundial");
+      updateMetaTag('twitter:description', "Viví la evolución del Truco argentino con figuritas coleccionables de tus jugadores de fútbol favoritos. ¡Jugá partidas online en tiempo real gratis contra amigos o local contra la CPU!");
+    }
+  }, [showRanking, showRoadmap, showTournament]);
 
   useEffect(() => {
     let timer: any;
@@ -285,7 +342,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart, sessionId }) 
         <RankingScreen
           user={user}
           handleAuth={handleAuth}
-          onBack={() => setShowRanking(false)}
+          onBack={() => {
+            setShowRanking(false);
+            if (typeof window !== 'undefined') {
+              const isEn = window.location.pathname.startsWith('/en');
+              window.history.pushState({}, '', isEn ? '/en' : '/');
+            }
+          }}
         />
       </div>
     );
@@ -305,7 +368,37 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart, sessionId }) 
         <TournamentScreen
           user={user}
           handleAuth={handleAuth}
-          onBack={() => setShowTournament(false)}
+          onBack={() => {
+            setShowTournament(false);
+            if (typeof window !== 'undefined') {
+              const isEn = window.location.pathname.startsWith('/en');
+              window.history.pushState({}, '', isEn ? '/en' : '/');
+            }
+          }}
+        />
+      </div>
+    );
+  }
+
+  if (showRoadmap) {
+    return (
+      <div style={{
+        position: 'fixed',
+        inset: 0,
+        background: 'transparent',
+        width: '100%',
+        height: '100vh',
+        overflowY: 'auto',
+        zIndex: 1500
+      }}>
+        <RoadmapScreen
+          onBack={() => {
+            setShowRoadmap(false);
+            if (typeof window !== 'undefined') {
+              const isEn = window.location.pathname.startsWith('/en');
+              window.history.pushState({}, '', isEn ? '/en' : '/');
+            }
+          }}
         />
       </div>
     );
@@ -503,10 +596,26 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart, sessionId }) 
             onSelect={(mode) => {
               if ((mode as string) === "ranking") {
                 setShowRanking(true);
+                if (typeof window !== 'undefined') {
+                  const isEn = window.location.pathname.startsWith('/en');
+                  window.history.pushState({}, '', isEn ? '/en/ranking' : '/ranking');
+                }
                 return;
               }
               if ((mode as string) === "tournament") {
                 setShowTournament(true);
+                if (typeof window !== 'undefined') {
+                  const isEn = window.location.pathname.startsWith('/en');
+                  window.history.pushState({}, '', isEn ? '/en/torneos' : '/torneos');
+                }
+                return;
+              }
+              if ((mode as string) === "roadmap") {
+                setShowRoadmap(true);
+                if (typeof window !== 'undefined') {
+                  const isEn = window.location.pathname.startsWith('/en');
+                  window.history.pushState({}, '', isEn ? '/en/ruta' : '/ruta');
+                }
                 return;
               }
               if (mode === "multiplayer" && !user) {

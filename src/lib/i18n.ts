@@ -9,7 +9,7 @@ const resources = {
     translation: {
       // Landing Page
       "title": "TRUCO MUNDIAL",
-      "subtitle": "The Argentine classic, now with World Cup stickers.",
+      "subtitle": "The Argentine classic, now with World Cup players.",
       "login": "Log In",
       "logout": "Log Out",
       "play_now": "PLAY NOW",
@@ -145,13 +145,114 @@ const resources = {
       "next_in": "NEXT IN",
       "lets_play": "LET'S PLAY!",
       "country_Francia": "France",
-      "country_Argentina": "Argentina"
+      "country_Argentina": "Argentina",
+
+      // GameModeSelector
+      "roadmap": "ROADMAP",
+
+      // RankingScreen
+      "ranking_subtitle": "Vote for your stickers to rank them in the Truco Mundial global power ranking",
+      "refresh_ranking": "Refresh Ranking",
+      "your_votes_distributed": "Your Distributed Votes",
+      "votes_label": "Votes",
+      "votes_available_hint": "You have {{count}} votes left to distribute.",
+      "votes_all_used": "You've used all 100 votes! Reduce a card's votes to give them to another.",
+      "save_to_cloud": "SAVE TO CLOUD",
+      "saving": "SAVING...",
+      "votes_saved": "VOTES SAVED!",
+      "login_to_vote_title": "Log In to Vote",
+      "login_to_vote_desc": "Registered Google users can distribute 100 votes across stickers to shape the community power ranking.",
+      "login_with_google": "LOG IN WITH GOOGLE",
+      "search_placeholder": "Search by player, country or club...",
+      "loading_votes": "LOADING GLOBAL VOTES...",
+      "equivalent_to": "Equivalent to",
+      "login_to_vote_btn": "Log in to vote",
+      "exit_without_saving": "EXIT WITHOUT SAVING?",
+      "unsaved_votes_warning": "You have unsaved vote changes. If you leave now, those modifications will be lost. Do you want to continue and exit anyway?",
+      "yes_exit": "YES, EXIT",
+      "no_stay": "NO, STAY",
+      "save_error": "There was a problem saving your votes to the server. Your votes are still saved locally on this device.",
+
+      // TournamentScreen
+      "tournament_desc": "Compete in 1vs1 tournaments hosted by your favorite streamers and rappers. The winner will qualify directly to the <strong>Mucho Movimiento 2vs2</strong> global tournament. Make sure to be connected in this lobby before the start to validate your registration.",
+      "tournament_desc_plain": "Compete in 1vs1 tournaments hosted by your favorite streamers and rappers. The winner will qualify directly to the Mucho Movimiento 2vs2 global tournament. Make sure to be connected in this lobby before the start to validate your registration.",
+      "testing_warning_tournaments": "⚠️ TEST ENVIRONMENT: Tournaments are not yet enabled.",
+      "testing_warning_generic": "⚠️ Non-final test version",
+      "status_open": "Open for Subscribers",
+      "status_active": "In Progress",
+      "status_finished": "Finished",
+      "champion": "Champion",
+      "starts": "Starts",
+      "prize": "Prize",
+      "organized_by": "Organized by",
+      "slots_filled": "Slots filled",
+      "sign_up_now": "SIGN UP NOW",
+      "tournament_in_progress": "TOURNAMENT IN PROGRESS",
+      "tournament_finished": "TOURNAMENT FINISHED",
+      "login_to_compete": "to compete",
+
+      // TournamentScreen — tournament data
+      "t1_name": "COPA MUCHO MOVIMIENTO (1v1)",
+      "t1_start": "In 8 minutes",
+      "t1_prize": "Qualification to the 2v2 Grand Final",
+      "t2_name": "CLASIFICATORIO PARDA LA MEJOR (1v1)",
+      "t2_start": "In 25 minutes",
+      "t2_prize": "Qualification to the 2v2 Grand Final",
+      "t3_name": "CLASIFICATORIO CON DYBBUK (1v1)",
+      "t3_start": "Semi-Finals Stage",
+      "t3_prize": "Qualification to the 2v2 Grand Final",
+      "t4_name": "OPEN LUQUITA RODRIGUEZ (1v1)",
+      "t4_start": "Finished",
+      "t4_prize": "Qualification to the 2v2 Grand Final",
+
+      // RoadmapScreen
+      "roadmap_intro": "Discover the future of <strong>Truco Mundial</strong>. We've designed a community-driven evolutionary path to turn this classic into a fully competitive experience.",
+      "roadmap_intro_plain": "Discover the future of Truco Mundial. We've designed a community-driven evolutionary path to turn this classic into a fully competitive experience.",
+
+      "phase1_title": "Initial Launch v1.0",
+      "phase1_status": "Enabled",
+      "phase1_desc": "The classic Argentine truco with World Cup players. Basic 1v1 match system and initial vote ranking.",
+      "phase1_f1": "Fast online 1v1 matches",
+      "phase1_f2": "15 or 30 point match selection",
+      "phase1_f3": "Interactive card voting (Ranking)",
+
+      "phase2_title": "Tournaments & Streamer Cups",
+      "phase2_status": "In Development",
+      "phase2_desc": "Tournament lobby with streamers and rappers. Brackets and special cups with exclusive subscriber access.",
+      "phase2_f1": "Discord for organizing brackets and matches",
+      "phase2_f2": "Streamer & rapper 1vs1 qualifiers",
+      "phase2_f3": "Prize integration and direct entry passes",
+
+      "phase3_title": "Cooperative 2v2 Multiplayer",
+      "phase3_status": "Planning",
+      "phase3_desc": "Real-time 2vs2 mode implementation. Play as a team with your friends against rivals from around the world.",
+      "phase3_f1": "4-player cooperative rooms",
+      "phase3_f2": "Mucho Movimiento 2vs2 World Cup",
+
+      "phase4_title": "Customization & Competitive",
+      "phase4_status": "Planning",
+      "phase4_desc": "Customizable card backs, animated stickers, global player ranking and recurring tournaments with major sponsor prizes.",
+      "phase4_f1": "Global player ranking",
+      "phase4_f2": "Recurring tournaments with sponsor prizes",
+      "phase4_f3": "Cosmetic shop and card backs",
+      "phase4_f4": "Holographic World Cup decks",
+
+      // Card suits (RankingScreen equivalences)
+      "card_of": "of",
+      "suit_espadas": "Swords",
+      "suit_bastos": "Clubs",
+      "suit_copas": "Cups",
+      "suit_oro": "Gold",
+      "card_macho": "Male",
+      "card_hembra": "Female",
+      "card_false_ace": "False Ace",
+      "card_false_seven": "False Seven"
     }
   },
   es: {
     translation: {
       "title": "TRUCO MUNDIAL",
-      "subtitle": "El clásico argentino, ahora con las figuritas del mundial.",
+      "subtitle": "El clásico argentino, ahora con los jugadores del mundial.",
       "login": "Iniciar Sesión",
       "logout": "Cerrar Sesión",
       "play_now": "JUGAR AHORA",
@@ -281,7 +382,108 @@ const resources = {
       "next_in": "PRÓXIMA EN",
       "lets_play": "¡VAMO' A JUGÁ!",
       "country_Francia": "Francia",
-      "country_Argentina": "Argentina"
+      "country_Argentina": "Argentina",
+
+      // GameModeSelector
+      "roadmap": "HOJA DE RUTA",
+
+      // RankingScreen
+      "ranking_subtitle": "Votá a tus figuritas para posicionarlas en el ranking global de Truco Mundial",
+      "refresh_ranking": "Actualizar Ranking",
+      "your_votes_distributed": "Tus Votos Distribuidos",
+      "votes_label": "Votos",
+      "votes_available_hint": "Tenés {{count}} votos disponibles para repartir.",
+      "votes_all_used": "¡Repartiste todos tus 100 votos! Podés reducirlos de una carta para dárselos a otra.",
+      "save_to_cloud": "GUARDAR EN LA NUBE",
+      "saving": "GUARDANDO...",
+      "votes_saved": "¡VOTOS GUARDADOS!",
+      "login_to_vote_title": "Iniciá Sesión para Votar",
+      "login_to_vote_desc": "Los usuarios registrados con Google pueden distribuir 100 votos entre las figuritas para moldear el ranking de poder de la comunidad.",
+      "login_with_google": "INICIAR SESIÓN CON GOOGLE",
+      "search_placeholder": "Buscar por jugador, selección o club...",
+      "loading_votes": "CARGANDO VOTOS GLOBALES...",
+      "equivalent_to": "Equivale al",
+      "login_to_vote_btn": "Logueate para votar",
+      "exit_without_saving": "¿SALIR SIN GUARDAR?",
+      "unsaved_votes_warning": "Tenés cambios en tus votos que no has guardado en la nube. Si salís ahora, se perderán esas modificaciones. ¿Querés continuar y salir de todas formas?",
+      "yes_exit": "SÍ, SALIR",
+      "no_stay": "NO, QUEDARSE",
+      "save_error": "Hubo un problema al guardar tus votos en el servidor. Tus votos siguen guardados localmente en este dispositivo.",
+
+      // TournamentScreen
+      "tournament_desc": "Competí en los torneos 1vs1 de tus streamers y rappers favoritos. El ganador clasificará directamente al torneo global de <strong>Mucho Movimiento 2vs2</strong>. Asegurate de estar conectado en este lobby antes del inicio para validar tu inscripción.",
+      "tournament_desc_plain": "Competí en los torneos 1vs1 de tus streamers y rappers favoritos. El ganador clasificará directamente al torneo global de Mucho Movimiento 2vs2. Asegurate de estar conectado en este lobby antes del inicio para validar tu inscripción.",
+      "testing_warning_tournaments": "⚠️ ENTORNO DE PRUEBAS: Los torneos aún no están habilitados.",
+      "testing_warning_generic": "⚠️ Versión de prueba no definitiva",
+      "status_open": "Abierto para Suscriptores",
+      "status_active": "En Curso",
+      "status_finished": "Finalizado",
+      "champion": "Campeón",
+      "starts": "Comienza",
+      "prize": "Premio",
+      "organized_by": "Organiza",
+      "slots_filled": "Cupos cubiertos",
+      "sign_up_now": "INSCRIBITE AHORA",
+      "tournament_in_progress": "TORNEO EN JUEGO",
+      "tournament_finished": "TORNEO FINALIZADO",
+      "login_to_compete": "para competir",
+
+      // TournamentScreen — tournament data
+      "t1_name": "COPA MUCHO MOVIMIENTO (1v1)",
+      "t1_start": "En 8 minutos",
+      "t1_prize": "Clasificación a la Gran Final 2v2",
+      "t2_name": "CLASIFICATORIO PARDA LA MEJOR (1v1)",
+      "t2_start": "En 25 minutos",
+      "t2_prize": "Clasificación a la Gran Final 2v2",
+      "t3_name": "CLASIFICATORIO CON DYBBUK (1v1)",
+      "t3_start": "Fase de Semifinales",
+      "t3_prize": "Clasificación a la Gran Final 2v2",
+      "t4_name": "OPEN LUQUITA RODRIGUEZ (1v1)",
+      "t4_start": "Finalizado",
+      "t4_prize": "Clasificación a la Gran Final 2v2",
+
+      // RoadmapScreen
+      "roadmap_intro": "Descubrí el futuro de <strong>Truco Mundial</strong>. Diseñamos un camino evolutivo guiado por la comunidad para convertir este clásico en una experiencia competitiva total.",
+      "roadmap_intro_plain": "Descubrí el futuro de Truco Mundial. Diseñamos un camino evolutivo guiado por la comunidad para convertir este clásico en una experiencia competitiva total.",
+
+      "phase1_title": "Lanzamiento Inicial v1.0",
+      "phase1_status": "Habilitado",
+      "phase1_desc": "El clásico truco argentino con los jugadores del mundial. Sistema básico de partidas 1v1 y ranking de votos inicial.",
+      "phase1_f1": "Partidas online rápidas 1v1",
+      "phase1_f2": "Elección de 15 o 30 puntos",
+      "phase1_f3": "Votación interactiva de cartas (Ranking)",
+
+      "phase2_title": "Torneos & Copas de Streamers",
+      "phase2_status": "En Desarrollo",
+      "phase2_desc": "Lobby de torneos con streamers y rappers. Clasificaciones y copas especiales con acceso exclusivo para suscriptores.",
+      "phase2_f1": "Discord para organizar llaves y partidas",
+      "phase2_f2": "Clasificatorios de streamers y rappers 1vs1",
+      "phase2_f3": "Integración de premios y pases directos",
+
+      "phase3_title": "Multijugador Cooperativo 2v2",
+      "phase3_status": "Planificando",
+      "phase3_desc": "Implementación del modo 2vs2 en tiempo real. Jugá en equipo con tus amigos contra rivales de todo el mundo.",
+      "phase3_f1": "Salas cooperativas de 4 jugadores",
+      "phase3_f2": "Copa Mundial 2vs2 de Mucho Movimiento",
+
+      "phase4_title": "Personalización & Competitivo",
+      "phase4_status": "Planificando",
+      "phase4_desc": "Dorsos de cartas personalizables, stickers animados, ranking global de jugadores y torneos recurrentes con importantes premios de sponsors.",
+      "phase4_f1": "Ranking de jugadores globales",
+      "phase4_f2": "Torneos recurrentes con premios de sponsors",
+      "phase4_f3": "Tienda cosmética y dorsos de cartas",
+      "phase4_f4": "Mazos del mundial holográficos",
+
+      // Card suits (RankingScreen equivalences)
+      "card_of": "de",
+      "suit_espadas": "Espadas",
+      "suit_bastos": "Bastos",
+      "suit_copas": "Copas",
+      "suit_oro": "Oro",
+      "card_macho": "Macho",
+      "card_hembra": "Hembra",
+      "card_false_ace": "Ancho Falso",
+      "card_false_seven": "Siete Falso"
     }
   }
 };

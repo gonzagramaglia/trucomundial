@@ -12,31 +12,41 @@ interface RankingScreenProps {
   onBack: () => void;
 }
 
-const getTraditionalEquivalent = (power: number): string => {
+const getTraditionalEquivalent = (power: number, t: (key: string) => string): string => {
+  const of = t('card_of');
+  const s = t('suit_espadas');
+  const b = t('suit_bastos');
+  const c = t('suit_copas');
+  const o = t('suit_oro');
+  const macho = t('card_macho');
+  const hembra = t('card_hembra');
+  const falseAce = t('card_false_ace');
+  const falseSeven = t('card_false_seven');
+
   switch (power) {
-    case 1: return "1 de Espadas (Macho)";
-    case 2: return "1 de Bastos (Hembra)";
-    case 3: return "7 de Espadas";
-    case 4: return "7 de Oro";
-    case 5: return "3 de Espadas";
-    case 6: return "3 de Bastos";
-    case 7: return "2 de Espadas";
-    case 8: return "2 de Bastos";
-    case 9: return "1 de Copas (Ancho Falso)";
-    case 10: return "1 de Oro (Ancho Falso)";
-    case 11: return "12 de Espadas";
-    case 12: return "12 de Bastos";
-    case 13: return "11 de Espadas";
-    case 14: return "11 de Bastos";
-    case 15: return "10 de Espadas";
-    case 16: return "10 de Bastos";
-    case 17: return "7 de Copas (Siete Falso)";
-    case 18: return "7 de Bastos (Siete Falso)";
-    case 19: return "6 de Espadas";
-    case 20: return "6 de Bastos";
-    case 21: return "5 de Espadas";
-    case 22: return "5 de Bastos";
-    default: return "";
+    case 1:  return `1 ${of} ${s} (${macho})`;
+    case 2:  return `1 ${of} ${b} (${hembra})`;
+    case 3:  return `7 ${of} ${s}`;
+    case 4:  return `7 ${of} ${o}`;
+    case 5:  return `3 ${of} ${s}`;
+    case 6:  return `3 ${of} ${b}`;
+    case 7:  return `2 ${of} ${s}`;
+    case 8:  return `2 ${of} ${b}`;
+    case 9:  return `1 ${of} ${c} (${falseAce})`;
+    case 10: return `1 ${of} ${o} (${falseAce})`;
+    case 11: return `12 ${of} ${s}`;
+    case 12: return `12 ${of} ${b}`;
+    case 13: return `11 ${of} ${s}`;
+    case 14: return `11 ${of} ${b}`;
+    case 15: return `10 ${of} ${s}`;
+    case 16: return `10 ${of} ${b}`;
+    case 17: return `7 ${of} ${c} (${falseSeven})`;
+    case 18: return `7 ${of} ${b} (${falseSeven})`;
+    case 19: return `6 ${of} ${s}`;
+    case 20: return `6 ${of} ${b}`;
+    case 21: return `5 ${of} ${s}`;
+    case 22: return `5 ${of} ${b}`;
+    default: return '';
   }
 };
 
@@ -193,7 +203,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
       await fetchGlobalVotes();
     } catch (err) {
       console.error('Error saving votes to Supabase:', err);
-      alert('Hubo un problema al guardar tus votos en el servidor. Tus votos siguen guardados localmente en este dispositivo.');
+      alert(t('save_error'));
     } finally {
       setSaving(false);
     }
@@ -360,7 +370,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
             {t("card_ranking")}
           </h1>
           <p style={{ fontSize: '0.8rem', opacity: 0.6, margin: '4px 0 0 0' }}>
-            Votá a tus figuritas para posicionarlas en el ranking global de Truco Mundial
+            {t('ranking_subtitle')}
           </p>
         </div>
 
@@ -383,7 +393,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
             backdropFilter: 'blur(10px)',
             opacity: loading ? 0.5 : 1
           }}
-          title="Actualizar Ranking"
+          title={t('refresh_ranking')}
         >
           <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
         </button>
@@ -417,10 +427,10 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.9rem', fontWeight: 800 }}>
                 <span style={{ color: '#a855f7', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <Trophy size={18} />
-                  Tus Votos Distribuidos
+                  {t('your_votes_distributed')}
                 </span>
                 <span style={{ color: availableVotes === 0 ? '#10b981' : '#fff' }}>
-                  {totalMyVotes} / 100 Votos
+                  {totalMyVotes} / 100 {t('votes_label')}
                 </span>
               </div>
 
@@ -439,8 +449,8 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
 
               <div style={{ fontSize: '0.75rem', opacity: 0.5, marginTop: '0.4rem' }}>
                 {availableVotes > 0
-                  ? `Tenés ${availableVotes} votos disponibles para repartir.`
-                  : '¡Repartiste todos tus 100 votos! Podés reducirlos de una carta para dárselos a otra.'}
+                  ? t('votes_available_hint', { count: availableVotes })
+                  : t('votes_all_used')}
               </div>
             </div>
 
@@ -469,7 +479,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
                 }}
               >
                 {saveSuccess ? <Check size={18} /> : <Save size={18} />}
-                {saveSuccess ? '¡VOTOS GUARDADOS!' : saving ? 'GUARDANDO...' : 'GUARDAR EN LA NUBE'}
+                {saveSuccess ? t('votes_saved') : saving ? t('saving') : t('save_to_cloud')}
               </button>
             </div>
           </motion.div>
@@ -494,10 +504,10 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
             <div style={{ flex: '1 1 300px' }}>
               <h3 style={{ margin: '0 0 0.5rem 0', color: '#a855f7', display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '1.1rem', fontWeight: 900 }}>
                 <Lock size={18} />
-                Iniciá Sesión para Votar
+                {t('login_to_vote_title')}
               </h3>
               <p style={{ margin: 0, fontSize: '0.8rem', opacity: 0.7, lineHeight: 1.4 }}>
-                Los usuarios registrados con Google pueden distribuir 100 votos entre las figuritas para moldear el ranking de poder de la comunidad.
+                {t('login_to_vote_desc')}
               </p>
             </div>
 
@@ -523,7 +533,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
               <svg width="18" height="18" viewBox="0 0 24 24" style={{ fill: 'currentColor' }}>
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" /><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" /><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" /><path d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
               </svg>
-              INICIAR SESIÓN CON GOOGLE
+              {t('login_with_google')}
             </button>
           </motion.div>
         )}
@@ -547,7 +557,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
         </div>
         <input
           type="text"
-          placeholder="Buscar por jugador, selección o club..."
+          placeholder={t('search_placeholder')}
           value={search}
           onChange={e => setSearch(e.target.value)}
           style={{
@@ -630,7 +640,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
               textShadow: '0 0 8px rgba(255, 223, 0, 0.2)',
               animation: 'pulse-soft 1.5s ease-in-out infinite'
             }}>
-              CARGANDO VOTOS GLOBALES...
+              {t('loading_votes')}
             </p>
           </div>
 
@@ -829,7 +839,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
                     marginTop: '10px',
                     display: 'inline-block'
                   }}>
-                    Equivale al {getTraditionalEquivalent(player.power)}
+                    {t('equivalent_to')} {getTraditionalEquivalent(player.power, t)}
                   </div>
                 </div>
 
@@ -920,7 +930,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
                     className="btn-hover-dark"
                   >
                     <Lock size={14} />
-                    Logueate para votar
+                    {t('login_to_vote_btn')}
                   </button>
                 )}
               </motion.div>
@@ -1028,11 +1038,11 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
               </div>
 
               <h3 className="text-display" style={{ fontSize: '1.5rem', margin: 0, color: '#ef4444', letterSpacing: '0.05em' }}>
-                ¿SALIR SIN GUARDAR?
+                {t('exit_without_saving')}
               </h3>
 
               <p style={{ margin: 0, fontSize: '0.95rem', opacity: 0.8, lineHeight: '1.5', color: '#fff' }}>
-                Tenés cambios en tus votos que no has guardado en la nube. Si salís ahora, se perderán esas modificaciones. ¿Querés continuar y salir de todas formas?
+                {t('unsaved_votes_warning')}
               </p>
 
               {/* Action Buttons */}
@@ -1057,7 +1067,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
                     transition: 'all 0.2s'
                   }}
                 >
-                  SÍ, SALIR
+                  {t('yes_exit')}
                 </button>
 
                 <button
@@ -1077,7 +1087,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
                     transition: 'all 0.2s'
                   }}
                 >
-                  NO, QUEDARSE
+                  {t('no_stay')}
                 </button>
               </div>
             </motion.div>

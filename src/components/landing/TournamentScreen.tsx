@@ -52,45 +52,45 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({ user, handle
   const tournaments: Tournament[] = [
     {
       id: 't1',
-      name: 'COPA MUCHO MOVIMIENTO (1v1)',
+      name: t('t1_name'),
       status: 'open',
       participants: participantCounts['t1'],
       maxParticipants: 16,
-      startTime: 'En 8 minutos',
-      prize: 'Clasificación a la Gran Final 2v2',
+      startTime: t('t1_start'),
+      prize: t('t1_prize'),
       bgGradient: 'linear-gradient(135deg, rgba(168, 85, 247, 0.12) 0%, rgba(255, 0, 128, 0.04) 100%)',
       organizer: 'Mucho Movimiento'
     },
     {
       id: 't2',
-      name: 'CLASIFICATORIO PARDA LA MEJOR (1v1)',
+      name: t('t2_name'),
       status: 'open',
       participants: participantCounts['t2'],
       maxParticipants: 8,
-      startTime: 'En 25 minutos',
-      prize: 'Clasificación a la Gran Final 2v2',
+      startTime: t('t2_start'),
+      prize: t('t2_prize'),
       bgGradient: 'linear-gradient(135deg, rgba(255, 120, 0, 0.12) 0%, rgba(255, 0, 0, 0.04) 100%)',
       organizer: 'Barbaroja'
     },
     {
       id: 't3',
-      name: 'CLASIFICATORIO CON DYBBUK (1v1)',
+      name: t('t3_name'),
       status: 'active',
       participants: 8,
       maxParticipants: 8,
-      startTime: 'Fase de Semifinales',
-      prize: 'Clasificación a la Gran Final 2v2',
+      startTime: t('t3_start'),
+      prize: t('t3_prize'),
       bgGradient: 'linear-gradient(135deg, rgba(0, 242, 255, 0.12) 0%, rgba(0, 80, 255, 0.04) 100%)',
       organizer: 'Dybbuk'
     },
     {
       id: 't4',
-      name: 'OPEN LUQUITA RODRIGUEZ (1v1)',
+      name: t('t4_name'),
       status: 'finished',
       participants: 16,
       maxParticipants: 16,
-      startTime: 'Finalizado',
-      prize: 'Clasificación a la Gran Final 2v2',
+      startTime: t('t4_start'),
+      prize: t('t4_prize'),
       bgGradient: 'linear-gradient(135deg, rgba(255, 215, 0, 0.12) 0%, rgba(255, 140, 0, 0.04) 100%)',
       winner: 'RoberGalati 🏆',
       organizer: 'Luquita Rodriguez'
@@ -148,15 +148,15 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({ user, handle
 
         {/* Title */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <Trophy size={32} style={{ color: '#ffd700', filter: 'drop-shadow(0 0 8px rgba(255, 215, 0, 0.45))' }} />
+          <Trophy size={32} style={{ color: '#ffffff', filter: 'drop-shadow(0 0 8px rgba(255, 255, 255, 0.25))' }} />
           <h2 className="text-display" style={{
             fontSize: '1.8rem',
             margin: 0,
             letterSpacing: '0.05em',
-            color: '#ffd700',
-            textShadow: '0 0 10px rgba(255, 215, 0, 0.2)'
+            color: '#ffffff',
+            textShadow: '0 0 10px rgba(255, 255, 255, 0.1)'
           }}>
-            LOBBY DE TORNEOS
+            {t("tournaments")} ({t("coming_soon")})
           </h2>
         </div>
 
@@ -173,7 +173,7 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({ user, handle
             fontWeight: 800
           }}>
             <span style={{ color: 'rgba(255, 255, 255, 0.6)', fontWeight: 600 }}>
-              Sesión iniciada como:
+              {t('session_desktop')}
             </span>
             <span style={{ color: '#00f2ff', marginLeft: '0.25rem' }}>
               {user.user_metadata?.full_name?.split(' ')[0] || user.email?.split('@')[0] || "Gonzalo"}
@@ -201,7 +201,7 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({ user, handle
             }}
           >
             <Lock size={14} />
-            {t("login")} para competir
+            {t("login")} {t("login_to_compete")}
           </button>
         )}
       </div>
@@ -233,7 +233,11 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({ user, handle
           color: '#fff',
           maxWidth: '850px'
         }}>
-          Competí en los torneos 1vs1 de tus streamers y rappers favoritos. El ganador clasificará directamente al torneo global de <strong style={{ color: '#ffd700', textShadow: '0 0 8px rgba(255,215,0,0.3)' }}>Mucho Movimiento 2vs2</strong>. Asegurate de estar conectado en este lobby antes del inicio para validar tu inscripción.
+          {t('tournament_desc_plain').split('Mucho Movimiento 2vs2').map((part, i, arr) =>
+            i < arr.length - 1
+              ? <React.Fragment key={i}>{part}<strong style={{ color: '#ffd700', textShadow: '0 0 8px rgba(255,215,0,0.3)' }}>Mucho Movimiento 2vs2</strong></React.Fragment>
+              : part
+          )}
         </p>
         <div style={{
           marginTop: '1rem',
@@ -249,7 +253,7 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({ user, handle
           fontWeight: 800,
           textShadow: '0 0 8px rgba(255, 120, 0, 0.25)'
         }}>
-          <span>⚠️ ENTORNO DE PRUEBAS: Los torneos aún no están habilitados.</span>
+          <span>{t('testing_warning_tournaments')}</span>
         </div>
       </motion.div>
 
@@ -314,11 +318,11 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({ user, handle
                 textTransform: 'uppercase',
                 zIndex: 10
               }}>
-                {tournament.status === 'open' 
-                  ? 'Abierto para Suscriptores' 
-                  : tournament.status === 'active' 
-                    ? 'En Curso' 
-                    : 'Finalizado'}
+                {tournament.status === 'open'
+                  ? t('status_open')
+                  : tournament.status === 'active'
+                    ? t('status_active')
+                    : t('status_finished')}
               </div>
 
               {/* Main Content */}
@@ -339,12 +343,12 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({ user, handle
                     {tournament.status === 'finished' ? (
                       <>
                         <Award size={15} style={{ color: '#ffd700' }} />
-                        <span>Campeón: <strong style={{ color: '#ffd700' }}>{tournament.winner}</strong></span>
+                        <span>{t('champion')}: <strong style={{ color: '#ffd700' }}>{tournament.winner}</strong></span>
                       </>
                     ) : (
                       <>
                         <Clock size={15} style={{ color: '#00f2ff' }} />
-                        <span>Comienza: <strong style={{ color: '#00f2ff' }}>{tournament.startTime}</strong></span>
+                        <span>{t('starts')}: <strong style={{ color: '#00f2ff' }}>{tournament.startTime}</strong></span>
                       </>
                     )}
                   </div>
@@ -352,20 +356,20 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({ user, handle
                   {/* Prize Info */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', opacity: 0.85 }}>
                     <Zap size={15} style={{ color: '#ff7800' }} />
-                    <span>Premio: <strong style={{ color: '#ff7800' }}>{tournament.prize}</strong></span>
+                    <span>{t('prize')}: <strong style={{ color: '#ff7800' }}>{tournament.prize}</strong></span>
                   </div>
 
                   {/* Organizer Info */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', opacity: 0.85 }}>
                     <ShieldCheck size={15} style={{ color: '#ffd700' }} />
-                    <span>Organiza: <strong style={{ color: '#ffd700' }}>{tournament.organizer}</strong></span>
+                    <span>{t('organized_by')}: <strong style={{ color: '#ffd700' }}>{tournament.organizer}</strong></span>
                   </div>
 
                   {/* Slots Info / Progress */}
                   {tournament.status !== 'finished' && (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '0.25rem' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', opacity: 0.7 }}>
-                        <span>Cupos cubiertos</span>
+                        <span>{t('slots_filled')}</span>
                         <strong>{tournament.participants} / {tournament.maxParticipants}</strong>
                       </div>
                       {/* Slots Bar */}
@@ -413,7 +417,7 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({ user, handle
                     }}
                   >
                     <Lock size={16} />
-                    <span>INSCRIBITE AHORA</span>
+                    <span>{t('sign_up_now')}</span>
                   </button>
                 ) : tournament.status === 'active' ? (
                   <button
@@ -436,7 +440,7 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({ user, handle
                     }}
                   >
                     <Trophy size={14} />
-                    TORNEO EN JUEGO
+                    {t('tournament_in_progress')}
                   </button>
                 ) : (
                   <button
@@ -459,7 +463,7 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({ user, handle
                     }}
                   >
                     <ShieldCheck size={14} />
-                    TORNEO FINALIZADO
+                    {t('tournament_finished')}
                   </button>
                 )}
               </div>
