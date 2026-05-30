@@ -8,6 +8,7 @@ import { GameModeSelector } from './GameModeSelector';
 import { PointSelector } from './PointSelector';
 import { MatchmakingOverlay } from './MatchmakingOverlay';
 import { RankingScreen } from './RankingScreen';
+import { TournamentScreen } from './TournamentScreen';
 
 interface LandingPageProps {
   onStart: (mode: "1v1" | "2v2" | "multiplayer", points: 15 | 30, rivalName?: string, rivalId?: string, isCreator?: boolean, roomCode?: string, isReconnecting?: boolean) => void;
@@ -28,6 +29,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart, sessionId }) 
   const [inputCode, setInputCode] = useState("");
   const [isCreator, setIsCreator] = useState(false);
   const [showRanking, setShowRanking] = useState(false);
+  const [showTournament, setShowTournament] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }: any) => setUser(session?.user ?? null));
@@ -289,6 +291,26 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart, sessionId }) 
     );
   }
 
+  if (showTournament) {
+    return (
+      <div style={{
+        position: 'fixed',
+        inset: 0,
+        background: 'transparent',
+        width: '100%',
+        height: '100vh',
+        overflowY: 'auto',
+        zIndex: 1500
+      }}>
+        <TournamentScreen
+          user={user}
+          handleAuth={handleAuth}
+          onBack={() => setShowTournament(false)}
+        />
+      </div>
+    );
+  }
+
   return (
     <div style={{
       minHeight: '100vh',
@@ -481,6 +503,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart, sessionId }) 
             onSelect={(mode) => {
               if ((mode as string) === "ranking") {
                 setShowRanking(true);
+                return;
+              }
+              if ((mode as string) === "tournament") {
+                setShowTournament(true);
                 return;
               }
               if (mode === "multiplayer" && !user) {

@@ -49,16 +49,14 @@ export const GameModeSelector: React.FC<GameModeSelectorProps> = ({ selectedMode
         {t("play_online")}
       </Button>
 
-      {/* Tournaments Option (Coming Soon) */}
+      {/* Tournaments Option */}
       <Button
-        disabled={true}
+        onClick={() => onSelect("tournament" as any)}
+        className="btn-hover-dark"
         style={{
-          ...getButtonStyle("multiplayer", "#00f2ff"),
+          ...getButtonStyle("multiplayer", "#ffffff"),
           width: "100%",
           gap: "0.75rem",
-          opacity: 0.5,
-          filter: "grayscale(1)",
-          cursor: "not-allowed",
         }}
       >
         <Trophy size={22} />

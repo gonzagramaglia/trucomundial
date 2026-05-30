@@ -61,9 +61,11 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
   const [myVotes, setMyVotes] = useState<Record<string, number>>({});
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [isOrderChanging, setIsOrderChanging] = useState(false);
+  const [showUnsavedModal, setShowUnsavedModal] = useState(false);
   const lastOrderRef = useRef<string>("");
   const lastVotedCardIdRef = useRef<string | null>(null);
   const lastVoteActionRef = useRef<'add' | 'sub' | null>(null);
+  const lastSavedVotesRef = useRef<Record<string, number>>({});
 
   const LOCAL_STORAGE_KEY = `trucomundial-uservotes-${user?.id || 'anonymous'}`;
 
@@ -72,12 +74,16 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
     const cached = localStorage.getItem(LOCAL_STORAGE_KEY);
     if (cached) {
       try {
-        setMyVotes(JSON.parse(cached));
+        const parsed = JSON.parse(cached);
+        setMyVotes(parsed);
+        lastSavedVotesRef.current = parsed;
       } catch (e) {
         setMyVotes({});
+        lastSavedVotesRef.current = {};
       }
     } else {
       setMyVotes({});
+      lastSavedVotesRef.current = {};
     }
   }, [user, LOCAL_STORAGE_KEY]);
 
@@ -101,6 +107,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
           const myDbRecord = data.find(item => item.match_id === `user_votes_${user.id}`);
           if (myDbRecord && myDbRecord.last_move && myDbRecord.last_move.votes) {
             setMyVotes(myDbRecord.last_move.votes);
+            lastSavedVotesRef.current = myDbRecord.last_move.votes;
             localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(myDbRecord.last_move.votes));
           }
         }
@@ -180,6 +187,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
 
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 2000);
+      lastSavedVotesRef.current = myVotes;
 
       // Refresh global list to show new calculations
       await fetchGlobalVotes();
@@ -188,6 +196,29 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
       alert('Hubo un problema al guardar tus votos en el servidor. Tus votos siguen guardados localmente en este dispositivo.');
     } finally {
       setSaving(false);
+    }
+  };
+
+  // Check if current local votes differ from the last cloud-saved/synced state
+  const hasUnsavedChanges = () => {
+    const currentKeys = Object.keys(myVotes);
+    const savedKeys = Object.keys(lastSavedVotesRef.current);
+
+    if (currentKeys.length !== savedKeys.length) return true;
+
+    for (const key of currentKeys) {
+      if (myVotes[key] !== lastSavedVotesRef.current[key]) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  const handleBackRequest = () => {
+    if (user && hasUnsavedChanges()) {
+      setShowUnsavedModal(true);
+    } else {
+      onBack();
     }
   };
 
@@ -293,7 +324,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
       }}>
         {/* Back Button */}
         <button
-          onClick={onBack}
+          onClick={handleBackRequest}
           className="btn-hover-dark"
           style={{
             background: 'rgba(255, 255, 255, 0.08)',
@@ -940,6 +971,119 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
         </svg>
         MUCHOMOVIMIENTO
       </a>
+
+      {/* UNSAVED CHANGES WARNING MODAL */}
+      <AnimatePresence>
+        {showUnsavedModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              background: 'rgba(0, 0, 0, 0.85)',
+              backdropFilter: 'blur(15px)',
+              zIndex: 2000,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '1.5rem'
+            }}
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              style={{
+                background: 'rgba(255, 255, 255, 0.05)',
+                border: '1.5px solid rgba(255, 255, 255, 0.1)',
+                borderRadius: '2rem',
+                padding: '2.5rem 2rem',
+                width: '100%',
+                maxWidth: '480px',
+                textAlign: 'center',
+                boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '1.5rem'
+              }}
+            >
+              {/* Warning Icon inside a red glowing circle */}
+              <div style={{
+                width: '64px',
+                height: '64px',
+                borderRadius: '50%',
+                background: 'rgba(239, 68, 68, 0.15)',
+                border: '2.5px solid #ef4444',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: '0 0 20px rgba(239, 68, 68, 0.45)',
+                color: '#ef4444',
+                fontSize: '2rem'
+              }}>
+                ⚠️
+              </div>
+
+              <h3 className="text-display" style={{ fontSize: '1.5rem', margin: 0, color: '#ef4444', letterSpacing: '0.05em' }}>
+                ¿SALIR SIN GUARDAR?
+              </h3>
+
+              <p style={{ margin: 0, fontSize: '0.95rem', opacity: 0.8, lineHeight: '1.5', color: '#fff' }}>
+                Tenés cambios en tus votos que no has guardado en la nube. Si salís ahora, se perderán esas modificaciones. ¿Querés continuar y salir de todas formas?
+              </p>
+
+              {/* Action Buttons */}
+              <div style={{ display: 'flex', gap: '1rem', width: '100%', marginTop: '0.5rem' }}>
+                <button
+                  onClick={() => {
+                    setShowUnsavedModal(false);
+                    onBack();
+                  }}
+                  className="btn-hover-dark"
+                  style={{
+                    flex: 1,
+                    height: '46px',
+                    borderRadius: '1.25rem',
+                    background: 'rgba(239, 68, 68, 0.2)',
+                    border: '1px solid #ef4444',
+                    color: '#ef4444',
+                    fontWeight: 900,
+                    cursor: 'pointer',
+                    fontSize: '0.9rem',
+                    boxShadow: '4px 4px 0px #000',
+                    transition: 'all 0.2s'
+                  }}
+                >
+                  SÍ, SALIR
+                </button>
+
+                <button
+                  onClick={() => setShowUnsavedModal(false)}
+                  className="btn-hover-dark"
+                  style={{
+                    flex: 1,
+                    height: '46px',
+                    borderRadius: '1.25rem',
+                    background: 'linear-gradient(to right, #a855f7, #7c3aed)',
+                    border: 'none',
+                    color: '#fff',
+                    fontWeight: 900,
+                    cursor: 'pointer',
+                    fontSize: '0.9rem',
+                    boxShadow: '4px 4px 0px #000',
+                    transition: 'all 0.2s'
+                  }}
+                >
+                  NO, QUEDARSE
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
