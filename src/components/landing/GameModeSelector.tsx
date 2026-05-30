@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from '../ui/Button';
-import { Users, User, Globe } from 'lucide-react';
+import { User, Globe, Trophy, BarChart3 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { GameMode } from '../../lib/truco/types';
 
@@ -49,6 +49,22 @@ export const GameModeSelector: React.FC<GameModeSelectorProps> = ({ selectedMode
         {t("play_online")}
       </Button>
 
+      {/* Tournaments Option (Coming Soon) */}
+      <Button
+        disabled={true}
+        style={{
+          ...getButtonStyle("multiplayer", "#00f2ff"),
+          width: "100%",
+          gap: "0.75rem",
+          opacity: 0.5,
+          filter: "grayscale(1)",
+          cursor: "not-allowed",
+        }}
+      >
+        <Trophy size={22} />
+        {t("tournaments")} ({t("coming_soon").toLowerCase()})
+      </Button>
+
       {/* Secondary Options: Local Modes */}
       <div className="game-mode-secondary-row" style={{ display: "flex", gap: "1rem", width: "100%" }}>
         <Button
@@ -64,19 +80,17 @@ export const GameModeSelector: React.FC<GameModeSelectorProps> = ({ selectedMode
           {t("vs_cpu")}
         </Button>
         <Button
-          onClick={() => onSelect("2v2")}
-          disabled={true}
+          onClick={() => onSelect("ranking" as any)}
+          className="btn-hover-dark"
           style={{
-            ...getButtonStyle("2v2", "#ffdf00"),
+            ...getButtonStyle("2v2", "#9146ff"),
             width: "100%",
             gap: "0.5rem",
-            opacity: 0.5,
-            filter: "grayscale(1)",
-            cursor: "not-allowed",
+            color: "#fff",
           }}
         >
-          <Users size={20} />
-          {t("coming_soon")}
+          <BarChart3 size={20} />
+          {t("vote")}
         </Button>
       </div>
     </div>

@@ -7,6 +7,7 @@ import { LandingHeader } from './LandingHeader';
 import { GameModeSelector } from './GameModeSelector';
 import { PointSelector } from './PointSelector';
 import { MatchmakingOverlay } from './MatchmakingOverlay';
+import { RankingScreen } from './RankingScreen';
 
 interface LandingPageProps {
   onStart: (mode: "1v1" | "2v2" | "multiplayer", points: 15 | 30, rivalName?: string, rivalId?: string, isCreator?: boolean, roomCode?: string, isReconnecting?: boolean) => void;
@@ -26,6 +27,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart, sessionId }) 
   const [isJoining, setIsJoining] = useState(false);
   const [inputCode, setInputCode] = useState("");
   const [isCreator, setIsCreator] = useState(false);
+  const [showRanking, setShowRanking] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }: any) => setUser(session?.user ?? null));
@@ -267,6 +269,23 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart, sessionId }) 
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  if (showRanking) {
+    return (
+      <div style={{
+        minHeight: '100vh',
+        background: 'transparent',
+        width: '100%',
+        overflowY: 'auto'
+      }}>
+        <RankingScreen
+          user={user}
+          handleAuth={handleAuth}
+          onBack={() => setShowRanking(false)}
+        />
+      </div>
+    );
+  }
+
   return (
     <div style={{
       minHeight: '100vh',
@@ -308,34 +327,80 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart, sessionId }) 
         <Globe size={20} />
       </button>
 
-      {/* Music Button - Top Right */}
-      <a
-        href="https://youtu.be/bqT0dq9SSZo"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="btn-hover-dark"
-        style={{
-          position: 'absolute',
-          top: '1.5rem',
-          right: '1.5rem',
-          background: 'rgba(255, 255, 255, 0.1)',
-          border: '1px solid rgba(255, 255, 255, 0.2)',
-          color: 'white',
-          height: '40px',
-          width: '40px',
-          borderRadius: '50%',
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          backdropFilter: 'blur(12px)',
-          zIndex: 1000,
-          textDecoration: 'none'
-        }}
-        title="Music"
-      >
-        <Music size={20} />
-      </a>
+      {/* Utility buttons column (Top Right) */}
+      <div style={{
+        position: 'absolute',
+        top: '1.5rem',
+        right: '1.5rem',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '0.75rem',
+        zIndex: 1000
+      }}>
+        {/* Music Button */}
+        <a
+          href="https://youtu.be/KqF3di6NiYY"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="btn-hover-dark"
+          style={{
+            background: 'rgba(255, 255, 255, 0.1)',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            color: 'white',
+            height: '40px',
+            width: '40px',
+            borderRadius: '50%',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backdropFilter: 'blur(12px)',
+            textDecoration: 'none'
+          }}
+          title="Music"
+        >
+          <Music size={20} />
+        </a>
+
+        {/* Instagram Button (Hidden for now) */}
+        {/*
+        <a
+          href="https://instagram.com/trucomundial"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="btn-hover-dark"
+          style={{
+            background: 'rgba(255, 255, 255, 0.1)',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            color: 'white',
+            height: '40px',
+            width: '40px',
+            borderRadius: '50%',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backdropFilter: 'blur(12px)'
+          }}
+          title="Instagram"
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+          </svg>
+        </a>
+        */}
+      </div>
       
       {/* Auth Button - Way Up Top & Centered */}
       <button
@@ -411,6 +476,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart, sessionId }) 
           <GameModeSelector
             selectedMode={selectedMode || "multiplayer"}
             onSelect={(mode) => {
+              if ((mode as string) === "ranking") {
+                setShowRanking(true);
+                return;
+              }
               if (mode === "multiplayer" && !user) {
                 handleAuth(); // Triggers the Google login
                 return;
@@ -450,8 +519,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart, sessionId }) 
           fontWeight: 800,
           letterSpacing: '0.05em',
           zIndex: 1000,
-          textTransform: 'uppercase'
+          textTransform: 'uppercase',
+          transition: 'all 0.25s ease'
         }}
+        title="Twitch"
       >
         <svg
           width="16"

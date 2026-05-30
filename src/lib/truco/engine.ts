@@ -3,7 +3,7 @@ import type { PlayedCard, PlayerRole } from "./types";
 
 export const calculateEnvido = (hand: Card[]) => {
   if (!hand || hand.length === 0) return 0;
-  
+
   let bestScore = Math.max(...hand.map(c => c.env || 0));
 
   // Check all possible pairs for matches
@@ -11,7 +11,7 @@ export const calculateEnvido = (hand: Card[]) => {
     for (let j = i + 1; j < hand.length; j++) {
       const c1 = hand[i];
       const c2 = hand[j];
-      
+
       if (c1.country === c2.country || c1.club === c2.club) {
         // User requested to remove the +20 base bonus
         const pairScore = (c1.env || 0) + (c2.env || 0);
@@ -24,14 +24,14 @@ export const calculateEnvido = (hand: Card[]) => {
 };
 
 export const getCardValue = (card: Card): number => {
-  // Mucho Mundial uses 'power' where LOWER is BETTER.
+  // Truco Mundial uses 'power' where LOWER is BETTER.
   // We return a value where HIGHER is BETTER for easier comparison.
   return 100 - card.power;
 };
 
 export const determineWinner = (playedCards: PlayedCard[]): PlayerRole | "draw" => {
   if (playedCards.length === 0) return "draw";
-  
+
   let bestValue = -1;
   let winners: PlayedCard[] = [];
 

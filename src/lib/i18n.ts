@@ -8,7 +8,7 @@ const resources = {
   en: {
     translation: {
       // Landing Page
-      "title": "MUCHO MUNDIAL",
+      "title": "TRUCO MUNDIAL",
       "subtitle": "The Argentine classic, now with World Cup stickers.",
       "login": "Log In",
       "logout": "Log Out",
@@ -89,6 +89,8 @@ const resources = {
       "play_online": "PLAY ONLINE (1 VS 1)",
       "vs_cpu": "VS CPU",
       "coming_soon": "COMING SOON",
+      "tournaments": "TOURNAMENTS",
+      "vote": "VOTE",
       "session_desktop": "Logged in as: ",
       "session_mobile": "Session of: ",
       "classic": "CLASSIC",
@@ -148,7 +150,7 @@ const resources = {
   },
   es: {
     translation: {
-      "title": "MUCHO MUNDIAL",
+      "title": "TRUCO MUNDIAL",
       "subtitle": "El clásico argentino, ahora con las figuritas del mundial.",
       "login": "Iniciar Sesión",
       "logout": "Cerrar Sesión",
@@ -223,6 +225,8 @@ const resources = {
       "play_online": "JUGAR ONLINE (1 VS 1)",
       "vs_cpu": "VS CPU",
       "coming_soon": "PRÓXIMAMENTE",
+      "tournaments": "TORNEOS",
+      "vote": "VOTAR",
       "session_desktop": "Sesión iniciada como: ",
       "session_mobile": "Sesión de: ",
       "classic": "CLÁSICA",
