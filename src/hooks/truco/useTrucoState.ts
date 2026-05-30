@@ -19,6 +19,7 @@ export const useTrucoState = () => {
   
   const [handWinners, setHandWinners] = useState<any[]>([]);
   const [isRoundEnding, setIsRoundEnding] = useState(false);
+  const [playerFolded, setPlayerFolded] = useState(false);
   const [isCooldown, setIsCooldown] = useState(false);
   const [isGameStarting, setIsGameStarting] = useState(false);
   const [showCountdown, setShowCountdown] = useState(false);
@@ -63,6 +64,7 @@ export const useTrucoState = () => {
     suspendedTruco, setSuspendedTruco,
     handWinners, setHandWinners,
     isRoundEnding, setIsRoundEnding,
+    playerFolded, setPlayerFolded,
     isCooldown, setIsCooldown,
     isGameStarting, setIsGameStarting,
     showCountdown, setShowCountdown,

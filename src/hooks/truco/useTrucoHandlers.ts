@@ -5,13 +5,16 @@ import i18n from "../../lib/i18n";
 
 export const useTrucoHandlers = (state: any, logic: any) => {
   const {
-    setPlayerHand, setPlayedCards, setTrucoState, setEnvidoState, setPendingAction, setSuspendedTruco, setIsRoundEnding, setIsCooldown, setActiveCall,
+    setPlayerHand, setPlayedCards, setTrucoState, setEnvidoState, setPendingAction, setSuspendedTruco, setIsRoundEnding, setIsCooldown, setActiveCall, setPlayerFolded,
     isRoundEnding, isCooldown, pendingAction, trucoState, envidoState, suspendedTruco, gameMode, isHost
   } = state;
   const { triggerCall, addPoints, resetRound, resolveEnvido } = logic;
 
   const handleMazo = useCallback((remote: boolean = false) => {
     const win = remote ? "player" : "cpu";
+    if (!remote) {
+      setPlayerFolded(true);
+    }
     triggerCall(i18n.t("me_voy_al_mazo"), remote ? "var(--color-secondary)" : "var(--color-accent)");
     const pts = trucoState.status === "accepted"
       ? (trucoState.level + 1)
@@ -21,7 +24,7 @@ export const useTrucoHandlers = (state: any, logic: any) => {
     if (gameMode !== "multiplayer" || isHost) {
       setTimeout(() => resetRound(), 3500);
     }
-  }, [trucoState.level, envidoState.status, triggerCall, addPoints, setIsRoundEnding, resetRound, isHost, gameMode]);
+  }, [trucoState.level, envidoState.status, triggerCall, addPoints, setIsRoundEnding, resetRound, isHost, gameMode, setPlayerFolded]);
 
   const playedCardsTracker = useRef(new Set<string>());
 

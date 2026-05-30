@@ -158,3 +158,34 @@
   border-radius: 12px;
   pointer-events: none;
 }
+
+/* Mobile responsive enhancements for buttons and sticker cards */
+@media (max-width: 768px) {
+  .sticker {
+    border-width: 2.5px !important;
+    border-radius: 8px !important;
+  }
+
+  /* Reduce padding and slightly limit button widths on mobile to keep layouts compact */
+  .game-actions .btn-urban,
+  .pending-challenge .btn-urban {
+    padding: 0.4rem 0.8rem !important;
+    font-size: 0.75rem !important;
+    max-width: 120px !important;
+    border-width: 2px !important;
+    box-shadow: 2px 2px 0px #000 !important;
+  }
+
+  /* Make sure response option buttons fit nicely side-by-side */
+  .pending-challenge > div > .btn-urban {
+    max-width: 100px !important;
+    min-width: 85px !important;
+  }
+
+  /* Allow "EL ENVIDO ESTÁ PRIMERO" button to be wider and wrap naturally */
+  .pending-challenge > div:first-child > .btn-urban {
+    max-width: 280px !important;
+    white-space: normal !important;
+    font-size: 0.85rem !important;
+  }
+}

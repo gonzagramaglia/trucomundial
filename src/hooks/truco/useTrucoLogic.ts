@@ -9,7 +9,7 @@ export const useTrucoLogic = (state: any) => {
     setScore, setTrucoState, setEnvidoState, setPendingAction, setSuspendedTruco,
     setHandWinners, setIsRoundEnding, setIsCooldown, setStarterIdx, setDealerIdx,
     setPlayerHand, setCpuHandCount, setPlayedCards, setHandWinningCardIds, setRoundWinningCardId,
-    setActiveCall, setScorePopups,
+    setActiveCall, setScorePopups, setPlayerFolded,
     playerHandRef, cpuHandRef, starterIdx, gameMode, lastProcessedHandRef, resetLockRef
   } = state;
 
@@ -56,6 +56,7 @@ export const useTrucoLogic = (state: any) => {
     setHandWinningCardIds([]);
     setRoundWinningCardId(null);
     setSuspendedTruco(null);
+    setPlayerFolded(false);
     lastProcessedHandRef.current = -1;
     
     setPlayerHand(data.playerHand);
@@ -65,7 +66,7 @@ export const useTrucoLogic = (state: any) => {
     setDealerIdx((data.starter + (gameMode === "2v2" ? 3 : 1)) % (gameMode === "2v2" ? 4 : 2));
     
     setTimeout(() => { resetLockRef.current = false; }, 800);
-  }, [gameMode, setTrucoState, setEnvidoState, setPendingAction, setHandWinners, setPlayedCards, setHandWinningCardIds, setRoundWinningCardId, setSuspendedTruco, setPlayerHand, setCpuHandCount, setStarterIdx, setDealerIdx, setIsRoundEnding, setIsCooldown, cpuHandRef, lastProcessedHandRef, resetLockRef]);
+  }, [gameMode, setTrucoState, setEnvidoState, setPendingAction, setHandWinners, setPlayedCards, setHandWinningCardIds, setRoundWinningCardId, setSuspendedTruco, setPlayerHand, setCpuHandCount, setStarterIdx, setDealerIdx, setIsRoundEnding, setIsCooldown, setPlayerFolded, cpuHandRef, lastProcessedHandRef, resetLockRef]);
 
   const resetRound = useCallback((remoteHands?: { player: Card[], cpu: Card[] }, forcedStarter?: number) => {
     if (resetLockRef.current) return;

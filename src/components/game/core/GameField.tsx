@@ -5,6 +5,7 @@ import { FieldSlots } from './FieldSlots';
 import { PlayedCard } from './PlayedCard';
 import { CallOverlay } from '../controls/CallOverlay';
 import { RoundCountdown } from '../modals/RoundCountdown';
+import { useTranslation } from 'react-i18next';
 
 interface GameFieldProps {
   gameMode: GameMode;
@@ -21,6 +22,8 @@ interface GameFieldProps {
   isRoundEnding: boolean;
   isGameStarting: boolean;
   whoseTurn: PlayerRole | null;
+  onHandleMazo?: () => void;
+  isMazoDisabled?: boolean;
 }
 
 export const GameField: React.FC<GameFieldProps> = ({
@@ -33,8 +36,11 @@ export const GameField: React.FC<GameFieldProps> = ({
   gameState,
   isRoundEnding,
   isGameStarting,
-  whoseTurn
+  whoseTurn,
+  onHandleMazo,
+  isMazoDisabled = false
 }) => {
+  const { t } = useTranslation();
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [isCardDragging, setIsCardDragging] = useState(false);
   const [deckPosition, setDeckPosition] = useState<"left" | "right">("right");
@@ -65,10 +71,10 @@ export const GameField: React.FC<GameFieldProps> = ({
   const is1v1 = gameMode === "1v1" || gameMode === "multiplayer";
 
   // Constantes de posicionamiento SINCRONIZADAS con FieldSlots y variables.css
-  const widthVal = isMobile ? 105 : 110;
-  const heightVal = isMobile ? 135 : 150;
+  const widthVal = isMobile ? 92 : 110;
+  const heightVal = isMobile ? 125 : 150;
   const gapXVal = isMobile ? 10 : 30;
-  const gapYVal = isMobile ? 40 : 45;
+  const gapYVal = isMobile ? 24 : 30;
 
   // slotWidth + gap
   const xStep = widthVal + gapXVal; 
@@ -79,7 +85,7 @@ export const GameField: React.FC<GameFieldProps> = ({
     <div className="game-field" style={{
       width: "100%",
       maxWidth: gameMode === "2v2" ? "1100px" : "800px",
-      height: isMobile ? (gameMode === "2v2" ? "500px" : "420px") : (gameMode === "2v2" ? "600px" : "440px"),
+      height: isMobile ? (gameMode === "2v2" ? "420px" : "310px") : (gameMode === "2v2" ? "600px" : "400px"),
       position: "relative",
       margin: "0 auto",
       display: "flex",
@@ -119,7 +125,7 @@ export const GameField: React.FC<GameFieldProps> = ({
         </h2>
       </div>
 
-      {/* Visual Deck of Cards (Mazo) - Animates left/right based on whose turn it is at start of round */}
+      {/* Visual Deck of Cards (Mazo) Container - Animates left/right based on whose turn it is at start of round */}
       <motion.div
         animate={{
           left: deckPosition === "left" ? (isMobile ? "12px" : "24px") : (isMobile ? "calc(100% - 12px - 45px)" : "calc(100% - 24px - 65px)"),
@@ -133,30 +139,78 @@ export const GameField: React.FC<GameFieldProps> = ({
           transform: 'translateY(-50%)',
           width: isMobile ? '45px' : '65px',
           height: isMobile ? '60px' : '90px',
-          zIndex: 2,
-          pointerEvents: 'none',
+          zIndex: 1000,
+          pointerEvents: 'auto',
           userSelect: 'none'
         }}
       >
-        {[0, 1, 2].map((i) => (
-          <div
-            key={`deck-card-${i}`}
+        {/* The visual card stack */}
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          width: '100%',
+          height: '100%',
+          pointerEvents: 'none'
+        }}>
+          {[0, 1, 2].map((i) => (
+            <div
+              key={`deck-card-${i}`}
+              style={{
+                width: '100%',
+                height: '100%',
+                backgroundImage: "url('/card-back.png')",
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                borderRadius: isMobile ? '4px' : '8px',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                boxShadow: '0 4px 10px rgba(0, 0, 0, 0.5)',
+                position: 'absolute',
+                top: `${i * -3}px`,
+                left: `${i * -2}px`,
+                transform: `rotate(${i * 1.5}deg)`,
+              }}
+            />
+          ))}
+        </div>
+
+        {/* "Me voy al mazo" Button - Rendered directly below the deck, moves in unison! */}
+        {onHandleMazo && (
+          <button
+            disabled={isMazoDisabled}
+            onClick={onHandleMazo}
+            className="btn-hover-dark"
             style={{
-              width: '100%',
-              height: '100%',
-              backgroundImage: "url('/card-back.png')",
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              borderRadius: isMobile ? '4px' : '8px',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              boxShadow: '0 4px 10px rgba(0, 0, 0, 0.5)',
               position: 'absolute',
-              top: `${i * -3}px`,
-              left: `${i * -2}px`,
-              transform: `rotate(${i * 1.5}deg)`,
+              top: isMobile ? '68px' : '100px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              width: isMobile ? '70px' : '100px',
+              fontSize: isMobile ? "0.5rem" : "0.7rem",
+              padding: isMobile ? "4px 2px" : "8px 4px",
+              background: '#ffffff',
+              color: '#000000',
+              border: '2.5px solid #000',
+              boxShadow: '3px 3px 0px #000',
+              fontWeight: 950,
+              borderRadius: '8px',
+              cursor: isMazoDisabled ? 'default' : 'pointer',
+              opacity: isMazoDisabled ? 0.3 : 1.0,
+              zIndex: 10,
+              textTransform: 'uppercase',
+              textAlign: 'center',
+              lineHeight: 1.1,
+              whiteSpace: 'normal',
+              wordWrap: 'break-word',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transition: 'all 0.15s ease'
             }}
-          />
-        ))}
+            title={t("me_voy_al_mazo")}
+          >
+            {isMobile ? "MAZO" : "IRSE AL MAZO"}
+          </button>
+        )}
       </motion.div>
 
       <CallOverlay activeCall={activeCall} gameState={gameState} />
@@ -193,13 +247,13 @@ export const GameField: React.FC<GameFieldProps> = ({
             yPos = isPlayer ? yOffset : -yOffset;
           } else {
             const handIdx = Math.floor(idx / 4);
-            const centerCardSpacing = isMobile ? 90 : 140;
-            const lateralCardSpacing = isMobile ? 25 : 35;
+            const centerCardSpacing = isMobile ? 80 : 140;
+            const lateralCardSpacing = isMobile ? 24 : 35;
             
-            if (isPlayer) { xPos = (handIdx - 1) * centerCardSpacing; yPos = isMobile ? 180 : 240; }
-            else if (isPartner) { xPos = (handIdx - 1) * centerCardSpacing; yPos = isMobile ? -180 : -240; }
-            else if (isCpu) { xPos = isMobile ? -180 : -280; yPos = (handIdx - 1) * lateralCardSpacing; rotate = 90; }
-            else if (isCpu2) { xPos = isMobile ? 180 : 280; yPos = (handIdx - 1) * lateralCardSpacing; rotate = -90; }
+            if (isPlayer) { xPos = (handIdx - 1) * centerCardSpacing; yPos = isMobile ? 145 : 240; }
+            else if (isPartner) { xPos = (handIdx - 1) * centerCardSpacing; yPos = isMobile ? -145 : -240; }
+            else if (isCpu) { xPos = isMobile ? -145 : -280; yPos = (handIdx - 1) * lateralCardSpacing; rotate = 90; }
+            else if (isCpu2) { xPos = isMobile ? 145 : 280; yPos = (handIdx - 1) * lateralCardSpacing; rotate = -90; }
           }
 
           return (

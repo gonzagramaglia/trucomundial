@@ -2,8 +2,6 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GameActions } from './GameActions';
 import { Sticker } from '../../shared/Sticker';
-import { Button } from '../../ui/Button';
-import { useTranslation } from 'react-i18next';
 import type { GameMode, PlayerRole, EnvidoState, TrucoState, PlayedCard } from '../../../lib/truco/types';
 
 interface GameBottomBarProps {
@@ -17,18 +15,17 @@ interface GameBottomBarProps {
   isBusy: boolean;
   playerHand: any[];
   onPlayCard: (card: any) => void;
-  onHandleMazo: () => void;
   onHandleResponse: (accept: boolean) => void;
   onHandleCall: (type: any, level: number, caller: PlayerRole) => void;
+  playerFolded?: boolean;
 }
 
 export const GameBottomBar: React.FC<GameBottomBarProps> = ({
   pendingAction, envidoState, trucoState, playedCards, gameMode,
   whoseTurn, isRoundEnding, isBusy, playerHand,
-  onPlayCard, onHandleMazo, onHandleResponse, onHandleCall
+  onPlayCard, onHandleResponse, onHandleCall,
+  playerFolded = false
 }) => {
-  const { t } = useTranslation();
-  const isHeroTeamTurn = whoseTurn === "player" || whoseTurn === "partner";
   const isDraggingRef = React.useRef(false);
   const [isMobile, setIsMobile] = React.useState(typeof window !== 'undefined' && window.innerWidth < 768);
 
@@ -39,13 +36,13 @@ export const GameBottomBar: React.FC<GameBottomBarProps> = ({
   }, []);
 
   return (
-    <div style={{
+    <div className="game-bottom-bar" style={{
       display: "flex",
       flexDirection: "column",
       alignItems: "center",
-      gap: isMobile ? "1.5rem" : "0.75rem",
+      gap: isMobile ? "1rem" : "1.75rem",
       width: "100%",
-      padding: isMobile ? "1rem 0" : "0.25rem 0",
+      padding: isMobile ? "0.25rem 0 1rem 0" : "0.75rem 0",
       zIndex: 1000
     }}>
       {/* Truco/Envido Actions */}
@@ -61,7 +58,7 @@ export const GameBottomBar: React.FC<GameBottomBarProps> = ({
         hideMazo={true}
         handleResponse={onHandleResponse}
         handleCall={onHandleCall}
-        handleMazo={onHandleMazo}
+        handleMazo={() => {}}
         triggerCall={() => {}}
       />
 
@@ -131,6 +128,7 @@ export const GameBottomBar: React.FC<GameBottomBarProps> = ({
                   <Sticker
                     card={card}
                     disabled={isCardDisabled}
+                    showBack={playerFolded}
                     onClick={() => {
                       if (!isDraggingRef.current) {
                         onPlayCard(card);
@@ -142,27 +140,6 @@ export const GameBottomBar: React.FC<GameBottomBarProps> = ({
             })
           )}
         </AnimatePresence>
-      </div>
-
-      {/* Mazo Button at the very bottom */}
-      <div style={{ marginBottom: isMobile ? "3rem" : "0.5rem" }}>
-        <Button
-          variant="white"
-          disabled={!isHeroTeamTurn || isBusy || pendingAction !== null}
-          onClick={() => onHandleMazo()}
-          style={{ 
-            minWidth: '130px', 
-            fontSize: '0.9rem', 
-            padding: '0.6rem 1.5rem',
-            background: '#ffffff',
-            color: '#000000',
-            border: '3px solid #000',
-            boxShadow: '4px 4px 0px #000',
-            fontWeight: 900
-          }}
-        >
-          {t("me_voy_al_mazo")}
-        </Button>
       </div>
     </div>
   );

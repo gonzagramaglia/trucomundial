@@ -159,9 +159,18 @@
   }
 
   .turn-pill-sticky {
-    position: sticky;
-    top: 4.5rem;
+    position: relative;
+    top: auto;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
     z-index: 200;
+  }
+  .points-indicator-fixed {
+    left: 50% !important;
+    right: auto !important;
+    bottom: 0.5rem !important;
+    transform: translateX(-50%) !important;
+    z-index: 2000;
   }
   .player-hand-container { min-height: 120px; }
   .game-mode-secondary-row { flex-direction: column !important; }

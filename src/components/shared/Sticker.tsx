@@ -11,6 +11,7 @@ interface StickerProps {
   heroMode?: boolean;
   winnerMode?: boolean;
   hideEnv?: boolean;
+  showBack?: boolean;
 }
 
 export const Sticker: React.FC<StickerProps> = ({
@@ -20,12 +21,32 @@ export const Sticker: React.FC<StickerProps> = ({
   heroMode = false,
   winnerMode = false,
   hideEnv = false,
+  showBack = false,
 }) => {
   const [isHovered, setIsHovered] = useState(false);
 
   const handleClick = () => {
     if (!disabled && onClick) onClick();
   };
+
+  if (showBack) {
+    return (
+      <motion.div
+        className="sticker"
+        style={{
+          cursor: "default",
+          backgroundImage: "url('/card-back.png')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          border: '1.5px solid rgba(255, 255, 255, 0.3)',
+          boxShadow: '0 4px 10px rgba(0, 0, 0, 0.5)',
+          opacity: 0.8
+        }}
+      >
+        <div className="sticker-glitter" />
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div

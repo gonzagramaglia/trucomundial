@@ -50,6 +50,7 @@ interface TrucoGameViewProps {
   onHandleMazo: () => void;
   onCloseExit: () => void;
   onConfirmExit: () => void;
+  playerFolded: boolean;
 }
 
 export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
@@ -59,7 +60,7 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
   showCountdown, roundWinningCardId, cpuPartnerHandRef, showExitModal,
   roomCode, isRivalConnected = true, isSelfConnected = true,
   onExitRequest, onRestartGame, onPlayCard, onHandleCall, onHandleResponse, onHandleMazo,
-  onCloseExit, onConfirmExit
+  onCloseExit, onConfirmExit, playerFolded
 }) => {
   const { t } = useTranslation();
   const [showMobileHelp, setShowMobileHelp] = useState(false);
@@ -171,7 +172,7 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
         gap: "0.25rem",
         width: "100%",
         maxWidth: gameMode === "2v2" ? "1200px" : "860px",
-        marginTop: isMobile ? "2.5rem" : "0.5rem"
+        marginTop: isMobile ? "4.5rem" : "0.5rem"
       }}>
         <CPUHands
           gameMode={gameMode}
@@ -224,6 +225,8 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
           isRoundEnding={isRoundEnding}
           isGameStarting={showCountdown}
           whoseTurn={whoseTurn}
+          onHandleMazo={onHandleMazo}
+          isMazoDisabled={!(whoseTurn === "player" || whoseTurn === "partner") || isBusy || pendingAction !== null}
         />
 
         <GameBottomBar
@@ -237,9 +240,9 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
           isBusy={isBusy}
           playerHand={playerHand}
           onPlayCard={onPlayCard}
-          onHandleMazo={onHandleMazo}
           onHandleResponse={onHandleResponse}
           onHandleCall={onHandleCall}
+          playerFolded={playerFolded}
         />
       </div>
 

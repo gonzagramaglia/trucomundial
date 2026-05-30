@@ -23,7 +23,7 @@
   --sticker-width: 110px;
   --sticker-height: 150px;
   --sticker-gap-x: 30px;
-  --sticker-gap-y: 45px;
+  --sticker-gap-y: 30px;
 }
 
 @media (max-width: 1024px) {
@@ -38,9 +38,9 @@
     --fs-title: 4.5rem;
     --fs-subtitle: 1.1rem;
 
-    --sticker-width: 105px;
-    --sticker-height: 135px;
+    --sticker-width: 92px;
+    --sticker-height: 125px;
     --sticker-gap-x: 10px;
-    --sticker-gap-y: 40px;
+    --sticker-gap-y: 24px;
   }
 }
