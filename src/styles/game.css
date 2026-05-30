@@ -4,11 +4,17 @@
 }
 
 .game-actions-wrapper {
-  min-height: 120px;
+  min-height: 80px;
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
+}
+
+@media (max-width: 768px) {
+  .game-actions-wrapper {
+    min-height: 120px;
+  }
 }
 
 /* Responsive Scoreboard */

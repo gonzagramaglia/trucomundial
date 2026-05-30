@@ -98,8 +98,8 @@
 
 /* Cards & Stickers */
 .sticker {
-  width: 140px;
-  height: 190px;
+  width: var(--sticker-width);
+  height: var(--sticker-height);
   background-image: url("/card-loading.png");
   background-size: cover;
   background-position: center;
@@ -151,8 +151,8 @@
 }
 
 .card-silhouette {
-  width: 140px;
-  height: 190px;
+  width: var(--sticker-width);
+  height: var(--sticker-height);
   border: 2px dashed rgba(255, 255, 255, 0.4);
   background: rgba(255, 255, 255, 0.02);
   border-radius: 12px;

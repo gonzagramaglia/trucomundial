@@ -30,15 +30,22 @@ export const GameBottomBar: React.FC<GameBottomBarProps> = ({
   const { t } = useTranslation();
   const isHeroTeamTurn = whoseTurn === "player" || whoseTurn === "partner";
   const isDraggingRef = React.useRef(false);
+  const [isMobile, setIsMobile] = React.useState(typeof window !== 'undefined' && window.innerWidth < 768);
+
+  React.useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   return (
     <div style={{
       display: "flex",
       flexDirection: "column",
       alignItems: "center",
-      gap: "1.5rem",
+      gap: isMobile ? "1.5rem" : "0.75rem",
       width: "100%",
-      padding: "1rem 0",
+      padding: isMobile ? "1rem 0" : "0.25rem 0",
       zIndex: 1000
     }}>
       {/* Truco/Envido Actions */}
@@ -138,7 +145,7 @@ export const GameBottomBar: React.FC<GameBottomBarProps> = ({
       </div>
 
       {/* Mazo Button at the very bottom */}
-      <div style={{ marginBottom: "3rem" }}>
+      <div style={{ marginBottom: isMobile ? "3rem" : "0.5rem" }}>
         <Button
           variant="white"
           disabled={!isHeroTeamTurn || isBusy || pendingAction !== null}

@@ -64,17 +64,22 @@ export const GameField: React.FC<GameFieldProps> = ({
 
   const is1v1 = gameMode === "1v1" || gameMode === "multiplayer";
 
-  // Constantes de posicionamiento SINCRONIZADAS con FieldSlots
+  // Constantes de posicionamiento SINCRONIZADAS con FieldSlots y variables.css
+  const widthVal = isMobile ? 105 : 110;
+  const heightVal = isMobile ? 135 : 150;
+  const gapXVal = isMobile ? 10 : 30;
+  const gapYVal = isMobile ? 40 : 45;
+
   // slotWidth + gap
-  const xStep = isMobile ? (105 + 10) : (140 + 45); 
+  const xStep = widthVal + gapXVal; 
   // (verticalGap + slotHeight) / 2
-  const yOffset = isMobile ? (40 + 135) / 2 : (70 + 190) / 2;
+  const yOffset = (gapYVal + heightVal) / 2;
 
   return (
     <div className="game-field" style={{
       width: "100%",
       maxWidth: gameMode === "2v2" ? "1100px" : "800px",
-      height: isMobile ? (gameMode === "2v2" ? "500px" : "420px") : (gameMode === "2v2" ? "750px" : "550px"),
+      height: isMobile ? (gameMode === "2v2" ? "500px" : "420px") : (gameMode === "2v2" ? "600px" : "440px"),
       position: "relative",
       margin: "0 auto",
       display: "flex",
@@ -188,13 +193,13 @@ export const GameField: React.FC<GameFieldProps> = ({
             yPos = isPlayer ? yOffset : -yOffset;
           } else {
             const handIdx = Math.floor(idx / 4);
-            const centerCardSpacing = isMobile ? 90 : 185;
-            const lateralCardSpacing = isMobile ? 25 : 45;
+            const centerCardSpacing = isMobile ? 90 : 140;
+            const lateralCardSpacing = isMobile ? 25 : 35;
             
-            if (isPlayer) { xPos = (handIdx - 1) * centerCardSpacing; yPos = isMobile ? 180 : 320; }
-            else if (isPartner) { xPos = (handIdx - 1) * centerCardSpacing; yPos = isMobile ? -180 : -320; }
-            else if (isCpu) { xPos = isMobile ? -180 : -375; yPos = (handIdx - 1) * lateralCardSpacing; rotate = 90; }
-            else if (isCpu2) { xPos = isMobile ? 180 : 375; yPos = (handIdx - 1) * lateralCardSpacing; rotate = -90; }
+            if (isPlayer) { xPos = (handIdx - 1) * centerCardSpacing; yPos = isMobile ? 180 : 240; }
+            else if (isPartner) { xPos = (handIdx - 1) * centerCardSpacing; yPos = isMobile ? -180 : -240; }
+            else if (isCpu) { xPos = isMobile ? -180 : -280; yPos = (handIdx - 1) * lateralCardSpacing; rotate = 90; }
+            else if (isCpu2) { xPos = isMobile ? 180 : 280; yPos = (handIdx - 1) * lateralCardSpacing; rotate = -90; }
           }
 
           return (

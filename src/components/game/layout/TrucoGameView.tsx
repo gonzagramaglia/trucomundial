@@ -64,6 +64,13 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
   const { t } = useTranslation();
   const [showMobileHelp, setShowMobileHelp] = useState(false);
   const [helpTab, setHelpTab] = useState<'rules' | 'ranking'>('rules');
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' && window.innerWidth < 768);
+
+  React.useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   return (
     <motion.div
@@ -164,7 +171,7 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
         gap: "0.25rem",
         width: "100%",
         maxWidth: gameMode === "2v2" ? "1200px" : "860px",
-        marginTop: "2.5rem"
+        marginTop: isMobile ? "2.5rem" : "0.5rem"
       }}>
         <CPUHands
           gameMode={gameMode}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import type { GameMode } from '../../../lib/truco/types';
 
 interface FieldSlotsProps {
@@ -6,21 +6,14 @@ interface FieldSlotsProps {
 }
 
 export const FieldSlots: React.FC<FieldSlotsProps> = ({ gameMode }) => {
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-
-  useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   const is1v1 = gameMode === "1v1" || gameMode === "multiplayer";
   
   // Constantes de diseño sincronizadas con GameField
-  const slotWidth = isMobile ? "105px" : "140px";
-  const slotHeight = isMobile ? "135px" : "190px";
-  const horizontalGap = isMobile ? "10px" : "45px";
-  const verticalGap = isMobile ? "40px" : "70px";
+  const slotWidth = "var(--sticker-width)";
+  const slotHeight = "var(--sticker-height)";
+  const horizontalGap = "var(--sticker-gap-x)";
+  const verticalGap = "var(--sticker-gap-y)";
 
   return (
     <>
