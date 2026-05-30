@@ -83,10 +83,9 @@ export const GameModeSelector: React.FC<GameModeSelectorProps> = ({ selectedMode
           onClick={() => onSelect("ranking" as any)}
           className="btn-hover-dark"
           style={{
-            ...getButtonStyle("2v2", "#9146ff"),
+            ...getButtonStyle("2v2", "#a855f7"),
             width: "100%",
             gap: "0.5rem",
-            color: "#fff",
           }}
         >
           <BarChart3 size={20} />
