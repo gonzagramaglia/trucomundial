@@ -272,10 +272,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart, sessionId }) 
   if (showRanking) {
     return (
       <div style={{
-        minHeight: '100vh',
+        position: 'fixed',
+        inset: 0,
         background: 'transparent',
         width: '100%',
-        overflowY: 'auto'
+        height: '100vh',
+        overflowY: 'auto',
+        zIndex: 1500
       }}>
         <RankingScreen
           user={user}

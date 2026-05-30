@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, Save, Plus, Minus, Search, Trophy, Lock, RefreshCw } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -17,13 +17,13 @@ const getTraditionalEquivalent = (power: number): string => {
     case 1: return "1 de Espadas (Macho)";
     case 2: return "1 de Bastos (Hembra)";
     case 3: return "7 de Espadas";
-    case 4: return "7 de Oros";
+    case 4: return "7 de Oro";
     case 5: return "3 de Espadas";
     case 6: return "3 de Bastos";
     case 7: return "2 de Espadas";
     case 8: return "2 de Bastos";
     case 9: return "1 de Copas (Ancho Falso)";
-    case 10: return "1 de Oros (Ancho Falso)";
+    case 10: return "1 de Oro (Ancho Falso)";
     case 11: return "12 de Espadas";
     case 12: return "12 de Bastos";
     case 13: return "11 de Espadas";
@@ -60,6 +60,8 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
   const [dbVotesData, setDbVotesData] = useState<any[]>([]);
   const [myVotes, setMyVotes] = useState<Record<string, number>>({});
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [isOrderChanging, setIsOrderChanging] = useState(false);
+  const lastOrderRef = useRef<string>("");
 
   const LOCAL_STORAGE_KEY = `trucomundial-uservotes-${user?.id || 'anonymous'}`;
 
@@ -216,6 +218,26 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
     })
     .sort((a, b) => b.totalVotes - a.totalVotes);
 
+  const currentOrder = sortedPlayers.map(p => p.id).join(',');
+
+  useEffect(() => {
+    if (!lastOrderRef.current) {
+      lastOrderRef.current = currentOrder;
+      return;
+    }
+
+    if (currentOrder !== lastOrderRef.current) {
+      setIsOrderChanging(true);
+      lastOrderRef.current = currentOrder;
+
+      const timer = setTimeout(() => {
+        setIsOrderChanging(false);
+      }, 1000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [currentOrder]);
+
   // Filter players based on search query
   const filteredPlayers = sortedPlayers.filter(p => {
     const q = search.toLowerCase();
@@ -322,8 +344,11 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
             initial={{ y: -30, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             style={{
-              background: 'rgba(0, 242, 255, 0.05)',
-              border: '2px solid rgba(0, 242, 255, 0.25)',
+              position: 'sticky',
+              top: '1rem',
+              zIndex: 100,
+              background: 'rgba(15, 10, 25, 0.9)',
+              border: '2px solid rgba(168, 85, 247, 0.25)',
               borderRadius: '2rem',
               padding: '1.25rem 2rem',
               marginBottom: '2rem',
@@ -332,13 +357,13 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
               alignItems: 'center',
               justifyContent: 'space-between',
               gap: '1.5rem',
-              boxShadow: '0 10px 30px rgba(0, 242, 255, 0.05), inset 0 0 20px rgba(0, 242, 255, 0.05)',
+              boxShadow: '0 10px 30px rgba(168, 85, 247, 0.05), inset 0 0 20px rgba(168, 85, 247, 0.05)',
               backdropFilter: 'blur(16px)'
             }}
           >
             <div style={{ flex: '1 1 300px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.9rem', fontWeight: 800 }}>
-                <span style={{ color: '#00f2ff', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <span style={{ color: '#a855f7', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <Trophy size={18} />
                   Tus Votos Distribuidos
                 </span>
@@ -354,8 +379,8 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
                   animate={{ width: `${(totalMyVotes / 100) * 100}%` }}
                   style={{
                     height: '100%',
-                    background: availableVotes === 0 ? 'linear-gradient(to right, #10b981, #059669)' : 'linear-gradient(to right, #00f2ff, #00b8d4)',
-                    boxShadow: availableVotes === 0 ? '0 0 8px rgba(16, 185, 129, 0.8)' : '0 0 8px rgba(0, 242, 255, 0.8)'
+                    background: availableVotes === 0 ? 'linear-gradient(to right, #10b981, #059669)' : 'linear-gradient(to right, #a855f7, #7c3aed)',
+                    boxShadow: availableVotes === 0 ? '0 0 8px rgba(16, 185, 129, 0.8)' : '0 0 8px rgba(168, 85, 247, 0.8)'
                   }}
                 />
               </div>
@@ -374,9 +399,9 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
                 disabled={saving}
                 className="btn-hover-dark"
                 style={{
-                  background: '#00f2ff',
+                  background: '#a855f7',
                   border: 'none',
-                  color: '#000',
+                  color: '#fff',
                   height: '48px',
                   borderRadius: '1.25rem',
                   padding: '0 2rem',
@@ -688,8 +713,8 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
                   top: '-15px',
                   left: '20px',
                   background: 'rgba(255, 255, 255, 0.15)',
-                  border: '1px solid rgba(255, 255, 255, 0.25)',
-                  color: '#fff',
+                  border: '1px solid rgba(255, 223, 0, 0.4)',
+                  color: '#ffdf00',
                   width: '36px',
                   height: '36px',
                   borderRadius: '50%',
@@ -710,15 +735,15 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
                   position: 'absolute',
                   top: '-15px',
                   right: '20px',
-                  background: player.myActiveVotes > 0 ? 'rgba(0, 242, 255, 0.2)' : 'rgba(255, 255, 255, 0.05)',
-                  border: player.myActiveVotes > 0 ? '1px solid #00f2ff' : '1px solid rgba(255, 255, 255, 0.1)',
-                  color: player.myActiveVotes > 0 ? '#00f2ff' : 'rgba(255,255,255,0.7)',
+                  background: player.myActiveVotes > 0 ? 'rgba(168, 85, 247, 0.2)' : 'rgba(255, 255, 255, 0.05)',
+                  border: player.myActiveVotes > 0 ? '1px solid #a855f7' : '1px solid rgba(255, 255, 255, 0.1)',
+                  color: player.myActiveVotes > 0 ? '#a855f7' : 'rgba(255,255,255,0.7)',
                   borderRadius: '1rem',
                   padding: '4px 12px',
                   fontSize: '0.8rem',
                   fontWeight: 900,
                   zIndex: 10,
-                  boxShadow: player.myActiveVotes > 0 ? '0 0 10px rgba(0, 242, 255, 0.3)' : 'none'
+                  boxShadow: player.myActiveVotes > 0 ? '0 0 10px rgba(168, 85, 247, 0.3)' : 'none'
                 }}>
                   ★ {player.totalVotes}
                 </div>
@@ -763,7 +788,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    background: 'rgba(0,0,0,0.2)',
+                    background: 'rgba(15, 10, 25, 0.6)',
                     border: '1px solid rgba(255,255,255,0.06)',
                     borderRadius: '1.25rem',
                     padding: '4px',
@@ -773,20 +798,20 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
                     {/* Subtract Vote */}
                     <button
                       onClick={() => handleSubVote(player.id)}
-                      disabled={player.myActiveVotes <= 0}
+                      disabled={player.myActiveVotes <= 0 || isOrderChanging}
                       style={{
                         background: 'transparent',
                         border: 'none',
-                        color: player.myActiveVotes > 0 ? '#ef4444' : 'rgba(255,255,255,0.15)',
+                        color: (player.myActiveVotes > 0 && !isOrderChanging) ? '#ffffff' : 'rgba(255,255,255,0.15)',
                         width: '38px',
                         height: '38px',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        cursor: player.myActiveVotes > 0 ? 'pointer' : 'default',
+                        cursor: (player.myActiveVotes > 0 && !isOrderChanging) ? 'pointer' : 'default',
                         borderRadius: '0.85rem'
                       }}
-                      className={player.myActiveVotes > 0 ? "btn-hover-dark" : ""}
+                      className={(player.myActiveVotes > 0 && !isOrderChanging) ? "btn-hover-dark" : ""}
                     >
                       <Minus size={18} />
                     </button>
@@ -797,7 +822,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
                       textAlign: 'center',
                       fontWeight: 950,
                       fontSize: '1rem',
-                      color: player.myActiveVotes > 0 ? '#00f2ff' : 'rgba(255,255,255,0.4)'
+                      color: player.myActiveVotes > 0 ? '#a855f7' : '#ffffff'
                     }}>
                       {player.myActiveVotes}
                     </div>
@@ -805,20 +830,20 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
                     {/* Add Vote */}
                     <button
                       onClick={() => handleAddVote(player.id)}
-                      disabled={availableVotes <= 0}
+                      disabled={availableVotes <= 0 || isOrderChanging}
                       style={{
                         background: 'transparent',
                         border: 'none',
-                        color: availableVotes > 0 ? '#10b981' : 'rgba(255,255,255,0.15)',
+                        color: (availableVotes > 0 && !isOrderChanging) ? '#a855f7' : 'rgba(255,255,255,0.15)',
                         width: '38px',
                         height: '38px',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        cursor: availableVotes > 0 ? 'pointer' : 'default',
+                        cursor: (availableVotes > 0 && !isOrderChanging) ? 'pointer' : 'default',
                         borderRadius: '0.85rem'
                       }}
-                      className={availableVotes > 0 ? "btn-hover-dark" : ""}
+                      className={(availableVotes > 0 && !isOrderChanging) ? "btn-hover-dark" : ""}
                     >
                       <Plus size={18} />
                     </button>
@@ -852,17 +877,17 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
           })}
         </div>
       )}
-      {/* Twitch Button - Way Down Bottom & Centered */}
+      {/* Twitch Button - Centered at the bottom of the page */}
       <a
         href="https://twitch.tv/muchomovimiento/videos"
         target="_blank"
         rel="noopener noreferrer"
         className="btn-hover-dark"
         style={{
-          position: 'fixed',
-          bottom: '1.5rem',
-          left: '50%',
-          transform: 'translateX(-50%)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          margin: '3rem auto 0 auto',
           background: 'rgba(145, 70, 255, 0.2)',
           backdropFilter: 'blur(12px)',
           border: '1px solid rgba(145, 70, 255, 0.3)',
@@ -871,13 +896,11 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
           padding: '0 1.25rem',
           borderRadius: '1rem',
           textDecoration: 'none',
-          display: 'flex',
-          alignItems: 'center',
           gap: '0.6rem',
           fontSize: '0.75rem',
           fontWeight: 800,
           letterSpacing: '0.05em',
-          zIndex: 1000,
+          width: 'fit-content',
           textTransform: 'uppercase',
           transition: 'all 0.25s ease'
         }}
