@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, Calendar, Scroll, ShieldAlert, LogOut, Globe, ArrowLeft, Home, Edit2, Check, X, Clock } from 'lucide-react';
+import { User, Calendar, Scroll, ShieldAlert, LogOut, Globe, ArrowLeft, Edit2, Check, X, Clock } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '../../lib/supabase';
 
@@ -54,7 +54,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, handleAuth, 
     setUpdateError('');
     
     try {
-      const { data, error } = await supabase.auth.updateUser({
+      const { error } = await supabase.auth.updateUser({
         data: { 
           custom_username: newName.trim(),
           last_name_change: new Date().toISOString()

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
-import { Home, User, Music, Globe, LogOut } from 'lucide-react';
+import { Home, User, Music, Globe } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { LandingHeader } from './LandingHeader';
 import { GameModeSelector } from './GameModeSelector';
