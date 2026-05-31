@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, Calendar, Scroll, ShieldAlert, LogOut, Globe, ArrowLeft, Home } from 'lucide-react';
+import { User, Calendar, Scroll, ShieldAlert, LogOut, Globe, ArrowLeft, Home, Edit2, Check, X, Clock } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '../../lib/supabase';
 
@@ -27,6 +27,49 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, handleAuth, 
   const [history, setHistory] = useState<MatchSummary[]>([]);
   const [selectedMatch, setSelectedMatch] = useState<MatchSummary | null>(null);
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
+  
+  // Name edit states
+  const [editingName, setEditingName] = useState(false);
+  const [newName, setNewName] = useState(user?.user_metadata?.custom_username || user?.email?.split('@')[0] || '');
+  const [isUpdatingName, setIsUpdatingName] = useState(false);
+  const [updateError, setUpdateError] = useState('');
+
+  // 24h check
+  const lastChangeStr = user?.user_metadata?.last_name_change;
+  const lastChangeDate = lastChangeStr ? new Date(lastChangeStr) : null;
+  const canChangeName = !lastChangeDate || (new Date().getTime() - lastChangeDate.getTime() > 72 * 60 * 60 * 1000);
+
+  const handleUpdateName = async () => {
+    if (!newName.trim() || newName.trim() === (user?.user_metadata?.custom_username || user?.email?.split('@')[0])) {
+      setEditingName(false);
+      return;
+    }
+    
+    if (!canChangeName) {
+      setUpdateError(t('config_username_error'));
+      return;
+    }
+    
+    setIsUpdatingName(true);
+    setUpdateError('');
+    
+    try {
+      const { data, error } = await supabase.auth.updateUser({
+        data: { 
+          custom_username: newName.trim(),
+          last_name_change: new Date().toISOString()
+        }
+      });
+      
+      if (error) throw error;
+      
+      setEditingName(false);
+    } catch (err: any) {
+      setUpdateError(err.message || t('config_username_update_error'));
+    } finally {
+      setIsUpdatingName(false);
+    }
+  };
 
   useEffect(() => {
     const handleResize = () => {
@@ -131,8 +174,8 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, handleAuth, 
               cursor: "pointer"
             }}
           >
-            <Home size={14} />
-            <span>{t("home")}</span>
+            <ArrowLeft size={14} />
+            <span>{t("back")}</span>
           </button>
 
           {/* Fixed Logout Button (Desktop Right Corner) */}
@@ -280,7 +323,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, handleAuth, 
                   textShadow: '0 0 8px rgba(0, 242, 255, 0.15)',
                   marginTop: '-0.15rem'
                 }}>
-                  {user.user_metadata?.full_name || user.email?.split('@')[0]}
+                  {user.user_metadata?.custom_username || user.email?.split('@')[0]}
                 </h2>
               )}
             </div>
@@ -310,7 +353,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, handleAuth, 
                   textShadow: '0 0 15px rgba(0, 242, 255, 0.2)',
                   marginTop: '-0.35rem'
                 }}>
-                  {user.user_metadata?.full_name || user.email?.split('@')[0]}
+                  {user.user_metadata?.custom_username || user.email?.split('@')[0]}
                 </h2>
               )}
             </div>
@@ -322,14 +365,12 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, handleAuth, 
         <>
           {/* CONFIGURATION SECTION */}
           <h3 className="text-display" style={{ fontSize: '1.2rem', marginBottom: '1rem', color: '#fff', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '1rem' }}>
-            CONFIGURACIÓN
+            {t('config_title')}
           </h3>
           
           <div style={{
             display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
+            flexDirection: 'column',
             gap: '1rem',
             background: 'rgba(255,255,255,0.03)',
             border: '1px solid rgba(255,255,255,0.08)',
@@ -337,9 +378,126 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, handleAuth, 
             borderRadius: '1.5rem',
             marginBottom: '2.5rem'
           }}>
+            {/* Username Config */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem', paddingBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+              <div style={{ flex: 1, minWidth: '200px' }}>
+                <div style={{ fontWeight: 800, fontSize: '0.95rem', color: '#fff' }}>{t('config_username')}</div>
+                <div style={{ fontSize: '0.8rem', opacity: 0.6, marginTop: '0.2rem' }}>
+                  {!canChangeName ? (
+                    <span style={{ color: '#ff7800', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                      <Clock size={12} /> {t('config_username_cooldown')}
+                    </span>
+                  ) : (
+                    t('config_username_desc')
+                  )}
+                </div>
+                {updateError && (
+                  <div style={{ color: '#ef4444', fontSize: '0.75rem', marginTop: '0.25rem', fontWeight: 600 }}>
+                    {updateError}
+                  </div>
+                )}
+              </div>
+
+              {editingName ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <input
+                    type="text"
+                    value={newName}
+                    onChange={(e) => setNewName(e.target.value)}
+                    disabled={isUpdatingName}
+                    maxLength={20}
+                    style={{
+                      background: 'rgba(0,0,0,0.3)',
+                      border: '1px solid rgba(255,255,255,0.2)',
+                      color: '#fff',
+                      height: '38px',
+                      borderRadius: '0.75rem',
+                      padding: '0 0.85rem',
+                      fontSize: '0.9rem',
+                      fontWeight: 700,
+                      outline: 'none',
+                      width: '160px'
+                    }}
+                  />
+                  <button
+                    onClick={handleUpdateName}
+                    disabled={isUpdatingName || !newName.trim()}
+                    style={{
+                      background: '#10b981',
+                      border: 'none',
+                      color: '#000',
+                      height: '38px',
+                      width: '38px',
+                      borderRadius: '0.75rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: isUpdatingName ? 'not-allowed' : 'pointer',
+                      opacity: isUpdatingName ? 0.5 : 1
+                    }}
+                  >
+                    <Check size={18} />
+                  </button>
+                  <button
+                    onClick={() => {
+                      setEditingName(false);
+                      setNewName(user.user_metadata?.custom_username || user.email?.split('@')[0]);
+                      setUpdateError('');
+                    }}
+                    disabled={isUpdatingName}
+                    style={{
+                      background: 'rgba(239, 68, 68, 0.2)',
+                      border: '1px solid rgba(239, 68, 68, 0.3)',
+                      color: '#ef4444',
+                      height: '38px',
+                      width: '38px',
+                      borderRadius: '0.75rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <X size={18} />
+                  </button>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <span style={{ fontWeight: 800, fontSize: '1rem', color: '#00f2ff' }}>
+                    {user.user_metadata?.custom_username || user.email?.split('@')[0]}
+                  </span>
+                  <button
+                    onClick={() => setEditingName(true)}
+                    disabled={!canChangeName}
+                    className="btn-hover-dark"
+                    style={{
+                      background: 'rgba(255, 255, 255, 0.08)',
+                      border: '1px solid rgba(255, 255, 255, 0.15)',
+                      color: canChangeName ? 'white' : 'rgba(255,255,255,0.3)',
+                      height: '38px',
+                      borderRadius: '0.75rem',
+                      padding: '0 1rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.4rem',
+                      fontSize: '0.8rem',
+                      fontWeight: 800,
+                      cursor: canChangeName ? 'pointer' : 'not-allowed',
+                      boxShadow: canChangeName ? '2px 2px 0px #000' : 'none'
+                    }}
+                  >
+                    <Edit2 size={14} />
+                    {t('config_edit')}
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Language Config */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
             <div>
-              <div style={{ fontWeight: 800, fontSize: '0.95rem', color: '#fff' }}>Idioma / Language</div>
-              <div style={{ fontSize: '0.8rem', opacity: 0.6, marginTop: '0.2rem' }}>Elegí el idioma de la interfaz del juego</div>
+              <div style={{ fontWeight: 800, fontSize: '0.95rem', color: '#fff' }}>{t('config_language')}</div>
+              <div style={{ fontSize: '0.8rem', opacity: 0.6, marginTop: '0.2rem' }}>{t('config_language_desc')}</div>
             </div>
             
             <button
@@ -366,11 +524,12 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, handleAuth, 
                 boxShadow: '3px 3px 0px #000',
                 transition: 'all 0.15s ease'
               }}
-              title="Cambiar Idioma / Change Language"
+              title={t('config_change_language')}
             >
               <Globe size={16} />
               {window.location.pathname.startsWith('/en') ? 'ENGLISH (EN)' : 'ESPAÑOL (ES)'}
             </button>
+          </div>
           </div>
 
           {/* MATCH HISTORY LIST */}

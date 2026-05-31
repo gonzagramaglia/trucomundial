@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { ArrowLeft, Trophy, Lock, Award, Zap, Clock, ShieldCheck } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowLeft, Trophy, Lock, Award, Zap, Clock, ShieldCheck, User, Edit2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 interface TournamentScreenProps {
@@ -22,8 +22,32 @@ interface Tournament {
   organizer: string;
 }
 
+const MOCK_RANKING = [
+  { id: 1, name: "GonzaGramaglia", score: 2500, position: 1 },
+  { id: 2, name: "Messi10", score: 2350, position: 2 },
+  { id: 3, name: "ElDibu", score: 2100, position: 3 },
+  { id: 4, name: "Player123", score: 1900, position: 4 },
+  { id: 5, name: "TrucoMaster", score: 1850, position: 5 },
+  { id: 6, name: "User_99", score: 1700, position: 6 },
+  { id: 7, name: "Pampa", score: 1650, position: 7 },
+  { id: 8, name: "Bostero", score: 1500, position: 8 },
+  { id: 9, name: "Gallo", score: 1450, position: 9 },
+  { id: 10, name: "Carp", score: 1400, position: 10 },
+  { id: 11, name: "Pepe", score: 1300, position: 11 },
+  { id: 12, name: "Tomi", score: 1200, position: 12 },
+  { id: 13, name: "Juan", score: 1150, position: 13 },
+  { id: 14, name: "Fede", score: 1100, position: 14 },
+  { id: 15, name: "Gaston", score: 1000, position: 15 },
+];
+
 export const TournamentScreen: React.FC<TournamentScreenProps> = ({ user, handleAuth, onBack }) => {
   const { t } = useTranslation();
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
+  
+  const totalPages = Math.ceil(MOCK_RANKING.length / ITEMS_PER_PAGE);
+  const currentRankingPage = MOCK_RANKING.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+  
   const LOCAL_REGISTRATIONS_KEY = `trucomundial-registrations-${user?.id || 'anonymous'}`;
 
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
@@ -155,13 +179,14 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({ user, handle
             <span>{t("back")}</span>
           </button>
 
-          {/* Fixed User Session/Login Indicator (Desktop Right Corner) */}
-          {user ? (
-            <div style={{
+          {/* Fixed Warning Badge (Desktop Right Corner) */}
+          <div
+            style={{
               position: "fixed",
               top: "1.5rem",
               right: "1rem",
-              background: "rgba(255, 255, 255, 0.1)",
+              background: "rgba(255, 120, 0, 0.06)",
+              border: "1.5px solid rgba(255, 120, 0, 0.3)",
               backdropFilter: "blur(12px)",
               zIndex: 2000,
               height: "36px",
@@ -170,51 +195,16 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({ user, handle
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              border: "1px solid rgba(255, 255, 255, 0.15)",
+              gap: "0.4rem",
+              color: "#ff7800",
+              boxShadow: "0 4px 14px rgba(255, 120, 0, 0.08)",
               fontSize: "0.7rem",
-              fontWeight: 900,
-              color: "white",
-              boxShadow: "none"
-            }}>
-              <span style={{ color: 'rgba(255, 255, 255, 0.6)', fontWeight: 600 }}>
-                {t('session_desktop')}
-              </span>
-              <span style={{ color: '#00f2ff', marginLeft: '0.25rem' }}>
-                {user.user_metadata?.full_name?.split(' ')[0] || user.email?.split('@')[0] || "Gonzalo"}
-              </span>
-            </div>
-          ) : (
-            <button
-              onClick={handleAuth}
-              className="home-btn-fixed btn-hover-dark profile-nav-btn"
-              style={{
-                position: "fixed",
-                top: "1.5rem",
-                right: "1rem",
-                background: "linear-gradient(to right, rgba(168, 85, 247, 0.25), rgba(124, 58, 237, 0.25))",
-                backdropFilter: "blur(12px)",
-                zIndex: 2000,
-                height: "36px",
-                borderRadius: "0.85rem",
-                padding: "0 0.85rem",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "0.4rem",
-                color: "white",
-                border: "1px solid rgba(168, 85, 247, 0.4)",
-                boxShadow: "0 4px 14px rgba(168, 85, 247, 0.08)",
-                fontWeight: 900,
-                fontSize: "0.7rem",
-                letterSpacing: "0.05em",
-                textTransform: "uppercase",
-                cursor: "pointer"
-              }}
-            >
-              <Lock size={14} />
-              <span>{t("login")}</span>
-            </button>
-          )}
+              fontWeight: 850,
+              textShadow: "0 0 8px rgba(255, 120, 0, 0.15)"
+            }}
+          >
+            <span>⚠️ Aún no habilitados</span>
+          </div>
         </>
       )}
 
@@ -224,7 +214,7 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({ user, handle
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        marginBottom: isMobile ? '2.5rem' : '3.5rem',
+        marginBottom: isMobile ? '1.5rem' : '2rem',
         width: '100%',
         position: 'relative'
       }}>
@@ -262,49 +252,23 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({ user, handle
                 {t("back")}
               </button>
 
-              {user ? (
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  background: 'rgba(255, 255, 255, 0.03)',
-                  border: '1px solid rgba(255, 255, 255, 0.08)',
-                  borderRadius: '2.5rem',
-                  padding: '0.35rem 0.85rem',
-                  fontSize: '0.75rem',
-                  fontWeight: 800
-                }}>
-                  <span style={{ color: 'rgba(255, 255, 255, 0.6)', fontWeight: 600 }}>
-                    {t('session_desktop')}
-                  </span>
-                  <span style={{ color: '#00f2ff', marginLeft: '0.25rem' }}>
-                    {user.user_metadata?.full_name?.split(' ')[0] || user.email?.split('@')[0] || "Gonzalo"}
-                  </span>
-                </div>
-              ) : (
-                <button
-                  onClick={handleAuth}
-                  className="btn-hover-dark"
-                  style={{
-                    background: 'linear-gradient(to right, #a855f7, #7c3aed)',
-                    border: 'none',
-                    color: 'white',
-                    height: '36px',
-                    borderRadius: '0.75rem',
-                    padding: '0 0.85rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.4rem',
-                    fontSize: '0.8rem',
-                    fontWeight: 900,
-                    cursor: 'pointer',
-                    boxShadow: '3px 3px 0px #000',
-                    textTransform: 'uppercase'
-                  }}
-                >
-                  <Lock size={12} />
-                  <span>{t("login")}</span>
-                </button>
-              )}
+              <div style={{
+                background: 'rgba(255, 120, 0, 0.06)',
+                border: '1.5px solid rgba(255, 120, 0, 0.3)',
+                borderRadius: '0.75rem',
+                padding: '0.35rem 0.75rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.4rem',
+                fontSize: '0.65rem',
+                fontWeight: 850,
+                color: '#ff7800',
+                maxWidth: '180px',
+                textAlign: 'center',
+                boxShadow: '2px 2px 0px rgba(0,0,0,0.8)',
+              }}>
+                <span>⚠️ Aún no habilitados</span>
+              </div>
             </div>
 
             <div style={{
@@ -322,9 +286,14 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({ user, handle
                 color: '#ffffff',
                 textShadow: '0 0 8px rgba(255, 255, 255, 0.1)'
               }}>
-                {t('tournaments').toUpperCase()}
+                {t('tournaments')} ({t('coming_soon').toLowerCase()})
               </h2>
             </div>
+            
+            <p style={{ fontSize: '0.75rem', opacity: 0.6, margin: '4px 0 0 0', textAlign: 'center' }}>
+              {t('tournaments_subtitle')}
+            </p>
+            
           </>
         ) : (
           <>
@@ -339,66 +308,167 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({ user, handle
                   color: '#ffffff',
                   textShadow: '0 0 15px rgba(255, 255, 255, 0.2)'
                 }}>
-                  {t('tournaments').toUpperCase()}
+                  {t('tournaments')} ({t('coming_soon').toLowerCase()})
                 </h2>
               </div>
+              <p style={{ fontSize: '0.95rem', opacity: 0.65, margin: '4px 0 0 0', fontWeight: 600 }}>
+                {t('tournaments_subtitle')}
+              </p>
+
+
             </div>
           </>
         )}
       </div>
 
-      {/* DESCRIPCIÓN CON PRESENCIA */}
-      <motion.div
-        initial={{ y: -15, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.5, delay: 0.1 }}
-        style={{
-          background: 'rgba(255, 255, 255, 0.02)',
-          border: '1.5px dashed rgba(255, 215, 0, 0.35)',
-          borderRadius: '1.75rem',
-          padding: '1.5rem 2rem',
-          marginBottom: '3rem',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          textAlign: 'center',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.15)',
-          backdropFilter: 'blur(8px)'
-        }}
-      >
-        <p style={{
-          margin: 0,
-          fontSize: '1rem',
-          fontWeight: 700,
-          lineHeight: '1.6',
-          color: '#fff',
-          maxWidth: '850px'
-        }}>
-          {t('tournament_desc_plain').split('Mucho Movimiento 2vs2').map((part, i, arr) =>
-            i < arr.length - 1
-              ? <React.Fragment key={i}>{part}<strong style={{ color: '#ffd700', textShadow: '0 0 8px rgba(255,215,0,0.3)' }}>Mucho Movimiento 2vs2</strong></React.Fragment>
-              : part
-          )}
-        </p>
-        <div style={{
-          marginTop: '1rem',
-          padding: '0.5rem 1.25rem',
-          borderRadius: '1rem',
-          background: 'rgba(255, 120, 0, 0.12)',
-          border: '1px solid rgba(255, 120, 0, 0.35)',
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '0.5rem',
-          color: '#ff7800',
-          fontSize: '0.85rem',
-          fontWeight: 800,
-          textShadow: '0 0 8px rgba(255, 120, 0, 0.25)'
-        }}>
-          <span>{t('testing_warning_tournaments')}</span>
-        </div>
-      </motion.div>
+      {/* LOGIN TO COMPETE OR USER STATS BANNER */}
+      <AnimatePresence mode="wait">
+        {!user ? (
+          <motion.div
+            key="login-banner"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            style={{
+              background: 'rgba(255, 255, 255, 0.03)',
+              border: '1.5px dashed rgba(168, 85, 247, 0.3)',
+              borderRadius: '1.75rem',
+              padding: '1.5rem',
+              marginBottom: '3.5rem',
+              display: 'flex',
+              flexDirection: isMobile ? 'column' : 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '1.5rem',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
+            }}
+          >
+            <div style={{ flex: 1, textAlign: isMobile ? 'center' : 'left' }}>
+              <h3 style={{ margin: '0 0 0.5rem 0', color: '#a855f7', display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '1.1rem', fontWeight: 900 }}>
+                <Lock size={18} />
+                {t('login_to_compete_title')}
+              </h3>
+              <p style={{ margin: 0, fontSize: '0.8rem', opacity: 0.7, lineHeight: 1.4 }}>
+                {t('login_to_compete_desc')}
+              </p>
+            </div>
+
+            <button
+              onClick={handleAuth}
+              className="btn-hover-dark"
+              style={{
+                background: '#9146ff',
+                border: 'none',
+                color: '#fff',
+                height: '46px',
+                borderRadius: '1.25rem',
+                padding: '0 1.5rem',
+                fontSize: '0.9rem',
+                fontWeight: 950,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.6rem',
+                cursor: 'pointer',
+                boxShadow: '4px 4px 0px #000',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" style={{ fill: 'currentColor' }}>
+                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" /><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" /><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" /><path d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+              </svg>
+              {t('login_with_google')}
+            </button>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="user-stats"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            style={{
+              background: 'rgba(255, 255, 255, 0.03)',
+              border: '1.5px solid rgba(0, 242, 255, 0.2)',
+              borderRadius: '1.75rem',
+              padding: '1.5rem',
+              marginBottom: '3.5rem',
+              display: 'flex',
+              flexDirection: isMobile ? 'column' : 'row',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '1.5rem',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.15)'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1, justifyContent: isMobile ? 'center' : 'flex-start' }}>
+              <div style={{
+                width: '52px', height: '52px', borderRadius: '50%', background: 'rgba(0, 242, 255, 0.1)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid rgba(0, 242, 255, 0.3)'
+              }}>
+                <User size={26} color="#00f2ff" />
+              </div>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <div style={{ fontSize: '1.1rem', fontWeight: 900, color: '#fff', textTransform: 'uppercase', letterSpacing: '0.02em' }}>
+                    {user.user_metadata?.custom_username || user.email?.split('@')[0]}
+                  </div>
+                  <button
+                    onClick={() => {
+                      window.location.href = window.location.pathname.startsWith('/en') ? '/en/perfil' : '/perfil';
+                    }}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: 'rgba(255, 255, 255, 0.4)',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: 0,
+                      transition: 'color 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = '#00f2ff')}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255, 255, 255, 0.4)')}
+                    title="Editar perfil"
+                  >
+                    <Edit2 size={14} />
+                  </button>
+                </div>
+                <div style={{ fontSize: '0.75rem', color: '#00f2ff', fontWeight: 800, marginTop: '2px' }}>ESTADÍSTICAS GLOBALES</div>
+              </div>
+            </div>
+
+            <div style={{ 
+              display: 'flex', 
+              gap: '1.5rem', 
+              flexWrap: 'wrap',
+              justifyContent: isMobile ? 'center' : 'flex-end',
+              flex: 2
+            }}>
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#fff' }}>0</div>
+                <div style={{ fontSize: '0.65rem', opacity: 0.6, textTransform: 'uppercase', fontWeight: 800 }}>Torneos<br/>Jugados</div>
+              </div>
+              <div style={{ width: '1px', background: 'rgba(255,255,255,0.15)' }} />
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '1.35rem', fontWeight: 900, color: '#ffdf00', textShadow: '0 0 8px rgba(255,223,0,0.3)' }}>#---</div>
+                <div style={{ fontSize: '0.65rem', opacity: 0.6, textTransform: 'uppercase', fontWeight: 800 }}>Posición<br/>Global</div>
+              </div>
+              <div style={{ width: '1px', background: 'rgba(255,255,255,0.15)' }} />
+              <div style={{ textAlign: 'center' }}>
+                <div style={{ fontSize: '1.05rem', fontWeight: 900, color: '#a855f7', marginTop: '0.3rem' }}>--:--:--</div>
+                <div style={{ fontSize: '0.65rem', opacity: 0.6, textTransform: 'uppercase', fontWeight: 800, marginTop: '0.3rem' }}>Próximo<br/>Torneo</div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* LOGIN TO COMPETE BANNER */}
 
       {/* TOURNAMENTS LIST SECTION */}
+      <h3 className="text-display" style={{ fontSize: '1.4rem', marginBottom: '2.5rem', marginTop: '0', color: '#fff', letterSpacing: '0.05em', textAlign: 'center' }}>
+        LISTADO DE TORNEOS
+      </h3>
       <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))',
@@ -436,19 +506,19 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({ user, handle
                 top: '-15px',
                 left: '24px',
                 background: tournament.status === 'open' 
-                  ? 'rgba(16, 185, 129, 0.15)' 
+                  ? 'rgba(168, 85, 247, 0.15)' 
                   : tournament.status === 'active' 
                     ? 'rgba(255, 120, 0, 0.15)' 
                     : 'rgba(255,255,255,0.05)',
                 border: `1.5px solid ${
                   tournament.status === 'open' 
-                    ? '#10b981' 
+                    ? '#a855f7' 
                     : tournament.status === 'active' 
                       ? '#ff7800' 
                       : 'rgba(255,255,255,0.2)'
                 }`,
                 color: tournament.status === 'open' 
-                  ? '#10b981' 
+                  ? '#a855f7' 
                   : tournament.status === 'active' 
                     ? '#ff7800' 
                     : 'rgba(255,255,255,0.5)',
@@ -611,6 +681,119 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({ user, handle
             </motion.div>
           );
         })}
+      </div>
+
+      {/* GLOBAL RANKING SECTION */}
+      <div style={{ marginTop: '4rem', marginBottom: '2rem' }}>
+        <h3 className="text-display" style={{ fontSize: '1.4rem', marginBottom: '1.5rem', color: '#fff', letterSpacing: '0.05em', textAlign: 'center' }}>
+          RANKING GLOBAL DE TORNEOS
+        </h3>
+        
+        <div style={{
+          background: 'rgba(255,255,255,0.03)',
+          border: '1px solid rgba(255,255,255,0.08)',
+          borderRadius: '1.5rem',
+          overflow: 'hidden'
+        }}>
+          {/* Header */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: '60px 1fr 100px',
+            padding: '1rem 1.5rem',
+            background: 'rgba(255,255,255,0.02)',
+            borderBottom: '1px solid rgba(255,255,255,0.05)',
+            fontSize: '0.75rem',
+            fontWeight: 800,
+            color: 'rgba(255,255,255,0.5)',
+            textTransform: 'uppercase'
+          }}>
+            <div style={{ textAlign: 'center' }}>POS</div>
+            <div>JUGADOR</div>
+            <div style={{ textAlign: 'right' }}>PTS</div>
+          </div>
+          
+          {/* List */}
+          <div>
+            {currentRankingPage.map((player, idx) => {
+              const isTop3 = player.position <= 3;
+              return (
+                <div key={player.id} style={{
+                  display: 'grid',
+                  gridTemplateColumns: '60px 1fr 100px',
+                  padding: '1rem 1.5rem',
+                  borderBottom: idx === currentRankingPage.length - 1 ? 'none' : '1px solid rgba(255,255,255,0.03)',
+                  alignItems: 'center',
+                  background: isTop3 ? 'rgba(255,223,0,0.03)' : 'transparent',
+                  transition: 'background 0.2s ease'
+                }}>
+                  <div style={{ 
+                    textAlign: 'center', 
+                    fontSize: '1.1rem', 
+                    fontWeight: 900,
+                    color: player.position === 1 ? '#ffdf00' : player.position === 2 ? '#c0c0c0' : player.position === 3 ? '#cd7f32' : 'rgba(255,255,255,0.5)'
+                  }}>
+                    #{player.position}
+                  </div>
+                  <div style={{ fontWeight: 800, fontSize: '1rem', color: isTop3 ? '#fff' : 'rgba(255,255,255,0.8)' }}>
+                    {player.name}
+                  </div>
+                  <div style={{ textAlign: 'right', fontWeight: 900, fontSize: '0.9rem', color: '#00f2ff' }}>
+                    {player.score}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Pagination */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '1rem',
+          marginTop: '1.5rem'
+        }}>
+          <button
+            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+            disabled={currentPage === 1}
+            style={{
+              background: 'rgba(255,255,255,0.05)',
+              border: '1px solid rgba(255,255,255,0.1)',
+              color: currentPage === 1 ? 'rgba(255,255,255,0.2)' : '#fff',
+              width: '36px',
+              height: '36px',
+              borderRadius: '0.5rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: currentPage === 1 ? 'not-allowed' : 'pointer'
+            }}
+          >
+            <ChevronLeft size={18} />
+          </button>
+          <div style={{ fontSize: '0.8rem', fontWeight: 800, color: 'rgba(255,255,255,0.5)' }}>
+            PÁGINA {currentPage} DE {totalPages}
+          </div>
+          <button
+            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+            disabled={currentPage === totalPages}
+            style={{
+              background: 'rgba(255,255,255,0.05)',
+              border: '1px solid rgba(255,255,255,0.1)',
+              color: currentPage === totalPages ? 'rgba(255,255,255,0.2)' : '#fff',
+              width: '36px',
+              height: '36px',
+              borderRadius: '0.5rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: currentPage === totalPages ? 'not-allowed' : 'pointer'
+            }}
+          >
+            <ChevronRight size={18} />
+          </button>
+        </div>
       </div>
 
       {/* Twitch Button - Centered at the bottom of the page */}

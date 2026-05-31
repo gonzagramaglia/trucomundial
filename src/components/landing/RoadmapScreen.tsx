@@ -49,8 +49,8 @@ export const RoadmapScreen: React.FC<RoadmapScreenProps> = ({ onBack }) => {
       date: 'Q3 2026',
       status: 'in-progress',
       statusText: t('phase2_status'),
-      statusColor: '#ff7800',
-      icon: <Award size={20} style={{ color: '#ff7800' }} />,
+      statusColor: '#ffd700',
+      icon: <Award size={20} style={{ color: '#ffd700' }} />,
       description: t('phase2_desc'),
       features: [t('phase2_f1'), t('phase2_f2'), t('phase2_f3')]
     },
@@ -63,7 +63,7 @@ export const RoadmapScreen: React.FC<RoadmapScreenProps> = ({ onBack }) => {
       statusColor: '#00f2ff',
       icon: <Users size={20} style={{ color: '#00f2ff' }} />,
       description: t('phase3_desc'),
-      features: [t('phase3_f1'), t('phase3_f2')]
+      features: [t('phase3_f1'), t('phase3_f2'), t('phase3_f3')]
     },
     {
       phase: 'FASE 4',
@@ -74,7 +74,7 @@ export const RoadmapScreen: React.FC<RoadmapScreenProps> = ({ onBack }) => {
       statusColor: '#a855f7',
       icon: <Sparkles size={20} style={{ color: '#a855f7' }} />,
       description: t('phase4_desc'),
-      features: [t('phase4_f1'), t('phase4_f2'), t('phase4_f3'), t('phase4_f4')]
+      features: [t('phase4_f1'), t('phase4_f2'), t('phase4_f4')]
     }
   ];
 
@@ -160,7 +160,7 @@ export const RoadmapScreen: React.FC<RoadmapScreenProps> = ({ onBack }) => {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        marginBottom: isMobile ? '2.5rem' : '3.5rem',
+        marginBottom: isMobile ? '1.5rem' : '2rem',
         width: '100%',
         position: 'relative'
       }}>
@@ -234,6 +234,10 @@ export const RoadmapScreen: React.FC<RoadmapScreenProps> = ({ onBack }) => {
                 {t('roadmap').toUpperCase()}
               </h2>
             </div>
+            
+            <p style={{ fontSize: '0.75rem', opacity: 0.6, margin: '4px 0 0 0', textAlign: 'center' }}>
+              {t('roadmap_subtitle')}
+            </p>
           </>
         ) : (
           <>
@@ -251,43 +255,13 @@ export const RoadmapScreen: React.FC<RoadmapScreenProps> = ({ onBack }) => {
                   {t('roadmap').toUpperCase()}
                 </h2>
               </div>
+              <p style={{ fontSize: '0.95rem', opacity: 0.65, margin: '4px 0 0 0', fontWeight: 600 }}>
+                {t('roadmap_subtitle')}
+              </p>
             </div>
           </>
         )}
       </div>
-
-      {/* INTRODUCTION */}
-      <motion.div
-        initial={{ y: -15, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.5 }}
-        style={{
-          background: 'rgba(255, 255, 255, 0.02)',
-          border: '1.5px dashed rgba(255, 255, 255, 0.15)',
-          borderRadius: '1.75rem',
-          padding: isMobile ? '1rem 1.25rem' : '1.5rem 2rem',
-          marginBottom: isMobile ? '2rem' : '3rem',
-          textAlign: 'center',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.15)',
-          backdropFilter: 'blur(8px)'
-        }}
-      >
-        <p style={{
-          margin: 0,
-          fontSize: isMobile ? '0.9rem' : '1.05rem',
-          fontWeight: 700,
-          lineHeight: '1.6',
-          color: 'rgba(255,255,255,0.85)',
-          maxWidth: '750px',
-          marginInline: 'auto'
-        }}>
-          {t('roadmap_intro_plain').split('Truco Mundial').map((part, i, arr) =>
-            i < arr.length - 1
-              ? <React.Fragment key={i}>{part}<strong style={{ color: '#00f2ff' }}>Truco Mundial</strong></React.Fragment>
-              : part
-          )}
-        </p>
-      </motion.div>
 
       {/* TIMELINE AND THE VERTICAL LINE */}
       <div style={{
@@ -349,7 +323,7 @@ export const RoadmapScreen: React.FC<RoadmapScreenProps> = ({ onBack }) => {
                   fontSize: '0.7rem',
                   fontWeight: 900,
                   color: item.statusColor,
-                  background: `rgba(${item.statusColor === '#10b981' ? '16,185,129' : item.statusColor === '#ff7800' ? '255,120,0' : item.statusColor === '#00f2ff' ? '0,242,255' : '168,85,247'}, 0.12)`,
+                  background: `rgba(${item.statusColor === '#10b981' ? '16,185,129' : item.statusColor === '#ffd700' ? '255,215,0' : item.statusColor === '#00f2ff' ? '0,242,255' : '168,85,247'}, 0.12)`,
                   padding: '3px 9px',
                   borderRadius: '1rem',
                   letterSpacing: '0.05em'

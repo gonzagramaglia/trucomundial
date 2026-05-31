@@ -402,7 +402,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        marginBottom: isMobile ? '2.5rem' : '3.5rem',
+        marginBottom: isMobile ? '1.5rem' : '2rem',
         width: '100%',
         position: 'relative'
       }}>

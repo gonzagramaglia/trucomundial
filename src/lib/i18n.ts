@@ -124,6 +124,17 @@ const resources = {
       "no_results": "No results",
       "vote_disclaimer": "Your vote moves the ranking · saved locally",
       
+      "config_title": "CONFIGURATION",
+      "config_username": "Username",
+      "config_username_desc": "Max 1 change every 72 hours",
+      "config_username_cooldown": "Available in 72h since last change",
+      "config_username_error": "You can only change your name once every 72 hours",
+      "config_username_update_error": "Error updating username",
+      "config_language": "Language",
+      "config_language_desc": "Choose the game interface language",
+      "config_change_language": "Change Language",
+      "config_edit": "EDIT",
+      
       "profile": "Profile",
       "match_history": "Match History",
       "no_matches_yet": "You haven't played any online matches yet.",
@@ -201,8 +212,11 @@ const resources = {
       "tournament_in_progress": "TOURNAMENT IN PROGRESS",
       "tournament_finished": "TOURNAMENT FINISHED",
       "login_to_compete": "to compete",
+      "login_to_compete_title": "Log In to Compete",
+      "login_to_compete_desc": "Registered Google users can sign up for official tournaments and qualify for the grand final.",
 
       // TournamentScreen — tournament data
+      "tournaments_subtitle": "Compete in 1v1 tournaments and qualify for the 2v2 grand final",
       "t1_name": "COPA MUCHO MOVIMIENTO (1v1)",
       "t1_start": "In 8 minutes",
       "t1_prize": "Qualification to the 2v2 Grand Final",
@@ -217,6 +231,7 @@ const resources = {
       "t4_prize": "Qualification to the 2v2 Grand Final",
 
       // RoadmapScreen
+      "roadmap_subtitle": "Discover the evolutionary path towards the ultimate competitive experience",
       "roadmap_intro": "Discover the future of <strong>Truco Mundial</strong>. We've designed a community-driven evolutionary path to turn this classic into a fully competitive experience.",
       "roadmap_intro_plain": "Discover the future of Truco Mundial. We've designed a community-driven evolutionary path to turn this classic into a fully competitive experience.",
 
@@ -239,10 +254,11 @@ const resources = {
       "phase3_desc": "Real-time 2vs2 mode implementation. Play as a team with your friends against rivals from around the world.",
       "phase3_f1": "4-player cooperative rooms",
       "phase3_f2": "Mucho Movimiento 2vs2 World Cup",
+      "phase3_f3": "Twitch chat and rewards integration",
 
-      "phase4_title": "Customization & Competitive",
+      "phase4_title": "Ranking & Competitive",
       "phase4_status": "Planning",
-      "phase4_desc": "Customizable card backs, animated stickers, global player ranking and recurring tournaments with major sponsor prizes.",
+      "phase4_desc": "Global player ranking, recurring tournaments with major sponsor prizes, and holographic World Cup decks.",
       "phase4_f1": "Global player ranking",
       "phase4_f2": "Recurring tournaments with sponsor prizes",
       "phase4_f3": "Cosmetic shop and card backs",
@@ -377,6 +393,17 @@ const resources = {
       "no_results": "Sin resultados",
       "vote_disclaimer": "Tu voto mueve el ranking · se guarda localmente",
 
+      "config_title": "CONFIGURACIÓN",
+      "config_username": "Nombre de Usuario",
+      "config_username_desc": "Máximo 1 cambio cada 72 horas",
+      "config_username_cooldown": "Disponible en 72hs desde el último cambio",
+      "config_username_error": "Solo podés cambiar tu nombre una vez cada 72 horas",
+      "config_username_update_error": "Error al actualizar el nombre",
+      "config_language": "Idioma",
+      "config_language_desc": "Elegí el idioma de la interfaz del juego",
+      "config_change_language": "Cambiar Idioma",
+      "config_edit": "EDITAR",
+
       "profile": "Perfil",
       "match_history": "Historial de Partidas Online",
       "no_matches_yet": "Aún no jugaste ninguna partida online.",
@@ -454,8 +481,11 @@ const resources = {
       "tournament_in_progress": "TORNEO EN JUEGO",
       "tournament_finished": "TORNEO FINALIZADO",
       "login_to_compete": "para competir",
+      "login_to_compete_title": "Iniciá Sesión para Competir",
+      "login_to_compete_desc": "Los usuarios registrados con Google pueden inscribirse a los torneos oficiales y clasificar a la gran final.",
 
       // TournamentScreen — tournament data
+      "tournaments_subtitle": "Competí en torneos 1vs1 y clasificá a la gran final 2vs2",
       "t1_name": "COPA MUCHO MOVIMIENTO (1v1)",
       "t1_start": "En 8 minutos",
       "t1_prize": "Clasificación a la Gran Final 2v2",
@@ -470,6 +500,7 @@ const resources = {
       "t4_prize": "Clasificación a la Gran Final 2v2",
 
       // RoadmapScreen
+      "roadmap_subtitle": "Conocé el camino evolutivo hacia la experiencia competitiva total",
       "roadmap_intro": "Descubrí el futuro de <strong>Truco Mundial</strong>. Diseñamos un camino evolutivo guiado por la comunidad para convertir este clásico en una experiencia competitiva total.",
       "roadmap_intro_plain": "Descubrí el futuro de Truco Mundial. Diseñamos un camino evolutivo guiado por la comunidad para convertir este clásico en una experiencia competitiva total.",
 
@@ -492,10 +523,11 @@ const resources = {
       "phase3_desc": "Implementación del modo 2vs2 en tiempo real. Jugá en equipo con tus amigos contra rivales de todo el mundo.",
       "phase3_f1": "Salas cooperativas de 4 jugadores",
       "phase3_f2": "Copa Mundial 2vs2 de Mucho Movimiento",
+      "phase3_f3": "Integración con el chat y recompensas de Twitch",
 
-      "phase4_title": "Personalización & Competitivo",
+      "phase4_title": "Ranking & Competitivo",
       "phase4_status": "Planificando",
-      "phase4_desc": "Dorsos de cartas personalizables, stickers animados, ranking global de jugadores y torneos recurrentes con importantes premios de sponsors.",
+      "phase4_desc": "Ranking global de jugadores, torneos recurrentes con importantes premios de sponsors y mazos holográficos del mundial.",
       "phase4_f1": "Ranking de jugadores globales",
       "phase4_f2": "Torneos recurrentes con premios de sponsors",
       "phase4_f3": "Tienda cosmética y dorsos de cartas",
