@@ -76,6 +76,15 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
   const lastVotedCardIdRef = useRef<string | null>(null);
   const lastVoteActionRef = useRef<'add' | 'sub' | null>(null);
   const lastSavedVotesRef = useRef<Record<string, number>>({});
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const LOCAL_STORAGE_KEY = `trucomundial-uservotes-${user?.id || 'anonymous'}`;
 
@@ -318,85 +327,190 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
       minHeight: '100vh',
       display: 'flex',
       flexDirection: 'column',
-      padding: '1.5rem 1rem 4rem 1rem',
+      padding: isMobile ? '1.5rem 1rem 4rem 1rem' : '1.1rem 1rem 4rem 1rem',
       color: '#fff',
       boxSizing: 'border-box'
     }}>
-      {/* HEADER SECTION */}
+      {/* HEADER SECTION (Centered column layout on desktop, responsive style on mobile) */}
+      {!isMobile && (
+        <>
+          {/* Fixed Back Button (Desktop Left Corner) */}
+          <button
+            onClick={handleBackRequest}
+            className="home-btn-fixed btn-hover-dark profile-nav-btn"
+            style={{
+              position: "fixed",
+              top: "1.5rem",
+              left: "1rem",
+              background: "rgba(255, 255, 255, 0.1)",
+              backdropFilter: "blur(12px)",
+              zIndex: 2000,
+              height: "36px",
+              borderRadius: "0.85rem",
+              padding: "0 0.85rem",
+              display: "flex",
+              alignItems: "center",
+              gap: "0.4rem",
+              color: "white",
+              border: "1px solid rgba(255, 255, 255, 0.1)",
+              boxShadow: "none",
+              fontWeight: 900,
+              fontSize: "0.7rem",
+              letterSpacing: "0.05em",
+              textTransform: "uppercase",
+              cursor: "pointer"
+            }}
+          >
+            <ArrowLeft size={14} />
+            <span>{t("back")}</span>
+          </button>
+
+          {/* Fixed Refresh Button (Desktop Right Corner) */}
+          <button
+            onClick={fetchGlobalVotes}
+            disabled={loading}
+            className="btn-hover-dark profile-nav-btn"
+            style={{
+              position: "fixed",
+              top: "1.5rem",
+              right: "1rem",
+              background: "rgba(255, 255, 255, 0.1)",
+              backdropFilter: "blur(12px)",
+              zIndex: 2000,
+              height: "36px",
+              width: "36px",
+              borderRadius: "50%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "white",
+              border: "1px solid rgba(255, 255, 255, 0.1)",
+              boxShadow: "none",
+              cursor: "pointer",
+              opacity: loading ? 0.5 : 1
+            }}
+            title={t('refresh_ranking')}
+          >
+            <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+          </button>
+        </>
+      )}
+
+      {/* HEADER SECTION (Responsive Container) */}
       <div style={{
         display: 'flex',
-        flexWrap: 'wrap',
+        flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: '1rem',
-        marginBottom: '2rem',
-        width: '100%'
+        justifyContent: 'center',
+        marginBottom: isMobile ? '2.5rem' : '3.5rem',
+        width: '100%',
+        position: 'relative'
       }}>
-        {/* Back Button */}
-        <button
-          onClick={handleBackRequest}
-          className="btn-hover-dark"
-          style={{
-            background: 'rgba(255, 255, 255, 0.08)',
-            border: '1px solid rgba(255, 255, 255, 0.15)',
-            color: 'white',
-            height: '42px',
-            borderRadius: '1rem',
-            padding: '0 1.25rem',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.6rem',
-            fontSize: '0.9rem',
-            fontWeight: 800,
-            cursor: 'pointer',
-            backdropFilter: 'blur(10px)',
-            transition: 'all 0.15s ease'
-          }}
-        >
-          <ArrowLeft size={18} />
-          {t("back")}
-        </button>
+        {isMobile ? (
+          <>
+            {/* Mobile Header Layout */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              width: '100%',
+              gap: '0.75rem',
+              marginBottom: '1rem'
+            }}>
+              <button
+                onClick={handleBackRequest}
+                className="btn-hover-dark"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.08)',
+                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                  color: 'white',
+                  height: '36px',
+                  borderRadius: '0.75rem',
+                  padding: '0 0.85rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.4rem',
+                  fontSize: '0.8rem',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  boxShadow: '3px 3px 0px #000',
+                }}
+              >
+                <ArrowLeft size={14} />
+                {t("back")}
+              </button>
 
-        {/* Brand Name */}
-        <div style={{ textAlign: 'center' }}>
-          <h1 className="text-display" style={{
-            fontSize: '2rem',
-            color: '#ffdf00',
-            textShadow: '0 0 10px rgba(255, 223, 0, 0.25)',
-            margin: 0,
-            lineHeight: 1.1,
-            letterSpacing: '0.05em'
-          }}>
-            {t("card_ranking")}
-          </h1>
-          <p style={{ fontSize: '0.8rem', opacity: 0.6, margin: '4px 0 0 0' }}>
-            {t('ranking_subtitle')}
-          </p>
-        </div>
+              <button
+                onClick={fetchGlobalVotes}
+                disabled={loading}
+                className="btn-hover-dark"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.08)',
+                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                  color: 'white',
+                  height: '36px',
+                  width: '36px',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  boxShadow: '3px 3px 0px #000',
+                  opacity: loading ? 0.5 : 1
+                }}
+                title={t('refresh_ranking')}
+              >
+                <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+              </button>
+            </div>
 
-        {/* Quick Refresh */}
-        <button
-          onClick={fetchGlobalVotes}
-          disabled={loading}
-          className="btn-hover-dark"
-          style={{
-            background: 'rgba(255, 255, 255, 0.08)',
-            border: '1px solid rgba(255, 255, 255, 0.15)',
-            color: 'white',
-            height: '42px',
-            width: '42px',
-            borderRadius: '50%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-            backdropFilter: 'blur(10px)',
-            opacity: loading ? 0.5 : 1
-          }}
-          title={t('refresh_ranking')}
-        >
-          <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
-        </button>
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '0.25rem',
+              justifyContent: 'center',
+              textAlign: 'center'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Trophy size={24} style={{ color: '#ffdf00', filter: 'drop-shadow(0 0 6px rgba(255, 223, 0, 0.25))' }} />
+                <h2 className="text-display" style={{
+                  fontSize: '1.4rem',
+                  margin: 0,
+                  letterSpacing: '0.05em',
+                  color: '#ffdf00',
+                  textShadow: '0 0 8px rgba(255, 223, 0, 0.15)'
+                }}>
+                  {t('card_ranking').toUpperCase()}
+                </h2>
+              </div>
+              <p style={{ fontSize: '0.75rem', opacity: 0.6, margin: '4px 0 0 0' }}>
+                {t('ranking_subtitle')}
+              </p>
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Desktop Centered Header Layout */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', textAlign: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <Trophy size={36} style={{ color: '#ffdf00', filter: 'drop-shadow(0 0 10px rgba(255, 223, 0, 0.3))' }} />
+                <h2 className="text-display" style={{
+                  fontSize: '2.2rem',
+                  margin: 0,
+                  letterSpacing: '0.05em',
+                  color: '#ffdf00',
+                  textShadow: '0 0 15px rgba(255, 223, 0, 0.2)'
+                }}>
+                  {t('card_ranking').toUpperCase()}
+                </h2>
+              </div>
+              <p style={{ fontSize: '0.95rem', opacity: 0.65, margin: '4px 0 0 0', fontWeight: 600 }}>
+                {t('ranking_subtitle')}
+              </p>
+            </div>
+          </>
+        )}
       </div>
 
       {/* VOTING CONTROL BLOCK (STICKY HUD) */}

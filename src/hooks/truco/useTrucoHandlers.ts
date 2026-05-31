@@ -6,12 +6,13 @@ import i18n from "../../lib/i18n";
 export const useTrucoHandlers = (state: any, logic: any) => {
   const {
     setPlayerHand, setPlayedCards, setTrucoState, setEnvidoState, setPendingAction, setSuspendedTruco, setIsRoundEnding, setIsCooldown, setActiveCall, setPlayerFolded,
-    isRoundEnding, isCooldown, pendingAction, trucoState, envidoState, suspendedTruco, gameMode, isHost
+    isRoundEnding, isCooldown, pendingAction, trucoState, envidoState, suspendedTruco, gameMode, isHost, setMatchLog
   } = state;
   const { triggerCall, addPoints, resetRound, resolveEnvido } = logic;
 
   const handleMazo = useCallback((remote: boolean = false) => {
     const win = remote ? "player" : "cpu";
+    const actor = remote ? "El Rival" : "Vos";
     if (!remote) {
       setPlayerFolded(true);
     }
@@ -19,12 +20,15 @@ export const useTrucoHandlers = (state: any, logic: any) => {
     const pts = trucoState.status === "accepted"
       ? (trucoState.level + 1)
       : (trucoState.level + 1 + (envidoState.status === "none" || envidoState.status === "pending" ? 1 : 0));
+    
+    setMatchLog((prev: string[]) => [...prev, `${actor} se fue al mazo. ${remote ? 'Ganaste' : 'Perdiste'} ${pts} puntos.`]);
+
     addPoints(win, pts);
     setIsRoundEnding(true);
     if (gameMode !== "multiplayer" || isHost) {
       setTimeout(() => resetRound(), 3500);
     }
-  }, [trucoState.level, envidoState.status, triggerCall, addPoints, setIsRoundEnding, resetRound, isHost, gameMode, setPlayerFolded]);
+  }, [trucoState.level, envidoState.status, triggerCall, addPoints, setIsRoundEnding, resetRound, isHost, gameMode, setPlayerFolded, setMatchLog]);
 
   const playedCardsTracker = useRef(new Set<string>());
 
@@ -39,10 +43,11 @@ export const useTrucoHandlers = (state: any, logic: any) => {
     if (playedCardsTracker.current.has(card.id)) return null;
     
     playedCardsTracker.current.add(card.id);
+    setMatchLog((prev: string[]) => [...prev, `Jugaste a ${card.name} (${card.country})`]);
     setPlayerHand((prev: Card[]) => prev.filter(c => c.id !== card.id));
     setPlayedCards((prev: any[]) => [...prev, { ...card, owner: "player", id: `${card.id}_${Date.now()}` }]);
     return card;
-  }, [isRoundEnding, isCooldown, pendingAction, setPlayerHand, setPlayedCards]);
+  }, [isRoundEnding, isCooldown, pendingAction, setPlayerHand, setPlayedCards, setMatchLog]);
 
   const handleCall = useCallback((type: "truco" | "envido", level: number, caller: PlayerRole) => {
     let text = "";
@@ -53,6 +58,9 @@ export const useTrucoHandlers = (state: any, logic: any) => {
       else if (level === 4) text = i18n.t("call_falta_envido");
       else text = i18n.t("call_envido");
     }
+
+    const speaker = (caller === "player" || caller === "partner") ? "Vos" : "El Rival";
+    setMatchLog((prev: string[]) => [...prev, `${speaker} cantó ${text}`]);
 
     triggerCall(text, (caller === "player" || caller === "partner") ? "var(--color-accent)" : "var(--color-secondary)");
 
@@ -78,12 +86,15 @@ export const useTrucoHandlers = (state: any, logic: any) => {
       });
       setPendingAction({ type, level, caller });
     }
-  }, [triggerCall, pendingAction, setTrucoState, setPendingAction, setSuspendedTruco, setEnvidoState]);
+  }, [triggerCall, pendingAction, setTrucoState, setPendingAction, setSuspendedTruco, setEnvidoState, setMatchLog]);
 
   const handleResponse = useCallback((accept: boolean, remote: boolean = false) => {
     if (!pendingAction) return 0;
     const resp = remote ? "cpu" : "player";
+    const responderName = remote ? "El Rival" : "Vos";
     triggerCall(accept ? i18n.t("call_quiero") : i18n.t("call_no_quiero"), remote ? "var(--color-secondary)" : "var(--color-accent)");
+
+    setMatchLog((prev: string[]) => [...prev, `${responderName} respondió: ${accept ? 'QUIERO' : 'NO QUIERO'}`]);
 
     if (accept) {
       if (pendingAction.type === "truco") {
@@ -100,6 +111,9 @@ export const useTrucoHandlers = (state: any, logic: any) => {
       } else {
         pts = pendingAction.level === 1 ? 1 : pendingAction.level - 1;
       }
+
+      const winnerText = resp === "player" ? "El Rival gana" : "Ganaste";
+      setMatchLog((prev: string[]) => [...prev, `Al no querer, ${winnerText} ${pts} puntos.`]);
 
       addPoints(resp === "player" ? "cpu" : "player", pts);
       if (pendingAction.type === "truco") {
@@ -128,7 +142,7 @@ export const useTrucoHandlers = (state: any, logic: any) => {
 
     setPendingAction(null);
     return 0;
-  }, [pendingAction, envidoState.prevAccumulated, suspendedTruco, triggerCall, setTrucoState, setEnvidoState, resolveEnvido, addPoints, setIsRoundEnding, resetRound, setPendingAction, setSuspendedTruco, setIsCooldown, setActiveCall]);
+  }, [pendingAction, envidoState.prevAccumulated, suspendedTruco, triggerCall, setTrucoState, setEnvidoState, resolveEnvido, addPoints, setIsRoundEnding, resetRound, setPendingAction, setSuspendedTruco, setIsCooldown, setActiveCall, setMatchLog]);
 
   return {
     handleMazo, playCard, handleCall, handleResponse

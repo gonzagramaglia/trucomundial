@@ -22,6 +22,7 @@ interface UseTrucoCPUProps {
   playCard: (card: Card) => void;
   handleCall: (type: "truco" | "envido", level: number, caller: PlayerRole) => void;
   handleResponse: (accept: boolean) => void;
+  setMatchLog: any;
 }
 
 export const useTrucoCPU = ({
@@ -42,7 +43,8 @@ export const useTrucoCPU = ({
   setIsCpuThinking,
   playCard,
   handleCall,
-  handleResponse
+  handleResponse,
+  setMatchLog
 }: UseTrucoCPUProps) => {
   const cpuMoveTimeoutRef = useRef<any>(null);
 
@@ -106,13 +108,13 @@ export const useTrucoCPU = ({
           cpuPlayedCount = 3 - cpuOpponent2HandRef.current.length;
         }
 
+        let currentHand: Card[] = [];
+        if (whoseTurn === "cpu") currentHand = cpuHandRef.current;
+        else if (whoseTurn === "partner") currentHand = cpuPartnerHandRef.current;
+        else if (whoseTurn === "cpu2") currentHand = cpuOpponent2HandRef.current;
+
         if (envidoState.status === "none" && cpuPlayedCount === 0) {
           // Calculate actual points to decide
-          let currentHand: Card[] = [];
-          if (whoseTurn === "cpu") currentHand = cpuHandRef.current;
-          else if (whoseTurn === "partner") currentHand = cpuPartnerHandRef.current;
-          else if (whoseTurn === "cpu2") currentHand = cpuOpponent2HandRef.current;
-
           const points = calculateEnvido(currentHand);
           
           // Decision Logic:
@@ -129,15 +131,13 @@ export const useTrucoCPU = ({
         }
 
         // 3. Play a card (only if we didn't call anything above)
-        let currentHand: Card[] = [];
-        if (whoseTurn === "cpu") currentHand = cpuHandRef.current;
-        else if (whoseTurn === "partner") currentHand = cpuPartnerHandRef.current;
-        else if (whoseTurn === "cpu2") currentHand = cpuOpponent2HandRef.current;
-
         if (currentHand.length > 0) {
           const randomIndex = Math.floor(Math.random() * currentHand.length);
           const cardToPlay = currentHand[randomIndex];
           
+          const actorName = whoseTurn === "partner" ? "Compañero" : "El Rival";
+          setMatchLog((prev: string[]) => [...prev, `${actorName} jugó a ${cardToPlay.name} (${cardToPlay.country})`]);
+
           // Remove from ref
           if (whoseTurn === "cpu") cpuHandRef.current = cpuHandRef.current.filter(c => c.id !== cardToPlay.id);
           else if (whoseTurn === "partner") cpuPartnerHandRef.current = cpuPartnerHandRef.current.filter(c => c.id !== cardToPlay.id);
@@ -148,5 +148,5 @@ export const useTrucoCPU = ({
         setIsCpuThinking(false);
       }, 2000 + Math.random() * 1000); // Increased delay for more human-like pacing
     }
-  }, [gameState, gameMode, playedCards.length, handWinners.length, pendingAction, isRoundEnding, isCooldown, whoseTurn, isCpuThinking, trucoState, envidoState]);
+  }, [gameState, gameMode, playedCards.length, handWinners.length, pendingAction, isRoundEnding, isCooldown, whoseTurn, isCpuThinking, trucoState, envidoState, setMatchLog]);
 };

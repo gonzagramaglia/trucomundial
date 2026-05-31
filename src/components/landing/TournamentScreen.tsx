@@ -26,6 +26,16 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({ user, handle
   const { t } = useTranslation();
   const LOCAL_REGISTRATIONS_KEY = `trucomundial-registrations-${user?.id || 'anonymous'}`;
 
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   // State to track registered tournament IDs
   const [registeredIds, setRegisteredIds] = useState<string[]>([]);
   // Simulated participant counts to make it feel alive
@@ -107,102 +117,233 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({ user, handle
       minHeight: '100vh',
       display: 'flex',
       flexDirection: 'column',
-      padding: '1.5rem 1rem 4rem 1rem',
+      padding: isMobile ? '1.5rem 1rem 4rem 1rem' : '1.1rem 1rem 4rem 1rem',
       color: '#fff',
       boxSizing: 'border-box'
     }}>
-      {/* HEADER SECTION */}
-      <div style={{
-        display: 'flex',
-        flexWrap: 'wrap',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: '1rem',
-        marginBottom: '2.5rem',
-        width: '100%'
-      }}>
-        {/* Back Button */}
-        <button
-          onClick={onBack}
-          className="btn-hover-dark"
-          style={{
-            background: 'rgba(255, 255, 255, 0.08)',
-            border: '1px solid rgba(255, 255, 255, 0.15)',
-            color: 'white',
-            height: '42px',
-            borderRadius: '1rem',
-            padding: '0 1.25rem',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.6rem',
-            fontSize: '0.9rem',
-            fontWeight: 800,
-            cursor: 'pointer',
-            boxShadow: '4px 4px 0px #000',
-            transition: 'transform 0.1s ease'
-          }}
-        >
-          <ArrowLeft size={16} />
-          {t("back")}
-        </button>
-
-        {/* Title */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <Trophy size={32} style={{ color: '#ffffff', filter: 'drop-shadow(0 0 8px rgba(255, 255, 255, 0.25))' }} />
-          <h2 className="text-display" style={{
-            fontSize: '1.8rem',
-            margin: 0,
-            letterSpacing: '0.05em',
-            color: '#ffffff',
-            textShadow: '0 0 10px rgba(255, 255, 255, 0.1)'
-          }}>
-            {t("tournaments")} ({t("coming_soon")})
-          </h2>
-        </div>
-
-        {/* User stats indicator if logged in */}
-        {user ? (
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            background: 'rgba(255, 255, 255, 0.03)',
-            border: '1px solid rgba(255, 255, 255, 0.08)',
-            borderRadius: '2rem',
-            padding: '0.4rem 1.25rem',
-            fontSize: '0.85rem',
-            fontWeight: 800
-          }}>
-            <span style={{ color: 'rgba(255, 255, 255, 0.6)', fontWeight: 600 }}>
-              {t('session_desktop')}
-            </span>
-            <span style={{ color: '#00f2ff', marginLeft: '0.25rem' }}>
-              {user.user_metadata?.full_name?.split(' ')[0] || user.email?.split('@')[0] || "Gonzalo"}
-            </span>
-          </div>
-        ) : (
+      {/* HEADER SECTION (Centered column layout on desktop, responsive style on mobile) */}
+      {!isMobile && (
+        <>
+          {/* Fixed Back Button (Desktop Left Corner) */}
           <button
-            onClick={handleAuth}
-            className="btn-hover-dark"
+            onClick={onBack}
+            className="home-btn-fixed btn-hover-dark profile-nav-btn"
             style={{
-              background: 'linear-gradient(to right, #a855f7, #7c3aed)',
-              border: 'none',
-              color: 'white',
-              height: '42px',
-              borderRadius: '1rem',
-              padding: '0 1.5rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.6rem',
-              fontSize: '0.85rem',
+              position: "fixed",
+              top: "1.5rem",
+              left: "1rem",
+              background: "rgba(255, 255, 255, 0.1)",
+              backdropFilter: "blur(12px)",
+              zIndex: 2000,
+              height: "36px",
+              borderRadius: "0.85rem",
+              padding: "0 0.85rem",
+              display: "flex",
+              alignItems: "center",
+              gap: "0.4rem",
+              color: "white",
+              border: "1px solid rgba(255, 255, 255, 0.1)",
+              boxShadow: "none",
               fontWeight: 900,
-              cursor: 'pointer',
-              boxShadow: '4px 4px 0px #000',
-              textTransform: 'uppercase'
+              fontSize: "0.7rem",
+              letterSpacing: "0.05em",
+              textTransform: "uppercase",
+              cursor: "pointer"
             }}
           >
-            <Lock size={14} />
-            {t("login")} {t("login_to_compete")}
+            <ArrowLeft size={14} />
+            <span>{t("back")}</span>
           </button>
+
+          {/* Fixed User Session/Login Indicator (Desktop Right Corner) */}
+          {user ? (
+            <div style={{
+              position: "fixed",
+              top: "1.5rem",
+              right: "1rem",
+              background: "rgba(255, 255, 255, 0.1)",
+              backdropFilter: "blur(12px)",
+              zIndex: 2000,
+              height: "36px",
+              borderRadius: "0.85rem",
+              padding: "0 0.85rem",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              border: "1px solid rgba(255, 255, 255, 0.15)",
+              fontSize: "0.7rem",
+              fontWeight: 900,
+              color: "white",
+              boxShadow: "none"
+            }}>
+              <span style={{ color: 'rgba(255, 255, 255, 0.6)', fontWeight: 600 }}>
+                {t('session_desktop')}
+              </span>
+              <span style={{ color: '#00f2ff', marginLeft: '0.25rem' }}>
+                {user.user_metadata?.full_name?.split(' ')[0] || user.email?.split('@')[0] || "Gonzalo"}
+              </span>
+            </div>
+          ) : (
+            <button
+              onClick={handleAuth}
+              className="home-btn-fixed btn-hover-dark profile-nav-btn"
+              style={{
+                position: "fixed",
+                top: "1.5rem",
+                right: "1rem",
+                background: "linear-gradient(to right, rgba(168, 85, 247, 0.25), rgba(124, 58, 237, 0.25))",
+                backdropFilter: "blur(12px)",
+                zIndex: 2000,
+                height: "36px",
+                borderRadius: "0.85rem",
+                padding: "0 0.85rem",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "0.4rem",
+                color: "white",
+                border: "1px solid rgba(168, 85, 247, 0.4)",
+                boxShadow: "0 4px 14px rgba(168, 85, 247, 0.08)",
+                fontWeight: 900,
+                fontSize: "0.7rem",
+                letterSpacing: "0.05em",
+                textTransform: "uppercase",
+                cursor: "pointer"
+              }}
+            >
+              <Lock size={14} />
+              <span>{t("login")}</span>
+            </button>
+          )}
+        </>
+      )}
+
+      {/* HEADER SECTION (Responsive Container) */}
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: isMobile ? '2.5rem' : '3.5rem',
+        width: '100%',
+        position: 'relative'
+      }}>
+        {isMobile ? (
+          <>
+            {/* Mobile Header Layout */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              width: '100%',
+              gap: '0.75rem',
+              marginBottom: '1rem'
+            }}>
+              <button
+                onClick={onBack}
+                className="btn-hover-dark"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.08)',
+                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                  color: 'white',
+                  height: '36px',
+                  borderRadius: '0.75rem',
+                  padding: '0 0.85rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.4rem',
+                  fontSize: '0.8rem',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  boxShadow: '3px 3px 0px #000',
+                }}
+              >
+                <ArrowLeft size={14} />
+                {t("back")}
+              </button>
+
+              {user ? (
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  background: 'rgba(255, 255, 255, 0.03)',
+                  border: '1px solid rgba(255, 255, 255, 0.08)',
+                  borderRadius: '2.5rem',
+                  padding: '0.35rem 0.85rem',
+                  fontSize: '0.75rem',
+                  fontWeight: 800
+                }}>
+                  <span style={{ color: 'rgba(255, 255, 255, 0.6)', fontWeight: 600 }}>
+                    {t('session_desktop')}
+                  </span>
+                  <span style={{ color: '#00f2ff', marginLeft: '0.25rem' }}>
+                    {user.user_metadata?.full_name?.split(' ')[0] || user.email?.split('@')[0] || "Gonzalo"}
+                  </span>
+                </div>
+              ) : (
+                <button
+                  onClick={handleAuth}
+                  className="btn-hover-dark"
+                  style={{
+                    background: 'linear-gradient(to right, #a855f7, #7c3aed)',
+                    border: 'none',
+                    color: 'white',
+                    height: '36px',
+                    borderRadius: '0.75rem',
+                    padding: '0 0.85rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.4rem',
+                    fontSize: '0.8rem',
+                    fontWeight: 900,
+                    cursor: 'pointer',
+                    boxShadow: '3px 3px 0px #000',
+                    textTransform: 'uppercase'
+                  }}
+                >
+                  <Lock size={12} />
+                  <span>{t("login")}</span>
+                </button>
+              )}
+            </div>
+
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              justifyContent: 'center',
+              marginTop: '1rem'
+            }}>
+              <Trophy size={24} style={{ color: '#ffffff', filter: 'drop-shadow(0 0 6px rgba(255, 255, 255, 0.25))' }} />
+              <h2 className="text-display" style={{
+                fontSize: '1.4rem',
+                margin: 0,
+                letterSpacing: '0.05em',
+                color: '#ffffff',
+                textShadow: '0 0 8px rgba(255, 255, 255, 0.1)'
+              }}>
+                {t('tournaments').toUpperCase()}
+              </h2>
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Desktop Centered Header Layout */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', textAlign: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <Trophy size={36} style={{ color: '#ffffff', filter: 'drop-shadow(0 0 10px rgba(255, 255, 255, 0.3))' }} />
+                <h2 className="text-display" style={{
+                  fontSize: '2.2rem',
+                  margin: 0,
+                  letterSpacing: '0.05em',
+                  color: '#ffffff',
+                  textShadow: '0 0 15px rgba(255, 255, 255, 0.2)'
+                }}>
+                  {t('tournaments').toUpperCase()}
+                </h2>
+              </div>
+            </div>
+          </>
         )}
       </div>
 

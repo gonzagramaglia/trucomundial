@@ -22,6 +22,7 @@ const resources = {
       "create": "CREATE",
       "private_match": "PRIVATE\nMATCH",
       "enter_match": "ENTER MATCH",
+      "start": "START",
       "code": "CODE",
 
       // Matchmaking
@@ -122,6 +123,16 @@ const resources = {
       "search_player": "Search player...",
       "no_results": "No results",
       "vote_disclaimer": "Your vote moves the ranking · saved locally",
+      
+      "profile": "Profile",
+      "match_history": "Match History",
+      "no_matches_yet": "You haven't played any online matches yet.",
+      "vs_rival": "vs {{rival}}",
+      "view_log": "View Log",
+      "match_log": "Match Log",
+      "won": "Won",
+      "lost": "Lost",
+      "loading_history": "Loading history...",
 
       "how_to_play": "HOW TO PLAY",
       "truco_title": "TRUCO",
@@ -246,7 +257,12 @@ const resources = {
       "card_macho": "Male",
       "card_hembra": "Female",
       "card_false_ace": "False Ace",
-      "card_false_seven": "False Seven"
+      "card_false_seven": "False Seven",
+
+      // 404 NotFound
+      "not_found_title": "Folded!",
+      "not_found_desc": "The route you are looking for does not exist or has folded. Go back to home to shuffle and deal again.",
+      "not_found_btn": "Back to Home"
     }
   },
   es: {
@@ -265,6 +281,7 @@ const resources = {
       "create": "CREAR",
       "private_match": "PARTIDA\nPRIVADA",
       "enter_match": "ENTRAR A LA PARTIDA",
+      "start": "COMENZAR",
       "code": "CÓDIGO",
 
       "waiting_for_rival": "ESPERANDO RIVAL...",
@@ -360,6 +377,16 @@ const resources = {
       "no_results": "Sin resultados",
       "vote_disclaimer": "Tu voto mueve el ranking · se guarda localmente",
 
+      "profile": "Perfil",
+      "match_history": "Historial de Partidas Online",
+      "no_matches_yet": "Aún no jugaste ninguna partida online.",
+      "vs_rival": "vs {{rival}}",
+      "view_log": "Ver Log",
+      "match_log": "Registro de la Partida",
+      "won": "Ganaste",
+      "lost": "Perdiste",
+      "loading_history": "Cargando historial...",
+
       "how_to_play": "CÓMO JUGAR",
       "truco_title": "TRUCO",
       "truco_desc_1": "Vale 2 pts (o más con Re-Truco o Vale 4). Jugás 3 manos, gana el que gana 2.",
@@ -414,7 +441,7 @@ const resources = {
       "tournament_desc": "Competí en los torneos 1vs1 de tus streamers y rappers favoritos. El ganador clasificará directamente al torneo global de <strong>Mucho Movimiento 2vs2</strong>. Asegurate de estar conectado en este lobby antes del inicio para validar tu inscripción.",
       "tournament_desc_plain": "Competí en los torneos 1vs1 de tus streamers y rappers favoritos. El ganador clasificará directamente al torneo global de Mucho Movimiento 2vs2. Asegurate de estar conectado en este lobby antes del inicio para validar tu inscripción.",
       "testing_warning_tournaments": "⚠️ ENTORNO DE PRUEBAS: Los torneos aún no están habilitados.",
-      "testing_warning_generic": "⚠️ Versión de prueba no definitiva",
+      "testing_warning_generic": "⚠️ Versión no definitiva",
       "status_open": "Abierto para Suscriptores",
       "status_active": "En Curso",
       "status_finished": "Finalizado",
@@ -483,7 +510,12 @@ const resources = {
       "card_macho": "Macho",
       "card_hembra": "Hembra",
       "card_false_ace": "Ancho Falso",
-      "card_false_seven": "Siete Falso"
+      "card_false_seven": "Siete Falso",
+
+      // 404 NotFound
+      "not_found_title": "¡Se fue al mazo!",
+      "not_found_desc": "La ruta que estás buscando no existe o se retiró del partido. Volvé al inicio para mezclar y repartir de nuevo.",
+      "not_found_btn": "Volver al Inicio"
     }
   }
 };

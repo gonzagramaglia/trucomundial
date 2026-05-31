@@ -58,7 +58,8 @@ export function useTrucoGame(sessionId: string | undefined, onSync?: (data: any)
       else if (owner === "cpu2") core.setCpuOpponent2HandCount(prev => Math.max(0, prev - 1));
     },
     handleCall: (type, level, caller) => core.handleCall(type, level, caller),
-    handleResponse: (accept) => core.handleResponse(accept, true)
+    handleResponse: (accept) => core.handleResponse(accept, true),
+    setMatchLog: core.setMatchLog
   });
 
   const startGame = useCallback((mode: GameMode, _rName: string, rId: string, points: number) => {
@@ -99,6 +100,10 @@ export function useTrucoGame(sessionId: string | undefined, onSync?: (data: any)
     setIsSelfConnected,
     handleRestartGame: () => core.resetRound(),
     playCardRemote: (card: Card, owner: PlayerRole) => {
+      const isPlayerRival = owner === "cpu" || owner === "cpu2";
+      const actorName = isPlayerRival ? "El Rival" : "Compañero";
+      core.setMatchLog((prev: string[]) => [...prev, `${actorName} jugó a ${card.name} (${card.country})`]);
+      
       core.setPlayedCards((prev: any) => [...prev, { 
         ...card, 
         owner, 

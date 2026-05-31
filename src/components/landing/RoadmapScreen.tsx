@@ -86,19 +86,82 @@ export const RoadmapScreen: React.FC<RoadmapScreenProps> = ({ onBack }) => {
       minHeight: '100vh',
       display: 'flex',
       flexDirection: 'column',
-      padding: isMobile ? '1rem 0.75rem 4rem 0.75rem' : '1.5rem 1rem 4rem 1rem',
+      padding: isMobile ? '1rem 0.75rem 4rem 0.75rem' : '1.1rem 1rem 4rem 1rem',
       color: '#fff',
       boxSizing: 'border-box'
     }}>
-      {/* HEADER SECTION */}
+      {/* HEADER SECTION (Centered column layout on desktop, responsive /ruta style on mobile) */}
+      {!isMobile && (
+        <>
+          {/* Fixed Back Button (Desktop Left Corner) */}
+          <button
+            onClick={onBack}
+            className="home-btn-fixed btn-hover-dark profile-nav-btn"
+            style={{
+              position: "fixed",
+              top: "1.5rem",
+              left: "1rem",
+              background: "rgba(255, 255, 255, 0.1)",
+              backdropFilter: "blur(12px)",
+              zIndex: 2000,
+              height: "36px",
+              borderRadius: "0.85rem",
+              padding: "0 0.85rem",
+              display: "flex",
+              alignItems: "center",
+              gap: "0.4rem",
+              color: "white",
+              border: "1px solid rgba(255, 255, 255, 0.1)",
+              boxShadow: "none",
+              fontWeight: 900,
+              fontSize: "0.7rem",
+              letterSpacing: "0.05em",
+              textTransform: "uppercase",
+              cursor: "pointer"
+            }}
+          >
+            <ArrowLeft size={14} />
+            <span>{t("back")}</span>
+          </button>
+
+          {/* Fixed Warning Badge (Desktop Right Corner) */}
+          <div
+            style={{
+              position: "fixed",
+              top: "1.5rem",
+              right: "1rem",
+              background: "rgba(255, 120, 0, 0.06)",
+              border: "1.5px solid rgba(255, 120, 0, 0.3)",
+              backdropFilter: "blur(12px)",
+              zIndex: 2000,
+              height: "36px",
+              borderRadius: "0.85rem",
+              padding: "0 0.85rem",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "0.4rem",
+              color: "#ff7800",
+              boxShadow: "0 4px 14px rgba(255, 120, 0, 0.08)",
+              fontSize: "0.7rem",
+              fontWeight: 850,
+              textAlign: "center",
+              textShadow: "0 0 8px rgba(255, 120, 0, 0.15)"
+            }}
+          >
+            <span>{t('testing_warning_generic')}</span>
+          </div>
+        </>
+      )}
+
+      {/* HEADER SECTION (Responsive container) */}
       <div style={{
         display: 'flex',
-        flexDirection: isMobile ? 'column' : 'row',
+        flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'space-between',
+        justifyContent: 'center',
         marginBottom: isMobile ? '2.5rem' : '3.5rem',
         width: '100%',
-        gap: '1rem',
         position: 'relative'
       }}>
         {isMobile ? (
@@ -158,7 +221,7 @@ export const RoadmapScreen: React.FC<RoadmapScreenProps> = ({ onBack }) => {
               alignItems: 'center',
               gap: '0.5rem',
               justifyContent: 'center',
-              marginTop: '0.5rem'
+              marginTop: '1rem'
             }}>
               <Milestone size={24} style={{ color: '#ffffff', filter: 'drop-shadow(0 0 6px rgba(255, 255, 255, 0.25))' }} />
               <h2 className="text-display" style={{
@@ -174,70 +237,19 @@ export const RoadmapScreen: React.FC<RoadmapScreenProps> = ({ onBack }) => {
           </>
         ) : (
           <>
-            {/* Desktop Header Layout */}
-            <div style={{ flex: '1 1 0%', display: 'flex', justifyContent: 'flex-start' }}>
-              <button
-                onClick={onBack}
-                className="btn-hover-dark"
-                style={{
-                  background: 'rgba(255, 255, 255, 0.08)',
-                  border: '1px solid rgba(255, 255, 255, 0.15)',
-                  color: 'white',
-                  height: '42px',
-                  borderRadius: '1rem',
-                  padding: '0 1.25rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.6rem',
-                  fontSize: '0.9rem',
-                  fontWeight: 800,
-                  cursor: 'pointer',
-                  boxShadow: '4px 4px 0px #000',
-                  transition: 'transform 0.1s ease'
-                }}
-              >
-                <ArrowLeft size={16} />
-                {t("back")}
-              </button>
-            </div>
-
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.75rem',
-              justifyContent: 'center',
-              flexShrink: 0
-            }}>
-              <Milestone size={32} style={{ color: '#ffffff', filter: 'drop-shadow(0 0 8px rgba(255, 255, 255, 0.25))' }} />
-              <h2 className="text-display" style={{
-                fontSize: '1.8rem',
-                margin: 0,
-                letterSpacing: '0.05em',
-                color: '#ffffff',
-                textShadow: '0 0 10px rgba(255, 255, 255, 0.1)'
-              }}>
-                {t('roadmap').toUpperCase()}
-              </h2>
-            </div>
-
-            <div style={{ flex: '1 1 0%', display: 'flex', justifyContent: 'flex-end' }}>
-              <div style={{
-                background: 'rgba(255, 120, 0, 0.06)',
-                border: '1.5px solid rgba(255, 120, 0, 0.3)',
-                borderRadius: '1.25rem',
-                padding: '0.6rem 1.25rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                fontSize: '0.75rem',
-                fontWeight: 850,
-                color: '#ff7800',
-                maxWidth: '240px',
-                textAlign: 'center',
-                boxShadow: '3px 3px 0px rgba(0,0,0,0.8)',
-                textShadow: '0 0 8px rgba(255, 120, 0, 0.15)'
-              }}>
-                <span>{t('testing_warning_generic')}</span>
+            {/* Desktop Centered Header Layout */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', textAlign: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <Milestone size={36} style={{ color: '#ffffff', filter: 'drop-shadow(0 0 10px rgba(255, 255, 255, 0.3))' }} />
+                <h2 className="text-display" style={{
+                  fontSize: '2.2rem',
+                  margin: 0,
+                  letterSpacing: '0.05em',
+                  color: '#ffffff',
+                  textShadow: '0 0 15px rgba(255, 255, 255, 0.2)'
+                }}>
+                  {t('roadmap').toUpperCase()}
+                </h2>
               </div>
             </div>
           </>

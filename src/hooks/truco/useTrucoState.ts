@@ -46,6 +46,8 @@ export const useTrucoState = () => {
   const lastProcessedHandRef = useRef(-1);
   const resetLockRef = useRef(false);
 
+  const [matchLog, setMatchLog] = useState<string[]>([]);
+
   // Synchronize refs with state for engine access
   playerHandRef.current = playerHand;
 
@@ -81,6 +83,7 @@ export const useTrucoState = () => {
     cpuPartnerHandCount, setCpuPartnerHandCount,
     cpuOpponent2HandCount, setCpuOpponent2HandCount,
     cpuHandRef, cpuPartnerHandRef, cpuOpponent2HandRef, playerHandRef,
-    lastProcessedHandRef, resetLockRef
+    lastProcessedHandRef, resetLockRef,
+    matchLog, setMatchLog
   };
 };

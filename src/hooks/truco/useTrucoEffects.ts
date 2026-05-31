@@ -1,11 +1,12 @@
 import { useEffect } from "react";
 import { determineWinner } from "../../lib/truco/engine";
+import { supabase } from "../../lib/supabase";
 
 export const useTrucoEffects = (state: any, logic: any) => {
   const {
     playedCards, gameMode, isRoundEnding, isCooldown, trucoState, starterIdx, isHost,
     setIsCooldown, setIsRoundEnding, setHandWinners, setHandWinningCardIds, setRoundWinningCardId, setShowCountdown,
-    lastProcessedHandRef, handWinners, score, maxPoints, setWinnerModal, setGameState
+    lastProcessedHandRef, handWinners, score, maxPoints, setWinnerModal, setGameState, matchLog
   } = state;
 
   const { addPoints, resetRound, clearRoundData } = logic;
@@ -13,16 +14,55 @@ export const useTrucoEffects = (state: any, logic: any) => {
   // --- Match Winner Effect ---
   useEffect(() => {
     console.log("[SCORE CHECK]", score.player, score.cpu, "Target:", maxPoints);
+    
+    const saveMatchHistory = async (finalWinner: "player" | "cpu") => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const user = session?.user;
+        if (!user || gameMode !== "multiplayer") return;
+
+        const uniqueHistoryId = `user_history_${user.id}_rem_${Date.now()}`;
+        const summary = {
+          type: "match_summary",
+          userId: user.id,
+          rivalName: state.rivalName || "CPU",
+          myScore: score.player,
+          rivalScore: score.cpu,
+          winner: finalWinner,
+          date: new Date().toISOString(),
+          log: matchLog
+        };
+
+        const { error } = await supabase
+          .from('game_sync')
+          .upsert({
+            match_id: uniqueHistoryId,
+            last_move: summary,
+            updated_at: new Date().toISOString()
+          }, { onConflict: 'match_id' });
+
+        if (error) {
+          console.error("Error saving match history to Supabase:", error);
+        } else {
+          console.log("Successfully saved match history to Supabase!");
+        }
+      } catch (err) {
+        console.error("Unexpected error saving match history:", err);
+      }
+    };
+
     if (score.player >= maxPoints) {
       console.log("[WINNER] Player Wins!");
       setWinnerModal("player");
       setGameState("winner");
+      saveMatchHistory("player");
     } else if (score.cpu >= maxPoints) {
       console.log("[WINNER] CPU Wins!");
       setWinnerModal("cpu");
       setGameState("winner");
+      saveMatchHistory("cpu");
     }
-  }, [score.player, score.cpu, maxPoints, setWinnerModal, setGameState]);
+  }, [score.player, score.cpu, maxPoints, setWinnerModal, setGameState, gameMode, matchLog, state.rivalName]);
 
   // --- Hand Resolution Effect ---
   useEffect(() => {
@@ -74,11 +114,15 @@ export const useTrucoEffects = (state: any, logic: any) => {
         if (roundWinner) {
           setIsRoundEnding(true);
           setShowCountdown(true);
+          
+          const points = trucoState.level + 1;
+          const winnerStr = roundWinner === "player" ? "Vos" : "El Rival";
+          state.setMatchLog((prev: string[]) => [...prev, `★ Fin de la mano. Gana ${winnerStr} por ${points} puntos.`]);
+
           clearRoundData();
           if (winningCard) setRoundWinningCardId(winningCard.id);
           
           if (gameMode !== "multiplayer" || isHost) {
-            const points = trucoState.level + 1;
             addPoints(roundWinner, points);
           }
 
@@ -91,7 +135,7 @@ export const useTrucoEffects = (state: any, logic: any) => {
         }
       }, 1000);
     }
-  }, [playedCards.length, gameMode, isRoundEnding, isCooldown, trucoState.level, starterIdx, isHost, addPoints, clearRoundData, setIsCooldown, setIsRoundEnding, setHandWinners, setHandWinningCardIds, setRoundWinningCardId, setShowCountdown, lastProcessedHandRef, handWinners]);
+  }, [playedCards.length, gameMode, isRoundEnding, isCooldown, trucoState.level, starterIdx, isHost, addPoints, clearRoundData, setIsCooldown, setIsRoundEnding, setHandWinners, setHandWinningCardIds, setRoundWinningCardId, setShowCountdown, lastProcessedHandRef, handWinners, state.setMatchLog]);
 
   // Dedicated Round Reset Effect (Crucial for Multiplayer stability)
   useEffect(() => {

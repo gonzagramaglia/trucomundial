@@ -10,7 +10,7 @@ export const useTrucoLogic = (state: any) => {
     setHandWinners, setIsRoundEnding, setIsCooldown, setStarterIdx, setDealerIdx,
     setPlayerHand, setCpuHandCount, setPlayedCards, setHandWinningCardIds, setRoundWinningCardId,
     setActiveCall, setScorePopups, setPlayerFolded,
-    playerHandRef, cpuHandRef, starterIdx, gameMode, lastProcessedHandRef, resetLockRef
+    playerHandRef, cpuHandRef, starterIdx, gameMode, lastProcessedHandRef, resetLockRef, setMatchLog
   } = state;
 
   const triggerCall = useCallback((text: string, color: string = "var(--color-primary)") => {
@@ -97,9 +97,11 @@ export const useTrucoLogic = (state: any) => {
     // 1st speaker (Mano)
     setTimeout(() => {
       if (isPlayerMano) {
+        setMatchLog((prev: string[]) => [...prev, `Vos (Mano) cantás envido con: ${pPoints} puntos`]);
         const text = pPoints >= 10 ? i18n.t("have_points_high", { points: pPoints }) : i18n.t("have_points_low", { points: pPoints });
         triggerCall(text, "var(--color-accent)");
       } else {
+        setMatchLog((prev: string[]) => [...prev, `El Rival (Mano) canta envido con: ${cPoints} puntos`]);
         const text = cPoints >= 10 ? i18n.t("have_points_high", { points: cPoints }) : i18n.t("have_points_low", { points: cPoints });
         triggerCall(text, "var(--color-secondary)");
       }
@@ -119,17 +121,21 @@ export const useTrucoLogic = (state: any) => {
         
         if (isPlayerMano) {
           if (pWins) {
+            setMatchLog((prev: string[]) => [...prev, `El Rival responde: son buenas. Ganás ${pts} puntos de Envido.`]);
             triggerCall(i18n.t("call_son_buenas"), "var(--color-secondary)");
             addPoints("player", pts);
           } else {
+            setMatchLog((prev: string[]) => [...prev, `El Rival responde: tengo ${cPoints}. El Rival gana ${pts} puntos de Envido.`]);
             triggerCall(i18n.t("call_son_mejores", { points: cPoints }), "var(--color-secondary)");
             addPoints("cpu", pts);
           }
         } else {
           if (pWins) {
+            setMatchLog((prev: string[]) => [...prev, `Vos respondés: tengo ${pPoints}. Ganás ${pts} puntos de Envido.`]);
             triggerCall(i18n.t("call_son_mejores", { points: pPoints }), "var(--color-accent)");
             addPoints("player", pts);
           } else {
+            setMatchLog((prev: string[]) => [...prev, `Vos respondés: son buenas. El Rival gana ${pts} puntos de Envido.`]);
             triggerCall(i18n.t("call_son_buenas"), "var(--color-accent)");
             addPoints("cpu", pts);
           }
@@ -151,7 +157,7 @@ export const useTrucoLogic = (state: any) => {
         setEnvidoState((prev: any) => ({ ...prev, status: "finished" }));
       }, 2500);
     }, 1500);
-  }, [playerHandRef, cpuHandRef, starterIdx, triggerCall, addPoints, setEnvidoState, setIsCooldown, setPendingAction, setSuspendedTruco, state.envidoState, state.score, state.maxPoints, state.suspendedTruco]);
+  }, [playerHandRef, cpuHandRef, starterIdx, triggerCall, addPoints, setEnvidoState, setIsCooldown, setPendingAction, setSuspendedTruco, state.envidoState, state.score, state.maxPoints, state.suspendedTruco, setMatchLog]);
 
   return {
     triggerCall, addPoints, resetRound, generateRoundData, applyRoundData, clearRoundData, resolveEnvido

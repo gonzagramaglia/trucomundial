@@ -1,0 +1,690 @@
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { User, Calendar, Scroll, ShieldAlert, LogOut, Globe, ArrowLeft, Home } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { supabase } from '../../lib/supabase';
+
+interface ProfileScreenProps {
+  user: any;
+  handleAuth: () => void;
+  onBack: () => void;
+}
+
+interface MatchSummary {
+  id: string;
+  match_id: string;
+  rivalName: string;
+  myScore: number;
+  rivalScore: number;
+  winner: 'player' | 'cpu';
+  date: string;
+  log: string[];
+}
+
+export const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, handleAuth, onBack }) => {
+  const { t } = useTranslation();
+  const [loading, setLoading] = useState(true);
+  const [history, setHistory] = useState<MatchSummary[]>([]);
+  const [selectedMatch, setSelectedMatch] = useState<MatchSummary | null>(null);
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const fetchMatchHistory = async () => {
+    if (!user) return;
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('game_sync')
+        .select('id, match_id, last_move, updated_at')
+        .like('match_id', `user_history_${user.id}_%`);
+
+      if (error) {
+        console.error('Error fetching history:', error);
+      } else if (data) {
+        const formattedHistory: MatchSummary[] = data
+          .map((item: any) => {
+            const summary = item.last_move;
+            return {
+              id: item.id,
+              match_id: item.match_id,
+              rivalName: summary.rivalName || t('rival'),
+              myScore: summary.myScore || 0,
+              rivalScore: summary.rivalScore || 0,
+              winner: summary.winner || 'cpu',
+              date: summary.date || item.updated_at,
+              log: summary.log || []
+            };
+          })
+          .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+        setHistory(formattedHistory);
+      }
+    } catch (err) {
+      console.error('Unexpected error fetching history:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchMatchHistory();
+  }, [user]);
+
+  // Calculate statistics
+  const totalPlayed = history.length;
+
+  const formatDate = (dateStr: string) => {
+    try {
+      const d = new Date(dateStr);
+      return d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    } catch {
+      return dateStr;
+    }
+  };
+
+  return (
+    <div style={{
+      width: '100%',
+      maxWidth: '1000px',
+      margin: '0 auto',
+      minHeight: '100vh',
+      display: 'flex',
+      flexDirection: 'column',
+      padding: isMobile ? '1.5rem 1rem 4rem 1rem' : '1.1rem 1rem 4rem 1rem',
+      color: '#fff',
+      boxSizing: 'border-box'
+    }}>
+      {/* HEADER SECTION (Centered column layout on desktop, /ruta style on mobile) */}
+      {!isMobile && (
+        <>
+          {/* Fixed Home Button (Desktop Left Corner) */}
+          <button
+            onClick={onBack}
+            className="home-btn-fixed btn-hover-dark profile-nav-btn"
+            style={{
+              position: "fixed",
+              top: "1.5rem",
+              left: "1rem",
+              background: "rgba(255, 255, 255, 0.1)",
+              backdropFilter: "blur(12px)",
+              zIndex: 2000,
+              height: "36px",
+              borderRadius: "0.85rem",
+              padding: "0 0.85rem",
+              display: "flex",
+              alignItems: "center",
+              gap: "0.4rem",
+              color: "white",
+              border: "1px solid rgba(255, 255, 255, 0.1)",
+              boxShadow: "none",
+              fontWeight: 900,
+              fontSize: "0.7rem",
+              letterSpacing: "0.05em",
+              textTransform: "uppercase",
+              cursor: "pointer"
+            }}
+          >
+            <Home size={14} />
+            <span>{t("home")}</span>
+          </button>
+
+          {/* Fixed Logout Button (Desktop Right Corner) */}
+          {user && (
+            <button
+              onClick={async () => {
+                await supabase.auth.signOut();
+                onBack(); // Go back home on sign out
+              }}
+              className="twitch-btn btn-hover-dark profile-nav-btn"
+              style={{
+                position: "fixed",
+                top: "1.5rem",
+                right: "1rem",
+                background: "rgba(239, 68, 68, 0.15)",
+                backdropFilter: "blur(12px)",
+                zIndex: 2000,
+                height: "36px",
+                borderRadius: "0.85rem",
+                padding: "0 0.85rem",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "0.4rem",
+                color: "#ef4848",
+                border: "1px solid rgba(239, 68, 68, 0.3)",
+                boxShadow: "0 4px 14px rgba(239, 68, 68, 0.08)",
+                cursor: "pointer",
+                fontWeight: 900,
+                fontSize: "0.7rem",
+                letterSpacing: "0.05em",
+                textTransform: "uppercase"
+              }}
+              title={t("logout")}
+            >
+              <LogOut size={14} style={{ transform: 'scaleX(-1)' }} />
+              <span>{t("logout")}</span>
+            </button>
+          )}
+        </>
+      )}
+
+      {/* HEADER SECTION (Responsive layout) */}
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: isMobile ? '0.5rem' : '0.75rem',
+        width: '100%',
+        position: 'relative'
+      }}>
+        {isMobile ? (
+          <>
+            {/* Mobile Header Layout - Replicating /ruta style */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              width: '100%',
+              gap: '0.75rem',
+              marginBottom: '1rem'
+            }}>
+              {/* Back Button */}
+              <button
+                onClick={onBack}
+                className="btn-hover-dark"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.08)',
+                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                  color: 'white',
+                  height: '36px',
+                  borderRadius: '0.75rem',
+                  padding: '0 0.85rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.4rem',
+                  fontSize: '0.8rem',
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                  boxShadow: '3px 3px 0px #000',
+                }}
+              >
+                <ArrowLeft size={14} />
+                {t("back")}
+              </button>
+
+              {/* Logout Button */}
+              {user && (
+                <button
+                  onClick={async () => {
+                    await supabase.auth.signOut();
+                    onBack();
+                  }}
+                  className="btn-hover-dark"
+                  style={{
+                    background: 'rgba(239, 68, 68, 0.1)',
+                    border: '1px solid rgba(239, 68, 68, 0.2)',
+                    color: '#ef4848',
+                    height: '36px',
+                    borderRadius: '0.75rem',
+                    padding: '0 0.85rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.4rem',
+                    fontSize: '0.8rem',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    boxShadow: '3px 3px 0px #000',
+                  }}
+                >
+                  <LogOut size={14} style={{ transform: 'scaleX(-1)' }} />
+                  {t("logout")}
+                </button>
+              )}
+            </div>
+
+            {/* Mobile Title & Subtitle */}
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '0rem',
+              justifyContent: 'center',
+              textAlign: 'center'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <User size={24} style={{ color: '#ffffff', filter: 'drop-shadow(0 0 6px rgba(255, 255, 255, 0.25))' }} />
+                <h2 className="text-display" style={{
+                  fontSize: '1.4rem',
+                  margin: 0,
+                  letterSpacing: '0.05em',
+                  color: '#ffffff',
+                  textShadow: '0 0 8px rgba(255, 255, 255, 0.1)'
+                }}>
+                  {window.location.pathname.startsWith('/en') ? 'PROFILE OF' : 'PERFIL DE'}
+                </h2>
+              </div>
+              {user && (
+                <h2 className="text-display" style={{
+                  fontSize: '1.4rem',
+                  margin: 0,
+                  letterSpacing: '0.05em',
+                  color: '#00f2ff',
+                  textShadow: '0 0 8px rgba(0, 242, 255, 0.15)',
+                  marginTop: '-0.15rem'
+                }}>
+                  {user.user_metadata?.full_name || user.email?.split('@')[0]}
+                </h2>
+              )}
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Desktop Centered Header Layout (As before, but styled beautifully) */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0rem', textAlign: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <User size={36} style={{ color: '#ffffff', filter: 'drop-shadow(0 0 10px rgba(255, 255, 255, 0.3))' }} />
+                <h2 className="text-display" style={{
+                  fontSize: '2.2rem',
+                  margin: 0,
+                  letterSpacing: '0.05em',
+                  color: '#ffffff',
+                  textShadow: '0 0 15px rgba(255, 255, 255, 0.2)'
+                }}>
+                  {window.location.pathname.startsWith('/en') ? 'PROFILE OF' : 'PERFIL DE'}
+                </h2>
+              </div>
+              {user && (
+                <h2 className="text-display" style={{
+                  fontSize: '2.2rem',
+                  margin: 0,
+                  letterSpacing: '0.05em',
+                  color: '#00f2ff',
+                  textShadow: '0 0 15px rgba(0, 242, 255, 0.2)',
+                  marginTop: '-0.35rem'
+                }}>
+                  {user.user_metadata?.full_name || user.email?.split('@')[0]}
+                </h2>
+              )}
+            </div>
+          </>
+        )}
+      </div>
+
+      {user ? (
+        <>
+          {/* CONFIGURATION SECTION */}
+          <h3 className="text-display" style={{ fontSize: '1.2rem', marginBottom: '1rem', color: '#fff', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '1rem' }}>
+            CONFIGURACIÓN
+          </h3>
+          
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '1rem',
+            background: 'rgba(255,255,255,0.03)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            padding: '1.25rem 1.5rem',
+            borderRadius: '1.5rem',
+            marginBottom: '2.5rem'
+          }}>
+            <div>
+              <div style={{ fontWeight: 800, fontSize: '0.95rem', color: '#fff' }}>Idioma / Language</div>
+              <div style={{ fontSize: '0.8rem', opacity: 0.6, marginTop: '0.2rem' }}>Elegí el idioma de la interfaz del juego</div>
+            </div>
+            
+            <button
+              onClick={() => {
+                const isEn = window.location.pathname.startsWith('/en');
+                const newLang = isEn ? "es" : "en";
+                localStorage.setItem('lang', newLang);
+                window.location.href = newLang === "en" ? "/en/perfil" : "/perfil";
+              }}
+              className="btn-hover-dark"
+              style={{
+                background: 'rgba(255, 255, 255, 0.08)',
+                border: '1px solid rgba(255, 255, 255, 0.15)',
+                color: 'white',
+                height: '42px',
+                borderRadius: '1rem',
+                padding: '0 1.5rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                fontSize: '0.85rem',
+                fontWeight: 900,
+                cursor: 'pointer',
+                boxShadow: '3px 3px 0px #000',
+                transition: 'all 0.15s ease'
+              }}
+              title="Cambiar Idioma / Change Language"
+            >
+              <Globe size={16} />
+              {window.location.pathname.startsWith('/en') ? 'ENGLISH (EN)' : 'ESPAÑOL (ES)'}
+            </button>
+          </div>
+
+          {/* MATCH HISTORY LIST */}
+          <h3 className="text-display" style={{ fontSize: '1.2rem', marginBottom: '1.25rem', color: '#fff', letterSpacing: '0.05em' }}>
+            {t("match_history")} ({totalPlayed})
+          </h3>
+
+          {loading ? (
+            <div style={{ textAlign: 'center', padding: '3rem 0', color: '#00f2ff', fontWeight: 'bold' }}>
+              {t("loading_history")}
+            </div>
+          ) : history.length === 0 ? (
+            <div style={{
+              background: 'rgba(255,255,255,0.02)',
+              border: '1px dashed rgba(255,255,255,0.1)',
+              borderRadius: '2rem',
+              padding: '3rem',
+              textAlign: 'center',
+              color: 'rgba(255,255,255,0.5)',
+              marginBottom: '3rem'
+            }}>
+              {t("no_matches_yet")}
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', marginBottom: '3rem' }}>
+              {history.map((match) => {
+                const won = match.winner === 'player';
+                return (
+                  <motion.div
+                    key={match.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    style={{
+                      background: won ? 'linear-gradient(to right, rgba(16, 185, 129, 0.08), rgba(255,255,255,0.02))' : 'linear-gradient(to right, rgba(239, 68, 68, 0.08), rgba(255,255,255,0.02))',
+                      border: won ? '1px solid rgba(16, 185, 129, 0.25)' : '1px solid rgba(239, 68, 68, 0.25)',
+                      borderRadius: '2rem',
+                      padding: '1.5rem',
+                      display: 'flex',
+                      flexWrap: 'wrap',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: '1.25rem',
+                      boxShadow: won ? '0 4px 20px rgba(16, 185, 129, 0.05)' : '0 4px 20px rgba(239, 68, 68, 0.05)'
+                    }}
+                  >
+                    <div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.4rem' }}>
+                        <span style={{
+                          background: won ? '#10b981' : '#ef4848',
+                          color: '#000',
+                          fontWeight: 950,
+                          fontSize: '0.7rem',
+                          padding: '0.2rem 0.6rem',
+                          borderRadius: '0.5rem',
+                          textTransform: 'uppercase'
+                        }}>
+                          {won ? t("won") : t("lost")}
+                        </span>
+                        <span style={{ fontWeight: 800, fontSize: '1.1rem' }}>
+                          {t("vs_rival", { rival: match.rivalName })}
+                        </span>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', opacity: 0.5, fontSize: '0.75rem' }}>
+                        <Calendar size={12} />
+                        {formatDate(match.date)}
+                      </div>
+                    </div>
+
+                    {/* Scores & Log Trigger */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+                      <div style={{ fontSize: '1.75rem', fontWeight: 900 }}>
+                        <span style={{ color: won ? '#10b981' : '#fff' }}>{match.myScore}</span>
+                        <span style={{ opacity: 0.3, margin: '0 0.5rem' }}>-</span>
+                        <span style={{ color: !won ? '#ef4848' : '#fff' }}>{match.rivalScore}</span>
+                      </div>
+
+                      <button
+                        onClick={() => setSelectedMatch(match)}
+                        className="btn-hover-dark"
+                        style={{
+                          background: 'rgba(255,255,255,0.08)',
+                          border: '1px solid rgba(255,255,255,0.15)',
+                          color: '#fff',
+                          height: '38px',
+                          borderRadius: '0.85rem',
+                          padding: '0 1rem',
+                          fontSize: '0.8rem',
+                          fontWeight: 800,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.4rem',
+                          cursor: 'pointer',
+                          boxShadow: '3px 3px 0px #000'
+                        }}
+                      >
+                        <Scroll size={14} />
+                        {t("view_log")}
+                      </button>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          )}
+
+        </>
+      ) : (
+        /* PROMPT SIGN IN */
+        <div style={{
+          background: 'rgba(145, 70, 255, 0.05)',
+          border: '2px dashed rgba(145, 70, 255, 0.45)',
+          borderRadius: '2rem',
+          padding: '3rem 2rem',
+          textAlign: 'center',
+          backdropFilter: 'blur(16px)',
+          marginTop: '2rem'
+        }}>
+          <ShieldAlert size={48} style={{ color: '#a855f7', marginBottom: '1.5rem' }} />
+          <h3 className="text-display" style={{ fontSize: '1.5rem', marginBottom: '0.75rem', color: '#a855f7' }}>
+            {t("login_to_vote_title")}
+          </h3>
+          <p style={{ maxWidth: '600px', margin: '0 auto 2rem auto', opacity: 0.7, lineHeight: 1.5 }}>
+            Registrate con tu cuenta de Google para poder registrar tu historial de partidas, ver logs interactivos y acumular trofeos de campeón.
+          </p>
+          <button
+            onClick={handleAuth}
+            className="btn-hover-dark"
+            style={{
+              background: '#9146ff',
+              border: 'none',
+              color: '#fff',
+              height: '48px',
+              borderRadius: '1.25rem',
+              padding: '0 2rem',
+              fontSize: '1rem',
+              fontWeight: 950,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.6rem',
+              cursor: 'pointer',
+              margin: '0 auto',
+              boxShadow: '4px 4px 0px #000'
+            }}
+          >
+            {t("login_with_google")}
+          </button>
+        </div>
+      )}
+
+      {/* DETAILED LOG MODAL */}
+      <AnimatePresence>
+        {selectedMatch && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              background: 'rgba(0, 0, 0, 0.85)',
+              backdropFilter: 'blur(12px)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 3000,
+              padding: '1.5rem'
+            }}
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              style={{
+                background: 'rgba(20, 15, 30, 0.95)',
+                border: '1.5px solid rgba(0, 242, 255, 0.25)',
+                borderRadius: '2.5rem',
+                padding: '2.5rem',
+                width: '100%',
+                maxWidth: '600px',
+                maxHeight: '80vh',
+                display: 'flex',
+                flexDirection: 'column',
+                boxShadow: '0 0 40px rgba(0, 242, 255, 0.15)'
+              }}
+            >
+              {/* Modal Header */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
+                <div>
+                  <h3 className="text-display" style={{ fontSize: '1.5rem', color: '#00f2ff', margin: 0, letterSpacing: '0.05em' }}>
+                    {t("match_log")}
+                  </h3>
+                  <div style={{ opacity: 0.5, fontSize: '0.75rem', marginTop: '0.25rem' }}>
+                    vs {selectedMatch.rivalName} · {formatDate(selectedMatch.date)}
+                  </div>
+                </div>
+                <div style={{ fontSize: '1.5rem', fontWeight: 900 }}>
+                  <span style={{ color: selectedMatch.winner === 'player' ? '#10b981' : '#fff' }}>{selectedMatch.myScore}</span>
+                  <span style={{ opacity: 0.3, margin: '0 0.4rem' }}>-</span>
+                  <span style={{ color: selectedMatch.winner !== 'player' ? '#ef4848' : '#fff' }}>{selectedMatch.rivalScore}</span>
+                </div>
+              </div>
+
+              {/* Log Timeline list */}
+              <div style={{
+                flex: 1,
+                overflowY: 'auto',
+                paddingRight: '8px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.75rem',
+                scrollbarWidth: 'thin',
+                scrollbarColor: 'rgba(255, 255, 255, 0.1) transparent'
+              }}>
+                {selectedMatch.log.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '2rem 0', opacity: 0.5, fontSize: '0.85rem' }}>
+                    No hay registro detallado de eventos para esta partida.
+                  </div>
+                ) : (
+                  selectedMatch.log.map((logItem, index) => {
+                    const isSystem = logItem.startsWith('★') || logItem.toLowerCase().includes('gana');
+                    return (
+                      <div
+                        key={index}
+                        style={{
+                          background: isSystem ? 'rgba(0, 242, 255, 0.04)' : 'rgba(255, 255, 255, 0.02)',
+                          borderLeft: isSystem ? '3px solid #00f2ff' : '2px solid rgba(255, 255, 255, 0.1)',
+                          padding: '0.6rem 1rem',
+                          borderRadius: '0.5rem',
+                          fontSize: '0.85rem',
+                          lineHeight: '1.4',
+                          color: isSystem ? '#e0f8ff' : 'rgba(255, 255, 255, 0.85)',
+                          display: 'flex',
+                          gap: '0.5rem',
+                          alignItems: 'flex-start'
+                        }}
+                      >
+                        <span style={{ opacity: 0.3, fontWeight: 'bold' }}>#{index + 1}</span>
+                        <span>{logItem}</span>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+
+              {/* Close Button */}
+              <button
+                onClick={() => setSelectedMatch(null)}
+                className="btn-hover-dark"
+                style={{
+                  background: '#fff',
+                  border: 'none',
+                  color: '#000',
+                  height: '42px',
+                  borderRadius: '1rem',
+                  marginTop: '1.5rem',
+                  fontSize: '0.9rem',
+                  fontWeight: 900,
+                  cursor: 'pointer',
+                  width: '100%',
+                  boxShadow: '4px 4px 0px #000'
+                }}
+              >
+                CERRAR
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Twitch Button - Way Down Bottom & Centered */}
+      <a
+        href="https://twitch.tv/muchomovimiento/videos"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="btn-hover-dark"
+        style={{
+          position: 'fixed',
+          bottom: window.innerWidth < 768 ? '1.5rem' : '4.5rem',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          background: 'rgba(145, 70, 255, 0.2)',
+          backdropFilter: 'blur(12px)',
+          border: '1px solid rgba(145, 70, 255, 0.3)',
+          color: 'white',
+          height: '40px',
+          padding: '0 1.25rem',
+          borderRadius: '1rem',
+          textDecoration: 'none',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.6rem',
+          fontSize: '0.75rem',
+          fontWeight: 800,
+          letterSpacing: '0.05em',
+          zIndex: 1000,
+          textTransform: 'uppercase',
+          transition: 'all 0.25s ease'
+        }}
+        title="Twitch"
+      >
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M21 2H3v16h5v4l4-4h5l4-4V2zm-10 9V7m5 4V7" />
+        </svg>
+        MUCHOMOVIMIENTO
+      </a>
+    </div>
+  );
+};
