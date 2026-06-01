@@ -21,6 +21,8 @@ import { useTranslation } from "react-i18next";
 import { supabase } from "../../lib/supabase";
 import { TournamentFormModal } from "./TournamentFormModal";
 import { CreatorProfileModal } from "./CreatorProfileModal";
+import { TournamentBracketModal } from "./TournamentBracketModal";
+import { TournamentPlayersModal } from "./TournamentPlayersModal";
 import {
   formatTournamentPrizes,
   normalizeTournamentPrizes,
@@ -84,6 +86,10 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
   const [isCreatorProfileModalOpen, setIsCreatorProfileModalOpen] =
     useState(false);
   const [editingCreator, setEditingCreator] = useState<any>(null);
+  const [playersModalTournament, setPlayersModalTournament] = useState<any>(null);
+  const [playersModalRegs, setPlayersModalRegs] = useState<any[]>([]);
+  const [bracketModalTournament, setBracketModalTournament] = useState<any>(null);
+  const [bracketModalRegs, setBracketModalRegs] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<
     | "players"
     | "matches"
@@ -238,6 +244,38 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
     } catch (err: any) {
       alert("Error cambiando estado: " + err.message);
     }
+  };
+
+  const handleCloseRegistrations = async (tournamentId: string) => {
+    const { error } = await supabase
+      .from("tournaments")
+      .update({ status: "closed" })
+      .eq("id", tournamentId);
+    if (!error)
+      setTournaments((prev) =>
+        prev.map((t) =>
+          t.id === tournamentId ? { ...t, status: "closed" } : t,
+        ),
+      );
+    else alert("Error al cerrar: " + error.message);
+  };
+
+  const openPlayersModal = async (tournament: any) => {
+    const { data } = await supabase
+      .from("tournament_registrations")
+      .select("user_id, code_used")
+      .eq("tournament_id", tournament.id);
+    setPlayersModalRegs(data || []);
+    setPlayersModalTournament(tournament);
+  };
+
+  const openBracketModal = async (tournament: any) => {
+    const { data } = await supabase
+      .from("tournament_registrations")
+      .select("user_id, code_used")
+      .eq("tournament_id", tournament.id);
+    setBracketModalRegs(data || []);
+    setBracketModalTournament(tournament);
   };
 
   /*
@@ -1369,7 +1407,80 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
                     </div>
 
                     {/* Actions */}
-                    <div style={{ display: "flex", gap: "0.75rem" }}>
+                    <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+                      {tournament.status === "open" && (
+                        <button
+                          onClick={() => handleCloseRegistrations(tournament.id)}
+                          style={{
+                            background: "rgba(255, 120, 0, 0.15)",
+                            border: "1px solid rgba(255, 120, 0, 0.3)",
+                            color: "#ff7800",
+                            height: "36px",
+                            padding: "0 0.85rem",
+                            borderRadius: "0.75rem",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "0.4rem",
+                            cursor: "pointer",
+                            fontSize: "0.75rem",
+                            fontWeight: 800,
+                          }}
+                        >
+                          Cerrar Inscripciones
+                        </button>
+                      )}
+                      {(tournament.status === "open" ||
+                        tournament.status === "closed") && (
+                        <button
+                          onClick={() => openPlayersModal(tournament)}
+                          style={{
+                            background: "rgba(255,255,255,0.08)",
+                            border: "1px solid rgba(255,255,255,0.15)",
+                            color: "#fff",
+                            height: "36px",
+                            padding: "0 0.85rem",
+                            borderRadius: "0.75rem",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "0.4rem",
+                            cursor: "pointer",
+                            fontSize: "0.75rem",
+                            fontWeight: 800,
+                          }}
+                        >
+                          Editar Jugadores
+                        </button>
+                      )}
+                      {tournament.status === "closed" && (
+                        <button
+                          onClick={() => {
+                            const enrolled = usedCodes[tournament.id]?.length || 0;
+                            const min = tournament.min_participants || 4;
+                            if (enrolled < min) {
+                              alert(`No se puede iniciar el torneo. Faltan jugadores. (Inscritos: ${enrolled}, Mínimo requerido: ${min})`);
+                              return;
+                            }
+                            openBracketModal(tournament);
+                          }}
+                          style={{
+                            background: "rgba(168, 85, 247, 0.2)",
+                            border: "1px solid rgba(168, 85, 247, 0.4)",
+                            color: "#a855f7",
+                            height: "36px",
+                            padding: "0 0.85rem",
+                            borderRadius: "0.75rem",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "0.4rem",
+                            cursor: "pointer",
+                            fontSize: "0.75rem",
+                            fontWeight: 800,
+                            boxShadow: "3px 3px 0 #000",
+                          }}
+                        >
+                          ▶ Iniciar con Bracket
+                        </button>
+                      )}
                       <button
                         onClick={() => {
                           setFormTournament(tournament);
@@ -1379,15 +1490,15 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
                           background: "rgba(255,255,255,0.1)",
                           border: "none",
                           color: "#fff",
-                          width: "40px",
-                          height: "40px",
+                          width: "36px",
+                          height: "36px",
                           borderRadius: "0.75rem",
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
                           cursor: "pointer",
                         }}
-                        title="Editar (Ir a Creador)"
+                        title="Editar"
                       >
                         <Edit2 size={16} />
                       </button>
@@ -1397,8 +1508,8 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
                           background: "rgba(239, 68, 68, 0.2)",
                           border: "none",
                           color: "#ef4444",
-                          width: "40px",
-                          height: "40px",
+                          width: "36px",
+                          height: "36px",
                           borderRadius: "0.75rem",
                           display: "flex",
                           alignItems: "center",
@@ -1432,7 +1543,7 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
                     <span>
                       Cupos:{" "}
                       <strong>
-                        {tournament.participants} /{" "}
+                        {usedCodes[tournament.id]?.length || 0} /{" "}
                         {tournament.max_participants}
                       </strong>
                     </span>
@@ -1686,6 +1797,11 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
                           <span>
                             Fecha: <strong>{formatDate(app.created_at)}</strong>
                           </span>
+                          {app.motivation && (
+                            <span style={{ marginTop: "0.25rem", borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: "0.5rem" }}>
+                              Motivación: <strong style={{ fontStyle: "italic", opacity: 0.9 }}>"{app.motivation}"</strong>
+                            </span>
+                          )}
                         </div>
                       </div>
 
@@ -1709,28 +1825,6 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
                           title="Aprobar"
                         >
                           <Check size={18} />
-                        </button>
-                        <button
-                          onClick={() => {
-                            setEditingCreator(app);
-                            setIsCreatorProfileModalOpen(true);
-                          }}
-                          style={{
-                            background: "rgba(168, 85, 247, 0.2)",
-                            border: "1px solid rgba(168, 85, 247, 0.5)",
-                            color: "#a855f7",
-                            height: "40px",
-                            padding: "0 1rem",
-                            borderRadius: "0.75rem",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "0.5rem",
-                            cursor: "pointer",
-                            fontWeight: 800,
-                          }}
-                          title="Editar Perfil"
-                        >
-                          <Edit2 size={16} /> Editar Perfil
                         </button>
                         <button
                           onClick={() =>
@@ -1888,10 +1982,37 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
                           <span>
                             Fecha: <strong>{formatDate(app.created_at)}</strong>
                           </span>
+                          {app.motivation && (
+                            <span style={{ marginTop: "0.25rem", borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: "0.5rem" }}>
+                              Motivación: <strong style={{ fontStyle: "italic", opacity: 0.9 }}>"{app.motivation}"</strong>
+                            </span>
+                          )}
                         </div>
                       </div>
 
                       <div style={{ display: "flex", gap: "0.75rem" }}>
+                        <button
+                          onClick={() => {
+                            setEditingCreator(app);
+                            setIsCreatorProfileModalOpen(true);
+                          }}
+                          style={{
+                            background: "rgba(168, 85, 247, 0.2)",
+                            border: "1px solid rgba(168, 85, 247, 0.5)",
+                            color: "#a855f7",
+                            height: "40px",
+                            padding: "0 1rem",
+                            borderRadius: "0.75rem",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "0.5rem",
+                            cursor: "pointer",
+                            fontWeight: 800,
+                          }}
+                          title="Editar Perfil"
+                        >
+                          <Edit2 size={16} /> Editar Perfil
+                        </button>
                         <button
                           onClick={() =>
                             handleApplicationStatus(app.id, "rejected")
@@ -2349,6 +2470,21 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
         isOpen={isCreatorProfileModalOpen}
         onClose={() => setIsCreatorProfileModalOpen(false)}
         creator={editingCreator}
+        onSuccess={fetchGlobalData}
+      />
+      <TournamentPlayersModal
+        isOpen={!!playersModalTournament}
+        onClose={() => setPlayersModalTournament(null)}
+        tournament={playersModalTournament}
+        registrations={playersModalRegs}
+        onSuccess={fetchGlobalData}
+      />
+
+      <TournamentBracketModal
+        isOpen={!!bracketModalTournament}
+        onClose={() => setBracketModalTournament(null)}
+        tournament={bracketModalTournament}
+        registrations={bracketModalRegs}
         onSuccess={fetchGlobalData}
       />
     </div>

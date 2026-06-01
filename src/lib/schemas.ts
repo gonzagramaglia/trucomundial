@@ -8,10 +8,11 @@ export const tournamentSchema = z
       .number()
       .min(4, "Debe haber un máximo de al menos 4 participantes")
       .max(32, "El máximo no puede superar 32"),
-    participants: z
+    min_participants: z
       .number()
       .min(4, "El mínimo de participantes debe ser al menos 4")
       .max(32, "El máximo no puede superar 32"),
+    participants: z.number().optional(),
     start_time: z.string().nonempty("La fecha y hora son obligatorias"),
     prize: z
       .array(z.string().trim().min(1, "El premio no puede estar vacío"))
@@ -24,9 +25,9 @@ export const tournamentSchema = z
     codes: z.array(z.string()).optional(),
     description: z.string().optional(),
   })
-  .refine((data) => data.participants <= data.max_participants, {
+  .refine((data) => data.min_participants <= data.max_participants, {
     message: "El mínimo de participantes no puede superar al máximo",
-    path: ["participants"],
+    path: ["min_participants"],
   })
   .refine((data) => data.prize.length <= data.max_participants, {
     message:

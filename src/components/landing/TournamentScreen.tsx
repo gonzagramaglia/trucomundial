@@ -19,7 +19,6 @@ import { useTranslation } from "react-i18next";
 import { supabase } from "../../lib/supabase";
 import {
   formatTournamentDate,
-  formatTournamentPrizes,
   normalizeTournamentPrizes,
 } from "../../lib/formatters";
 
@@ -46,7 +45,7 @@ interface Tournament {
 }
 
 const MOCK_RANKING = [
-  { id: 1, name: "GonzaGramaglia", score: 2500, position: 1 },
+  { id: 1, name: "TimPayne", score: 2500, position: 1 },
   { id: 2, name: "Messi10", score: 2350, position: 2 },
   { id: 3, name: "ElDibu", score: 2100, position: 3 },
   { id: 4, name: "Player123", score: 1900, position: 4 },
@@ -996,19 +995,21 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({
                     <div
                       style={{
                         display: "flex",
-                        alignItems: "center",
-                        gap: "0.5rem",
+                        alignItems: "flex-start",
+                        gap: "0.4rem",
                         fontSize: "0.8rem",
                         opacity: 0.85,
                       }}
                     >
-                      <Zap size={15} style={{ color: "#ff7800" }} />
-                      <span>
-                        {t("prize")}:{" "}
-                        <strong style={{ color: "#ff7800" }}>
-                          {formatTournamentPrizes(tournament.prize)}
-                        </strong>
-                      </span>
+                      <Zap size={17} style={{ color: "#ff7800", marginTop: "0.15rem", flexShrink: 0 }} />
+                      <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+                        <span>{tournament.prize.length > 1 ? "Premios:" : `${t("prize")}:`}</span>
+                        {tournament.prize.map((p: string, i: number) => (
+                          <strong key={i} style={{ color: "#ff7800" }}>
+                            {i + 1}º {p}
+                          </strong>
+                        ))}
+                      </div>
                     </div>
 
                     {/* Organizer Info */}

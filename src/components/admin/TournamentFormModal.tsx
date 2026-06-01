@@ -70,6 +70,7 @@ export const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
           name: "",
           status: "open",
           participants: 0,
+          min_participants: 4,
           max_participants: 16,
           start_time: defaultDate,
           prize: [""],
@@ -246,17 +247,17 @@ export const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
                 <input
                   type="number"
                   value={
-                    formData.participants === 0 ? "" : formData.participants
+                    formData.min_participants === 0 ? "" : formData.min_participants
                   }
                   onChange={(e) => {
                     const val = parseInt(e.target.value) || 0;
                     const max = formData.max_participants || 0;
-                    updateFormData({ participants: val > max ? max : val });
+                    updateFormData({ min_participants: val > max ? max : val });
                   }}
                   style={{
                     width: "100%",
                     background: "rgba(0,0,0,0.3)",
-                    border: errors.participants
+                    border: errors.min_participants
                       ? "1px solid rgba(239, 68, 68, 0.5)"
                       : "1px solid rgba(255,255,255,0.2)",
                     color: "#fff",
@@ -264,7 +265,7 @@ export const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
                     borderRadius: "0.75rem",
                   }}
                 />
-                {errors.participants && (
+                {errors.min_participants && (
                   <span
                     style={{
                       color: "#ef4444",
@@ -274,7 +275,7 @@ export const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
                       fontWeight: 700,
                     }}
                   >
-                    {errors.participants.message}
+                    {errors.min_participants.message}
                   </span>
                 )}
               </div>
@@ -300,11 +301,11 @@ export const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
                   }
                   onChange={(e) => {
                     const val = parseInt(e.target.value) || 0;
-                    const currentMin = formData.participants || 0;
+                    const currentMin = formData.min_participants || 0;
                     const nextMax = val > 32 ? 32 : val;
                     updateFormData({
                       max_participants: nextMax,
-                      participants: currentMin > nextMax ? nextMax : currentMin,
+                      min_participants: currentMin > nextMax ? nextMax : currentMin,
                       prize: (formData.prize || []).slice(0, nextMax),
                     });
                   }}
@@ -312,10 +313,10 @@ export const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
                     let val = parseInt(e.target.value) || 0;
                     if (val < 4) val = 4;
                     if (val > 32) val = 32;
-                    const currentMin = formData.participants || 0;
+                    const currentMin = formData.min_participants || 0;
                     updateFormData({
                       max_participants: val,
-                      participants: currentMin > val ? val : currentMin,
+                      min_participants: currentMin > val ? val : currentMin,
                       prize: (formData.prize || []).slice(0, val),
                     });
                   }}

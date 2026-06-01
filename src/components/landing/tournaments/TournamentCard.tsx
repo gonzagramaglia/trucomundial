@@ -1,7 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Zap, Clock, Lock, CheckCircle2 } from "lucide-react";
-import { formatTournamentPrizes } from "../../../lib/formatters";
+
 import type { Tournament } from "./types";
 
 interface Props {
@@ -72,19 +72,21 @@ const TournamentCard: React.FC<Props> = ({
           <div
             style={{
               display: "flex",
-              alignItems: "center",
-              gap: "0.5rem",
+              alignItems: "flex-start",
+              gap: "0.4rem",
               fontSize: "0.8rem",
               opacity: 0.85,
             }}
           >
-            <Zap size={15} style={{ color: "#ff7800" }} />
-            <span>
-              Premio:{" "}
-              <strong style={{ color: "#ff7800" }}>
-                {formatTournamentPrizes(tournament.prize)}
-              </strong>
-            </span>
+            <Zap size={17} style={{ color: "#ff7800", marginTop: "0.15rem", flexShrink: 0 }} />
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+              <span>{tournament.prize.length > 1 ? "Premios:" : "Premio:"}</span>
+              {tournament.prize.map((p, i) => (
+                <strong key={i} style={{ color: "#ff7800" }}>
+                  {i + 1}º {p}
+                </strong>
+              ))}
+            </div>
           </div>
         </div>
       </div>

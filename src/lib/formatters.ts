@@ -26,7 +26,31 @@ export const formatTournamentDate = (dateStr: string) => {
 };
 
 export const normalizeTournamentPrizes = (prizes: unknown): string[] => {
+  if (typeof prizes === "string") {
+    const trimmed = prizes.trim();
+    if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
+      try {
+        const parsed = JSON.parse(trimmed);
+        if (Array.isArray(parsed)) {
+          return normalizeTournamentPrizes(parsed);
+        }
+      } catch (e) {}
+    }
+  }
+
   if (Array.isArray(prizes)) {
+    if (prizes.length === 1 && typeof prizes[0] === "string") {
+      const trimmed = prizes[0].trim();
+      if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
+        try {
+          const parsed = JSON.parse(trimmed);
+          if (Array.isArray(parsed)) {
+            return normalizeTournamentPrizes(parsed);
+          }
+        } catch (e) {}
+      }
+    }
+
     const normalized = prizes
       .map((prize) => String(prize).trim())
       .filter(Boolean);

@@ -47,6 +47,7 @@ export interface Tournament {
   name: string;
   status: "open" | "closed" | "active" | "finished";
   participants: number;
+  min_participants: number;
   max_participants: number;
   start_time: string;
   prize: string[];
@@ -923,7 +924,15 @@ export const CreatorScreen: React.FC<CreatorScreenProps> = ({
                     )}
                     {tournament.status === "closed" && (
                       <button
-                        onClick={() => openBracketModal(tournament)}
+                        onClick={() => {
+                          const enrolled = usedCodes[tournament.id]?.length || 0;
+                          const min = tournament.min_participants || 4;
+                          if (enrolled < min) {
+                            alert(`No se puede iniciar el torneo. Faltan jugadores. (Inscritos: ${enrolled}, Mínimo requerido: ${min})`);
+                            return;
+                          }
+                          openBracketModal(tournament);
+                        }}
                         style={{
                           background: "rgba(168, 85, 247, 0.2)",
                           border: "1px solid rgba(168, 85, 247, 0.4)",
@@ -1003,7 +1012,7 @@ export const CreatorScreen: React.FC<CreatorScreenProps> = ({
                   <span>
                     Cupos:{" "}
                     <strong>
-                      {tournament.participants} / {tournament.max_participants}
+                      {usedCodes[tournament.id]?.length || 0} / {tournament.max_participants}
                     </strong>
                   </span>
                   <span>
@@ -1186,8 +1195,9 @@ export const CreatorScreen: React.FC<CreatorScreenProps> = ({
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+              gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr 1fr auto",
               gap: "1.5rem",
+              alignItems: "end",
             }}
           >
             <div>
@@ -1327,66 +1337,33 @@ export const CreatorScreen: React.FC<CreatorScreenProps> = ({
                 </span>
               )}
             </div>
-          </div>
 
-          <div>
-            <label
+            <button
+              type="submit"
+              disabled={profileUpdating}
+              className="btn-hover-dark"
               style={{
+                background: "#ff7800",
+                border: "none",
+                color: "#000",
+                height: "50px",
+                padding: "0 1.5rem",
+                borderRadius: "1rem",
+                fontWeight: 900,
+                fontSize: "1rem",
+                cursor: profileUpdating ? "not-allowed" : "pointer",
+                opacity: profileUpdating ? 0.7 : 1,
+                boxShadow: "4px 4px 0px #000",
                 display: "flex",
                 alignItems: "center",
+                justifyContent: "center",
                 gap: "0.5rem",
-                marginBottom: "0.5rem",
-                fontSize: "0.85rem",
-                fontWeight: 800,
               }}
             >
-              <MessageSquare size={16} style={{ color: "#ff7800" }} />
-              {t("motivation")}
-            </label>
-            <textarea
-              {...registerProfile("motivation")}
-              style={{
-                width: "100%",
-                background: "rgba(0,0,0,0.3)",
-                border: "1px solid rgba(255,255,255,0.2)",
-                color: "#fff",
-                padding: "1rem",
-                borderRadius: "1rem",
-                fontSize: "1rem",
-                fontFamily: "inherit",
-                minHeight: "100px",
-                resize: "vertical",
-                outline: "none",
-                boxSizing: "border-box",
-              }}
-            />
+              <Save size={18} />
+              {profileUpdating ? t("saving_changes") : t("save_changes")}
+            </button>
           </div>
-
-          <button
-            type="submit"
-            disabled={profileUpdating}
-            className="btn-hover-dark"
-            style={{
-              background: "#ff7800",
-              border: "none",
-              color: "#000",
-              height: "48px",
-              borderRadius: "1rem",
-              fontWeight: 900,
-              fontSize: "1rem",
-              cursor: profileUpdating ? "not-allowed" : "pointer",
-              opacity: profileUpdating ? 0.7 : 1,
-              marginTop: "1rem",
-              boxShadow: "4px 4px 0px #000",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "0.5rem",
-            }}
-          >
-            <Save size={18} />
-            {profileUpdating ? t("saving_changes") : t("save_changes")}
-          </button>
         </form>
       </div>
 
