@@ -25,7 +25,11 @@ import {
   ticketSchema,
   type TicketFormData,
 } from "../../lib/schemas";
-import { formatTournamentDate } from "../../lib/formatters";
+import {
+  formatTournamentDate,
+  formatTournamentPrizes,
+  normalizeTournamentPrizes,
+} from "../../lib/formatters";
 import { TournamentFormModal } from "./TournamentFormModal";
 import { TournamentPlayersModal } from "./TournamentPlayersModal";
 import { TournamentBracketModal } from "./TournamentBracketModal";
@@ -45,7 +49,7 @@ export interface Tournament {
   participants: number;
   max_participants: number;
   start_time: string;
-  prize: string;
+  prize: string[];
   bg_gradient: string;
   winner: string | null;
   organizer: string;
@@ -234,7 +238,12 @@ export const CreatorScreen: React.FC<CreatorScreenProps> = ({
       if (error) {
         console.error("Error fetching tournaments:", error);
       } else if (data) {
-        setTournaments(data);
+        setTournaments(
+          data.map((tournament: any) => ({
+            ...tournament,
+            prize: normalizeTournamentPrizes(tournament.prize),
+          })),
+        );
         if (data.length > 0) {
           const tIds = data.map((t: any) => t.id);
           const { data: regData } = await supabase
@@ -998,7 +1007,8 @@ export const CreatorScreen: React.FC<CreatorScreenProps> = ({
                     </strong>
                   </span>
                   <span>
-                    Premio: <strong>{tournament.prize}</strong>
+                    Premio:{" "}
+                    <strong>{formatTournamentPrizes(tournament.prize)}</strong>
                   </span>
                   <span>
                     Visibilidad:{" "}
