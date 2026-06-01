@@ -1,20 +1,18 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { Zap, Clock, Lock, CheckCircle2, Info } from "lucide-react";
+import { Zap, Clock, Lock, CheckCircle2 } from "lucide-react";
 import { formatTournamentPrizes } from "../../../lib/formatters";
 import type { Tournament } from "./types";
 
 interface Props {
   tournament: Tournament;
   isRegistered: boolean;
-  openInfo: (t: Tournament) => void;
   handleEnrollClick: (t: Tournament) => void;
 }
 
 const TournamentCard: React.FC<Props> = ({
   tournament,
   isRegistered,
-  openInfo,
   handleEnrollClick,
 }) => {
   return (
@@ -93,11 +91,24 @@ const TournamentCard: React.FC<Props> = ({
 
       <div style={{ display: "flex", gap: "0.75rem" }}>
         <button
-          onClick={() => openInfo(tournament)}
+          onClick={() => {
+            const isEn =
+              typeof window !== "undefined" &&
+              window.location.pathname.startsWith("/en");
+            window.history.pushState(
+              {},
+              "",
+              isEn
+                ? `/en/torneos/${tournament.id}`
+                : `/torneos/${tournament.id}`,
+            );
+            window.dispatchEvent(new PopStateEvent("popstate"));
+          }}
           className="btn-hover-dark"
           style={{
             height: "46px",
-            width: "46px",
+            minWidth: "64px",
+            padding: "0 0.85rem",
             flexShrink: 0,
             borderRadius: "1.25rem",
             background: "rgba(255,255,255,0.08)",
@@ -107,10 +118,14 @@ const TournamentCard: React.FC<Props> = ({
             alignItems: "center",
             justifyContent: "center",
             cursor: "pointer",
+            fontWeight: 900,
+            letterSpacing: "0.06em",
+            textTransform: "uppercase",
+            fontSize: "0.85rem",
           }}
-          title="Ver info del torneo"
+          title="INFO"
         >
-          <Info size={18} />
+          INFO
         </button>
 
         <button

@@ -151,7 +151,17 @@ const EnrollmentModal: React.FC<Props> = ({
             Cancelar
           </button>
           <button
-            onClick={submitEnrollment}
+            onClick={async () => {
+              await submitEnrollment();
+              // if no error after submission, navigate to tournament page
+              if (!enrollError && enrollModalTournament) {
+                const path = window.location.pathname.startsWith("/en")
+                  ? `/en/torneos/${enrollModalTournament.id}`
+                  : `/torneos/${enrollModalTournament.id}`;
+                window.history.pushState({}, "", path);
+                window.dispatchEvent(new PopStateEvent("popstate"));
+              }
+            }}
             disabled={enrolling || !enrollCode}
             style={{
               flex: 1,

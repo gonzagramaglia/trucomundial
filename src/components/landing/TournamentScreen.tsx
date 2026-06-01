@@ -273,6 +273,16 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({
         prev.map((x) => (x.id === t.id ? { ...x, participants: newCount } : x)),
       );
       setEnrollModalTournament(null);
+      // navigate to tournament event page after successful enrollment
+      try {
+        const path = window.location.pathname.startsWith("/en")
+          ? `/en/torneos/${t.id}`
+          : `/torneos/${t.id}`;
+        window.history.pushState({}, "", path);
+        window.dispatchEvent(new PopStateEvent("popstate"));
+      } catch (e) {
+        // ignore navigation errors
+      }
     } catch (err: any) {
       setEnrollError("Error: " + err.message);
     } finally {
