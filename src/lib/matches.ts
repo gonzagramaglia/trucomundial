@@ -47,6 +47,15 @@ export async function saveMatchLog(matchId: string, log: unknown) {
   return data;
 }
 
+export async function saveMatchLogByCode(matchCode: string, log: unknown) {
+  const { data, error } = await supabase
+    .from("tournament_matches")
+    .update({ log: log, ended_at: new Date().toISOString() })
+    .eq("match_code", matchCode);
+  if (error) throw error;
+  return data;
+}
+
 export async function getMatchesByTournament(tournamentId: string) {
   const { data, error } = await supabase
     .from("tournament_matches")
