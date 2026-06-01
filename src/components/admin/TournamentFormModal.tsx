@@ -299,6 +299,17 @@ export const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
             </div>
 
             <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', fontWeight: 800 }}>Descripción (opcional)</label>
+              <textarea
+                value={formData.description || ''}
+                onChange={(e) => updateFormData({ description: e.target.value })}
+                rows={3}
+                placeholder="Descripción del torneo, reglas, formato..."
+                style={{ width: '100%', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.2)', color: '#fff', padding: '0.75rem', borderRadius: '0.75rem', resize: 'vertical', fontFamily: 'inherit', fontSize: '0.9rem', boxSizing: 'border-box' }}
+              />
+            </div>
+
+            <div>
               <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', fontWeight: 800 }}>{t('access_code_type')}</label>
               <select
                 value={formData.code_type || 'single'}

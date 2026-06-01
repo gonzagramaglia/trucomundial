@@ -56,7 +56,7 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
   const [applications, setApplications] = useState<CreatorApplication[]>([]);
   const [tournaments, setTournaments] = useState<any[]>([]);
   const [tickets, setTickets] = useState<any[]>([]);
-  const [usedCodes, setUsedCodes] = useState<Record<string, string[]>>({});
+  const [usedCodes, setUsedCodes] = useState<Record<string, { code: string; userId: string }[]>>({});
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   console.log(deleteConfirmId); // keep typescript happy
   const [selectedMatch, setSelectedMatch] = useState<MatchSummary | null>(null);
@@ -141,14 +141,14 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
             const tIds = tourneysData.map((t: any) => t.id);
             const { data: regData } = await supabase
               .from('tournament_registrations')
-              .select('tournament_id, code_used')
+              .select('tournament_id, code_used, user_id')
               .in('tournament_id', tIds);
               
             if (regData) {
-              const codeMap: Record<string, string[]> = {};
+              const codeMap: Record<string, { code: string; userId: string }[]> = {};
               regData.forEach((r: any) => {
                 if (!codeMap[r.tournament_id]) codeMap[r.tournament_id] = [];
-                if (r.code_used) codeMap[r.tournament_id].push(r.code_used);
+                if (r.code_used) codeMap[r.tournament_id].push({ code: r.code_used, userId: r.user_id || '' });
               });
               setUsedCodes(codeMap);
             }
@@ -927,7 +927,8 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
                   ) : (
                     <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                       {tournament.codes?.map((code: string, idx: number) => {
-                        const isUsed = usedCodes[tournament.id]?.includes(code);
+                        const usedEntry = usedCodes[tournament.id]?.find(e => e.code === code);
+                        const isUsed = !!usedEntry;
                         return (
                           <div key={idx} style={{
                             background: 'rgba(255,255,255,0.05)',
@@ -938,11 +939,19 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
                             border: isUsed ? '1px solid rgba(16, 185, 129, 0.5)' : '1px solid rgba(255,255,255,0.1)',
                             color: isUsed ? '#10b981' : '#fff',
                             display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.4rem'
+                            flexDirection: 'column',
+                            alignItems: 'flex-start',
+                            gap: '0.2rem'
                           }}>
-                            {code}
-                            {isUsed && <CheckCircle2 size={14} color="#10b981" />}
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                              {code}
+                              {isUsed && <CheckCircle2 size={14} color="#10b981" />}
+                            </span>
+                            {isUsed && usedEntry.userId && (
+                              <span style={{ fontSize: '0.65rem', opacity: 0.6, letterSpacing: '0', maxWidth: '130px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                {usedEntry.userId}
+                              </span>
+                            )}
                           </div>
                         );
                       })}

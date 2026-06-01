@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Trophy, Lock, Award, Zap, Clock, ShieldCheck, User, Edit2, ChevronLeft, ChevronRight, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Trophy, Lock, Award, Zap, Clock, ShieldCheck, User, Edit2, ChevronLeft, ChevronRight, CheckCircle2, Info } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '../../lib/supabase';
 import { formatTournamentDate } from '../../lib/formatters';
@@ -24,6 +24,7 @@ interface Tournament {
   organizer: string;
   code_type?: string;
   codes?: string[];
+  description?: string;
 }
 
 const MOCK_RANKING = [
@@ -69,6 +70,9 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({ user, handle
   const [enrollCode, setEnrollCode] = useState('');
   const [enrollError, setEnrollError] = useState('');
   const [enrolling, setEnrolling] = useState(false);
+  // Info modal state
+  const [infoModalTournament, setInfoModalTournament] = useState<Tournament | null>(null);
+  const [infoRegistrations, setInfoRegistrations] = useState<{ user_id: string; code_used: string }[]>([]);
 
   // Fetch tournaments from DB
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
@@ -111,6 +115,15 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({ user, handle
     };
     fetchTournaments();
   }, []);
+
+  const openInfoModal = async (tournament: Tournament) => {
+    setInfoModalTournament(tournament);
+    const { data } = await supabase
+      .from('tournament_registrations')
+      .select('user_id, code_used')
+      .eq('tournament_id', tournament.id);
+    setInfoRegistrations(data || []);
+  };
 
   const handleEnrollClick = (tournament: Tournament) => {
     if (!user) {
@@ -689,52 +702,75 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({ user, handle
                 </div>
               </div>
 
-              {/* Action Button */}
-              <div>
-                      <button
-                        onClick={() => handleEnrollClick(tournament as any)}
-                        disabled={isRegistered || tournament.status !== 'open' || tournament.participants >= tournament.max_participants}
-                        className={`btn-hover-dark ${isRegistered ? 'disabled-btn' : ''}`}
-                        style={{
-                          width: '100%',
-                          height: '46px',
-                          borderRadius: '1.25rem',
-                          background: isRegistered ? 'rgba(16, 185, 129, 0.1)' : (tournament.status !== 'open' || tournament.participants >= tournament.max_participants) ? 'rgba(255,255,255,0.06)' : '#a855f7',
-                          border: isRegistered ? '1px solid rgba(16, 185, 129, 0.3)' : (tournament.status !== 'open' || tournament.participants >= tournament.max_participants) ? '1px solid rgba(255,255,255,0.1)' : 'none',
-                          color: isRegistered ? '#10b981' : (tournament.status !== 'open' || tournament.participants >= tournament.max_participants) ? 'rgba(255,255,255,0.4)' : '#fff',
-                          fontSize: '0.9rem',
-                          fontWeight: 950,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          gap: '0.5rem',
-                          cursor: (isRegistered || tournament.status !== 'open' || tournament.participants >= tournament.max_participants) ? 'not-allowed' : 'pointer',
-                          boxShadow: (isRegistered || tournament.status !== 'open' || tournament.participants >= tournament.max_participants) ? 'none' : '4px 4px 0px #000',
-                          opacity: (isRegistered || tournament.status !== 'open' || tournament.participants >= tournament.max_participants) ? 0.7 : 1
-                        }}
-                      >
-                        {isRegistered ? (
-                          <>
-                            <CheckCircle2 size={16} />
-                            INSCRIPTO
-                          </>
-                        ) : tournament.participants >= tournament.max_participants ? (
-                          <>
-                            <Lock size={16} />
-                            TORNEO LLENO
-                          </>
-                        ) : tournament.status === 'open' ? (
-                          <>
-                            <Lock size={16} />
-                            INSCRIBITE AHORA
-                          </>
-                        ) : (
-                          <>
-                            <Lock size={16} />
-                            INSCRIPCIONES CERRADAS
-                          </>
-                        )}
-                      </button>
+              {/* Action Buttons */}
+              <div style={{ display: 'flex', gap: '0.75rem' }}>
+                {/* Info Button */}
+                <button
+                  onClick={() => openInfoModal(tournament as any)}
+                  className="btn-hover-dark"
+                  style={{
+                    height: '46px',
+                    width: '46px',
+                    flexShrink: 0,
+                    borderRadius: '1.25rem',
+                    background: 'rgba(255,255,255,0.08)',
+                    border: '1px solid rgba(255,255,255,0.2)',
+                    color: '#fff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                  }}
+                  title="Ver info del torneo"
+                >
+                  <Info size={18} />
+                </button>
+
+                {/* Enroll Button */}
+                <button
+                  onClick={() => handleEnrollClick(tournament as any)}
+                  disabled={isRegistered || tournament.status !== 'open' || tournament.participants >= tournament.max_participants}
+                  className={`btn-hover-dark ${isRegistered ? 'disabled-btn' : ''}`}
+                  style={{
+                    flex: 1,
+                    height: '46px',
+                    borderRadius: '1.25rem',
+                    background: isRegistered ? 'rgba(16, 185, 129, 0.1)' : (tournament.status !== 'open' || tournament.participants >= tournament.max_participants) ? 'rgba(255,255,255,0.06)' : '#a855f7',
+                    border: isRegistered ? '1px solid rgba(16, 185, 129, 0.3)' : (tournament.status !== 'open' || tournament.participants >= tournament.max_participants) ? '1px solid rgba(255,255,255,0.1)' : 'none',
+                    color: isRegistered ? '#10b981' : (tournament.status !== 'open' || tournament.participants >= tournament.max_participants) ? 'rgba(255,255,255,0.4)' : '#fff',
+                    fontSize: '0.9rem',
+                    fontWeight: 950,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.5rem',
+                    cursor: (isRegistered || tournament.status !== 'open' || tournament.participants >= tournament.max_participants) ? 'not-allowed' : 'pointer',
+                    boxShadow: (isRegistered || tournament.status !== 'open' || tournament.participants >= tournament.max_participants) ? 'none' : '4px 4px 0px #000',
+                    opacity: (isRegistered || tournament.status !== 'open' || tournament.participants >= tournament.max_participants) ? 0.7 : 1
+                  }}
+                >
+                  {isRegistered ? (
+                    <>
+                      <CheckCircle2 size={16} />
+                      INSCRIPTO
+                    </>
+                  ) : tournament.participants >= tournament.max_participants ? (
+                    <>
+                      <Lock size={16} />
+                      TORNEO LLENO
+                    </>
+                  ) : tournament.status === 'open' ? (
+                    <>
+                      <Lock size={16} />
+                      INSCRIBITE
+                    </>
+                  ) : (
+                    <>
+                      <Lock size={16} />
+                      INSCRIPCIONES CERRADAS
+                    </>
+                  )}
+                </button>
               </div>
               </motion.div>
             );
@@ -901,6 +937,113 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({ user, handle
 
       {/* ENROLLMENT MODAL */}
       <AnimatePresence>
+      {/* Info Modal */}
+      <AnimatePresence>
+        {infoModalTournament && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2500, padding: '1rem'
+            }}
+            onClick={() => setInfoModalTournament(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: 20 }}
+              onClick={e => e.stopPropagation()}
+              style={{
+                background: 'rgba(18, 12, 28, 0.98)',
+                border: '1px solid rgba(168, 85, 247, 0.3)',
+                borderRadius: '2rem', padding: '2rem', width: '100%', maxWidth: '520px',
+                maxHeight: '85vh', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '1.5rem'
+              }}
+            >
+              {/* Header */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div>
+                  <h3 className="text-display" style={{ margin: 0, fontSize: '1.4rem', color: '#a855f7' }}>
+                    {infoModalTournament.name}
+                  </h3>
+                  <div style={{ opacity: 0.5, fontSize: '0.8rem', marginTop: '0.25rem' }}>
+                    Organizado por {infoModalTournament.organizer}
+                  </div>
+                </div>
+                <button onClick={() => setInfoModalTournament(null)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', fontSize: '1.4rem', opacity: 0.6 }}>✕</button>
+              </div>
+
+              {/* Description */}
+              {infoModalTournament.description && (
+                <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '1rem', padding: '1rem', fontSize: '0.9rem', lineHeight: 1.6, opacity: 0.85 }}>
+                  {infoModalTournament.description}
+                </div>
+              )}
+
+              {/* Codes */}
+              {infoModalTournament.codes && infoModalTournament.codes.length > 0 && (
+                <div>
+                  <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#ff7800', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    Códigos ({infoModalTournament.code_type === 'single' ? 'General' : 'Individuales'})
+                  </div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                    {infoModalTournament.codes.map((code, idx) => {
+                      const reg = infoRegistrations.find(r => r.code_used === code);
+                      const isUsed = !!reg;
+                      return (
+                        <div key={idx} style={{
+                          background: isUsed ? 'rgba(16, 185, 129, 0.1)' : 'rgba(255,255,255,0.05)',
+                          border: isUsed ? '1px solid rgba(16, 185, 129, 0.4)' : '1px solid rgba(255,255,255,0.1)',
+                          color: isUsed ? '#10b981' : 'rgba(255,255,255,0.7)',
+                          borderRadius: '0.75rem', padding: '0.4rem 0.8rem',
+                          fontFamily: 'monospace', fontSize: '0.9rem', fontWeight: 800,
+                          display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '0.1rem'
+                        }}>
+                          <span style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                            {code}
+                            {isUsed && <CheckCircle2 size={13} />}
+                          </span>
+                          {isUsed && reg.user_id && (
+                            <span style={{ fontSize: '0.6rem', opacity: 0.6, letterSpacing: 0, maxWidth: '130px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              {reg.user_id}
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Registered Users */}
+              <div>
+                <div style={{ fontSize: '0.8rem', fontWeight: 800, color: '#ff7800', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Inscriptos ({infoRegistrations.length} / {infoModalTournament.max_participants})
+                </div>
+                {infoRegistrations.length === 0 ? (
+                  <div style={{ opacity: 0.4, fontSize: '0.85rem' }}>Nadie se inscribió todavía.</div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    {infoRegistrations.map((r, idx) => (
+                      <div key={idx} style={{
+                        background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)',
+                        borderRadius: '0.75rem', padding: '0.5rem 0.75rem',
+                        fontSize: '0.8rem', fontFamily: 'monospace', display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+                      }}>
+                        <span style={{ opacity: 0.7, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '200px' }}>{r.user_id}</span>
+                        {r.code_used && <span style={{ color: '#a855f7', fontWeight: 800, fontSize: '0.75rem' }}>{r.code_used}</span>}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
         {enrollModalTournament && (
           <motion.div
             initial={{ opacity: 0 }}

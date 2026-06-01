@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 export const tournamentSchema = z.object({
   name: z.string().min(3, "El nombre debe tener al menos 3 caracteres"),
-  status: z.enum(['open', 'active', 'finished', 'cancelled']),
+  status: z.enum(['open', 'closed', 'active', 'finished', 'cancelled']),
   max_participants: z.number().min(4, "Debe haber un máximo de al menos 4 participantes").max(32, "El máximo no puede superar 32"),
   participants: z.number().min(4, "El mínimo de participantes debe ser al menos 4").max(32, "El máximo no puede superar 32"),
   start_time: z.string().nonempty("La fecha y hora son obligatorias"),
@@ -13,6 +13,7 @@ export const tournamentSchema = z.object({
   visibility: z.enum(['public', 'unlisted', 'private']),
   code_type: z.enum(['single', 'unique']),
   codes: z.array(z.string()).optional(),
+  description: z.string().optional(),
 }).refine(data => data.participants <= data.max_participants, {
   message: "El mínimo de participantes no puede superar al máximo",
   path: ["participants"],
