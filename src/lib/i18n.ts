@@ -602,7 +602,7 @@ const resources = {
       "create_first_tournament": "Creá tu primer torneo para empezar a organizar partidas.",
       "creator_profile_edit": "Editar Perfil de Creador",
       "contact_email_readonly": "Email de Contacto (Solo lectura)",
-      "channel_name": "Nombre del Canal (Ej: TrucoMundialTV)",
+      "channel_name": "Nombre del Canal",
       "main_social_link": "Link a tu Red Social principal",
       "main_streaming_link": "Link a tu canal de streaming principal",
       "motivation": "Motivación (Por qué querés ser creador)",

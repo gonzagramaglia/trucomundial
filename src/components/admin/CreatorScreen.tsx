@@ -264,13 +264,11 @@ export const CreatorScreen: React.FC<CreatorScreenProps> = ({ user, onBack }) =>
   };
 
   const handleDelete = async (id: string) => {
-    if (window.confirm('¿Seguro que querés eliminar este torneo?')) {
-      const { error } = await supabase.from('tournaments').delete().eq('id', id);
-      if (!error) {
-        setTournaments(prev => prev.filter(t => t.id !== id));
-      } else {
-        alert('Error al eliminar: ' + error.message);
-      }
+    const { error } = await supabase.from('tournaments').delete().eq('id', id);
+    if (!error) {
+      setTournaments(prev => prev.filter(t => t.id !== id));
+    } else {
+      alert('Error al eliminar: ' + error.message);
     }
   };
 
@@ -1265,9 +1263,11 @@ export const CreatorScreen: React.FC<CreatorScreenProps> = ({ user, onBack }) =>
                   className="btn-hover-dark"
                   style={{
                     flex: 1, background: '#ef4444', border: 'none', color: '#fff',
-                    height: '44px', borderRadius: '1rem', fontWeight: 800, cursor: 'pointer'
+                    height: '44px', borderRadius: '1rem', fontWeight: 800, cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem'
                   }}
                 >
+                  <Trash2 size={18} />
                   Eliminar
                 </button>
               </div>
