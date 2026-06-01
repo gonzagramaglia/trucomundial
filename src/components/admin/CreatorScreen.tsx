@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Trophy, Users, Calendar, Plus, X, ArrowLeft, MoreVertical, ShieldCheck, CheckCircle2, MessageSquare, Save, Search, Settings, Trash2, Edit2, FileText, Send, User, ShieldAlert, LogOut, Link } from 'lucide-react';
+import { Trophy, Plus, X, ArrowLeft, CheckCircle2, MessageSquare, Save, Trash2, Edit2, Send, User, ShieldAlert, LogOut, Link } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '../../lib/supabase';
 import { useForm } from 'react-hook-form';
@@ -35,14 +35,14 @@ export interface Tournament {
   codes: string[];
 }
 
-export const CreatorScreen: React.FC<CreatorScreenProps> = ({ user, handleAuth, onBack }) => {
+export const CreatorScreen: React.FC<CreatorScreenProps> = ({ user, onBack }) => {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [usedCodes, setUsedCodes] = useState<Record<string, string[]>>({});
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [creatorName, setCreatorName] = useState('Organizador Oficial');
-  const [activeTab, setActiveTab] = useState<'tournaments' | 'profile' | 'support'>('tournaments');
+  
   const [creatorProfile, setCreatorProfile] = useState<any>(null);
   const [profileUpdating, setProfileUpdating] = useState(false);
   const [profileSuccess, setProfileSuccess] = useState('');
@@ -56,7 +56,7 @@ export const CreatorScreen: React.FC<CreatorScreenProps> = ({ user, handleAuth, 
   const [formError, setFormError] = useState<string>('');
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   
-  const { register, handleSubmit, formState: { errors }, reset, watch, setValue } = useForm<TournamentFormData>({
+  const { handleSubmit, formState: { errors }, reset, watch, setValue } = useForm<TournamentFormData>({
     resolver: zodResolver(tournamentSchema),
     defaultValues: {
       status: 'open',
@@ -124,17 +124,17 @@ export const CreatorScreen: React.FC<CreatorScreenProps> = ({ user, handleAuth, 
       const { error } = await supabase
         .from('creator_applications')
         .update({
-          channel_name: data.channelName,
-          social_link: data.socialLink,
-          streaming_link: data.streamingLink || null,
+          channel_name: data.channel_name,
+          social_link: data.social_link,
+          streaming_link: data.streaming_link || null,
           motivation: data.motivation || null,
         })
         .eq('id', creatorProfile.id);
 
       if (error) throw error;
       setProfileSuccess('Perfil actualizado correctamente.');
-      setCreatorName(data.channelName);
-      setCreatorProfile({ ...creatorProfile, channel_name: data.channelName, social_link: data.socialLink, streaming_link: data.streamingLink });
+      setCreatorName(data.channel_name);
+      setCreatorProfile({ ...creatorProfile, channel_name: data.channel_name, social_link: data.social_link, streaming_link: data.streaming_link });
     } catch (err: any) {
       console.error(err);
       setProfileSuccess('Error al actualizar el perfil.');
@@ -165,7 +165,7 @@ export const CreatorScreen: React.FC<CreatorScreenProps> = ({ user, handleAuth, 
       }
 
       try {
-        const { data, error } = await supabase
+        const { data } = await supabase
           .from('creator_applications')
           .select('*')
           .eq('user_id', user.id)
@@ -177,11 +177,10 @@ export const CreatorScreen: React.FC<CreatorScreenProps> = ({ user, handleAuth, 
           setCreatorProfile(data);
           if (data.channel_name) setCreatorName(data.channel_name);
           resetProfile({
-            channelName: data.channel_name || '',
-            socialLink: data.social_link || '',
-            streamingLink: data.streaming_link || '',
-            contactEmail: data.email || '',
-      motivation: data.motivation || ''
+            channel_name: data.channel_name || '',
+            social_link: data.social_link || '',
+            streaming_link: data.streaming_link || '',
+            motivation: data.motivation || ''
           });
           fetchTournaments();
         } else {
@@ -799,13 +798,13 @@ export const CreatorScreen: React.FC<CreatorScreenProps> = ({ user, handleAuth, 
                 </label>
                 <input
                   type="text"
-                  {...registerProfile('channelName')}
+                  {...registerProfile('channel_name')}
                   style={{
-                    width: '100%', background: 'rgba(0,0,0,0.3)', border: profileErrors.channelName ? '1px solid #ef4444' : '1px solid rgba(255,255,255,0.2)',
+                    width: '100%', background: 'rgba(0,0,0,0.3)', border: profileErrors.channel_name ? '1px solid #ef4444' : '1px solid rgba(255,255,255,0.2)',
                     color: '#fff', padding: '1rem', borderRadius: '1rem', fontSize: '1rem', fontWeight: 800, outline: 'none', boxSizing: 'border-box'
                   }}
                 />
-                {profileErrors.channelName && <span style={{ color: '#ef4444', fontSize: '0.8rem', marginTop: '0.25rem', display: 'block' }}>{profileErrors.channelName.message}</span>}
+                {profileErrors.channel_name && <span style={{ color: '#ef4444', fontSize: '0.8rem', marginTop: '0.25rem', display: 'block' }}>{profileErrors.channel_name.message}</span>}
               </div>
 
               <div>
@@ -815,13 +814,13 @@ export const CreatorScreen: React.FC<CreatorScreenProps> = ({ user, handleAuth, 
                 </label>
                 <input
                   type="text"
-                  {...registerProfile('socialLink')}
+                  {...registerProfile('social_link')}
                   style={{
-                    width: '100%', background: 'rgba(0,0,0,0.3)', border: profileErrors.socialLink ? '1px solid #ef4444' : '1px solid rgba(255,255,255,0.2)',
+                    width: '100%', background: 'rgba(0,0,0,0.3)', border: profileErrors.social_link ? '1px solid #ef4444' : '1px solid rgba(255,255,255,0.2)',
                     color: '#fff', padding: '1rem', borderRadius: '1rem', fontSize: '1rem', fontWeight: 800, outline: 'none', boxSizing: 'border-box'
                   }}
                 />
-                {profileErrors.socialLink && <span style={{ color: '#ef4444', fontSize: '0.8rem', marginTop: '0.25rem', display: 'block' }}>{profileErrors.socialLink.message}</span>}
+                {profileErrors.social_link && <span style={{ color: '#ef4444', fontSize: '0.8rem', marginTop: '0.25rem', display: 'block' }}>{profileErrors.social_link.message}</span>}
               </div>
 
               <div>
@@ -831,13 +830,13 @@ export const CreatorScreen: React.FC<CreatorScreenProps> = ({ user, handleAuth, 
                 </label>
                 <input
                   type="text"
-                  {...registerProfile('streamingLink')}
+                  {...registerProfile('streaming_link')}
                   style={{
-                    width: '100%', background: 'rgba(0,0,0,0.3)', border: profileErrors.streamingLink ? '1px solid #ef4444' : '1px solid rgba(255,255,255,0.2)',
+                    width: '100%', background: 'rgba(0,0,0,0.3)', border: profileErrors.streaming_link ? '1px solid #ef4444' : '1px solid rgba(255,255,255,0.2)',
                     color: '#fff', padding: '1rem', borderRadius: '1rem', fontSize: '1rem', fontWeight: 800, outline: 'none', boxSizing: 'border-box'
                   }}
                 />
-                {profileErrors.streamingLink && <span style={{ color: '#ef4444', fontSize: '0.8rem', marginTop: '0.25rem', display: 'block' }}>{profileErrors.streamingLink.message}</span>}
+                {profileErrors.streaming_link && <span style={{ color: '#ef4444', fontSize: '0.8rem', marginTop: '0.25rem', display: 'block' }}>{profileErrors.streaming_link.message}</span>}
               </div>
             </div>
 

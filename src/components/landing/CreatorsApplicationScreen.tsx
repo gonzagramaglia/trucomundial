@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+// import { motion, AnimatePresence } from 'framer-motion';
 import { ShieldCheck, ArrowLeft, Send, Clock, XCircle, User, Link, MessageSquare } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { useForm } from 'react-hook-form';
@@ -41,7 +41,7 @@ export const CreatorsApplicationScreen: React.FC<CreatorsApplicationScreenProps>
       }
       
       try {
-        const { data, error } = await supabase
+        const { data } = await supabase
           .from('creator_applications')
           .select('status')
           .eq('user_id', user.id)
@@ -306,7 +306,7 @@ export const CreatorsApplicationScreen: React.FC<CreatorsApplicationScreenProps>
             </p>
 
             <div style={{ marginBottom: '1.5rem' }}>
-              <label style={{ display: 'block', marginBottom: '0.75rem', fontSize: '0.9rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <label style={{ marginBottom: '0.75rem', fontSize: '0.9rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <User size={16} style={{ color: '#10b981' }}/> Nombre público
               </label>
               <input
@@ -324,7 +324,7 @@ export const CreatorsApplicationScreen: React.FC<CreatorsApplicationScreenProps>
             </div>
 
             <div style={{ marginBottom: '1.5rem' }}>
-              <label style={{ display: 'block', marginBottom: '0.75rem', fontSize: '0.9rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <label style={{ marginBottom: '0.75rem', fontSize: '0.9rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <Link size={16} style={{ color: '#10b981' }}/> Link a tu red social principal
               </label>
               <input
@@ -342,7 +342,7 @@ export const CreatorsApplicationScreen: React.FC<CreatorsApplicationScreenProps>
             </div>
 
             <div style={{ marginBottom: '2.5rem' }}>
-              <label style={{ display: 'block', marginBottom: '0.75rem', fontSize: '0.9rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <label style={{ marginBottom: '0.75rem', fontSize: '0.9rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <Link size={16} style={{ color: '#10b981' }}/> Link a tu canal de streaming principal
               </label>
               <input
@@ -360,7 +360,7 @@ export const CreatorsApplicationScreen: React.FC<CreatorsApplicationScreenProps>
             </div>
 
             <div style={{ marginBottom: '2.5rem' }}>
-              <label style={{ display: 'block', marginBottom: '0.75rem', fontSize: '0.9rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <label style={{ marginBottom: '0.75rem', fontSize: '0.9rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <MessageSquare size={16} style={{ color: '#10b981' }}/> ¿Por qué querés ser creador?
               </label>
               <textarea

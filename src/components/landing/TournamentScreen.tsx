@@ -22,6 +22,8 @@ interface Tournament {
   bg_gradient: string;
   winner?: string;
   organizer: string;
+  code_type?: string;
+  codes?: string[];
 }
 
 const MOCK_RANKING = [
@@ -50,8 +52,6 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({ user, handle
   const totalPages = Math.ceil(MOCK_RANKING.length / ITEMS_PER_PAGE);
   const currentRankingPage = MOCK_RANKING.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
   
-  const LOCAL_REGISTRATIONS_KEY = `trucomundial-registrations-${user?.id || 'anonymous'}`;
-
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
 
   useEffect(() => {
@@ -526,7 +526,21 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({ user, handle
         LISTADO DE TORNEOS
       </h3>
       
-      {tournaments.length === 0 ? (
+      {loading ? (
+        <div style={{
+          background: 'rgba(255,255,255,0.02)',
+          border: '1px dashed rgba(255,255,255,0.1)',
+          borderRadius: '2rem',
+          padding: '4rem',
+          textAlign: 'center',
+          color: '#a855f7',
+          fontWeight: 800,
+          fontSize: '1.2rem',
+          width: '100%'
+        }}>
+          Cargando torneos...
+        </div>
+      ) : tournaments.length === 0 ? (
         <div style={{
           background: 'rgba(255,255,255,0.02)',
           border: '1px dashed rgba(255,255,255,0.1)',

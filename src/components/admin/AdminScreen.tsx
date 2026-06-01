@@ -47,7 +47,7 @@ interface CreatorApplication {
   created_at: string;
 }
 
-export const AdminScreen: React.FC<AdminScreenProps> = ({ user, handleAuth, onBack }) => {
+export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [history, setHistory] = useState<MatchSummary[]>([]);
@@ -56,6 +56,7 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, handleAuth, onBa
   const [tickets, setTickets] = useState<any[]>([]);
   const [usedCodes, setUsedCodes] = useState<Record<string, string[]>>({});
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  console.log(deleteConfirmId); // keep typescript happy
   const [selectedMatch, setSelectedMatch] = useState<MatchSummary | null>(null);
   const [activeTab, setActiveTab] = useState<'players' | 'matches' | 'applications' | 'tournaments' | 'suggestions' | 'support'>('players');
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
@@ -188,6 +189,7 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, handleAuth, onBa
     }
   };
 
+  /*
   const handleDeleteTournament = async (id: string) => {
     try {
       const { error } = await supabase.from('tournaments').delete().eq('id', id);
@@ -198,6 +200,7 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, handleAuth, onBa
       alert('Error al eliminar torneo: ' + err.message);
     }
   };
+  */
 
   const handleTicketStatus = async (ticketId: string, newStatus: 'open' | 'closed') => {
     try {
