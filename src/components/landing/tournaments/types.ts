@@ -1,0 +1,17 @@
+export interface Tournament {
+  id: string;
+  name: string;
+  status: "open" | "active" | "finished";
+  participants: number;
+  max_participants: number;
+  start_time: string;
+  prize: string[];
+  bg_gradient: string;
+  winner?: string;
+  organizer: string;
+  code_type?: string;
+  codes?: string[];
+  description?: string;
+}
+
+export type Registration = { user_id: string; code_used: string };

@@ -1,0 +1,160 @@
+import React from "react";
+import { motion } from "framer-motion";
+import { Zap, Clock, Lock, CheckCircle2, Info } from "lucide-react";
+import { formatTournamentPrizes } from "../../../lib/formatters";
+import type { Tournament } from "./types";
+
+interface Props {
+  tournament: Tournament;
+  isRegistered: boolean;
+  openInfo: (t: Tournament) => void;
+  handleEnrollClick: (t: Tournament) => void;
+}
+
+const TournamentCard: React.FC<Props> = ({
+  tournament,
+  isRegistered,
+  openInfo,
+  handleEnrollClick,
+}) => {
+  return (
+    <motion.div
+      key={tournament.id}
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.3 }}
+      style={{
+        background: tournament.bg_gradient,
+        border: isRegistered
+          ? "1.5px solid #10b981"
+          : "1px solid rgba(255, 255, 255, 0.08)",
+        borderRadius: "2.25rem",
+        padding: "1.75rem",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-between",
+        position: "relative",
+        boxShadow: isRegistered
+          ? "0 0 25px rgba(16, 185, 129, 0.15), 0 12px 30px rgba(0,0,0,0.2)"
+          : "0 12px 30px rgba(0,0,0,0.15)",
+        backdropFilter: "blur(8px)",
+        transition: "all 0.3s ease",
+      }}
+    >
+      {/* Main Content (simplified) */}
+      <div style={{ marginTop: "0.5rem", marginBottom: "1.5rem" }}>
+        <h3
+          className="text-display"
+          style={{
+            fontSize: "1.4rem",
+            margin: "0.5rem 0 0.75rem 0",
+            color: isRegistered ? "#10b981" : "#fff",
+            letterSpacing: "0.05em",
+          }}
+        >
+          {tournament.name}
+        </h3>
+
+        <div
+          style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "0.5rem",
+              fontSize: "0.8rem",
+              opacity: 0.85,
+            }}
+          >
+            <Clock size={15} style={{ color: "#00f2ff" }} />
+            <span>{new Date(tournament.start_time).toLocaleString()}</span>
+          </div>
+
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "0.5rem",
+              fontSize: "0.8rem",
+              opacity: 0.85,
+            }}
+          >
+            <Zap size={15} style={{ color: "#ff7800" }} />
+            <span>
+              Premio:{" "}
+              <strong style={{ color: "#ff7800" }}>
+                {formatTournamentPrizes(tournament.prize)}
+              </strong>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ display: "flex", gap: "0.75rem" }}>
+        <button
+          onClick={() => openInfo(tournament)}
+          className="btn-hover-dark"
+          style={{
+            height: "46px",
+            width: "46px",
+            flexShrink: 0,
+            borderRadius: "1.25rem",
+            background: "rgba(255,255,255,0.08)",
+            border: "1px solid rgba(255,255,255,0.2)",
+            color: "#fff",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "pointer",
+          }}
+          title="Ver info del torneo"
+        >
+          <Info size={18} />
+        </button>
+
+        <button
+          onClick={() => handleEnrollClick(tournament)}
+          disabled={
+            isRegistered ||
+            tournament.status !== "open" ||
+            tournament.participants >= tournament.max_participants
+          }
+          className={`btn-hover-dark ${isRegistered ? "disabled-btn" : ""}`}
+          style={{
+            flex: 1,
+            height: "46px",
+            borderRadius: "1.25rem",
+            background: isRegistered ? "rgba(16, 185, 129, 0.1)" : "#a855f7",
+            border: isRegistered ? "1px solid rgba(16, 185, 129, 0.3)" : "none",
+            color: isRegistered ? "#10b981" : "#fff",
+            fontSize: "0.9rem",
+            fontWeight: 950,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "0.5rem",
+            cursor: isRegistered ? "not-allowed" : "pointer",
+            boxShadow: isRegistered ? "none" : "4px 4px 0px #000",
+          }}
+        >
+          {isRegistered ? (
+            <>
+              <CheckCircle2 size={16} /> INSCRIPTO
+            </>
+          ) : tournament.participants >= tournament.max_participants ? (
+            <>
+              <Lock size={16} /> TORNEO LLENO
+            </>
+          ) : (
+            <>
+              <Lock size={16} /> INSCRIBITE
+            </>
+          )}
+        </button>
+      </div>
+    </motion.div>
+  );
+};
+
+export default TournamentCard;
