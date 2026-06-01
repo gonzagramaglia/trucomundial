@@ -11,6 +11,9 @@ import { RankingScreen } from './RankingScreen';
 import { TournamentScreen } from './TournamentScreen';
 import { RoadmapScreen } from './RoadmapScreen';
 import { ProfileScreen } from './ProfileScreen';
+import { AdminScreen } from '../admin/AdminScreen';
+import { CreatorScreen } from '../admin/CreatorScreen';
+import { CreatorsApplicationScreen } from './CreatorsApplicationScreen';
 
 interface LandingPageProps {
   onStart: (mode: "1v1" | "2v2" | "multiplayer", points: 15 | 30, rivalName?: string, rivalId?: string, isCreator?: boolean, roomCode?: string, isReconnecting?: boolean) => void;
@@ -42,6 +45,15 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart, sessionId }) 
   const [showProfile, setShowProfile] = useState(() =>
     typeof window !== 'undefined' && (window.location.pathname === '/perfil' || window.location.pathname === '/en/perfil')
   );
+  const [showAdmin, setShowAdmin] = useState(() =>
+    typeof window !== 'undefined' && (window.location.pathname === '/admin' || window.location.pathname === '/en/admin')
+  );
+  const [showCreator, setShowCreator] = useState(() =>
+    typeof window !== 'undefined' && (window.location.pathname === '/creador' || window.location.pathname === '/en/creador')
+  );
+  const [showCreatorsApp, setShowCreatorsApp] = useState(() =>
+    typeof window !== 'undefined' && (window.location.pathname === '/creadores' || window.location.pathname === '/en/creadores')
+  );
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }: any) => {
@@ -57,10 +69,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart, sessionId }) 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
       const activeUser = session?.user ?? null;
       setUser(activeUser);
-      if (!activeUser && (window.location.pathname === '/perfil' || window.location.pathname === '/en/perfil')) {
+      if (!activeUser && (window.location.pathname === '/perfil' || window.location.pathname === '/en/perfil' || window.location.pathname === '/admin' || window.location.pathname === '/en/admin' || window.location.pathname === '/creador' || window.location.pathname === '/en/creador' || window.location.pathname === '/creadores' || window.location.pathname === '/en/creadores')) {
         setShowProfile(false);
-        const isEn = window.location.pathname.startsWith('/en');
-        window.history.pushState({}, '', isEn ? '/en' : '/');
+        // Do not redirect /admin, /creador, or /creadores here because they have their own "Restricted Access" prompt.
+        if (window.location.pathname.includes('/perfil')) {
+          const isEn = window.location.pathname.startsWith('/en');
+          window.history.pushState({}, '', isEn ? '/en' : '/');
+        }
       }
     });
     return () => subscription.unsubscribe();
@@ -106,12 +121,18 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart, sessionId }) 
       updateMetaTag('twitter:title', "Torneos de Truco Mundial");
       updateMetaTag('twitter:description', "Competí en los torneos y clasificatorios de streamers de Truco Mundial. Copa Mucho Movimiento, Dybbuk y Barbaroja 1vs1.");
     } else if (showProfile) {
-      document.title = "Mi Perfil - Truco Mundial";
+      document.title = "Mi Perfil de Truco Mundial";
       updateMetaTag('description', "Accedé a tu perfil de Truco Mundial. Revisá tu historial de partidas online y estadísticas de rendimiento.");
-      updateMetaTag('og:title', "Mi Perfil - Truco Mundial");
+      updateMetaTag('og:title', "Mi Perfil de Truco Mundial");
       updateMetaTag('og:description', "Accedé a tu perfil de Truco Mundial. Revisá tu historial de partidas online y estadísticas de rendimiento.");
-      updateMetaTag('twitter:title', "Mi Perfil - Truco Mundial");
+      updateMetaTag('twitter:title', "Mi Perfil de Truco Mundial");
       updateMetaTag('twitter:description', "Accedé a tu perfil de Truco Mundial. Revisá tu historial de partidas online y estadísticas de rendimiento.");
+    } else if (showAdmin) {
+      document.title = "Admin de Truco Mundial";
+    } else if (showCreator) {
+      document.title = "Creador de Truco Mundial";
+    } else if (showCreatorsApp) {
+      document.title = "Programa de Creadores - Truco Mundial";
     } else {
       document.title = "Truco Mundial";
       updateMetaTag('description', "Truco Mundial: La evolución del Truco argentino. Un juego de cartas tácticas donde el ingenio del truco se fusiona con la pasión de las figuritas mundialistas. ¡Jugá online con amigos o local contra la CPU!");
@@ -453,6 +474,84 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onStart, sessionId }) 
         <RoadmapScreen
           onBack={() => {
             setShowRoadmap(false);
+            if (typeof window !== 'undefined') {
+              const isEn = window.location.pathname.startsWith('/en');
+              window.history.pushState({}, '', isEn ? '/en' : '/');
+            }
+          }}
+        />
+      </div>
+    );
+  }
+
+  if (showAdmin) {
+    return (
+      <div style={{
+        position: 'fixed',
+        inset: 0,
+        background: 'transparent',
+        width: '100%',
+        height: '100vh',
+        overflowY: 'auto',
+        zIndex: 1500
+      }}>
+        <AdminScreen
+          user={user}
+          handleAuth={handleAuth}
+          onBack={() => {
+            setShowAdmin(false);
+            if (typeof window !== 'undefined') {
+              const isEn = window.location.pathname.startsWith('/en');
+              window.history.pushState({}, '', isEn ? '/en' : '/');
+            }
+          }}
+        />
+      </div>
+    );
+  }
+
+  if (showCreator) {
+    return (
+      <div style={{
+        position: 'fixed',
+        inset: 0,
+        background: 'transparent',
+        width: '100%',
+        height: '100vh',
+        overflowY: 'auto',
+        zIndex: 1500
+      }}>
+        <CreatorScreen
+          user={user}
+          handleAuth={handleAuth}
+          onBack={() => {
+            setShowCreator(false);
+            if (typeof window !== 'undefined') {
+              const isEn = window.location.pathname.startsWith('/en');
+              window.history.pushState({}, '', isEn ? '/en' : '/');
+            }
+          }}
+        />
+      </div>
+    );
+  }
+
+  if (showCreatorsApp) {
+    return (
+      <div style={{
+        position: 'fixed',
+        inset: 0,
+        background: 'transparent',
+        width: '100%',
+        height: '100vh',
+        overflowY: 'auto',
+        zIndex: 1500
+      }}>
+        <CreatorsApplicationScreen
+          user={user}
+          handleAuth={handleAuth}
+          onBack={() => {
+            setShowCreatorsApp(false);
             if (typeof window !== 'undefined') {
               const isEn = window.location.pathname.startsWith('/en');
               window.history.pushState({}, '', isEn ? '/en' : '/');

@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Trophy, Lock, Award, Zap, Clock, ShieldCheck, User, Edit2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Trophy, Lock, Award, Zap, Clock, ShieldCheck, User, Edit2, ChevronLeft, ChevronRight, CheckCircle2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { supabase } from '../../lib/supabase';
+import { formatTournamentDate } from '../../lib/formatters';
 
 interface TournamentScreenProps {
   user: any;
@@ -14,10 +16,10 @@ interface Tournament {
   name: string;
   status: 'open' | 'active' | 'finished';
   participants: number;
-  maxParticipants: number;
-  startTime: string;
+  max_participants: number;
+  start_time: string;
   prize: string;
-  bgGradient: string;
+  bg_gradient: string;
   winner?: string;
   organizer: string;
 }
@@ -62,76 +64,130 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({ user, handle
 
   // State to track registered tournament IDs
   const [registeredIds, setRegisteredIds] = useState<string[]>([]);
-  // Simulated participant counts to make it feel alive
-  const participantCounts: Record<string, number> = {
-    't1': 14,
-    't2': 5,
-    't3': 8,
-    't4': 16
-  };
+  // Enrollment modal state
+  const [enrollModalTournament, setEnrollModalTournament] = useState<Tournament | null>(null);
+  const [enrollCode, setEnrollCode] = useState('');
+  const [enrollError, setEnrollError] = useState('');
+  const [enrolling, setEnrolling] = useState(false);
 
-  // Load registered tournaments on mount
+  // Fetch tournaments from DB
+  const [tournaments, setTournaments] = useState<Tournament[]>([]);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
-    const cached = localStorage.getItem(LOCAL_REGISTRATIONS_KEY);
-    if (cached) {
-      try {
-        setRegisteredIds(JSON.parse(cached));
-      } catch (e) {
-        console.error('Error parsing tournament cache:', e);
+    const fetchRegistrations = async () => {
+      if (!user) return;
+      const { data } = await supabase
+        .from('tournament_registrations')
+        .select('tournament_id')
+        .eq('user_id', user.id);
+      
+      if (data) {
+        setRegisteredIds(data.map(r => r.tournament_id));
       }
-    }
+    };
+    fetchRegistrations();
   }, [user]);
 
-  // Seed initial list of Tournaments
-  const tournaments: Tournament[] = [
-    {
-      id: 't1',
-      name: t('t1_name'),
-      status: 'open',
-      participants: participantCounts['t1'],
-      maxParticipants: 16,
-      startTime: t('t1_start'),
-      prize: t('t1_prize'),
-      bgGradient: 'linear-gradient(135deg, rgba(168, 85, 247, 0.12) 0%, rgba(255, 0, 128, 0.04) 100%)',
-      organizer: 'Mucho Movimiento'
-    },
-    {
-      id: 't2',
-      name: t('t2_name'),
-      status: 'open',
-      participants: participantCounts['t2'],
-      maxParticipants: 8,
-      startTime: t('t2_start'),
-      prize: t('t2_prize'),
-      bgGradient: 'linear-gradient(135deg, rgba(255, 120, 0, 0.12) 0%, rgba(255, 0, 0, 0.04) 100%)',
-      organizer: 'Barbaroja'
-    },
-    {
-      id: 't3',
-      name: t('t3_name'),
-      status: 'active',
-      participants: 8,
-      maxParticipants: 8,
-      startTime: t('t3_start'),
-      prize: t('t3_prize'),
-      bgGradient: 'linear-gradient(135deg, rgba(0, 242, 255, 0.12) 0%, rgba(0, 80, 255, 0.04) 100%)',
-      organizer: 'Dybbuk'
-    },
-    {
-      id: 't4',
-      name: t('t4_name'),
-      status: 'finished',
-      participants: 16,
-      maxParticipants: 16,
-      startTime: t('t4_start'),
-      prize: t('t4_prize'),
-      bgGradient: 'linear-gradient(135deg, rgba(255, 215, 0, 0.12) 0%, rgba(255, 140, 0, 0.04) 100%)',
-      winner: 'RoberGalati 🏆',
-      organizer: 'Luquita Rodriguez'
+  useEffect(() => {
+    const fetchTournaments = async () => {
+      setLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('tournaments')
+          .select('*')
+          .order('created_at', { ascending: false });
+        
+        if (error) {
+          console.error('Error fetching tournaments:', error);
+        } else if (data) {
+          setTournaments(data);
+        }
+      } catch (err) {
+        console.error('Unexpected error fetching tournaments:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTournaments();
+  }, []);
+
+  const handleEnrollClick = (tournament: Tournament) => {
+    if (!user) {
+      handleAuth();
+      return;
     }
-  ];
+    setEnrollModalTournament(tournament);
+    setEnrollCode('');
+    setEnrollError('');
+  };
 
+  const submitEnrollment = async () => {
+    if (!enrollModalTournament || !user) return;
+    setEnrolling(true);
+    setEnrollError('');
+    const t = enrollModalTournament;
 
+    try {
+      if (t.code_type === 'single') {
+        if (!t.codes || t.codes[0] !== enrollCode) {
+          setEnrollError('Código incorrecto');
+          setEnrolling(false);
+          return;
+        }
+      } else if (t.code_type === 'unique') {
+        if (!t.codes || !t.codes.includes(enrollCode)) {
+          setEnrollError('Código inválido o no existe');
+          setEnrolling(false);
+          return;
+        }
+        // Check if used
+        const { data: usedData } = await supabase
+          .from('tournament_registrations')
+          .select('id')
+          .eq('tournament_id', t.id)
+          .eq('code_used', enrollCode);
+        if (usedData && usedData.length > 0) {
+          setEnrollError('Ese código ya fue utilizado');
+          setEnrolling(false);
+          return;
+        }
+      }
+
+      if (t.participants >= t.max_participants) {
+        setEnrollError('El torneo está lleno');
+        setEnrolling(false);
+        return;
+      }
+
+      const { error } = await supabase.from('tournament_registrations').insert({
+        tournament_id: t.id,
+        user_id: user.id,
+        code_used: enrollCode
+      });
+
+      if (error) {
+        if (error.code === '23505') {
+          setEnrollError('Ya estás inscripto en este torneo');
+        } else {
+          setEnrollError('Error al inscribirse: ' + error.message);
+        }
+        setEnrolling(false);
+        return;
+      }
+
+      const newCount = t.participants + 1;
+      await supabase.from('tournaments').update({ participants: newCount }).eq('id', t.id);
+
+      setRegisteredIds(prev => [...prev, t.id]);
+      setTournaments(prev => prev.map(x => x.id === t.id ? { ...x, participants: newCount } : x));
+      setEnrollModalTournament(null);
+    } catch (err: any) {
+      setEnrollError('Error: ' + err.message);
+    } finally {
+      setEnrolling(false);
+    }
+  };
 
   return (
     <div style={{
@@ -469,13 +525,28 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({ user, handle
       <h3 className="text-display" style={{ fontSize: '1.4rem', marginBottom: '2.5rem', marginTop: '0', color: '#fff', letterSpacing: '0.05em', textAlign: 'center' }}>
         LISTADO DE TORNEOS
       </h3>
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))',
-        gap: '2.5rem',
-        width: '100%'
-      }}>
-        {tournaments.map((tournament) => {
+      
+      {tournaments.length === 0 ? (
+        <div style={{
+          background: 'rgba(255,255,255,0.02)',
+          border: '1px dashed rgba(255,255,255,0.1)',
+          borderRadius: '2rem',
+          padding: '4rem',
+          textAlign: 'center',
+          color: 'rgba(255,255,255,0.5)',
+          fontSize: '1.1rem',
+          width: '100%'
+        }}>
+          No hay torneos disponibles en este momento.
+        </div>
+      ) : (
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))',
+          gap: '2.5rem',
+          width: '100%'
+        }}>
+          {tournaments.map((tournament) => {
           const isRegistered = registeredIds.includes(tournament.id);
           
           return (
@@ -485,7 +556,7 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({ user, handle
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.3 }}
               style={{
-                background: tournament.bgGradient,
+                background: tournament.bg_gradient,
                 border: isRegistered ? '1.5px solid #10b981' : '1px solid rgba(255, 255, 255, 0.08)',
                 borderRadius: '2.25rem',
                 padding: '1.75rem',
@@ -530,7 +601,7 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({ user, handle
                 zIndex: 10
               }}>
                 {tournament.status === 'open'
-                  ? t('status_open')
+                  ? (tournament.code_type === 'single' ? t('status_open_single') : t('status_open_unique'))
                   : tournament.status === 'active'
                     ? t('status_active')
                     : t('status_finished')}
@@ -559,7 +630,7 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({ user, handle
                     ) : (
                       <>
                         <Clock size={15} style={{ color: '#00f2ff' }} />
-                        <span>{t('starts')}: <strong style={{ color: '#00f2ff' }}>{tournament.startTime}</strong></span>
+                        <span>{t('starts')}: <strong style={{ color: '#00f2ff' }}>{formatTournamentDate(tournament.start_time)}</strong></span>
                       </>
                     )}
                   </div>
@@ -581,7 +652,7 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({ user, handle
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '0.25rem' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', opacity: 0.7 }}>
                         <span>{t('slots_filled')}</span>
-                        <strong>{tournament.participants} / {tournament.maxParticipants}</strong>
+                        <strong>{tournament.participants} / {tournament.max_participants}</strong>
                       </div>
                       {/* Slots Bar */}
                       <div style={{
@@ -592,7 +663,7 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({ user, handle
                         overflow: 'hidden'
                       }}>
                         <div style={{
-                          width: `${(tournament.participants / tournament.maxParticipants) * 100}%`,
+                          width: `${(tournament.participants / tournament.max_participants) * 100}%`,
                           height: '100%',
                           background: isRegistered ? '#10b981' : '#00f2ff',
                           borderRadius: '3px',
@@ -606,84 +677,58 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({ user, handle
 
               {/* Action Button */}
               <div>
-                {tournament.status === 'open' ? (
-                  <button
-                    disabled={true}
-                    style={{
-                      width: '100%',
-                      height: '46px',
-                      borderRadius: '1.25rem',
-                      background: 'rgba(255,255,255,0.06)',
-                      border: '1px solid rgba(255,255,255,0.1)',
-                      color: 'rgba(255,255,255,0.4)',
-                      fontSize: '0.9rem',
-                      fontWeight: 950,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '0.5rem',
-                      cursor: 'not-allowed',
-                      boxShadow: '4px 4px 0px #000',
-                      opacity: 0.6
-                    }}
-                  >
-                    <Lock size={16} />
-                    <span>{t('sign_up_now')}</span>
-                  </button>
-                ) : tournament.status === 'active' ? (
-                  <button
-                    disabled
-                    style={{
-                      width: '100%',
-                      height: '46px',
-                      borderRadius: '1.25rem',
-                      border: '1px solid rgba(255, 120, 0, 0.25)',
-                      background: 'rgba(255, 120, 0, 0.05)',
-                      color: '#ff7800',
-                      fontSize: '0.85rem',
-                      fontWeight: 900,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '0.5rem',
-                      boxShadow: '4px 4px 0px #000',
-                      opacity: 0.8
-                    }}
-                  >
-                    <Trophy size={14} />
-                    {t('tournament_in_progress')}
-                  </button>
-                ) : (
-                  <button
-                    disabled
-                    style={{
-                      width: '100%',
-                      height: '46px',
-                      borderRadius: '1.25rem',
-                      border: '1px solid rgba(255,255,255,0.1)',
-                      background: 'rgba(255,255,255,0.02)',
-                      color: 'rgba(255,255,255,0.4)',
-                      fontSize: '0.85rem',
-                      fontWeight: 900,
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '0.5rem',
-                      boxShadow: '4px 4px 0px #000',
-                      opacity: 0.6
-                    }}
-                  >
-                    <ShieldCheck size={14} />
-                    {t('tournament_finished')}
-                  </button>
-                )}
+                      <button
+                        onClick={() => handleEnrollClick(tournament as any)}
+                        disabled={isRegistered || tournament.status !== 'open' || tournament.participants >= tournament.max_participants}
+                        className={`btn-hover-dark ${isRegistered ? 'disabled-btn' : ''}`}
+                        style={{
+                          width: '100%',
+                          height: '46px',
+                          borderRadius: '1.25rem',
+                          background: isRegistered ? 'rgba(16, 185, 129, 0.1)' : (tournament.status !== 'open' || tournament.participants >= tournament.max_participants) ? 'rgba(255,255,255,0.06)' : '#a855f7',
+                          border: isRegistered ? '1px solid rgba(16, 185, 129, 0.3)' : (tournament.status !== 'open' || tournament.participants >= tournament.max_participants) ? '1px solid rgba(255,255,255,0.1)' : 'none',
+                          color: isRegistered ? '#10b981' : (tournament.status !== 'open' || tournament.participants >= tournament.max_participants) ? 'rgba(255,255,255,0.4)' : '#fff',
+                          fontSize: '0.9rem',
+                          fontWeight: 950,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '0.5rem',
+                          cursor: (isRegistered || tournament.status !== 'open' || tournament.participants >= tournament.max_participants) ? 'not-allowed' : 'pointer',
+                          boxShadow: (isRegistered || tournament.status !== 'open' || tournament.participants >= tournament.max_participants) ? 'none' : '4px 4px 0px #000',
+                          opacity: (isRegistered || tournament.status !== 'open' || tournament.participants >= tournament.max_participants) ? 0.7 : 1
+                        }}
+                      >
+                        {isRegistered ? (
+                          <>
+                            <CheckCircle2 size={16} />
+                            INSCRIPTO
+                          </>
+                        ) : tournament.participants >= tournament.max_participants ? (
+                          <>
+                            <Lock size={16} />
+                            TORNEO LLENO
+                          </>
+                        ) : tournament.status === 'open' ? (
+                          <>
+                            <Lock size={16} />
+                            INSCRIBITE AHORA
+                          </>
+                        ) : (
+                          <>
+                            <Lock size={16} />
+                            INSCRIPCIONES CERRADAS
+                          </>
+                        )}
+                      </button>
               </div>
-            </motion.div>
-          );
-        })}
-      </div>
+              </motion.div>
+            );
+          })}
+        </div>
+      )}
 
-      {/* GLOBAL RANKING SECTION */}
+      {/* RANKING SECTION */}
       <div style={{ marginTop: '4rem', marginBottom: '2rem' }}>
         <h3 className="text-display" style={{ fontSize: '1.4rem', marginBottom: '1.5rem', color: '#fff', letterSpacing: '0.05em', textAlign: 'center' }}>
           RANKING GLOBAL DE TORNEOS
@@ -839,6 +884,129 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({ user, handle
         </svg>
         MUCHOMOVIMIENTO
       </a>
+
+      {/* ENROLLMENT MODAL */}
+      <AnimatePresence>
+        {enrollModalTournament && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              background: 'rgba(0, 0, 0, 0.85)',
+              backdropFilter: 'blur(12px)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 3000,
+              padding: '1.5rem'
+            }}
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              style={{
+                background: 'rgba(20, 15, 30, 0.95)',
+                border: '1.5px solid rgba(168, 85, 247, 0.4)',
+                borderRadius: '2.5rem',
+                padding: '2.5rem',
+                width: '100%',
+                maxWidth: '450px',
+                display: 'flex',
+                flexDirection: 'column',
+                boxShadow: '0 0 40px rgba(168, 85, 247, 0.15)'
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
+                <h3 className="text-display" style={{ fontSize: '1.5rem', color: '#a855f7', margin: 0, letterSpacing: '0.05em' }}>
+                  Ingreso a Torneo
+                </h3>
+              </div>
+
+              <div style={{ fontSize: '0.9rem', marginBottom: '1.5rem', opacity: 0.8, lineHeight: 1.5 }}>
+                Estás a punto de inscribirte al torneo <strong>{enrollModalTournament.name}</strong> organizado por <strong>{enrollModalTournament.organizer}</strong>.
+                <br /><br />
+                {enrollModalTournament.code_type === 'unique' 
+                  ? 'Por favor, ingresá tu código personal y único de acceso.'
+                  : 'Por favor, ingresá el código general de acceso al torneo.'}
+              </div>
+
+              <input
+                type="text"
+                placeholder="Ingresar Código..."
+                value={enrollCode}
+                onChange={e => setEnrollCode(e.target.value)}
+                disabled={enrolling}
+                style={{
+                  width: '100%',
+                  background: 'rgba(0,0,0,0.3)',
+                  border: enrollError ? '1px solid rgba(239, 68, 68, 0.5)' : '1px solid rgba(255,255,255,0.2)',
+                  color: '#fff',
+                  padding: '1rem',
+                  borderRadius: '1rem',
+                  fontSize: '1rem',
+                  fontWeight: 800,
+                  outline: 'none',
+                  boxSizing: 'border-box',
+                  textTransform: 'uppercase',
+                  marginBottom: '1rem'
+                }}
+              />
+
+              {enrollError && (
+                <div style={{ color: '#ef4444', fontSize: '0.85rem', fontWeight: 800, marginBottom: '1rem' }}>
+                  {enrollError}
+                </div>
+              )}
+
+              <div style={{ display: 'flex', gap: '1rem' }}>
+                <button
+                  onClick={() => setEnrollModalTournament(null)}
+                  disabled={enrolling}
+                  style={{
+                    flex: 1,
+                    background: 'transparent',
+                    border: '1px solid rgba(255,255,255,0.2)',
+                    color: '#fff',
+                    height: '48px',
+                    borderRadius: '1rem',
+                    fontWeight: 800,
+                    cursor: 'pointer'
+                  }}
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={submitEnrollment}
+                  disabled={enrolling || !enrollCode}
+                  style={{
+                    flex: 1,
+                    background: '#a855f7',
+                    border: 'none',
+                    color: '#fff',
+                    height: '48px',
+                    borderRadius: '1rem',
+                    fontWeight: 800,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.5rem',
+                    cursor: enrolling || !enrollCode ? 'not-allowed' : 'pointer',
+                    opacity: enrolling || !enrollCode ? 0.5 : 1
+                  }}
+                >
+                  <CheckCircle2 size={18} />
+                  {enrolling ? 'Validando...' : 'Inscribite'}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
     </div>
   );
 };

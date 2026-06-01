@@ -3,6 +3,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { User, Calendar, Scroll, ShieldAlert, LogOut, Globe, ArrowLeft, Edit2, Check, X, Clock } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '../../lib/supabase';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { ticketSchema, type TicketFormData } from '../../lib/schemas';
+import { MessageSquare, Send } from 'lucide-react';
 
 interface ProfileScreenProps {
   user: any;
@@ -33,6 +37,44 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, handleAuth, 
   const [newName, setNewName] = useState(user?.user_metadata?.custom_username || user?.email?.split('@')[0] || '');
   const [isUpdatingName, setIsUpdatingName] = useState(false);
   const [updateError, setUpdateError] = useState('');
+
+  // Suggestion box states
+  const [isSubmittingSuggestion, setIsSubmittingSuggestion] = useState(false);
+  const [suggestionSuccess, setSuggestionSuccess] = useState(false);
+  const [suggestionError, setSuggestionError] = useState('');
+
+  const {
+    register: registerSuggestion,
+    handleSubmit: handleSuggestionSubmit,
+    reset: resetSuggestion,
+    formState: { errors: suggestionErrors }
+  } = useForm<TicketFormData>({
+    resolver: zodResolver(ticketSchema)
+  });
+
+  const onSuggestionSubmit = async (data: TicketFormData) => {
+    setIsSubmittingSuggestion(true);
+    setSuggestionError('');
+    setSuggestionSuccess(false);
+
+    try {
+      const { error } = await supabase.from('tickets').insert({
+        user_id: user.id,
+        type: 'suggestion',
+        subject: data.subject,
+        message: data.message
+      });
+
+      if (error) throw error;
+      setSuggestionSuccess(true);
+      resetSuggestion();
+      setTimeout(() => setSuggestionSuccess(false), 5000);
+    } catch (err: any) {
+      setSuggestionError('Error al enviar la sugerencia: ' + err.message);
+    } finally {
+      setIsSubmittingSuggestion(false);
+    }
+  };
 
   // 24h check
   const lastChangeStr = user?.user_metadata?.last_name_change;
@@ -635,6 +677,83 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, handleAuth, 
             </div>
           )}
 
+          {/* SUGGESTIONS BOX */}
+          <div style={{
+            background: 'rgba(168, 85, 247, 0.05)',
+            border: '2px dashed rgba(168, 85, 247, 0.25)',
+            borderRadius: '2rem',
+            padding: '2.5rem',
+            marginTop: '0'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem', marginBottom: '1.5rem' }}>
+              <div style={{
+                background: 'rgba(168, 85, 247, 0.15)',
+                width: '48px', height: '48px',
+                borderRadius: '1.25rem',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: '#a855f7',
+                flexShrink: 0,
+                marginTop: '0.25rem'
+              }}>
+                <MessageSquare size={24} />
+              </div>
+              <div>
+                <h3 className="text-display" style={{ fontSize: '1.4rem', margin: 0, color: '#a855f7', lineHeight: 1.2 }}>
+                  Dejanos tu Sugerencia
+                </h3>
+                <p style={{ margin: '0.25rem 0 0 0', opacity: 0.7, fontSize: '0.9rem' }}>
+                  ¿Tenés alguna idea para mejorar el juego? ¡Te leemos!
+                </p>
+              </div>
+            </div>
+
+            <form onSubmit={handleSuggestionSubmit(onSuggestionSubmit)} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <div>
+                <input
+                  {...registerSuggestion('subject')}
+                  placeholder="Asunto (ej. Nueva funcionalidad)"
+                  disabled={isSubmittingSuggestion}
+                  style={{
+                    width: '100%', background: 'rgba(0,0,0,0.3)', border: suggestionErrors.subject ? '1px solid rgba(239, 68, 68, 0.5)' : '1px solid rgba(255,255,255,0.1)',
+                    color: '#fff', padding: '1rem', borderRadius: '1rem', fontSize: '0.9rem', outline: 'none', boxSizing: 'border-box'
+                  }}
+                />
+                {suggestionErrors.subject && <span style={{ color: '#ef4444', fontSize: '0.75rem', marginTop: '0.25rem', display: 'block' }}>{suggestionErrors.subject.message}</span>}
+              </div>
+              
+              <div>
+                <textarea
+                  {...registerSuggestion('message')}
+                  placeholder="Escribí tu sugerencia en detalle..."
+                  disabled={isSubmittingSuggestion}
+                  style={{
+                    width: '100%', background: 'rgba(0,0,0,0.3)', border: suggestionErrors.message ? '1px solid rgba(239, 68, 68, 0.5)' : '1px solid rgba(255,255,255,0.1)',
+                    color: '#fff', padding: '1rem', borderRadius: '1rem', fontSize: '0.9rem', fontFamily: 'inherit', minHeight: '120px', resize: 'vertical', outline: 'none', boxSizing: 'border-box'
+                  }}
+                />
+                {suggestionErrors.message && <span style={{ color: '#ef4444', fontSize: '0.75rem', marginTop: '0.25rem', display: 'block' }}>{suggestionErrors.message.message}</span>}
+              </div>
+
+              {suggestionError && <div style={{ color: '#ef4444', fontSize: '0.85rem' }}>{suggestionError}</div>}
+              {suggestionSuccess && <div style={{ color: '#10b981', fontSize: '0.85rem', fontWeight: 800 }}>¡Gracias por tu sugerencia! La hemos recibido correctamente.</div>}
+
+              <button
+                type="submit"
+                disabled={isSubmittingSuggestion}
+                className="btn-hover-dark"
+                style={{
+                  background: '#a855f7', border: 'none', color: '#fff', height: '48px', borderRadius: '1.25rem',
+                  fontSize: '0.9rem', fontWeight: 950, cursor: isSubmittingSuggestion ? 'not-allowed' : 'pointer',
+                  opacity: isSubmittingSuggestion ? 0.7 : 1, alignSelf: 'flex-start', padding: '0 2rem', boxShadow: '4px 4px 0px #000',
+                  display: 'flex', alignItems: 'center', gap: '0.5rem'
+                }}
+              >
+                <Send size={18} />
+                {isSubmittingSuggestion ? 'Enviando...' : 'Enviar Sugerencia'}
+              </button>
+            </form>
+          </div>
+
         </>
       ) : (
         /* PROMPT SIGN IN */
@@ -800,50 +919,48 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, handleAuth, 
       </AnimatePresence>
 
       {/* Twitch Button - Way Down Bottom & Centered */}
-      <a
-        href="https://twitch.tv/muchomovimiento/videos"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="btn-hover-dark"
-        style={{
-          position: 'fixed',
-          bottom: window.innerWidth < 768 ? '1.5rem' : '4.5rem',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          background: 'rgba(145, 70, 255, 0.2)',
-          backdropFilter: 'blur(12px)',
-          border: '1px solid rgba(145, 70, 255, 0.3)',
-          color: 'white',
-          height: '40px',
-          padding: '0 1.25rem',
-          borderRadius: '1rem',
-          textDecoration: 'none',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '0.6rem',
-          fontSize: '0.75rem',
-          fontWeight: 800,
-          letterSpacing: '0.05em',
-          zIndex: 1000,
-          textTransform: 'uppercase',
-          transition: 'all 0.25s ease'
-        }}
-        title="Twitch"
-      >
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
+      <div style={{ display: 'flex', justifyContent: 'center', padding: '4rem 0 2rem 0' }}>
+        <a
+          href="https://twitch.tv/muchomovimiento/videos"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="btn-hover-dark"
+          style={{
+            background: 'rgba(145, 70, 255, 0.2)',
+            backdropFilter: 'blur(12px)',
+            border: '1px solid rgba(145, 70, 255, 0.3)',
+            color: 'white',
+            height: '40px',
+            padding: '0 1.25rem',
+            borderRadius: '1rem',
+            textDecoration: 'none',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.6rem',
+            fontSize: '0.75rem',
+            fontWeight: 800,
+            letterSpacing: '0.05em',
+            zIndex: 10,
+            textTransform: 'uppercase',
+            transition: 'all 0.25s ease'
+          }}
+          title="Twitch"
         >
-          <path d="M21 2H3v16h5v4l4-4h5l4-4V2zm-10 9V7m5 4V7" />
-        </svg>
-        MUCHOMOVIMIENTO
-      </a>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M21 2H3v16h5v4l4-4h5l4-4V2zm-10 9V7m5 4V7" />
+          </svg>
+          MUCHOMOVIMIENTO
+        </a>
+      </div>
     </div>
   );
 };
