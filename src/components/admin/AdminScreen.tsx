@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ShieldAlert, Users, Swords, ArrowLeft, LogOut, Scroll, Calendar, FileText, Check, X, Trophy, Trash2, Edit2, CheckCircle2, MessageSquare } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '../../lib/supabase';
+import { TournamentFormModal } from './TournamentFormModal';
+import { CreatorProfileModal } from './CreatorProfileModal';
 
 const ADMIN_EMAILS = [
   'gonzagramaglia@gmail.com',
@@ -58,6 +60,10 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   console.log(deleteConfirmId); // keep typescript happy
   const [selectedMatch, setSelectedMatch] = useState<MatchSummary | null>(null);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [formTournament, setFormTournament] = useState<any>(null);
+  const [isCreatorProfileModalOpen, setIsCreatorProfileModalOpen] = useState(false);
+  const [editingCreator, setEditingCreator] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<'players' | 'matches' | 'applications' | 'tournaments' | 'suggestions' | 'support'>('players');
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
 
@@ -72,16 +78,15 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  useEffect(() => {
-    const fetchGlobalData = async () => {
-      if (!isAdmin) {
-        setLoading(false);
-        return;
-      }
-      setLoading(true);
-      
-      try {
-        // Fetch Matches
+  const fetchGlobalData = async () => {
+    if (!isAdmin) {
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    
+    try {
+      // Fetch Matches
         const { data: historyData, error: historyError } = await supabase
           .from('game_sync')
           .select('id, match_id, last_move, updated_at')
@@ -169,6 +174,7 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
       }
     };
 
+  useEffect(() => {
     fetchGlobalData();
   }, [isAdmin]);
 
@@ -243,6 +249,32 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
 
     return Array.from(statsMap.values()).sort((a, b) => b.totalGames - a.totalGames);
   }, [history]);
+
+  const handleAssignRole = async (userId: string, role: 'admin' | 'mod' | 'creator') => {
+    try {
+      if (role === 'creator') {
+        const { error } = await supabase
+          .from('creator_applications')
+          .insert([{
+            user_id: userId,
+            email: 'assigned-by-admin@trucomundial.com',
+            channel_name: 'Nuevo Creador',
+            status: 'approved'
+          }]);
+        if (error) throw error;
+        alert('Perfil de creador asignado con éxito (status: approved).');
+        fetchGlobalData(); // Refresh creators list
+      } else {
+        const { error } = await supabase
+          .from('user_roles')
+          .upsert([{ user_id: userId, role }]);
+        if (error) throw error;
+        alert(`Rol ${role.toUpperCase()} asignado con éxito a ${userId}.`);
+      }
+    } catch (err: any) {
+      alert('Error asignando rol: ' + err.message);
+    }
+  };
 
   const formatDate = (dateStr: string) => {
     try {
@@ -688,21 +720,50 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
                 <th style={{ padding: '1.25rem 1.5rem', fontWeight: 800, color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.8rem', textTransform: 'uppercase' }}>Partidas</th>
                 <th style={{ padding: '1.25rem 1.5rem', fontWeight: 800, color: '#10b981', fontSize: '0.8rem', textTransform: 'uppercase' }}>Victorias</th>
                 <th style={{ padding: '1.25rem 1.5rem', fontWeight: 800, color: '#ef4444', fontSize: '0.8rem', textTransform: 'uppercase' }}>Derrotas</th>
-                <th style={{ padding: '1.25rem 1.5rem', fontWeight: 800, color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.8rem', textTransform: 'uppercase' }}>Winrate</th>
                 <th style={{ padding: '1.25rem 1.5rem', fontWeight: 800, color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.8rem', textTransform: 'uppercase' }}>Última Vez</th>
+                <th style={{ padding: '1.25rem 1.5rem', fontWeight: 800, color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.8rem', textTransform: 'uppercase', textAlign: 'right' }}>Acciones</th>
               </tr>
             </thead>
             <tbody>
               {playerStats.map((stats, idx) => {
-                const winrate = stats.totalGames > 0 ? Math.round((stats.wins / stats.totalGames) * 100) : 0;
                 return (
                   <tr key={stats.userId} style={{ borderBottom: idx === playerStats.length - 1 ? 'none' : '1px solid rgba(255, 255, 255, 0.05)' }}>
                     <td style={{ padding: '1rem 1.5rem', fontSize: '0.9rem', fontFamily: 'monospace', opacity: 0.8 }}>{stats.userId}</td>
                     <td style={{ padding: '1rem 1.5rem', fontWeight: 800, fontSize: '1rem' }}>{stats.totalGames}</td>
                     <td style={{ padding: '1rem 1.5rem', fontWeight: 800, color: '#10b981' }}>{stats.wins}</td>
                     <td style={{ padding: '1rem 1.5rem', fontWeight: 800, color: '#ef4444' }}>{stats.losses}</td>
-                    <td style={{ padding: '1rem 1.5rem', fontWeight: 800 }}>{winrate}%</td>
                     <td style={{ padding: '1rem 1.5rem', fontSize: '0.85rem', opacity: 0.6 }}>{formatDate(stats.lastPlayed)}</td>
+                    <td style={{ padding: '1rem 1.5rem', textAlign: 'right' }}>
+                      <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+                        <button
+                          onClick={() => handleAssignRole(stats.userId, 'mod')}
+                          style={{
+                            background: 'rgba(16, 185, 129, 0.2)', border: '1px solid rgba(16, 185, 129, 0.3)', color: '#10b981',
+                            padding: '0.25rem 0.75rem', borderRadius: '0.5rem', fontSize: '0.75rem', fontWeight: 800, cursor: 'pointer'
+                          }}
+                        >
+                          Mod
+                        </button>
+                        <button
+                          onClick={() => handleAssignRole(stats.userId, 'admin')}
+                          style={{
+                            background: 'rgba(239, 68, 68, 0.2)', border: '1px solid rgba(239, 68, 68, 0.3)', color: '#ef4444',
+                            padding: '0.25rem 0.75rem', borderRadius: '0.5rem', fontSize: '0.75rem', fontWeight: 800, cursor: 'pointer'
+                          }}
+                        >
+                          Admin
+                        </button>
+                        <button
+                          onClick={() => handleAssignRole(stats.userId, 'creator')}
+                          style={{
+                            background: 'rgba(168, 85, 247, 0.2)', border: '1px solid rgba(168, 85, 247, 0.3)', color: '#a855f7',
+                            padding: '0.25rem 0.75rem', borderRadius: '0.5rem', fontSize: '0.75rem', fontWeight: 800, cursor: 'pointer'
+                          }}
+                        >
+                          Creador
+                        </button>
+                      </div>
+                    </td>
                   </tr>
                 );
               })}
@@ -817,7 +878,10 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
                   {/* Actions */}
                   <div style={{ display: 'flex', gap: '0.75rem' }}>
                     <button
-                      onClick={() => alert('Para editar este torneo, ve al Panel de Creador.')}
+                      onClick={() => {
+                        setFormTournament(tournament);
+                        setIsFormOpen(true);
+                      }}
                       style={{
                         background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff',
                         width: '40px', height: '40px', borderRadius: '0.75rem',
@@ -943,6 +1007,22 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
                       title="Aprobar"
                     >
                       <Check size={18} />
+                    </button>
+                    <button
+                      onClick={() => {
+                        setEditingCreator(app);
+                        setIsCreatorProfileModalOpen(true);
+                      }}
+                      style={{
+                        background: 'rgba(168, 85, 247, 0.2)',
+                        border: '1px solid rgba(168, 85, 247, 0.5)', color: '#a855f7',
+                        height: '40px', padding: '0 1rem', borderRadius: '0.75rem',
+                        display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer',
+                        fontWeight: 800
+                      }}
+                      title="Editar Perfil"
+                    >
+                      <Edit2 size={16} /> Editar Perfil
                     </button>
                     <button
                       onClick={() => handleApplicationStatus(app.id, 'rejected')}
@@ -1281,6 +1361,21 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
           MUCHOMOVIMIENTO
         </a>
       </div>
+    
+      <TournamentFormModal
+        isOpen={isFormOpen}
+        onClose={() => setIsFormOpen(false)}
+        tournament={formTournament}
+        creatorName="Admin"
+        onSuccess={fetchGlobalData}
+      />
+    
+      <CreatorProfileModal
+        isOpen={isCreatorProfileModalOpen}
+        onClose={() => setIsCreatorProfileModalOpen(false)}
+        creator={editingCreator}
+        onSuccess={fetchGlobalData}
+      />
     </div>
   );
 };

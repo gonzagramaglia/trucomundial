@@ -10,6 +10,7 @@ import { useTrucoEffects } from "./truco/useTrucoEffects";
  * Main Game Engine Hook (Modularized)
  * Orchestrates state, turn calculation, logic, and effects.
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const useTrucoCore = (_sessionId: string | null) => {
   const state = useTrucoState();
   const logic = useTrucoLogic(state);

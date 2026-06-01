@@ -1,0 +1,339 @@
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X, Save } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { tournamentSchema, type TournamentFormData } from '../../lib/schemas';
+import { supabase } from '../../lib/supabase';
+
+
+interface TournamentFormModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  tournament: any | null;
+  creatorName: string;
+  onSuccess: () => void;
+}
+
+export const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
+  isOpen,
+  onClose,
+  tournament,
+  creatorName,
+  onSuccess
+}) => {
+  const { t } = useTranslation();
+  const [formError, setFormError] = useState('');
+  
+  const { handleSubmit, formState: { errors }, reset, watch, setValue } = useForm<TournamentFormData>({
+    resolver: zodResolver(tournamentSchema)
+  });
+
+  const formData = watch();
+
+  const updateFormData = (data: Partial<TournamentFormData>) => {
+    Object.keys(data).forEach((key) => {
+      setValue(key as keyof TournamentFormData, data[key as keyof TournamentFormData], {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+    });
+  };
+
+  useEffect(() => {
+    if (isOpen) {
+      setFormError('');
+      if (tournament) {
+        reset(tournament as any);
+      } else {
+        const now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        const defaultDate = now.toISOString().slice(0, 16);
+
+        reset({
+          name: '',
+          status: 'open',
+          participants: 0,
+          max_participants: 16,
+          start_time: defaultDate,
+          prize: '',
+          bg_gradient: 'linear-gradient(135deg, rgba(168, 85, 247, 0.12) 0%, rgba(255, 0, 128, 0.04) 100%)',
+          winner: '',
+          organizer: creatorName,
+          visibility: 'public',
+          code_type: 'single',
+          codes: []
+        });
+      }
+    }
+  }, [isOpen, tournament, creatorName, reset]);
+
+  const onSubmit = async (data: TournamentFormData) => {
+    setFormError('');
+
+    try {
+      const targetCount = data.code_type === 'single' ? 1 : (data.max_participants || 16);
+      let currentCodes = [...(data.codes || [])];
+      
+      while (currentCodes.length < targetCount) {
+        currentCodes.push(Math.random().toString(36).substring(2, 6).toUpperCase());
+      }
+      
+      const payload = {
+        ...data,
+        codes: currentCodes
+      };
+
+      if (tournament) {
+        // Update
+        const { error } = await supabase
+          .from('tournaments')
+          .update(payload)
+          .eq('id', tournament.id);
+        
+        if (error) throw error;
+      } else {
+        // Create
+        const { error } = await supabase
+          .from('tournaments')
+          .insert([payload]);
+        
+        if (error) throw error;
+      }
+      onSuccess();
+      onClose();
+    } catch (err: any) {
+      setFormError('Error guardando torneo: ' + err.message);
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 3000, padding: '1rem'
+        }}
+      >
+        <motion.div
+          initial={{ scale: 0.95, y: 20 }}
+          animate={{ scale: 1, y: 0 }}
+          exit={{ scale: 0.95, y: 20 }}
+          style={{
+            background: 'rgba(20, 15, 30, 0.95)',
+            border: '1px solid rgba(255, 120, 0, 0.3)',
+            borderRadius: '2rem', padding: '2rem', width: '100%', maxWidth: '600px',
+            maxHeight: '90vh', overflowY: 'auto'
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+            <h3 className="text-display" style={{ margin: 0, fontSize: '1.5rem', color: '#ff7800' }}>
+              {tournament ? t('edit_tournament') : t('create_tournament')}
+            </h3>
+            <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer' }}>
+              <X size={24} />
+            </button>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', fontWeight: 800 }}>{t('tournament_name')}</label>
+              <input
+                type="text"
+                value={formData.name || ''}
+                onChange={(e) => updateFormData({ name: e.target.value })}
+                style={{ width: '100%', background: 'rgba(0,0,0,0.3)', border: errors.name ? '1px solid rgba(239, 68, 68, 0.5)' : '1px solid rgba(255,255,255,0.2)', color: '#fff', padding: '0.75rem', borderRadius: '0.75rem' }}
+              />
+              {errors.name && <span style={{ color: '#ef4444', fontSize: '0.8rem', marginTop: '0.5rem', display: 'block', fontWeight: 700 }}>{errors.name.message}</span>}
+            </div>
+
+            <div style={{ display: 'flex', gap: '1rem' }}>
+              <div style={{ flex: 1 }}>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', fontWeight: 800 }}>{t('min_participants')}</label>
+                <input
+                  type="number"
+                  value={formData.participants === 0 ? '' : formData.participants}
+                  onChange={(e) => {
+                    const val = parseInt(e.target.value) || 0;
+                    const max = formData.max_participants || 0;
+                    updateFormData({ participants: val > max ? max : val });
+                  }}
+                  style={{ width: '100%', background: 'rgba(0,0,0,0.3)', border: errors.participants ? '1px solid rgba(239, 68, 68, 0.5)' : '1px solid rgba(255,255,255,0.2)', color: '#fff', padding: '0.75rem', borderRadius: '0.75rem' }}
+                />
+                {errors.participants && <span style={{ color: '#ef4444', fontSize: '0.8rem', marginTop: '0.5rem', display: 'block', fontWeight: 700 }}>{errors.participants.message}</span>}
+              </div>
+              <div style={{ flex: 1 }}>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', fontWeight: 800 }}>{t('max_participants')}</label>
+                <input
+                  type="number"
+                  min="4"
+                  max="32"
+                  value={formData.max_participants === 0 ? '' : formData.max_participants}
+                  onChange={(e) => {
+                    const val = parseInt(e.target.value) || 0;
+                    const currentMin = formData.participants || 0;
+                    updateFormData({ max_participants: val > 32 ? 32 : val, participants: currentMin > val ? val : currentMin });
+                  }}
+                  onBlur={(e) => {
+                    let val = parseInt(e.target.value) || 0;
+                    if (val < 4) val = 4;
+                    if (val > 32) val = 32;
+                    const currentMin = formData.participants || 0;
+                    updateFormData({ max_participants: val, participants: currentMin > val ? val : currentMin });
+                  }}
+                  style={{ width: '100%', background: 'rgba(0,0,0,0.3)', border: errors.max_participants ? '1px solid rgba(239, 68, 68, 0.5)' : '1px solid rgba(255,255,255,0.2)', color: '#fff', padding: '0.75rem', borderRadius: '0.75rem' }}
+                />
+                {errors.max_participants && <span style={{ color: '#ef4444', fontSize: '0.8rem', marginTop: '0.5rem', display: 'block', fontWeight: 700 }}>{errors.max_participants.message}</span>}
+              </div>
+            </div>
+            {formError && (
+              <div style={{ color: '#ef4444', fontSize: '0.8rem', fontWeight: 800, marginTop: '-0.5rem', marginBottom: '0.5rem' }}>
+                {formError}
+              </div>
+            )}
+
+            <div style={{ display: 'flex', gap: '1rem' }}>
+              <div style={{ flex: 1 }}>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', fontWeight: 800 }}>{t('date_time')}</label>
+                {(() => {
+                  const match = (formData.start_time || '').match(/2026-(\d{2})-(\d{2})T(\d{2}):(\d{2})/);
+                  const currentMonth = match ? match[1] : '06';
+                  const currentDay = match ? match[2] : '01';
+                  const currentHours = match ? match[3] : '22';
+                  const currentMinutes = match ? match[4] : '00';
+
+                  const updateDate = (m: string, d: string, h: string, min: string) => {
+                    const safeH = Math.min(23, parseInt(h.replace(/\D/g, '') || '0', 10)).toString().padStart(2, '0');
+                    const safeMin = Math.min(59, parseInt(min.replace(/\D/g, '') || '0', 10)).toString().padStart(2, '0');
+                    const safeD = Math.min(31, Math.max(1, parseInt(d.replace(/\D/g, '') || '1', 10))).toString().padStart(2, '0');
+                    updateFormData({ start_time: `2026-${m.padStart(2, '0')}-${safeD}T${safeH}:${safeMin}` });
+                  };
+
+                  return (
+                    <div style={{ display: 'flex', gap: '0.5rem', width: '100%' }}>
+                      <div style={{ flex: 1.2, display: 'flex', alignItems: 'center', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '0.75rem', padding: '0 0.5rem' }}>
+                        <input 
+                          type="text" inputMode="numeric" pattern="[0-9]*"
+                          value={currentDay.replace(/^0+/, '') || ''} 
+                          onChange={e => updateDate(currentMonth, e.target.value, currentHours, currentMinutes)} 
+                          style={{ width: '35px', background: 'transparent', border: 'none', color: '#fff', textAlign: 'center', padding: '0.75rem 0', outline: 'none' }} 
+                        />
+                        <span style={{ color: 'rgba(255,255,255,0.3)' }}>/</span>
+                        <select 
+                          value={currentMonth} 
+                          onChange={e => updateDate(e.target.value, currentDay, currentHours, currentMinutes)} 
+                          style={{ flex: 1, background: 'transparent', border: 'none', color: '#fff', padding: '0.75rem 0.25rem', outline: 'none', cursor: 'pointer', appearance: 'none', textAlign: 'center', fontSize: '0.85rem' }}
+                        >
+                          <option value="01">Ene</option>
+                          <option value="02">Feb</option>
+                          <option value="03">Mar</option>
+                          <option value="04">Abr</option>
+                          <option value="05">May</option>
+                          <option value="06">Jun</option>
+                          <option value="07">Jul</option>
+                          <option value="08">Ago</option>
+                          <option value="09">Sep</option>
+                          <option value="10">Oct</option>
+                          <option value="11">Nov</option>
+                          <option value="12">Dic</option>
+                        </select>
+                      </div>
+                      <div style={{ flex: 1, display: 'flex', alignItems: 'center', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '0.75rem', padding: '0.5rem', justifyContent: 'center' }}>
+                        <input 
+                          type="text" inputMode="numeric" pattern="[0-9]*"
+                          value={currentHours} 
+                          onChange={e => updateDate(currentMonth, currentDay, e.target.value, currentMinutes)} 
+                          style={{ width: '36px', background: 'transparent', border: 'none', color: '#fff', textAlign: 'center', padding: '0', outline: 'none', fontSize: '0.9rem', fontWeight: 700 }} 
+                        />
+                        <span style={{ color: '#fff', fontWeight: 900, fontSize: '1.1rem', margin: '0 2px', transform: 'translateY(-3px)' }}>:</span>
+                        <input 
+                          type="text" inputMode="numeric" pattern="[0-9]*"
+                          value={currentMinutes} 
+                          onChange={e => updateDate(currentMonth, currentDay, currentHours, e.target.value)} 
+                          style={{ width: '36px', background: 'transparent', border: 'none', color: '#fff', textAlign: 'center', padding: '0', outline: 'none', fontSize: '0.9rem', fontWeight: 700 }} 
+                        />
+                      </div>
+                    </div>
+                  );
+                })()}
+              </div>
+              <div style={{ flex: 1 }}>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', fontWeight: 800 }}>{t('visibility')}</label>
+                <select
+                  value={formData.visibility || 'public'}
+                  onChange={(e) => updateFormData({ visibility: e.target.value as any })}
+                  style={{ 
+                    width: '100%', 
+                    background: 'rgba(0,0,0,0.3) url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'16\' height=\'16\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'white\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'%3E%3Cpolyline points=\'6 9 12 15 18 9\'%3E%3C/polyline%3E%3C/svg%3E") no-repeat',
+                    backgroundPosition: 'right 1rem center',
+                    border: '1px solid rgba(255,255,255,0.2)', 
+                    color: '#fff', 
+                    padding: '0.75rem 2.5rem 0.75rem 0.75rem', 
+                    borderRadius: '0.75rem',
+                    appearance: 'none',
+                    WebkitAppearance: 'none'
+                  }}
+                >
+                  <option value="public">{t('public')}</option>
+                  <option value="unlisted">{t('unlisted')}</option>
+                  <option value="private">{t('private')}</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', fontWeight: 800 }}>{t('prize')}</label>
+              <input
+                type="text"
+                value={formData.prize || ''}
+                onChange={(e) => updateFormData({ prize: e.target.value })}
+                style={{ width: '100%', background: 'rgba(0,0,0,0.3)', border: errors.prize ? '1px solid rgba(239, 68, 68, 0.5)' : '1px solid rgba(255,255,255,0.2)', color: '#fff', padding: '0.75rem', borderRadius: '0.75rem' }}
+              />
+              {errors.prize && <span style={{ color: '#ef4444', fontSize: '0.8rem', marginTop: '0.5rem', display: 'block', fontWeight: 700 }}>{errors.prize.message}</span>}
+            </div>
+
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.85rem', fontWeight: 800 }}>{t('access_code_type')}</label>
+              <select
+                value={formData.code_type || 'single'}
+                onChange={(e) => updateFormData({ code_type: e.target.value as any })}
+                style={{ 
+                  width: '100%', 
+                  background: 'rgba(0,0,0,0.3) url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'16\' height=\'16\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'white\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'%3E%3Cpolyline points=\'6 9 12 15 18 9\'%3E%3C/polyline%3E%3C/svg%3E") no-repeat',
+                  backgroundPosition: 'right 1rem center',
+                  border: '1px solid rgba(255,255,255,0.2)', 
+                  color: '#fff', 
+                  padding: '0.75rem 2.5rem 0.75rem 0.75rem', 
+                  borderRadius: '0.75rem',
+                  appearance: 'none',
+                  WebkitAppearance: 'none'
+                }}
+              >
+                <option value="single">{t('same_code_for_all')}</option>
+                <option value="unique">{t('unique_code_per_participant')}</option>
+              </select>
+            </div>
+
+            <button
+              onClick={handleSubmit(onSubmit)}
+              style={{
+                background: '#ff7800', border: 'none', color: '#000', height: '48px', borderRadius: '1rem',
+                fontSize: '1rem', fontWeight: 900, cursor: 'pointer', display: 'flex', alignItems: 'center',
+                justifyContent: 'center', gap: '0.5rem', marginTop: '1rem', boxShadow: '4px 4px 0px #000'
+              }}
+            >
+              <Save size={18} />
+              {t('save')}
+            </button>
+          </div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
+  );
+};

@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import type { Card } from "../../data/cards";
 import type { GameMode, GameState, Score, TrucoState, EnvidoState, PlayedCard } from "../../lib/truco/types";
 
@@ -49,7 +49,9 @@ export const useTrucoState = () => {
   const [matchLog, setMatchLog] = useState<string[]>([]);
 
   // Synchronize refs with state for engine access
-  playerHandRef.current = playerHand;
+  useEffect(() => {
+    playerHandRef.current = playerHand;
+  }, [playerHand]);
 
   return {
     gameState, setGameState,

@@ -20,6 +20,7 @@ export const matchmakingService = {
     if (error) throw error;
   },
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async findMatch(_userId: string) {
     // This would typically be a database function or a subscription
     // For a simple implementation, let's just use a subscription to the queue

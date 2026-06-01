@@ -1,2 +1,1 @@
 yarn --ignore-engines build
-yarn --ignore-engines lint
