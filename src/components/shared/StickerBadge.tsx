@@ -10,7 +10,7 @@ interface StickerBadgeProps {
 export const StickerBadge: React.FC<StickerBadgeProps> = ({ label, value, color = "#fff", subLabel }) => {
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-      <span style={{ fontSize: "0.55rem", fontWeight: 700, color: "rgba(255,255,255,0.7)", letterSpacing: "0.05em", marginBottom: "-2px" }}>
+      <span style={{ fontSize: "0.55rem", fontWeight: 900, color: "#fff", letterSpacing: "0.05em", marginBottom: "-2px" }}>
         {label}
       </span>
       <div style={{ display: "flex", alignItems: "baseline", gap: "2px" }}>

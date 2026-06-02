@@ -14,43 +14,6 @@ interface RankingScreenProps {
   onBack: () => void;
 }
 
-const getTraditionalEquivalent = (power: number, t: (key: string) => string): string => {
-  const of = t('card_of');
-  const s = t('suit_espadas');
-  const b = t('suit_bastos');
-  const c = t('suit_copas');
-  const o = t('suit_oro');
-  const macho = t('card_macho');
-  const hembra = t('card_hembra');
-  const falseAce = t('card_false_ace');
-  const falseSeven = t('card_false_seven');
-
-  switch (power) {
-    case 1:  return `1 ${of} ${s} (${macho})`;
-    case 2:  return `1 ${of} ${b} (${hembra})`;
-    case 3:  return `7 ${of} ${s}`;
-    case 4:  return `7 ${of} ${o}`;
-    case 5:  return `3 ${of} ${s}`;
-    case 6:  return `3 ${of} ${b}`;
-    case 7:  return `2 ${of} ${s}`;
-    case 8:  return `2 ${of} ${b}`;
-    case 9:  return `1 ${of} ${c} (${falseAce})`;
-    case 10: return `1 ${of} ${o} (${falseAce})`;
-    case 11: return `12 ${of} ${s}`;
-    case 12: return `12 ${of} ${b}`;
-    case 13: return `11 ${of} ${s}`;
-    case 14: return `11 ${of} ${b}`;
-    case 15: return `10 ${of} ${s}`;
-    case 16: return `10 ${of} ${b}`;
-    case 17: return `7 ${of} ${c} (${falseSeven})`;
-    case 18: return `7 ${of} ${b} (${falseSeven})`;
-    case 19: return `6 ${of} ${s}`;
-    case 20: return `6 ${of} ${b}`;
-    case 21: return `5 ${of} ${s}`;
-    case 22: return `5 ${of} ${b}`;
-    default: return '';
-  }
-};
 
 const BASE_PLAYERS = CARDS.map(card => ({
   id: card.id,
@@ -890,8 +853,8 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
                   top: '-15px',
                   left: '20px',
                   background: 'rgba(255, 255, 255, 0.15)',
-                  border: '1px solid rgba(255, 223, 0, 0.4)',
-                  color: '#ffdf00',
+                  border: '1px solid rgba(168, 85, 247, 0.4)',
+                  color: '#a855f7',
                   width: '36px',
                   height: '36px',
                   borderRadius: '50%',
@@ -904,26 +867,10 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
                   boxShadow: '0 4px 10px rgba(0,0,0,0.3)',
                   backdropFilter: 'blur(10px)'
                 }}>
-                  {index + 1}
+                  {index + 1}º
                 </div>
 
-                {/* total votes glow badge */}
-                <div style={{
-                  position: 'absolute',
-                  top: '-15px',
-                  right: '20px',
-                  background: player.myActiveVotes > 0 ? 'rgba(168, 85, 247, 0.2)' : 'rgba(255, 255, 255, 0.05)',
-                  border: player.myActiveVotes > 0 ? '1px solid #a855f7' : '1px solid rgba(255, 255, 255, 0.1)',
-                  color: player.myActiveVotes > 0 ? '#a855f7' : 'rgba(255,255,255,0.7)',
-                  borderRadius: '1rem',
-                  padding: '4px 12px',
-                  fontSize: '0.8rem',
-                  fontWeight: 900,
-                  zIndex: 10,
-                  boxShadow: player.myActiveVotes > 0 ? '0 0 10px rgba(168, 85, 247, 0.3)' : 'none'
-                }}>
-                  ★ {player.totalVotes}
-                </div>
+
 
                 {/* THE COLLECTIBLE STICKER COMPONENT */}
                 <div style={{
@@ -931,7 +878,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
                   height: '180px',
                   margin: '1rem 0 1.25rem 0'
                 }}>
-                  <Sticker card={player as any} disabled={true} />
+                  <Sticker card={{ ...player, power: player.totalVotes } as any} disabled={true} />
                 </div>
 
                 {/* PLAYER INFO PANEL */}
@@ -942,22 +889,9 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
                   <p style={{ margin: 0, fontSize: '0.75rem', opacity: 0.6, textTransform: 'uppercase' }}>
                     {t(`country_${player.country}`)} · {player.club}
                   </p>
-
-                  {/* Traditional Equivalent */}
-                  <div style={{
-                    fontSize: '0.78rem',
-                    color: '#ffdf00',
-                    fontWeight: 700,
-                    background: 'rgba(255, 223, 0, 0.05)',
-                    border: '1px solid rgba(255, 223, 0, 0.15)',
-                    borderRadius: '10px',
-                    padding: '6px 12px',
-                    marginTop: '10px',
-                    display: 'inline-block'
-                  }}>
-                    {t('equivalent_to')} {getTraditionalEquivalent(player.power, t)}
-                  </div>
                 </div>
+
+
 
                 {/* VOTING ROW BUTTONS */}
                 {user ? (

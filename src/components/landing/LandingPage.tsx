@@ -56,8 +56,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   const [showRanking, setShowRanking] = useState(
     () =>
       typeof window !== "undefined" &&
-      (window.location.pathname === "/ranking" ||
-        window.location.pathname === "/en/ranking"),
+      (window.location.pathname === "/votar" ||
+        window.location.pathname === "/en/votar"),
   );
   const [showTournament, setShowTournament] = useState(
     () =>
@@ -269,7 +269,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   useEffect(() => {
     const onPop = () => {
       const p = window.location.pathname;
-      setShowRanking(p === "/ranking" || p === "/en/ranking");
+      setShowRanking(p === "/votar" || p === "/en/votar");
       setShowTournament(p === "/torneos" || p === "/en/torneos");
       setShowTournamentEvent(
         p.startsWith("/torneos/") || p.startsWith("/en/torneos/"),
@@ -1022,7 +1022,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   window.history.pushState(
                     {},
                     "",
-                    isEn ? "/en/ranking" : "/ranking",
+                    isEn ? "/en/votar" : "/votar",
                   );
                 }
                 return;
@@ -1047,10 +1047,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 }
                 return;
               }
-              if (mode === "multiplayer" && !user) {
-                handleAuth(); // Triggers the Google login
-                return;
-              }
+
               setSelectedMode(mode);
               if (mode !== "multiplayer") {
                 setIsSelectingPoints(true);
@@ -1228,7 +1225,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                       }}
                     >
                       <button
-                        onClick={() => setIsJoining(true)}
+                        onClick={() => { if (!user) { handleAuth(); return; } setIsJoining(true); }}
                         className="btn-hover-dark"
                         style={{
                           background: "#00f2ff",
@@ -1268,7 +1265,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                       }}
                     >
                       <button
-                        onClick={() => setIsSelectingPoints(true)}
+                        onClick={() => { if (!user) { handleAuth(); return; } setIsSelectingPoints(true); }}
                         className="btn-hover-dark"
                         style={{
                           background: "#00f2ff",

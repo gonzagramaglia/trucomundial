@@ -59,7 +59,7 @@
     left: 50%;
     right: auto;
     width: 100%;
-    max-width: 350px;
+    max-width: 325px;
     transform: translateX(-50%) !important;
   }
 
@@ -194,6 +194,16 @@
   }
   .player-hand-container { min-height: 120px; }
   .game-mode-secondary-row { flex-direction: column !important; }
+
+  /* When mobile help modal is open, move points badge between the scoreboards */
+  .points-indicator-modal-open {
+    left: 50% !important;
+    right: auto !important;
+    bottom: auto !important;
+    top: 4.1rem !important;
+    transform: translateX(-50%) !important;
+    z-index: 4100 !important;
+  }
 }
 
 @media (max-width: 480px) {

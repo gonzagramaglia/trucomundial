@@ -15,35 +15,8 @@ const BASE_PLAYERS = CARDS.map(card => ({
   stickerNumber: card.stickerNumber
 }));
 
-const getTraditionalEquivalent = (power: number): string => {
-  switch (power) {
-    case 1: return "1 de Espadas";
-    case 2: return "1 de Bastos";
-    case 3: return "7 de Espadas";
-    case 4: return "7 de Oro";
-    case 5: return "3 de Espadas";
-    case 6: return "3 de Bastos";
-    case 7: return "2 de Espadas";
-    case 8: return "2 de Bastos";
-    case 9: return "1 de Copas";
-    case 10: return "1 de Oro";
-    case 11: return "12 de Espadas";
-    case 12: return "12 de Bastos";
-    case 13: return "11 de Espadas";
-    case 14: return "11 de Bastos";
-    case 15: return "10 de Espadas";
-    case 16: return "10 de Bastos";
-    case 17: return "7 de Copas";
-    case 18: return "7 de Bastos";
-    case 19: return "6 de Espadas";
-    case 20: return "6 de Bastos";
-    case 21: return "5 de Espadas";
-    case 22: return "5 de Bastos";
-    default: return "";
-  }
-};
 
-export const RankingSidebar = () => {
+export const StarsSidebar = () => {
   const { t } = useTranslation();
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
@@ -234,10 +207,6 @@ export const RankingSidebar = () => {
                   <div style={{ opacity: 0.5, fontSize: '0.65rem', textTransform: 'uppercase', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {t(`country_${p.country}`)} · {p.club}
                   </div>
-                  {/* Line 3: Traditional equivalent in yellow */}
-                  <div style={{ color: '#ffdf00', fontSize: '0.65rem', fontWeight: 'bold', opacity: 0.85 }}>
-                    {getTraditionalEquivalent(p.power)}
-                  </div>
                 </div>
 
                 {/* Global total votes in violet */}
@@ -264,10 +233,10 @@ export const RankingSidebar = () => {
 
       <div style={{ flexShrink: 0, marginTop: '0.75rem' }}>
         <p style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.3)', textAlign: 'center', marginBottom: '0.5rem' }}>
-          Este ranking se actualiza en tiempo real con los votos de la comunidad mundialista.
+          Estas posiciones se actualizan en tiempo real con los votos de la comunidad.
         </p>
         <a 
-          href="/ranking" 
+          href="/votar" 
           target="_blank" 
           rel="noopener noreferrer"
           style={{
@@ -286,7 +255,8 @@ export const RankingSidebar = () => {
         >
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
             <BarChart3 size={18} />
-            ¡Votar en el ranking!
+            <span className="mobile-only">¡Votá ahora!</span>
+            <span className="desktop-only">¡Votá ahora y distribuí tus estrellas!</span>
           </div>
         </a>
       </div>

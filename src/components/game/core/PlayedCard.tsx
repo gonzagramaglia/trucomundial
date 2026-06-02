@@ -14,6 +14,7 @@ interface PlayedCardProps {
   yPos: number;
   rotate: number;
   isPlayer: boolean;
+  envColor?: string;
 }
 
 export const PlayedCard: React.FC<PlayedCardProps> = ({
@@ -26,7 +27,8 @@ export const PlayedCard: React.FC<PlayedCardProps> = ({
   xPos,
   yPos,
   rotate,
-  isPlayer
+  isPlayer,
+  envColor = "#fff"
 }) => {
   return (
     <motion.div
@@ -68,6 +70,7 @@ export const PlayedCard: React.FC<PlayedCardProps> = ({
         card={card} 
         hideEnv={isHero}
         winnerMode={isHero}
+        envColor={envColor}
       />
     </motion.div>
   );

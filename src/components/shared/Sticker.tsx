@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import type { Card } from "../../data/cards";
 import { StickerBadge } from "./StickerBadge";
 import { StickerInfo } from "./StickerInfo";
+import { useCardVotes } from "../../lib/votesStore";
 
 interface StickerProps {
   card: Card;
@@ -11,6 +12,8 @@ interface StickerProps {
   heroMode?: boolean;
   winnerMode?: boolean;
   hideEnv?: boolean;
+  hideStars?: boolean;
+  envColor?: string;
   showBack?: boolean;
 }
 
@@ -21,9 +24,12 @@ export const Sticker: React.FC<StickerProps> = ({
   heroMode = false,
   winnerMode = false,
   hideEnv = false,
+  hideStars = false,
+  envColor = "var(--color-primary)",
   showBack = false,
 }) => {
   const [isHovered, setIsHovered] = useState(false);
+  const votes = useCardVotes(card.id);
 
   const handleClick = () => {
     if (!disabled && onClick) onClick();
@@ -48,13 +54,15 @@ export const Sticker: React.FC<StickerProps> = ({
     );
   }
 
+  const displayVotes = votes < 10 ? `0${votes}` : votes;
+
   return (
     <motion.div
-      whileHover={!disabled ? { scale: 1.1, rotate: 2, zIndex: 1000 } : {}}
+      whileHover={{ scale: 1.1, rotate: 2, zIndex: 1000 }}
       whileTap={!disabled ? { scale: 0.95 } : {}}
       className={`sticker ${disabled ? "disabled" : ""} ${winnerMode ? "winner" : ""}`}
       onClick={handleClick}
-      onHoverStart={() => !disabled && setIsHovered(true)}
+      onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
       style={{
         cursor: disabled ? "default" : "pointer",
@@ -83,18 +91,18 @@ export const Sticker: React.FC<StickerProps> = ({
       <div style={{ position: "absolute", bottom: "18px", left: 0, width: "100%", padding: "8px", textAlign: "center", zIndex: 3, overflow: "hidden" }}>
         {!heroMode && (
           <div style={{ display: "flex", justifyContent: "center", gap: "20px", opacity: isHovered ? 0 : 1, transition: "opacity 0.15s ease", pointerEvents: "none", position: "absolute", bottom: "2px", left: 0, right: 0 }}>
-            {!hideEnv && <StickerBadge label="ENV" value={`+${card.env}`} color="var(--color-primary)" />}
-            <StickerBadge label="RANK" value={card.power} color="var(--color-accent)" />
+            {!hideEnv && <StickerBadge label="ENV" value={`+${card.env}`} color={envColor} />}
+            {!hideStars && <StickerBadge label="★" value={displayVotes} color="var(--color-accent)" />}
           </div>
         )}
 
         {heroMode && (
           <div style={{ position: "absolute", bottom: "2px", left: 0, right: 0, textAlign: "center", pointerEvents: "none" }}>
-            <StickerBadge label="RANK" value={card.power} color="var(--color-accent)" />
+            {!hideStars && <StickerBadge label="★" value={displayVotes} color="var(--color-accent)" />}
           </div>
         )}
 
-        {!heroMode && <StickerInfo country={card.country} club={card.club} isHovered={isHovered} />}
+        {!heroMode && <StickerInfo country={card.country} club={card.club} isHovered={isHovered} color={envColor} />}
       </div>
     </motion.div>
   );

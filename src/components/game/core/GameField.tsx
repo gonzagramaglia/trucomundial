@@ -24,6 +24,7 @@ interface GameFieldProps {
   whoseTurn: PlayerRole | null;
   onHandleMazo?: () => void;
   isMazoDisabled?: boolean;
+  envHighlightIds?: Set<string>;
 }
 
 export const GameField: React.FC<GameFieldProps> = ({
@@ -38,7 +39,8 @@ export const GameField: React.FC<GameFieldProps> = ({
   isGameStarting,
   whoseTurn,
   onHandleMazo,
-  isMazoDisabled = false
+  isMazoDisabled = false,
+  envHighlightIds
 }) => {
   const { t } = useTranslation();
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -208,7 +210,7 @@ export const GameField: React.FC<GameFieldProps> = ({
             }}
             title={t("me_voy_al_mazo")}
           >
-            {isMobile ? "MAZO" : "IRSE AL MAZO"}
+            {"IRSE AL MAZO"}
           </button>
         )}
       </motion.div>
@@ -256,6 +258,10 @@ export const GameField: React.FC<GameFieldProps> = ({
             else if (isCpu2) { xPos = isMobile ? 145 : 280; yPos = (handIdx - 1) * lateralCardSpacing; rotate = -90; }
           }
 
+          const baseId = card.id.split('_')[0];
+          const isPlayerHighlighted = envHighlightIds?.has(baseId) && isPlayer;
+          const envColor = isPlayerHighlighted ? "#00f2ff" : "#fff";
+
           return (
             <PlayedCard 
               key={card.id}
@@ -269,6 +275,7 @@ export const GameField: React.FC<GameFieldProps> = ({
               yPos={yPos}
               rotate={rotate}
               isPlayer={isPlayer}
+              envColor={envColor}
             />
           );
         })}

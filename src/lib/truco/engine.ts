@@ -1,6 +1,8 @@
 import type { Card } from "../../data/cards";
 import type { PlayedCard, PlayerRole } from "./types";
 
+import { getCardPower } from "../votesStore";
+
 export const calculateEnvido = (hand: Card[]) => {
   if (!hand || hand.length === 0) return 0;
 
@@ -24,9 +26,8 @@ export const calculateEnvido = (hand: Card[]) => {
 };
 
 export const getCardValue = (card: Card): number => {
-  // Truco Mundial uses 'power' where LOWER is BETTER.
-  // We return a value where HIGHER is BETTER for easier comparison.
-  return 100 - card.power;
+  // Truco Mundial uses 'power' (community stars) where HIGHER is BETTER.
+  return getCardPower(card.id);
 };
 
 export const determineWinner = (playedCards: PlayedCard[]): PlayerRole | "draw" => {

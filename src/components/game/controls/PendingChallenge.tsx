@@ -127,32 +127,36 @@ export const PendingChallenge: React.FC<PendingChallengeProps> = ({
 
       {/* Response Row */}
       <div style={{ display: "flex", gap: "0.5rem", justifyContent: "center", width: "100%", maxWidth: "600px", alignItems: "center" }}>
-        <Button
-          variant={pendingAction.type === "envido" ? "primary" : "secondary"}
-          style={{ fontWeight: 800, border: "none", flex: 1, minWidth: "110px", height: btnHeight, whiteSpace: "nowrap", padding: "0 1.25rem", fontSize: "0.9rem" }}
-          onClick={() => handleResponse(true)}
-        >
-          {isHighStakesEnvido
-            ? (gameMode === "2v2" ? t("call_queremos") : t("call_quiero"))
-            : (gameMode === "2v2" ? t("call_queremos") : t("call_quiero").replace('¡', '').replace('!', ''))
-          }
-        </Button>
+        <div style={{ flex: '1 1 0', position: 'relative' }}>
+          <Button
+            variant={pendingAction.type === "envido" ? "primary" : "secondary"}
+            style={{ fontWeight: 800, border: "none", width: "100%", height: btnHeight, padding: "0 0.5rem", fontSize: "0.9rem", textAlign: "center" }}
+            onClick={() => handleResponse(true)}
+          >
+            {isHighStakesEnvido
+              ? (gameMode === "2v2" ? t("call_queremos") : t("call_quiero"))
+              : (gameMode === "2v2" ? t("call_queremos") : t("call_quiero").replace('¡', '').replace('!', ''))
+            }
+          </Button>
+        </div>
 
-        <Button
-          variant="white"
-          style={{ border: "none", flex: 1, minWidth: "110px", height: btnHeight, whiteSpace: "nowrap", padding: "0 1.25rem", fontSize: "0.9rem" }}
-          onClick={() => handleResponse(false)}
-        >
-          {isHighStakesEnvido
-            ? (gameMode === "2v2" ? t("call_no_queremos") : t("call_no_quiero"))
-            : (gameMode === "2v2" ? t("call_no_queremos") : t("call_no_quiero").replace('¡', '').replace('!', ''))
-          }
-        </Button>
+        <div style={{ flex: '1 1 0', position: 'relative' }}>
+          <Button
+            variant="white"
+            style={{ border: "none", width: "100%", height: btnHeight, padding: "0 0.5rem", fontSize: "0.9rem", textAlign: "center" }}
+            onClick={() => handleResponse(false)}
+          >
+            {isHighStakesEnvido
+              ? (gameMode === "2v2" ? t("call_no_queremos") : t("call_no_quiero"))
+              : (gameMode === "2v2" ? t("call_no_queremos") : t("call_no_quiero").replace('¡', '').replace('!', ''))
+            }
+          </Button>
+        </div>
 
         {/* Escalations (Truco or Envido) */}
         {pendingAction.type === "envido" && pendingAction.level === 1 && (
           <div
-            style={{ position: 'relative', flex: 1, minWidth: "130px" }}
+            style={{ position: 'relative', flex: '1 1 0' }}
             onMouseEnter={() => {
               if (window.innerWidth > 768) setShowEnvidoOptions(true);
             }}
@@ -175,7 +179,7 @@ export const PendingChallenge: React.FC<PendingChallengeProps> = ({
             </AnimatePresence>
             <Button
               variant="primary"
-              style={{ fontWeight: 800, border: "none", width: "100%", height: btnHeight, whiteSpace: "nowrap", padding: "0 1.25rem", fontSize: "0.9rem" }}
+              style={{ fontWeight: 800, border: "none", width: "100%", height: btnHeight, padding: "0 0.5rem", fontSize: "0.9rem", textAlign: "center" }}
               onClick={onEnvidoClick}
             >
               {t("call_envido")} (x2)
@@ -184,7 +188,7 @@ export const PendingChallenge: React.FC<PendingChallengeProps> = ({
         )}
         {pendingAction.type === "envido" && pendingAction.level === 2 && (
           <div
-            style={{ position: 'relative', flex: 1, minWidth: "140px" }}
+            style={{ position: 'relative', flex: '1 1 0' }}
             onMouseEnter={() => {
               if (window.innerWidth > 768) setShowRealEnvidoOptions(true);
             }}
@@ -213,9 +217,9 @@ export const PendingChallenge: React.FC<PendingChallengeProps> = ({
                 border: "none",
                 width: "100%",
                 height: btnHeight,
-                whiteSpace: "nowrap",
-                padding: "0 1.25rem",
+                padding: "0 0.5rem",
                 fontSize: "0.9rem",
+                textAlign: "center",
                 background: "#00f2ff",
                 color: "#000"
               }}
@@ -226,33 +230,36 @@ export const PendingChallenge: React.FC<PendingChallengeProps> = ({
           </div>
         )}
         {pendingAction.type === "envido" && pendingAction.level === 3 && (
-          <Button
-            variant="primary"
-            style={{
-              fontWeight: 800,
-              border: "none",
-              flex: 1,
-              minWidth: "140px",
-              height: btnHeight,
-              whiteSpace: "nowrap",
-              padding: "0 1.25rem",
-              fontSize: "0.9rem",
-              background: "#00f2ff",
-              color: "#000"
-            }}
-            onClick={() => handleCall("envido", 4, "player")}
-          >
-            {t("call_falta_envido")}
-          </Button>
+          <div style={{ flex: '1 1 0', position: 'relative' }}>
+            <Button
+              variant="primary"
+              style={{
+                fontWeight: 800,
+                border: "none",
+                width: "100%",
+                height: btnHeight,
+                padding: "0 0.5rem",
+                fontSize: "0.9rem",
+                textAlign: "center",
+                background: "#00f2ff",
+                color: "#000"
+              }}
+              onClick={() => handleCall("envido", 4, "player")}
+            >
+              {t("call_falta_envido")}
+            </Button>
+          </div>
         )}
         {pendingAction.type === "truco" && pendingAction.level < 3 && (
-          <Button
-            variant="secondary"
-            style={{ border: "none", flex: 1, minWidth: "110px", height: btnHeight, whiteSpace: "nowrap", padding: "0 1.25rem", fontSize: "0.9rem" }}
-            onClick={() => handleCall("truco", pendingAction.level + 1, "player")}
-          >
-            {pendingAction.level === 1 ? t("call_retruco") : t("call_vale_4")}
-          </Button>
+          <div style={{ flex: '1 1 0', position: 'relative' }}>
+            <Button
+              variant="secondary"
+              style={{ border: "none", width: "100%", height: btnHeight, padding: "0 0.5rem", fontSize: "0.9rem", textAlign: "center" }}
+              onClick={() => handleCall("truco", pendingAction.level + 1, "player")}
+            >
+              {pendingAction.level === 1 ? t("call_retruco") : t("call_vale_4")}
+            </Button>
+          </div>
         )}
       </div>
     </motion.div>

@@ -23,6 +23,7 @@ export const TwitchButton: React.FC = () => {
         display: "flex",
         alignItems: "center",
         gap: "0.6rem",
+        whiteSpace: "nowrap",
         fontSize: "0.95rem",
         fontWeight: 800,
         fontFamily: "var(--font-display)",

@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Scoreboard } from "./Scoreboard";
-import { RankingSidebar } from "./RankingSidebar";
+import { StarsSidebar } from "./StarsSidebar";
 import { InstructionsPanel } from "./InstructionsPanel";
 import { GameField } from "../core/GameField";
 import { CPUHands } from "../core/CPUHands";
 import { GameModals } from "../modals/GameModals";
 import { GameTopBar } from "../controls/GameTopBar";
-import { GameBottomBar } from "../controls/GameBottomBar";
+import { GameBottomBar, getEnvHighlightIds } from "../controls/GameBottomBar";
 import { Zap, BookOpen, X } from "lucide-react";
 import { useTranslation, Trans } from "react-i18next";
 import type { GameMode, PlayerRole } from "../../../lib/truco/types";
@@ -77,16 +77,12 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const prevCountdownRef = React.useRef(showCountdown);
-  const hasOpenedRulesRef = React.useRef(false);
-  React.useEffect(() => {
-    if (prevCountdownRef.current && !showCountdown && !hasOpenedRulesRef.current) {
-      setShowMobileHelp(true);
-      setHelpTab('rules');
-      hasOpenedRulesRef.current = true;
-    }
-    prevCountdownRef.current = showCountdown;
-  }, [showCountdown]);
+  const playerPlayed = playedCards ? playedCards.filter((c: any) => c.owner === "player") : [];
+  const initialHand = [...playerHand, ...playerPlayed];
+  const cardsPerHand = gameMode === '2v2' ? 4 : 2;
+  const isFirstRound = (playedCards ? playedCards.length : 0) < cardsPerHand;
+  const showEnvHint = isFirstRound && (envidoState.status === 'none' || envidoState.status === 'pending');
+  const envHighlightIds = showEnvHint ? getEnvHighlightIds(initialHand) : new Set<string>();
 
   React.useEffect(() => {
     if (setIsPaused) {
@@ -152,7 +148,7 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
 
       {/* Bottom Left: Points Indicator */}
       <div
-        className="points-indicator points-indicator-fixed"
+        className={`points-indicator points-indicator-fixed${showMobileHelp && isMobile ? ' points-indicator-modal-open' : ''}`}
         style={{
           background: "rgba(255, 255, 255, 0.1)",
           backdropFilter: "blur(12px)",
@@ -248,6 +244,7 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
           whoseTurn={whoseTurn}
           onHandleMazo={onHandleMazo}
           isMazoDisabled={!(whoseTurn === "player" || whoseTurn === "partner") || isBusy || pendingAction !== null}
+          envHighlightIds={envHighlightIds}
         />
 
         <GameBottomBar
@@ -264,6 +261,7 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
           onHandleResponse={onHandleResponse}
           onHandleCall={onHandleCall}
           playerFolded={playerFolded}
+          envHighlightIds={envHighlightIds}
         />
       </div>
 
@@ -288,7 +286,7 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
         onClick={() => setShowMobileHelp(true)}
         className="mobile-help-btn"
         style={{
-          background: "rgba(255, 255, 255, 0.1)",
+          background: "rgba(168, 85, 247, 0.15)",
           backdropFilter: "blur(12px)",
           height: "40px",
           borderRadius: "1rem",
@@ -296,8 +294,8 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
           alignItems: "center",
           justifyContent: "center",
           color: "white",
-          border: "1px solid rgba(255, 255, 255, 0.1)",
-          boxShadow: "none",
+          border: "1px solid rgba(168, 85, 247, 0.4)",
+          boxShadow: "0 0 15px rgba(168, 85, 247, 0.4), inset 0 0 8px rgba(168, 85, 247, 0.2)",
           cursor: "pointer"
         }}
       >
@@ -442,7 +440,7 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
                     background: rgba(255, 255, 255, 0.4);
                   }
                 `}</style>
-                {helpTab === 'rules' ? <InstructionsPanel maxPoints={maxPoints} /> : <RankingSidebar />}
+                {helpTab === 'rules' ? <InstructionsPanel maxPoints={maxPoints} /> : <StarsSidebar />}
               </div>
             </motion.div>
           </motion.div>

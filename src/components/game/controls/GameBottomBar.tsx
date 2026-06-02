@@ -18,13 +18,47 @@ interface GameBottomBarProps {
   onHandleResponse: (accept: boolean) => void;
   onHandleCall: (type: any, level: number, caller: PlayerRole) => void;
   playerFolded?: boolean;
+  envHighlightIds?: Set<string>;
+}
+
+/**
+ * Returns the set of card IDs whose ENV number should be highlighted in cyan.
+ * - If any two cards share country or club → highlight the two with highest combined ENV.
+ * - Otherwise → highlight only the single highest-ENV card.
+ */
+export function getEnvHighlightIds(hand: any[]): Set<string> {
+  if (hand.length === 0) return new Set();
+
+  // Find all pairs sharing country or club
+  const pairs: [any, any][] = [];
+  for (let i = 0; i < hand.length; i++) {
+    for (let j = i + 1; j < hand.length; j++) {
+      if (hand[i].country === hand[j].country || hand[i].club === hand[j].club) {
+        pairs.push([hand[i], hand[j]]);
+      }
+    }
+  }
+
+  if (pairs.length > 0) {
+    // Best pair = highest combined ENV
+    const best = pairs.reduce((a, b) =>
+      (a[0].env + a[1].env) >= (b[0].env + b[1].env) ? a : b
+    );
+    return new Set([best[0].id, best[1].id]);
+  } else {
+    // No links — just the highest single card
+    const maxEnv = Math.max(...hand.map((c: any) => c.env));
+    const top = hand.find((c: any) => c.env === maxEnv);
+    return new Set(top ? [top.id] : []);
+  }
 }
 
 export const GameBottomBar: React.FC<GameBottomBarProps> = ({
   pendingAction, envidoState, trucoState, playedCards, gameMode,
   whoseTurn, isRoundEnding, isBusy, playerHand,
   onPlayCard, onHandleResponse, onHandleCall,
-  playerFolded = false
+  playerFolded = false,
+  envHighlightIds
 }) => {
   const isDraggingRef = React.useRef(false);
   const [isMobile, setIsMobile] = React.useState(typeof window !== 'undefined' && window.innerWidth < 768);
@@ -34,6 +68,17 @@ export const GameBottomBar: React.FC<GameBottomBarProps> = ({
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  // Use passed highlights or fallback to calculating it
+  let computedHighlightIds = envHighlightIds;
+  if (!computedHighlightIds) {
+    const playerPlayed = playedCards ? playedCards.filter(c => c.owner === "player") : [];
+    const initialHand = [...playerHand, ...playerPlayed];
+    const cardsPerHand = gameMode === '2v2' ? 4 : 2;
+    const isFirstRound = (playedCards ? playedCards.length : 0) < cardsPerHand;
+    const showEnvHint = isFirstRound && (envidoState.status === 'none' || envidoState.status === 'pending');
+    computedHighlightIds = showEnvHint ? getEnvHighlightIds(initialHand) : new Set<string>();
+  }
 
   return (
     <div className="game-bottom-bar" style={{
@@ -94,6 +139,7 @@ export const GameBottomBar: React.FC<GameBottomBarProps> = ({
           ) : (
             playerHand.map((card, idx) => {
               const isCardDisabled = isBusy || whoseTurn !== "player" || isRoundEnding;
+              const envColor = computedHighlightIds.has(card.id) ? "#00f2ff" : "#fff";
               return (
                 <motion.div
                   key={card.id}
@@ -129,6 +175,7 @@ export const GameBottomBar: React.FC<GameBottomBarProps> = ({
                     card={card}
                     disabled={isCardDisabled}
                     showBack={playerFolded}
+                    envColor={envColor}
                     onClick={() => {
                       if (!isDraggingRef.current) {
                         onPlayCard(card);

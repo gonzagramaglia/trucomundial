@@ -9,6 +9,7 @@ import { AnimatePresence } from "framer-motion";
 import type { GameMode, PlayerRole } from "./lib/truco/types";
 import { ScrollIndicator } from "./components/ui/ScrollIndicator";
 import i18n from "./lib/i18n";
+import { updateVotesRegistry, snapshotVotesForGame, setGameActive } from "./lib/votesStore";
 
 function App() {
   const [user, setUser] = useState<any>(null);
@@ -18,6 +19,36 @@ function App() {
   const [showExitModal, setShowExitModal] = useState(false);
   const [currentRoomCode, setCurrentRoomCode] = useState<string | null>(null);
   const [isCreator, setIsCreator] = useState(false);
+
+  useEffect(() => {
+    const fetchGlobalVotes = async () => {
+      try {
+        const { data } = await supabase
+          .from('game_sync')
+          .select('match_id, last_move')
+          .like('match_id', 'user_votes_%');
+        
+        if (data) {
+          const aggregate: Record<string, number> = {};
+          data.forEach(item => {
+            const votes = item.last_move?.votes;
+            if (votes && typeof votes === 'object') {
+              Object.entries(votes).forEach(([cardId, count]) => {
+                if (typeof count === 'number') {
+                  aggregate[cardId] = (aggregate[cardId] || 0) + count;
+                }
+              });
+            }
+          });
+          
+          updateVotesRegistry(aggregate);
+        }
+      } catch (err) {
+        console.error('Error fetching global votes on init:', err);
+      }
+    };
+    fetchGlobalVotes();
+  }, []);
 
   const syncRef = useRef<((data: any) => void) | null>(null);
   const roomInfoRef = useRef<any>(null);
@@ -158,6 +189,9 @@ function App() {
     roomCode?: string,
     isReconnecting?: boolean,
   ) => {
+    snapshotVotesForGame();
+    setGameActive(true);
+
     const isHostForThisMatch =
       mode === "multiplayer" ? isCreatorFlag || false : false;
     setIsCreator(isHostForThisMatch);
@@ -259,6 +293,7 @@ function App() {
   };
 
   const handleConfirmExit = () => {
+    setGameActive(false);
     setShowExitModal(false);
     core.setWinnerModal(null);
     core.handleRestartGame();

@@ -4,12 +4,14 @@ interface StickerInfoProps {
   country: string;
   club: string;
   isHovered: boolean;
+  color?: string;
 }
 
 import { useTranslation } from 'react-i18next';
 
-export const StickerInfo: React.FC<StickerInfoProps> = ({ country, club, isHovered }) => {
+export const StickerInfo: React.FC<StickerInfoProps> = ({ country, club, isHovered, color }) => {
   const { t } = useTranslation();
+  const textColor = color || "var(--color-primary)";
   return (
     <div
       style={{
@@ -25,7 +27,7 @@ export const StickerInfo: React.FC<StickerInfoProps> = ({ country, club, isHover
       <span
         className="text-display"
         style={{
-          color: "var(--color-primary)",
+          color: textColor,
           fontSize: "0.8rem",
           lineHeight: 1.2,
         }}
@@ -35,7 +37,7 @@ export const StickerInfo: React.FC<StickerInfoProps> = ({ country, club, isHover
       <span
         className="text-display"
         style={{
-          color: "var(--color-primary)",
+          color: textColor,
           fontSize: "0.75rem",
           lineHeight: 1.2,
           opacity: 0.8

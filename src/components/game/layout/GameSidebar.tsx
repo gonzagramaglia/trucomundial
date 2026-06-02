@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { RankingSidebar } from './RankingSidebar';
+import { StarsSidebar } from './StarsSidebar';
 import { InstructionsPanel } from './InstructionsPanel';
 import { useTranslation } from 'react-i18next';
 
@@ -61,7 +61,7 @@ export const GameSidebar: React.FC<GameSidebarProps> = ({ maxPoints = 30 }) => {
 
       {/* Content */}
       <div style={{ height: "100%", overflowY: "auto" }}>
-        {activeTab === 'rules' ? <InstructionsPanel maxPoints={maxPoints} /> : <RankingSidebar />}
+        {activeTab === 'rules' ? <InstructionsPanel maxPoints={maxPoints} /> : <StarsSidebar />}
       </div>
     </div>
   );
