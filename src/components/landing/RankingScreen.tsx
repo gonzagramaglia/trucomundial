@@ -30,6 +30,8 @@ const BASE_PLAYERS = CARDS.map(card => ({
 export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, onBack }) => {
   const { t } = useTranslation();
   const [search, setSearch] = useState('');
+  const [countryFilter, setCountryFilter] = useState<'all' | 'Argentina' | 'Francia' | 'España' | 'Nueva Zelanda'>('all');
+  const [sortBy, setSortBy] = useState<'most_voted' | 'least_voted'>('most_voted');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [dbVotesData, setDbVotesData] = useState<any[]>([]);
@@ -223,6 +225,20 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
     }
   });
 
+  // Calculate absolute ranks (always based on most voted to least voted)
+  const absoluteRanks = new Map<string, number>();
+  [...BASE_PLAYERS]
+    .map(player => {
+      const otherVotes = aggregateOtherVotes[player.id] ?? 0;
+      const myActiveVotes = myVotes[player.id] ?? 0;
+      const totalVotes = player.baseVotes + otherVotes + myActiveVotes;
+      return { id: player.id, totalVotes };
+    })
+    .sort((a, b) => b.totalVotes - a.totalVotes)
+    .forEach((p, idx) => {
+      absoluteRanks.set(p.id, idx + 1);
+    });
+
   // Combine: baseVotes + other users' votes + current user's active local votes
   const sortedPlayers = [...BASE_PLAYERS]
     .map(player => {
@@ -237,7 +253,12 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
         totalVotes
       };
     })
-    .sort((a, b) => b.totalVotes - a.totalVotes);
+    .sort((a, b) => {
+      if (sortBy === 'least_voted') {
+        return a.totalVotes - b.totalVotes;
+      }
+      return b.totalVotes - a.totalVotes;
+    });
 
   const currentOrder = sortedPlayers.map(p => p.id).join(',');
 
@@ -274,13 +295,28 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
     }
   }, [currentOrder]);
 
-  // Filter players based on search query
+  const cleanString = (str: string): string => {
+    return str
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase();
+  };
+
+  // Filter players based on search query and nationality
   const filteredPlayers = sortedPlayers.filter(p => {
-    const q = search.toLowerCase();
+    // 1. Nationality filter
+    if (countryFilter !== 'all' && p.country !== countryFilter) {
+      return false;
+    }
+
+    // 2. Search query filter
+    const q = cleanString(search);
+    if (!q) return true;
+
     return (
-      p.name.toLowerCase().includes(q) ||
-      p.country.toLowerCase().includes(q) ||
-      p.club.toLowerCase().includes(q)
+      cleanString(p.name).includes(q) ||
+      cleanString(p.country).includes(q) ||
+      cleanString(p.club).includes(q)
     );
   });
 
@@ -620,41 +656,213 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
 
       {/* SEARCH BOX & FILTERS */}
       <div style={{
-        position: 'relative',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '1rem',
         width: '100%',
         marginBottom: '2rem'
       }}>
-        <div style={{
-          position: 'absolute',
-          top: '50%',
-          left: '1.25rem',
-          transform: 'translateY(-50%)',
-          color: 'rgba(255,255,255,0.4)',
-          pointerEvents: 'none'
-        }}>
-          <Search size={20} />
+        {/* Search Input */}
+        <div style={{ position: 'relative', width: '100%' }}>
+          <div style={{
+            position: 'absolute',
+            top: '50%',
+            left: '1.25rem',
+            transform: 'translateY(-50%)',
+            color: 'rgba(255,255,255,0.4)',
+            pointerEvents: 'none'
+          }}>
+            <Search size={20} />
+          </div>
+          <input
+            type="text"
+            placeholder={t('search_placeholder')}
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            style={{
+              width: '100%',
+              padding: '1.25rem 1.25rem 1.25rem 3.25rem',
+              background: 'rgba(255, 255, 255, 0.05)',
+              border: '2px solid rgba(255, 255, 255, 0.1)',
+              borderRadius: '1.5rem',
+              color: '#fff',
+              fontSize: '1.1rem',
+              outline: 'none',
+              boxSizing: 'border-box',
+              transition: 'all 0.2s ease',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)'
+            }}
+            onFocus={e => e.target.style.borderColor = 'rgba(0, 242, 255, 0.5)'}
+            onBlur={e => e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)'}
+          />
         </div>
-        <input
-          type="text"
-          placeholder={t('search_placeholder')}
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          style={{
-            width: '100%',
-            padding: '1.25rem 1.25rem 1.25rem 3.25rem',
-            background: 'rgba(255, 255, 255, 0.05)',
-            border: '2px solid rgba(255, 255, 255, 0.1)',
-            borderRadius: '1.5rem',
-            color: '#fff',
-            fontSize: '1.1rem',
-            outline: 'none',
-            boxSizing: 'border-box',
-            transition: 'all 0.2s ease',
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)'
-          }}
-          onFocus={e => e.target.style.borderColor = 'rgba(0, 242, 255, 0.5)'}
-          onBlur={e => e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)'}
-        />
+
+        {/* Filters and Sort Row */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          gap: '1rem',
+          flexWrap: 'wrap',
+          width: '100%'
+        }}>
+          {/* Nationality Filters (Pills) */}
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+            <button
+              onClick={() => setCountryFilter('all')}
+              style={{
+                height: '38px',
+                padding: '0 1.2rem',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxSizing: 'border-box',
+                borderRadius: '1rem',
+                background: countryFilter === 'all' ? 'rgba(0, 242, 255, 0.2)' : 'rgba(255, 255, 255, 0.05)',
+                border: countryFilter === 'all' ? '1.5px solid #00f2ff' : '1px solid rgba(255, 255, 255, 0.1)',
+                color: '#fff',
+                fontSize: '0.85rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                boxShadow: countryFilter === 'all' ? '0 0 10px rgba(0, 242, 255, 0.2)' : 'none'
+              }}
+            >
+              🌎 {t('filter_all', 'Todos')}
+            </button>
+            <button
+              onClick={() => setCountryFilter('Argentina')}
+              style={{
+                height: '38px',
+                padding: '0 1.2rem',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxSizing: 'border-box',
+                borderRadius: '1rem',
+                background: countryFilter === 'Argentina' ? 'rgba(0, 242, 255, 0.2)' : 'rgba(255, 255, 255, 0.05)',
+                border: countryFilter === 'Argentina' ? '1.5px solid #00f2ff' : '1px solid rgba(255, 255, 255, 0.1)',
+                color: '#fff',
+                fontSize: '0.85rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                boxShadow: countryFilter === 'Argentina' ? '0 0 10px rgba(0, 242, 255, 0.2)' : 'none'
+              }}
+            >
+              🇦🇷 Argentina
+            </button>
+            <button
+              onClick={() => setCountryFilter('Francia')}
+              style={{
+                height: '38px',
+                padding: '0 1.2rem',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxSizing: 'border-box',
+                borderRadius: '1rem',
+                background: countryFilter === 'Francia' ? 'rgba(168, 85, 247, 0.2)' : 'rgba(255, 255, 255, 0.05)',
+                border: countryFilter === 'Francia' ? '1.5px solid #a855f7' : '1px solid rgba(255, 255, 255, 0.1)',
+                color: '#fff',
+                fontSize: '0.85rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                boxShadow: countryFilter === 'Francia' ? '0 0 10px rgba(168, 85, 247, 0.2)' : 'none'
+              }}
+            >
+              🇫🇷 Francia
+            </button>
+            <button
+              onClick={() => setCountryFilter('España')}
+              style={{
+                height: '38px',
+                padding: '0 1.2rem',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxSizing: 'border-box',
+                borderRadius: '1rem',
+                background: countryFilter === 'España' ? 'rgba(239, 68, 68, 0.2)' : 'rgba(255, 255, 255, 0.05)',
+                border: countryFilter === 'España' ? '1.5px solid #ef4444' : '1px solid rgba(255, 255, 255, 0.1)',
+                color: '#fff',
+                fontSize: '0.85rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                boxShadow: countryFilter === 'España' ? '0 0 10px rgba(239, 68, 68, 0.2)' : 'none'
+              }}
+            >
+              🇪🇸 España
+            </button>
+            <button
+              onClick={() => setCountryFilter('Nueva Zelanda')}
+              style={{
+                height: '38px',
+                padding: '0 1.2rem',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxSizing: 'border-box',
+                borderRadius: '1rem',
+                background: countryFilter === 'Nueva Zelanda' ? 'rgba(34, 197, 94, 0.2)' : 'rgba(255, 255, 255, 0.05)',
+                border: countryFilter === 'Nueva Zelanda' ? '1.5px solid #22c55e' : '1px solid rgba(255, 255, 255, 0.1)',
+                color: '#fff',
+                fontSize: '0.85rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                boxShadow: countryFilter === 'Nueva Zelanda' ? '0 0 10px rgba(34, 197, 94, 0.2)' : 'none'
+              }}
+            >
+              🇳🇿 Nueva Zelanda
+            </button>
+          </div>
+
+          {/* Sort Selector */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <span style={{ fontSize: '0.85rem', opacity: 0.6 }}>{t('sort_by', 'Ordenar por')}:</span>
+            <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
+              <select
+                value={sortBy}
+                onChange={e => setSortBy(e.target.value as any)}
+                style={{
+                  height: '38px',
+                  padding: '0 1.8rem 0 1rem',
+                  borderRadius: '1rem',
+                  background: 'rgba(0, 0, 0, 0.3)',
+                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                  color: '#fff',
+                  fontSize: '0.85rem',
+                  fontWeight: 700,
+                  outline: 'none',
+                  cursor: 'pointer',
+                  appearance: 'none',
+                  WebkitAppearance: 'none',
+                  MozAppearance: 'none',
+                  transition: 'all 0.2s',
+                  boxSizing: 'border-box'
+                }}
+              >
+                <option value="most_voted">📈 {t('most_voted', 'Más Votados')}</option>
+                <option value="least_voted">📉 {t('least_voted', 'Menos Votados')}</option>
+              </select>
+              <span style={{
+                position: 'absolute',
+                right: '0.65rem',
+                pointerEvents: 'none',
+                fontSize: '0.5rem',
+                opacity: 0.7,
+                display: 'flex',
+                alignItems: 'center',
+                color: '#fff'
+              }}>
+                ▼
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* LOADER */}
@@ -867,7 +1075,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
                   boxShadow: '0 4px 10px rgba(0,0,0,0.3)',
                   backdropFilter: 'blur(10px)'
                 }}>
-                  {index + 1}º
+                  {absoluteRanks.get(player.id)}º
                 </div>
 
 

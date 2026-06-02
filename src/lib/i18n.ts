@@ -170,11 +170,16 @@ const resources = {
       "lets_play": "LET'S PLAY!",
       "country_Francia": "France",
       "country_Argentina": "Argentina",
+      "country_España": "Spain",
+      "country_Nueva Zelanda": "New Zealand",
 
       // GameModeSelector
       "roadmap": "ROADMAP",
 
       // RankingScreen
+      "sort_by": "Sort by",
+      "most_voted": "Most Voted",
+      "least_voted": "Least Voted",
       "ranking_subtitle": "Vote for your stickers to rank them in the Truco Mundial global power ranking",
       "refresh_ranking": "Refresh Ranking",
       "your_votes_distributed": "Your Distributed Votes",
@@ -482,11 +487,16 @@ const resources = {
       "lets_play": "¡VAMO' A JUGÁ!",
       "country_Francia": "Francia",
       "country_Argentina": "Argentina",
+      "country_España": "España",
+      "country_Nueva Zelanda": "Nueva Zelanda",
 
       // GameModeSelector
       "roadmap": "HOJA DE RUTA",
 
       // RankingScreen
+      "sort_by": "Ordenar por",
+      "most_voted": "Más Votados",
+      "least_voted": "Menos Votados",
       "ranking_subtitle": "Votá a tus figuritas para posicionarlas en la jerarquía global de Truco Mundial",
       "refresh_ranking": "Actualizar Jerarquía",
       "your_votes_distributed": "Tus Votos Distribuidos",
