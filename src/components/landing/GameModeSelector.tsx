@@ -1,16 +1,21 @@
 import React from 'react';
 import { Button } from '../ui/Button';
-import { User, Globe, Trophy, BarChart3, Milestone } from 'lucide-react';
+import { User, Globe, Trophy, BarChart3, Milestone, Lock } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { GameMode } from '../../lib/truco/types';
 
 interface GameModeSelectorProps {
   selectedMode: GameMode;
   onSelect: (mode: GameMode) => void;
+  user: any;
 }
 
-export const GameModeSelector: React.FC<GameModeSelectorProps> = ({ selectedMode, onSelect }) => {
+export const GameModeSelector: React.FC<GameModeSelectorProps> = ({ selectedMode, onSelect, user }) => {
   const { t } = useTranslation();
+  const ADMIN_EMAILS = ["gonzagramaglia@gmail.com", "ciberportero@gmail.com"];
+  const isAdmin = user && user.email && ADMIN_EMAILS.includes(user.email);
+  const showTournamentAsLocked = !isAdmin;
+  const showRoadmapAsLocked = true;
   const commonStyle = {
     display: "flex",
     alignItems: "center",
@@ -55,20 +60,6 @@ export const GameModeSelector: React.FC<GameModeSelectorProps> = ({ selectedMode
         {t("play_online")}
       </Button>
 
-      {/* Tournaments Option */}
-      <Button
-        onClick={() => onSelect("tournament" as any)}
-        className="btn-hover-dark"
-        style={{
-          ...getButtonStyle("multiplayer", "#ffffff"),
-          width: "100%",
-          gap: "0.75rem",
-        }}
-      >
-        <Trophy size={22} />
-        {t("tournaments")} ({t("coming_soon").toLowerCase()})
-      </Button>
-
       {/* Secondary Options: Local Modes */}
       <div className="game-mode-secondary-row" style={{ display: "flex", gap: "1rem", width: "100%" }}>
         <Button
@@ -97,20 +88,48 @@ export const GameModeSelector: React.FC<GameModeSelectorProps> = ({ selectedMode
         </Button>
       </div>
 
-      {/* Roadmap Option */}
+      {/* Tournaments Option */}
       <Button
-        onClick={() => onSelect("roadmap" as any)}
-        className="btn-hover-dark"
+        onClick={() => {
+          if (!showTournamentAsLocked) {
+            onSelect("tournament" as any);
+          }
+        }}
+        className={showTournamentAsLocked ? "" : "btn-hover-dark"}
         style={{
-          ...getButtonStyle("multiplayer", "rgba(255, 255, 255, 0.08)"),
-          color: "#fff",
-          border: "1px solid rgba(255, 255, 255, 0.15)",
+          ...getButtonStyle("multiplayer", showTournamentAsLocked ? "rgba(255, 255, 255, 0.05)" : "#ffffff"),
+          color: showTournamentAsLocked ? "rgba(255, 255, 255, 0.4)" : "#000",
+          border: showTournamentAsLocked ? "1px solid rgba(255, 255, 255, 0.1)" : "none",
           width: "100%",
           gap: "0.75rem",
+          cursor: showTournamentAsLocked ? "not-allowed" : "pointer",
+          boxShadow: showTournamentAsLocked ? "none" : "4px 4px 0px #000"
         }}
       >
-        <Milestone size={20} />
-        {t("roadmap")}
+        {showTournamentAsLocked ? <Lock size={22} style={{ opacity: 0.5 }} /> : <Trophy size={22} />}
+        {t("tournaments")} {showTournamentAsLocked && `(${t("locked", "Bloqueado")})`}
+      </Button>
+
+      {/* Roadmap Option */}
+      <Button
+        onClick={() => {
+          if (!showRoadmapAsLocked) {
+            onSelect("roadmap" as any);
+          }
+        }}
+        className={showRoadmapAsLocked ? "" : "btn-hover-dark"}
+        style={{
+          ...getButtonStyle("multiplayer", showRoadmapAsLocked ? "rgba(255, 255, 255, 0.05)" : "rgba(255, 255, 255, 0.08)"),
+          color: showRoadmapAsLocked ? "rgba(255, 255, 255, 0.4)" : "#fff",
+          border: showRoadmapAsLocked ? "1px solid rgba(255, 255, 255, 0.1)" : "1px solid rgba(255, 255, 255, 0.15)",
+          width: "100%",
+          gap: "0.75rem",
+          cursor: showRoadmapAsLocked ? "not-allowed" : "pointer",
+          boxShadow: showRoadmapAsLocked ? "none" : "4px 4px 0px #000"
+        }}
+      >
+        {showRoadmapAsLocked ? <Lock size={20} style={{ opacity: 0.5 }} /> : <Milestone size={20} />}
+        {t("roadmap")} {showRoadmapAsLocked && `(${t("locked", "Bloqueado")})`}
       </Button>
     </div>
   );

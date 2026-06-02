@@ -48,6 +48,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     "1v1" | "2v2" | "multiplayer" | null
   >(null);
   const [isSelectingPoints, setIsSelectingPoints] = useState(false);
+  const [isSelectingTeams, setIsSelectingTeams] = useState(false);
+  const [selectedPoints, setSelectedPoints] = useState<15 | 30>(15);
+  const [selectedTeams, setSelectedTeams] = useState<string[]>(["Argentina", "Francia", "España", "Nueva Zelanda"]);
   const [roomCode, setRoomCode] = useState<string>("");
   const [isJoining, setIsJoining] = useState(false);
   const [inputCode, setInputCode] = useState("");
@@ -1014,6 +1017,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         <div style={{ width: "100%", display: "flex", justifyContent: "center" }}>
           <GameModeSelector
             selectedMode={selectedMode || "multiplayer"}
+            user={user}
             onSelect={(mode) => {
               if ((mode as string) === "ranking") {
                 setShowRanking(true);
@@ -1112,9 +1116,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               </h2>
 
               <PointSelector
-                onSelect={(points) =>
-                  initiateGame(selectedMode!, points as 15 | 30)
-                }
+                onSelect={(points) => {
+                  setSelectedPoints(points as 15 | 30);
+                  setIsSelectingPoints(false);
+                  setIsSelectingTeams(true);
+                }}
               />
 
               <motion.div
@@ -1148,6 +1154,165 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   {t("back")}
                 </button>
               </motion.div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Team Selection Modal */}
+      <AnimatePresence>
+        {isSelectingTeams && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              position: "fixed",
+              inset: 0,
+              background: "rgba(0, 0, 0, 0.85)",
+              backdropFilter: "blur(10px)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 2000,
+              padding: "2rem",
+            }}
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              style={{
+                background: "rgba(255, 255, 255, 0.05)",
+                border: "1px solid rgba(255, 255, 255, 0.1)",
+                padding: "3rem",
+                borderRadius: "2.5rem",
+                width: "100%",
+                maxWidth: "500px",
+                textAlign: "center",
+                boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)",
+              }}
+            >
+              <h2
+                className="text-display"
+                style={{
+                  fontSize: "2.2rem",
+                  color: "#fff",
+                  marginBottom: "2rem",
+                  lineHeight: 1.2,
+                  whiteSpace: "pre-wrap",
+                }}
+              >
+                ¿QUÉ SELECCIONES
+                <br />
+                <span style={{ color: "#00f2ff" }}>FORMAN EL MAZO?</span>
+              </h2>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '2rem', textAlign: 'left' }}>
+                {[
+                  { id: 'Argentina', flag: '🇦🇷', name: 'Argentina' },
+                  { id: 'Francia', flag: '🇫🇷', name: 'Francia' },
+                  { id: 'España', flag: '🇪🇸', name: 'España' },
+                  { id: 'Nueva Zelanda', flag: '🇳🇿', name: 'Nueva Zelanda' }
+                ].map(team => {
+                  const isChecked = selectedTeams.includes(team.id);
+                  return (
+                    <div
+                      key={team.id}
+                      onClick={() => {
+                        setSelectedTeams(prev =>
+                          prev.includes(team.id)
+                            ? prev.filter(t => t !== team.id)
+                            : [...prev, team.id]
+                        );
+                      }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '0.75rem 1.25rem',
+                        background: isChecked ? 'rgba(0, 242, 255, 0.1)' : 'rgba(255,255,255,0.03)',
+                        border: isChecked ? '1.5px solid #00f2ff' : '1px solid rgba(255,255,255,0.1)',
+                        borderRadius: '1.25rem',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                        boxShadow: isChecked ? '0 0 10px rgba(0, 242, 255, 0.15)' : 'none'
+                      }}
+                    >
+                      <span style={{ fontSize: '1rem', fontWeight: 800, color: '#fff' }}>
+                        {team.flag} {team.name}
+                      </span>
+                      <div style={{
+                        width: '20px',
+                        height: '20px',
+                        borderRadius: '6px',
+                        border: isChecked ? 'none' : '2px solid rgba(255,255,255,0.3)',
+                        background: isChecked ? '#00f2ff' : 'transparent',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: '#000',
+                        fontSize: '0.75rem',
+                        fontWeight: 900
+                      }}>
+                        {isChecked && '✓'}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', alignItems: 'center' }}>
+                <button
+                  disabled={selectedTeams.length < 2}
+                  onClick={() => {
+                    setIsSelectingTeams(false);
+                    initiateGame(selectedMode!, selectedPoints);
+                  }}
+                  className="btn-hover-dark"
+                  style={{
+                    width: "100%",
+                    height: "50px",
+                    fontSize: "1.2rem",
+                    fontWeight: 950,
+                    backgroundColor: selectedTeams.length < 2 ? "rgba(255,255,255,0.1)" : "#00f2ff",
+                    color: selectedTeams.length < 2 ? "rgba(255,255,255,0.3)" : "#000",
+                    border: "none",
+                    borderRadius: "1rem",
+                    boxShadow: "4px 4px 0px #000",
+                    fontStyle: "italic",
+                    cursor: selectedTeams.length < 2 ? "default" : "pointer"
+                  }}
+                >
+                  ACEPTAR
+                </button>
+
+                <button
+                  onClick={() => {
+                    setIsSelectingTeams(false);
+                    setIsSelectingPoints(true);
+                  }}
+                  className="btn-hover-dark"
+                  style={{
+                    background: "rgba(255, 255, 255, 0.1)",
+                    border: "1px solid rgba(255, 255, 255, 0.2)",
+                    color: "white",
+                    height: "40px",
+                    borderRadius: "1rem",
+                    padding: "0 1.5rem",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.5rem",
+                    fontSize: "0.8rem",
+                    fontWeight: 900,
+                    cursor: "pointer",
+                    transition: "none",
+                    marginTop: '0.5rem'
+                  }}
+                >
+                  Atrás
+                </button>
+              </div>
             </motion.div>
           </motion.div>
         )}

@@ -35,11 +35,12 @@ export const useTrucoLogic = (state: any) => {
       pHand = remoteHands.player;
       cHand = remoteHands.cpu;
     } else {
-      const argentinaCards = CARDS.filter(c => c.country === 'Argentina');
-      const franceCards = CARDS.filter(c => c.country === 'Francia');
+      const activeCountries = ['Argentina', 'Francia', 'España', 'Nueva Zelanda'];
+      const filteredCards = CARDS.filter(c => activeCountries.includes(c.country));
+      const deck = [...filteredCards].sort(() => Math.random() - 0.5);
       
-      pHand = argentinaCards.sort(() => Math.random() - 0.5).slice(0, 3);
-      cHand = franceCards.sort(() => Math.random() - 0.5).slice(0, 3);
+      pHand = deck.slice(0, 3);
+      cHand = deck.slice(3, 6);
     }
     const nextStarter = forcedStarter !== undefined ? forcedStarter : (starterIdx + 1) % (gameMode === "2v2" ? 4 : 2);
     return { playerHand: pHand, cpuHand: cHand, starter: nextStarter };
