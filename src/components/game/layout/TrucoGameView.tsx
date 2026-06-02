@@ -63,7 +63,12 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
   onCloseExit, onConfirmExit, playerFolded
 }) => {
   const { t } = useTranslation();
-  const [showMobileHelp, setShowMobileHelp] = useState(false);
+  const [showMobileHelp, setShowMobileHelp] = useState(() => {
+    if (typeof window !== "undefined") {
+      return window.innerWidth <= 1024 && gameMode !== "multiplayer";
+    }
+    return false;
+  });
   const [helpTab, setHelpTab] = useState<'rules' | 'ranking'>('rules');
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' && window.innerWidth < 768);
 

@@ -915,7 +915,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           className="btn-hover-dark"
           style={{
             position: "absolute",
-            top: "3.5rem",
+            top: typeof window !== "undefined" && window.innerWidth < 768 ? "3.5rem" : "1.5rem",
             left: "50%",
             transform: "translateX(-50%)",
             background: "rgba(255, 255, 255, 0.1)",

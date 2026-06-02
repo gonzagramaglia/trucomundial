@@ -59,7 +59,7 @@ export const InstructionsPanel: React.FC<InstructionsPanelProps> = ({ maxPoints 
           </p>
           <p style={{ marginBottom: "0.4rem" }}>
             {t("envido_desc_1")}{" "}
-            <strong style={{ color: "#fff" }}>{t("envido_team")}</strong> o{" "}
+            <strong style={{ color: "#fff" }}>{t("envido_team")}</strong>{" "}
             <strong style={{ color: "#fff" }}>{t("envido_club")}</strong>.
           </p>
           <div
@@ -82,7 +82,7 @@ export const InstructionsPanel: React.FC<InstructionsPanelProps> = ({ maxPoints 
             <p>
               {t("envido_ex_1_desc")}{" "}
               <strong style={{ color: "var(--color-primary)" }}>
-                33
+                40
               </strong>
             </p>
             <p
@@ -96,10 +96,7 @@ export const InstructionsPanel: React.FC<InstructionsPanelProps> = ({ maxPoints 
               {t("envido_ex_2")}
             </p>
             <p>
-              {t("envido_ex_2_desc")}{" "}
-              <strong style={{ color: "var(--color-primary)" }}>
-                10
-              </strong>
+              {t("envido_ex_2_desc")}
             </p>
           </div>
         </div>

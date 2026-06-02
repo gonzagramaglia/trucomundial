@@ -59,7 +59,6 @@ export const LandingHeader: React.FC<LandingHeaderProps> = ({ user }) => {
           }}>
             <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#00f2ff' }} />
             <span className="desktop-only">{t("session_desktop")}</span>
-            <span className="mobile-only">{t("session_mobile")}</span>
             <strong>{user.user_metadata?.custom_username || user.email?.split('@')[0]}</strong>
           </div>
         )}
