@@ -66,12 +66,22 @@ export const StarsSidebar = () => {
     }))
     .sort((a, b) => b.totalVotes - a.totalVotes);
 
+  const cleanString = (str: string): string => {
+    return str
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase();
+  };
+
   const filtered = sorted.filter(p => {
-    const q = search.toLowerCase();
+    const q = cleanString(search);
+    if (!q) return true;
+    const translatedCountry = t(`country_${p.country}`, p.country);
     return (
-      p.name.toLowerCase().includes(q) ||
-      p.country.toLowerCase().includes(q) ||
-      p.club.toLowerCase().includes(q)
+      cleanString(p.name).includes(q) ||
+      cleanString(p.country).includes(q) ||
+      cleanString(translatedCountry).includes(q) ||
+      cleanString(p.club).includes(q)
     );
   });
 
@@ -233,7 +243,7 @@ export const StarsSidebar = () => {
 
       <div style={{ flexShrink: 0, marginTop: '0.75rem' }}>
         <p style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.3)', textAlign: 'center', marginBottom: '0.5rem' }}>
-          Estas posiciones se actualizan en tiempo real con los votos de la comunidad.
+          {t("ranking_community_disclaimer")}
         </p>
         <a 
           href="/votar" 
@@ -255,8 +265,8 @@ export const StarsSidebar = () => {
         >
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
             <BarChart3 size={18} />
-            <span className="mobile-only">¡Votá ahora!</span>
-            <span className="desktop-only">¡Votá ahora y distribuí tus estrellas!</span>
+            <span className="mobile-only">{t("vote_now_mobile")}</span>
+            <span className="desktop-only">{t("vote_now_desktop")}</span>
           </div>
         </a>
       </div>

@@ -11,6 +11,7 @@ export const useTrucoState = () => {
   const [maxPoints, setMaxPoints] = useState(30);
   const [isHost, setIsHost] = useState(false);
   const [myIndex, setMyIndex] = useState(0);
+  const [activeCountries, setActiveCountries] = useState<string[]>(["Argentina", "Francia", "España", "Nueva Zelanda"]);
 
   const [trucoState, setTrucoState] = useState<TrucoState>({ level: 0, caller: null, status: "none" });
   const [envidoState, setEnvidoState] = useState<EnvidoState>({ level: 0, caller: null, status: "none" });
@@ -86,6 +87,7 @@ export const useTrucoState = () => {
     cpuOpponent2HandCount, setCpuOpponent2HandCount,
     cpuHandRef, cpuPartnerHandRef, cpuOpponent2HandRef, playerHandRef,
     lastProcessedHandRef, resetLockRef,
+    activeCountries, setActiveCountries,
     matchLog, setMatchLog
   };
 };

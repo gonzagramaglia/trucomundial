@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import { Home, User, Music, Globe } from "lucide-react";
+import { Home, User, Music, Globe, ArrowLeft } from "lucide-react";
 import { supabase } from "../../lib/supabase";
 import { LandingHeader } from "./LandingHeader";
 import { GameModeSelector } from "./GameModeSelector";
@@ -27,6 +27,7 @@ interface LandingPageProps {
     isCreator?: boolean,
     roomCode?: string,
     isReconnecting?: boolean,
+    selectedTeams?: string[],
   ) => void;
   sessionId: string;
 }
@@ -331,7 +332,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         handleCreateRoom(points); // Pass points directly to avoid state race
       }
     } else {
-      onStart(mode, points);
+      onStart(mode, points, undefined, undefined, undefined, undefined, false, selectedTeams);
     }
   };
 
@@ -470,6 +471,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             true,
             code,
             true,
+            selectedTeams,
           );
         }, 2000);
       } else if (myId === roomInfo.guestId) {
@@ -536,6 +538,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 true,
                 roomCode,
                 false,
+                selectedTeams,
               );
             }, 3500);
           }
@@ -546,7 +549,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     return () => {
       channel.unsubscribe();
     };
-  }, [isWaiting, user, roomCode, isCreator, rivalData, onStart]);
+  }, [isWaiting, user, roomCode, isCreator, rivalData, onStart, selectedTeams]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -1150,7 +1153,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     transition: "none",
                   }}
                 >
-                  <Home size={18} />
+                  {selectedMode === "multiplayer" ? <ArrowLeft size={18} /> : <Home size={18} />}
                   {t("back")}
                 </button>
               </motion.div>
@@ -1203,17 +1206,17 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   whiteSpace: "pre-wrap",
                 }}
               >
-                ¿QUÉ SELECCIONES
+                {t("deck_selection_title_line1")}
                 <br />
-                <span style={{ color: "#00f2ff" }}>FORMAN EL MAZO?</span>
+                <span style={{ color: "#00f2ff" }}>{t("deck_selection_title_line2")}</span>
               </h2>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '2rem', textAlign: 'left' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.25rem', textAlign: 'left' }}>
                 {[
-                  { id: 'Argentina', flag: '🇦🇷', name: 'Argentina' },
-                  { id: 'Francia', flag: '🇫🇷', name: 'Francia' },
-                  { id: 'España', flag: '🇪🇸', name: 'España' },
-                  { id: 'Nueva Zelanda', flag: '🇳🇿', name: 'Nueva Zelanda' }
+                  { id: 'Argentina', flag: '🇦🇷' },
+                  { id: 'Francia', flag: '🇫🇷' },
+                  { id: 'España', flag: '🇪🇸' },
+                  { id: 'Nueva Zelanda', flag: '🇳🇿' }
                 ].map(team => {
                   const isChecked = selectedTeams.includes(team.id);
                   return (
@@ -1239,8 +1242,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                         boxShadow: isChecked ? '0 0 10px rgba(0, 242, 255, 0.15)' : 'none'
                       }}
                     >
-                      <span style={{ fontSize: '1rem', fontWeight: 800, color: '#fff' }}>
-                        {team.flag} {team.name}
+                      <span style={{ fontSize: '1rem', fontWeight: 800, color: '#fff', display: 'inline-flex', alignItems: 'center' }}>
+                        <span style={{ marginRight: '0.65rem' }}>{team.flag}</span>
+                        {t("country_" + team.id)}
                       </span>
                       <div style={{
                         width: '20px',
@@ -1284,7 +1288,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     cursor: selectedTeams.length < 2 ? "default" : "pointer"
                   }}
                 >
-                  ACEPTAR
+                  {t("play")}
                 </button>
 
                 <button
@@ -1307,10 +1311,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     fontWeight: 900,
                     cursor: "pointer",
                     transition: "none",
-                    marginTop: '0.5rem'
+                    marginTop: '1.25rem'
                   }}
                 >
-                  Atrás
+                  <ArrowLeft size={18} />
+                  {t("back")}
                 </button>
               </div>
             </motion.div>
@@ -1320,7 +1325,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
       {/* Room Selection Modal (Multiplayer only) */}
       <AnimatePresence>
-        {selectedMode === "multiplayer" && !isWaiting && !isSelectingPoints && (
+        {selectedMode === "multiplayer" && !isWaiting && !isSelectingPoints && !isSelectingTeams && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -1400,7 +1405,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                           height: "80px",
                           fontSize: "2rem",
                           fontWeight: 950,
-                          fontStyle: "italic",
                           cursor: "pointer",
                           boxShadow: "6px 6px 0px #000",
                           transition: "transform 0.1s ease",
@@ -1440,7 +1444,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                           height: "80px",
                           fontSize: "2rem",
                           fontWeight: 950,
-                          fontStyle: "italic",
                           cursor: "pointer",
                           boxShadow: "6px 6px 0px #000",
                           transition: "transform 0.1s ease",
@@ -1616,7 +1619,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                         transition: "none",
                       }}
                     >
-                      <Home size={18} />
+                      <ArrowLeft size={18} />
                       {t("back")}
                     </button>
                   </motion.div>

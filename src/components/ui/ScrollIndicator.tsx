@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 export const ScrollIndicator: React.FC = () => {
+  const { t } = useTranslation();
   const [isAtBottom, setIsAtBottom] = useState(false);
   const [showIndicator, setShowIndicator] = useState(false);
 
@@ -91,7 +93,7 @@ export const ScrollIndicator: React.FC = () => {
             }}
           >
             <span style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: '0.75rem', letterSpacing: '0.05em', fontStyle: 'normal', textTransform: 'uppercase' }}>
-              DESLIZÁ
+              {t("swipe")}
             </span>
             <svg 
               width="16" 

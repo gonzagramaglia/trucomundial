@@ -10,11 +10,9 @@ interface GameModeSelectorProps {
   user: any;
 }
 
-export const GameModeSelector: React.FC<GameModeSelectorProps> = ({ selectedMode, onSelect, user }) => {
+export const GameModeSelector: React.FC<GameModeSelectorProps> = ({ selectedMode, onSelect, user: _user }) => {
   const { t } = useTranslation();
-  const ADMIN_EMAILS = ["gonzagramaglia@gmail.com", "ciberportero@gmail.com"];
-  const isAdmin = user && user.email && ADMIN_EMAILS.includes(user.email);
-  const showTournamentAsLocked = !isAdmin;
+  const showTournamentAsLocked = true;
   const showRoadmapAsLocked = true;
   const commonStyle = {
     display: "flex",

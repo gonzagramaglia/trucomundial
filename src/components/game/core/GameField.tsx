@@ -210,7 +210,7 @@ export const GameField: React.FC<GameFieldProps> = ({
             }}
             title={t("me_voy_al_mazo")}
           >
-            {"IRSE AL MAZO"}
+            {t("deck")}
           </button>
         )}
       </motion.div>

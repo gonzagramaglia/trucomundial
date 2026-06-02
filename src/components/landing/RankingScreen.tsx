@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, Save, Plus, Minus, Search, Trophy, Lock, RefreshCw, Check } from 'lucide-react';
+import { Save, Plus, Minus, Search, Trophy, Lock, RefreshCw, Check, Home } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { CARDS } from '../../data/cards';
 import { Sticker } from '../shared/Sticker';
@@ -30,7 +30,16 @@ const BASE_PLAYERS = CARDS.map(card => ({
 export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, onBack }) => {
   const { t } = useTranslation();
   const [search, setSearch] = useState('');
-  const [countryFilter, setCountryFilter] = useState<'all' | 'Argentina' | 'Francia' | 'España' | 'Nueva Zelanda'>('all');
+  const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
+  const toggleCountryFilter = (country: string) => {
+    setSelectedCountries(prev => {
+      if (prev.includes(country)) {
+        return prev.filter(c => c !== country);
+      } else {
+        return [...prev, country];
+      }
+    });
+  };
   const [sortBy, setSortBy] = useState<'most_voted' | 'least_voted'>('most_voted');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -305,7 +314,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
   // Filter players based on search query and nationality
   const filteredPlayers = sortedPlayers.filter(p => {
     // 1. Nationality filter
-    if (countryFilter !== 'all' && p.country !== countryFilter) {
+    if (selectedCountries.length > 0 && !selectedCountries.includes(p.country)) {
       return false;
     }
 
@@ -313,9 +322,11 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
     const q = cleanString(search);
     if (!q) return true;
 
+    const translatedCountry = t(`country_${p.country}`, p.country);
     return (
       cleanString(p.name).includes(q) ||
       cleanString(p.country).includes(q) ||
+      cleanString(translatedCountry).includes(q) ||
       cleanString(p.club).includes(q)
     );
   });
@@ -342,28 +353,28 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
             style={{
               position: "fixed",
               top: "1.5rem",
-              left: "1rem",
+              left: "1.5rem",
               background: "rgba(255, 255, 255, 0.1)",
               backdropFilter: "blur(12px)",
               zIndex: 2000,
-              height: "36px",
-              borderRadius: "0.85rem",
-              padding: "0 0.85rem",
+              height: "40px",
+              borderRadius: "1rem",
+              padding: "0 1.25rem",
               display: "flex",
               alignItems: "center",
-              gap: "0.4rem",
+              gap: "0.5rem",
               color: "white",
-              border: "1px solid rgba(255, 255, 255, 0.1)",
+              border: "1px solid rgba(255, 255, 255, 0.2)",
               boxShadow: "none",
               fontWeight: 900,
-              fontSize: "0.7rem",
+              fontSize: "0.75rem",
               letterSpacing: "0.05em",
               textTransform: "uppercase",
               cursor: "pointer"
             }}
           >
-            <ArrowLeft size={14} />
-            <span>{t("back")}</span>
+            <Home size={18} />
+            <span>{t("home")}</span>
           </button>
 
           {/* Fixed Refresh Button (Desktop Right Corner) */}
@@ -374,25 +385,31 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
             style={{
               position: "fixed",
               top: "1.5rem",
-              right: "1rem",
+              right: "1.5rem",
               background: "rgba(255, 255, 255, 0.1)",
               backdropFilter: "blur(12px)",
               zIndex: 2000,
-              height: "36px",
-              width: "36px",
-              borderRadius: "50%",
+              height: "40px",
+              borderRadius: "1rem",
+              padding: "0 1.25rem",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
+              gap: "0.5rem",
               color: "white",
-              border: "1px solid rgba(255, 255, 255, 0.1)",
+              border: "1px solid rgba(255, 255, 255, 0.2)",
               boxShadow: "none",
+              fontWeight: 900,
+              fontSize: "0.75rem",
+              letterSpacing: "0.05em",
+              textTransform: "uppercase",
               cursor: "pointer",
               opacity: loading ? 0.5 : 1
             }}
             title={t('refresh_ranking')}
           >
-            <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+            <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
+            <span>{t("sync")}</span>
           </button>
         </>
       )}
@@ -437,8 +454,8 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
                   boxShadow: '3px 3px 0px #000',
                 }}
               >
-                <ArrowLeft size={14} />
-                {t("back")}
+                <Home size={14} />
+                {t("home")}
               </button>
 
               <button
@@ -450,11 +467,13 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
                   border: '1px solid rgba(255, 255, 255, 0.15)',
                   color: 'white',
                   height: '36px',
-                  width: '36px',
-                  borderRadius: '50%',
+                  borderRadius: '0.75rem',
+                  padding: '0 0.85rem',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
+                  gap: '0.4rem',
+                  fontSize: '0.8rem',
+                  fontWeight: 800,
                   cursor: 'pointer',
                   boxShadow: '3px 3px 0px #000',
                   opacity: loading ? 0.5 : 1
@@ -462,6 +481,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
                 title={t('refresh_ranking')}
               >
                 <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
+                <span>{t("sync")}</span>
               </button>
             </div>
 
@@ -709,7 +729,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
           {/* Nationality Filters (Pills) */}
           <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
             <button
-              onClick={() => setCountryFilter('all')}
+              onClick={() => setSelectedCountries([])}
               style={{
                 height: '42px',
                 padding: '0 1.25rem',
@@ -718,20 +738,20 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
                 justifyContent: 'center',
                 boxSizing: 'border-box',
                 borderRadius: '1.1rem',
-                background: countryFilter === 'all' ? 'rgba(0, 242, 255, 0.2)' : 'rgba(255, 255, 255, 0.05)',
-                border: countryFilter === 'all' ? '1.5px solid #00f2ff' : '1px solid rgba(255, 255, 255, 0.1)',
+                background: selectedCountries.length === 0 ? 'rgba(0, 242, 255, 0.2)' : 'rgba(255, 255, 255, 0.05)',
+                border: selectedCountries.length === 0 ? '1.5px solid #00f2ff' : '1px solid rgba(255, 255, 255, 0.1)',
                 color: '#fff',
                 fontSize: '0.85rem',
                 fontWeight: 700,
                 cursor: 'pointer',
                 transition: 'all 0.2s ease',
-                boxShadow: countryFilter === 'all' ? '0 0 10px rgba(0, 242, 255, 0.2)' : 'none'
+                boxShadow: selectedCountries.length === 0 ? '0 0 10px rgba(0, 242, 255, 0.2)' : 'none'
               }}
             >
-              🌎 {t('filter_all', 'Todos')}
+              <span style={{ marginRight: '0.4rem' }}>🌎</span> {t('filter_all')}
             </button>
             <button
-              onClick={() => setCountryFilter('Argentina')}
+              onClick={() => toggleCountryFilter('Argentina')}
               style={{
                 height: '42px',
                 padding: '0 1.25rem',
@@ -740,20 +760,20 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
                 justifyContent: 'center',
                 boxSizing: 'border-box',
                 borderRadius: '1.1rem',
-                background: countryFilter === 'Argentina' ? 'rgba(0, 242, 255, 0.2)' : 'rgba(255, 255, 255, 0.05)',
-                border: countryFilter === 'Argentina' ? '1.5px solid #00f2ff' : '1px solid rgba(255, 255, 255, 0.1)',
+                background: selectedCountries.includes('Argentina') ? 'rgba(0, 242, 255, 0.2)' : 'rgba(255, 255, 255, 0.05)',
+                border: selectedCountries.includes('Argentina') ? '1.5px solid #00f2ff' : '1px solid rgba(255, 255, 255, 0.1)',
                 color: '#fff',
                 fontSize: '0.85rem',
                 fontWeight: 700,
                 cursor: 'pointer',
                 transition: 'all 0.2s ease',
-                boxShadow: countryFilter === 'Argentina' ? '0 0 10px rgba(0, 242, 255, 0.2)' : 'none'
+                boxShadow: selectedCountries.includes('Argentina') ? '0 0 10px rgba(0, 242, 255, 0.2)' : 'none'
               }}
             >
-              🇦🇷 Argentina
+              <span style={{ marginRight: '0.4rem' }}>🇦🇷</span> {t("country_Argentina")}
             </button>
             <button
-              onClick={() => setCountryFilter('Francia')}
+              onClick={() => toggleCountryFilter('Francia')}
               style={{
                 height: '42px',
                 padding: '0 1.25rem',
@@ -762,20 +782,20 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
                 justifyContent: 'center',
                 boxSizing: 'border-box',
                 borderRadius: '1.1rem',
-                background: countryFilter === 'Francia' ? 'rgba(168, 85, 247, 0.2)' : 'rgba(255, 255, 255, 0.05)',
-                border: countryFilter === 'Francia' ? '1.5px solid #a855f7' : '1px solid rgba(255, 255, 255, 0.1)',
+                background: selectedCountries.includes('Francia') ? 'rgba(168, 85, 247, 0.2)' : 'rgba(255, 255, 255, 0.05)',
+                border: selectedCountries.includes('Francia') ? '1.5px solid #a855f7' : '1px solid rgba(255, 255, 255, 0.1)',
                 color: '#fff',
                 fontSize: '0.85rem',
                 fontWeight: 700,
                 cursor: 'pointer',
                 transition: 'all 0.2s ease',
-                boxShadow: countryFilter === 'Francia' ? '0 0 10px rgba(168, 85, 247, 0.2)' : 'none'
+                boxShadow: selectedCountries.includes('Francia') ? '0 0 10px rgba(168, 85, 247, 0.2)' : 'none'
               }}
             >
-              🇫🇷 Francia
+              <span style={{ marginRight: '0.4rem' }}>🇫🇷</span> {t("country_Francia")}
             </button>
             <button
-              onClick={() => setCountryFilter('España')}
+              onClick={() => toggleCountryFilter('España')}
               style={{
                 height: '42px',
                 padding: '0 1.25rem',
@@ -784,20 +804,20 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
                 justifyContent: 'center',
                 boxSizing: 'border-box',
                 borderRadius: '1.1rem',
-                background: countryFilter === 'España' ? 'rgba(239, 68, 68, 0.2)' : 'rgba(255, 255, 255, 0.05)',
-                border: countryFilter === 'España' ? '1.5px solid #ef4444' : '1px solid rgba(255, 255, 255, 0.1)',
+                background: selectedCountries.includes('España') ? 'rgba(239, 68, 68, 0.2)' : 'rgba(255, 255, 255, 0.05)',
+                border: selectedCountries.includes('España') ? '1.5px solid #ef4444' : '1px solid rgba(255, 255, 255, 0.1)',
                 color: '#fff',
                 fontSize: '0.85rem',
                 fontWeight: 700,
                 cursor: 'pointer',
                 transition: 'all 0.2s ease',
-                boxShadow: countryFilter === 'España' ? '0 0 10px rgba(239, 68, 68, 0.2)' : 'none'
+                boxShadow: selectedCountries.includes('España') ? '0 0 10px rgba(239, 68, 68, 0.2)' : 'none'
               }}
             >
-              🇪🇸 España
+              <span style={{ marginRight: '0.4rem' }}>🇪🇸</span> {t("country_España")}
             </button>
             <button
-              onClick={() => setCountryFilter('Nueva Zelanda')}
+              onClick={() => toggleCountryFilter('Nueva Zelanda')}
               style={{
                 height: '42px',
                 padding: '0 1.25rem',
@@ -806,17 +826,17 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
                 justifyContent: 'center',
                 boxSizing: 'border-box',
                 borderRadius: '1.1rem',
-                background: countryFilter === 'Nueva Zelanda' ? 'rgba(34, 197, 94, 0.2)' : 'rgba(255, 255, 255, 0.05)',
-                border: countryFilter === 'Nueva Zelanda' ? '1.5px solid #22c55e' : '1px solid rgba(255, 255, 255, 0.1)',
+                background: selectedCountries.includes('Nueva Zelanda') ? 'rgba(34, 197, 94, 0.2)' : 'rgba(255, 255, 255, 0.05)',
+                border: selectedCountries.includes('Nueva Zelanda') ? '1.5px solid #22c55e' : '1px solid rgba(255, 255, 255, 0.1)',
                 color: '#fff',
                 fontSize: '0.85rem',
                 fontWeight: 700,
                 cursor: 'pointer',
                 transition: 'all 0.2s ease',
-                boxShadow: countryFilter === 'Nueva Zelanda' ? '0 0 10px rgba(34, 197, 94, 0.2)' : 'none'
+                boxShadow: selectedCountries.includes('Nueva Zelanda') ? '0 0 10px rgba(34, 197, 94, 0.2)' : 'none'
               }}
             >
-              🇳🇿 Nueva Zelanda
+              <span style={{ marginRight: '0.4rem' }}>🇳🇿</span> {t("country_Nueva Zelanda")}
             </button>
           </div>
 
@@ -866,7 +886,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
       </div>
 
       {/* LOADER */}
-      {loading && dbVotesData.length === 0 ? (
+      {loading ? (
         <div style={{ width: '100%' }}>
           <style>{`
             @keyframes shimmer {

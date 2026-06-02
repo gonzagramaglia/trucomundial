@@ -111,30 +111,33 @@ export const useTrucoEffects = (state: any, logic: any) => {
         const winningCard = currentHandCards.find((c: any) => c.owner === handWinner);
         if (winningCard) setHandWinningCardIds((prev: string[]) => [...prev, winningCard.id]);
 
-        if (roundWinner) {
-          setIsRoundEnding(true);
-          setShowCountdown(true);
-          
-          const points = trucoState.level + 1;
-          const winnerStr = roundWinner === "player" ? "Vos" : "El Rival";
-          state.setMatchLog((prev: string[]) => [...prev, `★ Fin de la mano. Gana ${winnerStr} por ${points} puntos.`]);
+        // Delay the transition by 1 second so the player has time to see the winner/loser highlights on the table
+        setTimeout(() => {
+          if (roundWinner) {
+            setIsRoundEnding(true);
+            setShowCountdown(true);
+            
+            const points = trucoState.level + 1;
+            const winnerStr = roundWinner === "player" ? "Vos" : "El Rival";
+            state.setMatchLog((prev: string[]) => [...prev, `★ Fin de la mano. Gana ${winnerStr} por ${points} puntos.`]);
 
-          clearRoundData();
-          if (winningCard) setRoundWinningCardId(winningCard.id);
-          
-          if (gameMode !== "multiplayer" || isHost) {
-            const trucoLabel = points === 1 ? "la Mano" : points === 2 ? "el Truco" : points === 3 ? "el Retruco" : "el Vale 4";
-            const reason = roundWinner === "player" ? `Ganaste ${trucoLabel}` : `Ganó ${trucoLabel}`;
-            addPoints(roundWinner, points, reason);
+            clearRoundData();
+            if (winningCard) setRoundWinningCardId(winningCard.id);
+            
+            if (gameMode !== "multiplayer" || isHost) {
+              const trucoLabel = points === 1 ? "la Mano" : points === 2 ? "el Truco" : points === 3 ? "el Retruco" : "el Vale 4";
+              const reason = roundWinner === "player" ? `Ganaste ${trucoLabel}` : `Ganó ${trucoLabel}`;
+              addPoints(roundWinner, points, reason);
+            }
+
+            // Clear visual countdown message shortly after (4s)
+            setTimeout(() => {
+              setShowCountdown(false);
+            }, 4000);
+          } else {
+            setIsCooldown(false);
           }
-
-          // Clear visual countdown message shortly after (4s)
-          setTimeout(() => {
-            setShowCountdown(false);
-          }, 4000);
-        } else {
-          setIsCooldown(false);
-        }
+        }, 1000);
       }, 1000);
     }
   }, [playedCards.length, gameMode, isRoundEnding, isCooldown, trucoState.level, starterIdx, isHost, addPoints, clearRoundData, setIsCooldown, setIsRoundEnding, setHandWinners, setHandWinningCardIds, setRoundWinningCardId, setShowCountdown, lastProcessedHandRef, handWinners, state.setMatchLog]);

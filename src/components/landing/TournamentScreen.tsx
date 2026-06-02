@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  ArrowLeft,
+  Home,
   Trophy,
   Lock,
   Award,
@@ -315,28 +315,28 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({
             style={{
               position: "fixed",
               top: "1.5rem",
-              left: "1rem",
+              left: "1.5rem",
               background: "rgba(255, 255, 255, 0.1)",
               backdropFilter: "blur(12px)",
               zIndex: 2000,
-              height: "36px",
-              borderRadius: "0.85rem",
-              padding: "0 0.85rem",
+              height: "40px",
+              borderRadius: "1rem",
+              padding: "0 1.25rem",
               display: "flex",
               alignItems: "center",
-              gap: "0.4rem",
+              gap: "0.5rem",
               color: "white",
-              border: "1px solid rgba(255, 255, 255, 0.1)",
+              border: "1px solid rgba(255, 255, 255, 0.2)",
               boxShadow: "none",
               fontWeight: 900,
-              fontSize: "0.7rem",
+              fontSize: "0.75rem",
               letterSpacing: "0.05em",
               textTransform: "uppercase",
               cursor: "pointer",
             }}
           >
-            <ArrowLeft size={14} />
-            <span>{t("back")}</span>
+            <Home size={18} />
+            <span>{t("home")}</span>
           </button>
 
           {/* Fixed Warning Badge (Desktop Right Corner) */}
@@ -412,8 +412,8 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({
                   boxShadow: "3px 3px 0px #000",
                 }}
               >
-                <ArrowLeft size={14} />
-                {t("back")}
+                <Home size={14} />
+                {t("home")}
               </button>
 
               <div

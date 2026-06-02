@@ -70,12 +70,15 @@ export function useTrucoGame(sessionId: string | undefined, onSync?: (data: any)
     isPaused
   });
 
-  const startGame = useCallback((mode: GameMode, _rName: string, rId: string, points: number) => {
+  const startGame = useCallback((mode: GameMode, _rName: string, rId: string, points: number, selectedTeams?: string[]) => {
     core.setGameMode(mode);
     core.setGameState("playing");
     core.setScore({ player: 0, cpu: 0 });
     core.setRivalId(rId || null);
     core.setMaxPoints(points);
+    if (selectedTeams) {
+      core.setActiveCountries(selectedTeams);
+    }
     core.setIsGameStarting(true);
     core.setShowCountdown(true);
     core.clearRoundData(); // Clear field immediately

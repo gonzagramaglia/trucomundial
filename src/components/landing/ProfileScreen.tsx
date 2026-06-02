@@ -72,7 +72,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, handleAuth, 
       resetSuggestion();
       setTimeout(() => setSuggestionSuccess(false), 5000);
     } catch (err: any) {
-      setSuggestionError('Error al enviar la sugerencia: ' + err.message);
+      setSuggestionError(t('error_sending_suggestion') + err.message);
     } finally {
       setIsSubmittingSuggestion(false);
     }
@@ -166,6 +166,15 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, handleAuth, 
 
   // Calculate statistics
   const totalPlayed = history.length;
+
+  const getValidationMessage = (msg: string | undefined) => {
+    if (!msg) return "";
+    if (msg === "El asunto debe tener al menos 3 caracteres") return t("err_subject_min");
+    if (msg === "El asunto es muy largo") return t("err_subject_max");
+    if (msg === "El mensaje debe ser más descriptivo") return t("err_message_min");
+    if (msg === "El mensaje es muy largo") return t("err_message_max");
+    return t(msg);
+  };
 
   const formatDate = (dateStr: string) => {
     try {
@@ -701,10 +710,10 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, handleAuth, 
               </div>
               <div>
                 <h3 className="text-display" style={{ fontSize: '1.4rem', margin: 0, color: '#a855f7', lineHeight: 1.2 }}>
-                  Dejanos tu Sugerencia
+                  {t("suggestion_title")}
                 </h3>
                 <p style={{ margin: '0.25rem 0 0 0', opacity: 0.7, fontSize: '0.9rem' }}>
-                  ¿Tenés alguna idea para mejorar el juego? ¡Te leemos!
+                  {t("suggestion_desc")}
                 </p>
               </div>
             </div>
@@ -713,31 +722,31 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, handleAuth, 
               <div>
                 <input
                   {...registerSuggestion('subject')}
-                  placeholder="Asunto (ej. Nueva funcionalidad)"
+                  placeholder={t("suggestion_subject_placeholder")}
                   disabled={isSubmittingSuggestion}
                   style={{
                     width: '100%', background: 'rgba(0,0,0,0.3)', border: suggestionErrors.subject ? '1px solid rgba(239, 68, 68, 0.5)' : '1px solid rgba(255,255,255,0.1)',
                     color: '#fff', padding: '1rem', borderRadius: '1rem', fontSize: '0.9rem', outline: 'none', boxSizing: 'border-box'
                   }}
                 />
-                {suggestionErrors.subject && <span style={{ color: '#ef4444', fontSize: '0.75rem', marginTop: '0.25rem', display: 'block' }}>{suggestionErrors.subject.message}</span>}
+                {suggestionErrors.subject && <span style={{ color: '#ef4444', fontSize: '0.75rem', marginTop: '0.25rem', display: 'block' }}>{getValidationMessage(suggestionErrors.subject.message)}</span>}
               </div>
               
               <div>
                 <textarea
                   {...registerSuggestion('message')}
-                  placeholder="Escribí tu sugerencia en detalle..."
+                  placeholder={t("suggestion_message_placeholder")}
                   disabled={isSubmittingSuggestion}
                   style={{
                     width: '100%', background: 'rgba(0,0,0,0.3)', border: suggestionErrors.message ? '1px solid rgba(239, 68, 68, 0.5)' : '1px solid rgba(255,255,255,0.1)',
                     color: '#fff', padding: '1rem', borderRadius: '1rem', fontSize: '0.9rem', fontFamily: 'inherit', minHeight: '120px', resize: 'vertical', outline: 'none', boxSizing: 'border-box'
                   }}
                 />
-                {suggestionErrors.message && <span style={{ color: '#ef4444', fontSize: '0.75rem', marginTop: '0.25rem', display: 'block' }}>{suggestionErrors.message.message}</span>}
+                {suggestionErrors.message && <span style={{ color: '#ef4444', fontSize: '0.75rem', marginTop: '0.25rem', display: 'block' }}>{getValidationMessage(suggestionErrors.message.message)}</span>}
               </div>
 
               {suggestionError && <div style={{ color: '#ef4444', fontSize: '0.85rem' }}>{suggestionError}</div>}
-              {suggestionSuccess && <div style={{ color: '#10b981', fontSize: '0.85rem', fontWeight: 800 }}>¡Gracias por tu sugerencia! La hemos recibido correctamente.</div>}
+              {suggestionSuccess && <div style={{ color: '#10b981', fontSize: '0.85rem', fontWeight: 800 }}>{t("suggestion_success")}</div>}
 
               <button
                 type="submit"
@@ -751,7 +760,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, handleAuth, 
                 }}
               >
                 <Send size={18} />
-                {isSubmittingSuggestion ? 'Enviando...' : 'Enviar Sugerencia'}
+                {isSubmittingSuggestion ? t("sending_suggestion") : t("send_suggestion")}
               </button>
             </form>
           </div>

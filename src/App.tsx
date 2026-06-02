@@ -188,9 +188,14 @@ function App() {
     isCreatorFlag?: boolean,
     roomCode?: string,
     isReconnecting?: boolean,
+    selectedTeams?: string[],
   ) => {
     snapshotVotesForGame();
     setGameActive(true);
+
+    if (selectedTeams) {
+      core.setActiveCountries(selectedTeams);
+    }
 
     const isHostForThisMatch =
       mode === "multiplayer" ? isCreatorFlag || false : false;
@@ -243,6 +248,7 @@ function App() {
           rName || "RIVAL",
           rId || "",
           points,
+          selectedTeams,
         );
         if (syncData) {
           setTimeout(() => {

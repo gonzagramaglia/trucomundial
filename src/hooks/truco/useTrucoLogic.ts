@@ -10,7 +10,8 @@ export const useTrucoLogic = (state: any) => {
     setHandWinners, setIsRoundEnding, setIsCooldown, setStarterIdx, setDealerIdx,
     setPlayerHand, setCpuHandCount, setPlayedCards, setHandWinningCardIds, setRoundWinningCardId,
     setActiveCall, setScorePopups, setPlayerFolded,
-    playerHandRef, cpuHandRef, starterIdx, gameMode, lastProcessedHandRef, resetLockRef, setMatchLog
+    playerHandRef, cpuHandRef, starterIdx, gameMode, lastProcessedHandRef, resetLockRef, setMatchLog,
+    activeCountries
   } = state;
 
   const triggerCall = useCallback((text: string, color: string = "var(--color-primary)") => {
@@ -35,7 +36,6 @@ export const useTrucoLogic = (state: any) => {
       pHand = remoteHands.player;
       cHand = remoteHands.cpu;
     } else {
-      const activeCountries = ['Argentina', 'Francia', 'España', 'Nueva Zelanda'];
       const filteredCards = CARDS.filter(c => activeCountries.includes(c.country));
       const deck = [...filteredCards].sort(() => Math.random() - 0.5);
       
@@ -44,7 +44,7 @@ export const useTrucoLogic = (state: any) => {
     }
     const nextStarter = forcedStarter !== undefined ? forcedStarter : (starterIdx + 1) % (gameMode === "2v2" ? 4 : 2);
     return { playerHand: pHand, cpuHand: cHand, starter: nextStarter };
-  }, [gameMode, starterIdx]);
+  }, [gameMode, starterIdx, activeCountries]);
 
   const applyRoundData = useCallback((data: { playerHand: Card[], cpuHand: Card[], starter: number }) => {
     setIsRoundEnding(false);
