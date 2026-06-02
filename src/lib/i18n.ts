@@ -9,7 +9,7 @@ const resources = {
     translation: {
       // Landing Page
       "title": "TRUCO MUNDIAL",
-      "subtitle": "The Argentine classic, now with World Cup players.",
+      "subtitle": "The Argentine classic, now with World Cup players",
       "login": "Log In",
       "logout": "Log Out",
       "play_now": "PLAY NOW",
@@ -92,7 +92,7 @@ const resources = {
       "coming_soon": "COMING SOON",
       "tournaments": "TOURNAMENTS",
       "vote": "VOTE",
-      "session_desktop": "Logged in as: ",
+      "session_desktop": "Session of:",
       "session_mobile": "Session of: ",
       "classic": "CLASSIC",
       "fast": "FAST",
@@ -325,7 +325,7 @@ const resources = {
   es: {
     translation: {
       "title": "TRUCO MUNDIAL",
-      "subtitle": "El clásico argentino, ahora con los jugadores del mundial.",
+      "subtitle": "El clásico argentino, ahora con los jugadores del mundial",
       "login": "Iniciar Sesión",
       "logout": "Cerrar Sesión",
       "play_now": "JUGAR AHORA",
@@ -402,7 +402,7 @@ const resources = {
       "coming_soon": "PRÓXIMAMENTE",
       "tournaments": "TORNEOS",
       "vote": "VOTAR",
-      "session_desktop": "Sesión iniciada como: ",
+      "session_desktop": "Sesión de:",
       "session_mobile": "Sesión de: ",
       "classic": "CLÁSICA",
       "fast": "RÁPIDA",
@@ -604,7 +604,7 @@ const resources = {
       "contact_email_readonly": "Email de Contacto (Solo lectura)",
       "channel_name": "Nombre del Canal",
       "main_social_link": "Link a tu Red Social principal",
-      "main_streaming_link": "Link a tu canal de streaming principal",
+      "main_streaming_link": "Link a tu Canal de Streaming",
       "motivation": "Motivación (Por qué querés ser creador)",
       "saving_changes": "GUARDANDO...",
       "save_changes": "GUARDAR CAMBIOS",

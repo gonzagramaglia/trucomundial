@@ -15,6 +15,8 @@ import { ProfileScreen } from "./ProfileScreen";
 import { AdminScreen } from "../admin/AdminScreen";
 import { CreatorScreen } from "../admin/CreatorScreen";
 import { CreatorsApplicationScreen } from "./CreatorsApplicationScreen";
+import { TwitchButton } from '../shared/TwitchButton';
+
 
 interface LandingPageProps {
   onStart: (
@@ -991,23 +993,24 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
         <p
           style={{
-            fontFamily: "var(--font-display)",
+            fontFamily: "var(--font-main)",
             color: "#00f2ff",
-            fontSize: "1.15rem",
+            fontSize: "0.95rem",
             textTransform: "uppercase",
             maxWidth: "600px",
             margin: "0 0 2rem 0",
             fontWeight: 700,
             opacity: 1,
             textAlign: "center",
+            letterSpacing: "0.05em",
             whiteSpace: "pre-line"
           }}
         >
           <span className="desktop-only">{t("subtitle")}</span>
-          <span className="mobile-only">{t("subtitle").replace(" con ", " con \n")}</span>
+          <span className="mobile-only">{t("subtitle").replace(" con ", "\ncon ")}</span>
         </p>
 
-        <div style={{ width: "100%", paddingLeft: "22px" }}>
+        <div style={{ width: "100%", display: "flex", justifyContent: "center" }}>
           <GameModeSelector
             selectedMode={selectedMode || "multiplayer"}
             onSelect={(mode) => {
@@ -1057,51 +1060,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       </motion.div>
 
       {/* Twitch Button - Way Down Bottom & Centered */}
-      <a
-        href="https://twitch.tv/muchomovimiento/videos"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="btn-hover-dark"
-        style={{
-          position: "fixed",
-          bottom: typeof window !== "undefined" && window.innerWidth < 768 ? "0.5rem" : "1.5rem",
-          left: "50%",
-          transform: "translateX(-50%)",
-          background: "rgba(145, 70, 255, 0.2)",
-          backdropFilter: "blur(12px)",
-          border: "1px solid rgba(145, 70, 255, 0.3)",
-          color: "white",
-          height: "40px",
-          padding: "0 1.25rem",
-          borderRadius: "1rem",
-          textDecoration: "none",
-          display: "flex",
-          alignItems: "center",
-          gap: "0.6rem",
-          fontSize: "0.95rem",
-          fontWeight: 800,
-          fontFamily: "var(--font-display)",
-          letterSpacing: "0.05em",
-          zIndex: 1000,
-          textTransform: "uppercase",
-          transition: "all 0.25s ease",
-        }}
-        title="Twitch"
-      >
-        <svg
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M21 2H3v16h5v4l4-4h5l4-4V2zm-10 9V7m5 4V7" />
-        </svg>
-        MUCHOMOVIMIENTO
-      </a>
+      <TwitchButton />
 
       {/* Point Selection Modal */}
       <AnimatePresence>
@@ -1415,11 +1374,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                       border: "none",
                       padding: "1.25rem",
                       borderRadius: "1.25rem",
-                      fontSize: "1.25rem",
-                      fontWeight: 900,
+                      fontSize: "2rem",
+                      fontWeight: 950,
+                      fontStyle: "italic",
                       cursor: "pointer",
                       textTransform: "uppercase",
-                      letterSpacing: "0.1em",
                     }}
                   >
                     {t("start")}

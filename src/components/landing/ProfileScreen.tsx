@@ -7,6 +7,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ticketSchema, type TicketFormData } from '../../lib/schemas';
 import { MessageSquare, Send } from 'lucide-react';
+import { TwitchButton } from '../shared/TwitchButton';
+
 
 interface ProfileScreenProps {
   user: any;
@@ -363,7 +365,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, handleAuth, 
                   letterSpacing: '0.05em',
                   color: '#00f2ff',
                   textShadow: '0 0 8px rgba(0, 242, 255, 0.15)',
-                  marginTop: '-0.15rem'
+                  marginTop: '0.1rem'
                 }}>
                   {user.user_metadata?.custom_username || user.email?.split('@')[0]}
                 </h2>
@@ -393,7 +395,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, handleAuth, 
                   letterSpacing: '0.05em',
                   color: '#00f2ff',
                   textShadow: '0 0 15px rgba(0, 242, 255, 0.2)',
-                  marginTop: '-0.35rem'
+                  marginTop: '0.15rem'
                 }}>
                   {user.user_metadata?.custom_username || user.email?.split('@')[0]}
                 </h2>
@@ -920,46 +922,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, handleAuth, 
 
       {/* Twitch Button - Way Down Bottom & Centered */}
       <div style={{ display: 'flex', justifyContent: 'center', padding: '4rem 0 2rem 0' }}>
-        <a
-          href="https://twitch.tv/muchomovimiento/videos"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="btn-hover-dark"
-          style={{
-            background: 'rgba(145, 70, 255, 0.2)',
-            backdropFilter: 'blur(12px)',
-            border: '1px solid rgba(145, 70, 255, 0.3)',
-            color: 'white',
-            height: '40px',
-            padding: '0 1.25rem',
-            borderRadius: '1rem',
-            textDecoration: 'none',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.6rem',
-            fontSize: '0.75rem',
-            fontWeight: 800,
-            letterSpacing: '0.05em',
-            zIndex: 10,
-            textTransform: 'uppercase',
-            transition: 'all 0.25s ease'
-          }}
-          title="Twitch"
-        >
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M21 2H3v16h5v4l4-4h5l4-4V2zm-10 9V7m5 4V7" />
-          </svg>
-          MUCHOMOVIMIENTO
-        </a>
+        <TwitchButton />
       </div>
     </div>
   );

@@ -24,9 +24,10 @@ export const LandingHeader: React.FC<LandingHeaderProps> = ({ user }) => {
       flexDirection: 'row', 
       alignItems: 'center', 
       justifyContent: 'center', 
-      gap: isMobile ? '0.75rem' : '2.5rem', 
+      gap: isMobile ? '0.6rem' : '2rem', 
       marginBottom: '1rem', 
-      width: '100%' 
+      width: '100%',
+      transform: 'translateX(-12px)'
     }}>
       {/* Messi Card (Left) */}
       <motion.div
@@ -50,13 +51,14 @@ export const LandingHeader: React.FC<LandingHeaderProps> = ({ user }) => {
             fontSize: '0.75rem', 
             display: 'flex', 
             alignItems: 'center', 
-            gap: '0.5rem', 
+            gap: '0.35rem', 
             background: 'rgba(0,242,255,0.1)', 
             padding: '0.4rem 0.8rem', 
             borderRadius: '1rem', 
             border: '1px solid rgba(0,242,255,0.2)',
-            fontFamily: 'var(--font-display)',
+            fontFamily: 'var(--font-main)',
             textTransform: 'uppercase',
+            letterSpacing: '0.05em',
             fontWeight: 700
           }}>
             <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#00f2ff' }} />

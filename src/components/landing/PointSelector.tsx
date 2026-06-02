@@ -24,6 +24,7 @@ export const PointSelector: React.FC<PointSelectorProps> = ({ onSelect }) => {
     boxShadow: "4px 4px 0px #000",
     transition: "none",
     cursor: "pointer",
+    fontStyle: "normal",
   });
 
   return (
