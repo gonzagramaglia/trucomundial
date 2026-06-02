@@ -23,7 +23,7 @@ export const CPUHands: React.FC<CPUHandsProps> = ({
         width: "100%",
         justifyContent: "center",
         padding: "0 1rem",
-        marginBottom: "10px",
+        marginBottom: typeof window !== 'undefined' && window.innerWidth > 1024 ? "12px" : "2px",
         height: "60px",
         boxSizing: "border-box",
       }}

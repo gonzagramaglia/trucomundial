@@ -53,63 +53,49 @@ export const ScrollIndicator: React.FC = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const handleClick = () => {
-    const target = getScrollContainer();
-    const scrollHeight = target.scrollHeight || document.documentElement.scrollHeight;
-
-    if (isAtBottom) {
-      target.scrollTo({ top: 0, behavior: 'smooth' });
-      if (target === document.documentElement) window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else {
-      target.scrollTo({ top: scrollHeight, behavior: 'smooth' });
-      if (target === document.documentElement) window.scrollTo({ top: scrollHeight, behavior: 'smooth' });
-    }
-  };
-
   return (
     <AnimatePresence>
-      {showIndicator && (
+      {showIndicator && !isAtBottom && (
         <motion.div
           initial={{ opacity: 0, scale: 0.5 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.5 }}
-          onClick={handleClick}
           style={{
             position: 'fixed',
-            bottom: isMobile ? '1rem' : '25px',
-            right: isMobile ? '1rem' : '35px',
+            bottom: isMobile ? '0.25rem' : '1.5rem',
+            right: isMobile ? '0.75rem' : '1.5rem',
             zIndex: 9999,
-            cursor: 'pointer',
-            pointerEvents: 'auto'
+            pointerEvents: 'none'
           }}
         >
           <motion.div
             animate={{ 
-              y: isAtBottom ? [0, -8, 0] : [0, 8, 0],
-              rotate: isAtBottom ? 180 : 0 
+              y: [0, 8, 0],
             }}
             transition={{ 
               y: { duration: 1.5, repeat: Infinity, ease: "easeInOut" },
-              rotate: { duration: 0.4, ease: "backOut" }
             }}
-            whileHover={{ scale: 1.15 }}
-            whileTap={{ scale: 0.9 }}
             style={{
-              width: '48px',
-              height: '48px',
-              borderRadius: '50%',
-              background: 'rgba(255, 255, 255, 0.12)',
-              backdropFilter: 'blur(16px)',
-              border: '1px solid rgba(255, 255, 255, 0.25)',
+              height: '40px',
+              borderRadius: '1rem',
+              padding: '0 0.75rem 0 1.25rem',
+              background: 'rgba(255, 255, 255, 0.1)',
+              backdropFilter: 'blur(12px)',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 10px 40px rgba(0,0,0,0.5)',
+              gap: '0.6rem',
+              boxShadow: 'none',
+              color: 'white'
             }}
           >
+            <span style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: '0.75rem', letterSpacing: '0.05em', fontStyle: 'normal', textTransform: 'uppercase' }}>
+              DESLIZÁ
+            </span>
             <svg 
-              width="24" 
-              height="24" 
+              width="16" 
+              height="16" 
               viewBox="0 0 24 24" 
               fill="none" 
               stroke="white" 

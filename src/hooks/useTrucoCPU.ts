@@ -21,8 +21,9 @@ interface UseTrucoCPUProps {
   setIsCpuThinking: (val: boolean) => void;
   playCard: (card: Card) => void;
   handleCall: (type: "truco" | "envido", level: number, caller: PlayerRole) => void;
-  handleResponse: (accept: boolean) => void;
+  handleResponse: (accept: boolean, remote?: boolean) => void;
   setMatchLog: any;
+  isPaused?: boolean;
 }
 
 export const useTrucoCPU = ({
@@ -44,12 +45,22 @@ export const useTrucoCPU = ({
   playCard,
   handleCall,
   handleResponse,
-  setMatchLog
+  setMatchLog,
+  isPaused
 }: UseTrucoCPUProps) => {
   const cpuMoveTimeoutRef = useRef<any>(null);
 
   useEffect(() => {
     if (gameState !== "playing" || gameMode === "multiplayer") return;
+    
+    if (isPaused) {
+      if (cpuMoveTimeoutRef.current) {
+        clearTimeout(cpuMoveTimeoutRef.current);
+        cpuMoveTimeoutRef.current = null;
+      }
+      setIsCpuThinking(false);
+      return;
+    }
     
     const isBoardFull = playedCards.length >= (gameMode === "2v2" ? 12 : 6);
     if (isBoardFull) return;
@@ -62,7 +73,7 @@ export const useTrucoCPU = ({
       cpuMoveTimeoutRef.current = setTimeout(() => {
         // Simple AI logic: 80% chance to accept
         const accept = Math.random() < 0.8;
-        handleResponse(accept);
+        handleResponse(accept, true);
         setIsCpuThinking(false);
       }, 1500 + Math.random() * 500);
       return;
@@ -146,7 +157,7 @@ export const useTrucoCPU = ({
           playCard(cardToPlay);
         }
         setIsCpuThinking(false);
-      }, 2000 + Math.random() * 1000); // Increased delay for more human-like pacing
+      }, 3500 + Math.random() * 1000); // Increased delay so it doesn't feel immediate after a call
     }
-  }, [gameState, gameMode, playedCards.length, handWinners.length, pendingAction, isRoundEnding, isCooldown, whoseTurn, isCpuThinking, trucoState, envidoState, setMatchLog]);
+  }, [gameState, gameMode, playedCards.length, handWinners.length, pendingAction, isRoundEnding, isCooldown, whoseTurn, isCpuThinking, trucoState, envidoState, setMatchLog, isPaused]);
 };

@@ -51,6 +51,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   const [roomCode, setRoomCode] = useState<string>("");
   const [isJoining, setIsJoining] = useState(false);
   const [inputCode, setInputCode] = useState("");
+  const [joinError, setJoinError] = useState("");
   const [isCreator, setIsCreator] = useState(false);
   const [showRanking, setShowRanking] = useState(
     () =>
@@ -378,7 +379,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
     if (error || !data || !data.last_move) {
       console.log("Sala no encontrada:", error || data);
-      alert("Código incorrecto o la sala ya no existe.");
+      setJoinError("Código incorrecto o la sala ya no existe.");
       setInputCode("");
       return;
     }
@@ -417,7 +418,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         .eq("match_id", code);
 
       if (updateError) {
-        alert("No se pudo unir a la sala. Intenta de nuevo.");
+        setJoinError("No se pudo unir a la sala. Intenta de nuevo.");
         return;
       }
 
@@ -443,7 +444,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       const roomInfo =
         state.roomInfo || (state.status === "matched" ? state : null);
       if (!roomInfo || (!roomInfo.creatorId && !roomInfo.guestId)) {
-        alert("Código incorrecto o la sala ya no existe.");
+        setJoinError("Código incorrecto o la sala ya no existe.");
         setInputCode("");
         return;
       }
@@ -488,7 +489,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           );
         }, 2000);
       } else {
-        alert("La sala ya está en juego con otros jugadores.");
+        setJoinError("La sala ya está en juego con otros jugadores.");
         setInputCode("");
       }
     }
@@ -847,7 +848,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       >
         {/* Music Button */}
         <a
-          href="https://youtu.be/KqF3di6NiYY"
+          href="https://youtu.be/sBB0bQB4Sms"
           target="_blank"
           rel="noopener noreferrer"
           className="btn-hover-dark"
@@ -1348,23 +1349,50 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     maxLength={4}
                     placeholder={t("code")}
                     value={inputCode}
-                    onChange={(e) => setInputCode(e.target.value.toUpperCase())}
+                    onChange={(e) => {
+                      setInputCode(e.target.value.toUpperCase());
+                      setJoinError("");
+                    }}
                     style={{
                       background: "rgba(0,0,0,0.3)",
                       border: "2px solid #00f2ff",
-                      borderRadius: "1.5rem",
-                      padding: "1.5rem",
+                      borderRadius: "0",
+                      padding: "0.75rem",
                       color: "#fff",
-                      fontSize: "clamp(1.5rem, 6vw, 2.5rem)",
+                      fontSize: "clamp(1.5rem, 6vw, 2rem)",
                       textAlign: "center",
+                      fontFamily: "var(--font-display)",
+                      fontStyle: "italic",
                       fontWeight: 900,
                       letterSpacing: "0.3rem",
                       outline: "none",
                       width: "100%",
+                      maxWidth: "240px",
+                      margin: "0.5rem auto 0 auto",
                       boxSizing: "border-box",
-                      boxShadow: "0 0 20px rgba(0, 242, 255, 0.1)",
+                      boxShadow: "4px 4px 0px #00f2ff",
                     }}
                   />
+                  {joinError && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      style={{
+                        color: "#ef4444",
+                        fontSize: "0.95rem",
+                        fontWeight: 600,
+                        textAlign: "center",
+                        marginTop: "-0.5rem",
+                        marginBottom: "-0.75rem",
+                        background: "rgba(239, 68, 68, 0.1)",
+                        padding: "0.5rem",
+                        borderRadius: "0.5rem",
+                        border: "1px solid rgba(239, 68, 68, 0.2)",
+                      }}
+                    >
+                      {joinError}
+                    </motion.div>
+                  )}
                   <button
                     onClick={handleJoinRoom}
                     className="btn-hover-dark"
@@ -1372,14 +1400,25 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                       background: "#00f2ff",
                       color: "#000",
                       border: "none",
-                      padding: "1.25rem",
-                      borderRadius: "1.25rem",
+                      padding: "0.75rem",
+                      borderRadius: "0",
                       fontSize: "2rem",
                       fontWeight: 950,
                       fontStyle: "italic",
                       cursor: "pointer",
                       textTransform: "uppercase",
+                      width: "100%",
+                      maxWidth: "240px",
+                      margin: "0 auto",
+                      boxShadow: "6px 6px 0px #000",
+                      transition: "transform 0.1s ease",
                     }}
+                    onMouseDown={(e) =>
+                      (e.currentTarget.style.transform = "translate(2px, 2px)")
+                    }
+                    onMouseUp={(e) =>
+                      (e.currentTarget.style.transform = "translate(0px, 0px)")
+                    }
                   >
                     {t("start")}
                   </button>
@@ -1396,6 +1435,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                       onClick={() => {
                         setIsJoining(false);
                         setInputCode("");
+                        setJoinError("");
                       }}
                       className="btn-hover-dark"
                       style={{

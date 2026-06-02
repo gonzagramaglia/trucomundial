@@ -58,8 +58,8 @@ export const GameModals: React.FC<GameModalsProps> = ({
         </div>
       </Modal>
 
-      <Modal open={showExitModal} onClose={onCloseExit}>
-        <div style={{ textAlign: "center", padding: "0.5rem 0 0 0" }}>
+      <Modal open={showExitModal} onClose={onCloseExit} showClose={false}>
+        <div style={{ textAlign: "center", padding: "0.75rem 0 0 0" }}>
           <h2 className="text-display" style={{ fontSize: "2rem", color: "#fff", marginBottom: 20, width: "100%", textAlign: "center" }}>
             {t("return_to_home_q")}
           </h2>
@@ -68,9 +68,9 @@ export const GameModals: React.FC<GameModalsProps> = ({
               variant="white"
               className="btn-hover-dark"
               onClick={onConfirmExit}
-              style={{ flex: 1, fontSize: "1.2rem", padding: "0.6rem", lineHeight: 0.8, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", whiteSpace: 'pre-wrap' }}
+              style={{ flex: 1, fontSize: "1.2rem", padding: "0.6rem", display: "flex", alignItems: "center", justifyContent: "center" }}
             >
-              {t("back_to_home")}
+              VOLVER<br />AL INICIO
             </Button>
             <Button
               variant="secondary"

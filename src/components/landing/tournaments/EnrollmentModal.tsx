@@ -40,6 +40,7 @@ const EnrollmentModal: React.FC<Props> = ({
         zIndex: 3000,
         padding: "1.5rem",
       }}
+      onClick={() => setEnrollModalTournament(null)}
     >
       <motion.div
         initial={{ scale: 0.9, y: 20 }}
@@ -56,6 +57,7 @@ const EnrollmentModal: React.FC<Props> = ({
           flexDirection: "column",
           boxShadow: "0 0 40px rgba(168, 85, 247, 0.15)",
         }}
+        onClick={(e) => e.stopPropagation()}
       >
         <div
           style={{
@@ -74,7 +76,7 @@ const EnrollmentModal: React.FC<Props> = ({
               letterSpacing: "0.05em",
             }}
           >
-            Ingreso a Torneo
+            Ingreso al Torneo
           </h3>
         </div>
 

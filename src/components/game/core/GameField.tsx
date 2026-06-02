@@ -114,7 +114,7 @@ export const GameField: React.FC<GameFieldProps> = ({
         width: '100%'
       }}>
         <h2 className="text-display" style={{ 
-          fontSize: is1v1 ? 'clamp(1.5rem, 5vw, 2.5rem)' : 'clamp(2rem, 8vw, 3.5rem)', 
+          fontSize: is1v1 ? 'clamp(1.2rem, 4vw, 2rem)' : 'clamp(1.5rem, 6vw, 3rem)', 
           lineHeight: 1,
           margin: 0,
           color: '#fff',
@@ -177,7 +177,7 @@ export const GameField: React.FC<GameFieldProps> = ({
         {onHandleMazo && (
           <button
             disabled={isMazoDisabled}
-            onClick={onHandleMazo}
+            onClick={() => { if (onHandleMazo) onHandleMazo(); }}
             className="btn-hover-dark"
             style={{
               position: 'absolute',

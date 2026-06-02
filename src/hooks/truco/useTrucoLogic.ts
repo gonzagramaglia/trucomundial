@@ -19,14 +19,14 @@ export const useTrucoLogic = (state: any) => {
     setTimeout(() => setActiveCall((prev: any) => prev?.id === id ? null : prev), 2000);
   }, [setActiveCall]);
 
-  const addPoints = useCallback((side: "player" | "cpu", points: number) => {
+  const addPoints = useCallback((side: "player" | "cpu", points: number, reason?: string) => {
     setScore((prev: any) => {
       const newScore = { ...prev, [side]: prev[side] + points };
       return newScore;
     });
     const id = Date.now() + Math.random();
-    setScorePopups((prev: any) => [...prev, { id, points, side }]);
-    setTimeout(() => setScorePopups((prev: any) => prev.filter((p: any) => p.id !== id)), 2500);
+    setScorePopups((prev: any) => [...prev, { id, points, side, reason }]);
+    setTimeout(() => setScorePopups((prev: any) => prev.filter((p: any) => p.id !== id)), 3000);
   }, [setScore, setScorePopups]);
 
   const generateRoundData = useCallback((remoteHands?: { player: Card[], cpu: Card[] }, forcedStarter?: number) => {
@@ -70,6 +70,7 @@ export const useTrucoLogic = (state: any) => {
 
   const resetRound = useCallback((remoteHands?: { player: Card[], cpu: Card[] }, forcedStarter?: number) => {
     if (resetLockRef.current) return;
+    if (state.score.player >= state.maxPoints || state.score.cpu >= state.maxPoints) return;
     resetLockRef.current = true;
     const data = generateRoundData(remoteHands, forcedStarter);
     applyRoundData(data);
@@ -99,11 +100,11 @@ export const useTrucoLogic = (state: any) => {
       if (isPlayerMano) {
         setMatchLog((prev: string[]) => [...prev, `Vos (Mano) cantás envido con: ${pPoints} puntos`]);
         const text = pPoints >= 10 ? i18n.t("have_points_high", { points: pPoints }) : i18n.t("have_points_low", { points: pPoints });
-        triggerCall(text, "var(--color-accent)");
+        triggerCall(text, "#00f2ff");
       } else {
         setMatchLog((prev: string[]) => [...prev, `El Rival (Mano) canta envido con: ${cPoints} puntos`]);
         const text = cPoints >= 10 ? i18n.t("have_points_high", { points: cPoints }) : i18n.t("have_points_low", { points: cPoints });
-        triggerCall(text, "var(--color-secondary)");
+        triggerCall(text, "#F77502");
       }
 
       // 2nd speaker (Response)
@@ -116,28 +117,37 @@ export const useTrucoLogic = (state: any) => {
         } else {
           pts = state.envidoState.accumulated || 2;
         }
+
+        const envidoLevel = state.envidoState.level;
+        let envidoName = "el envido";
+        if (envidoLevel === 2) envidoName = "el envido envido";
+        if (envidoLevel === 3) envidoName = "el real envido";
+        if (envidoLevel === 4) envidoName = "el falta envido";
+
+        const playerWinMsg = `Ganaste ${envidoName}`;
+        const cpuWinMsg = `Te ganó ${envidoName}`;
         
         const pWins = pPoints > cPoints || (pPoints === cPoints && isPlayerMano);
         
         if (isPlayerMano) {
           if (pWins) {
             setMatchLog((prev: string[]) => [...prev, `El Rival responde: son buenas. Ganás ${pts} puntos de Envido.`]);
-            triggerCall(i18n.t("call_son_buenas"), "var(--color-secondary)");
-            addPoints("player", pts);
+            triggerCall(i18n.t("call_son_buenas"), "#F77502");
+            addPoints("player", pts, playerWinMsg);
           } else {
             setMatchLog((prev: string[]) => [...prev, `El Rival responde: tengo ${cPoints}. El Rival gana ${pts} puntos de Envido.`]);
-            triggerCall(i18n.t("call_son_mejores", { points: cPoints }), "var(--color-secondary)");
-            addPoints("cpu", pts);
+            triggerCall(i18n.t("call_son_mejores", { points: cPoints }), "#F77502");
+            addPoints("cpu", pts, cpuWinMsg);
           }
         } else {
           if (pWins) {
             setMatchLog((prev: string[]) => [...prev, `Vos respondés: tengo ${pPoints}. Ganás ${pts} puntos de Envido.`]);
-            triggerCall(i18n.t("call_son_mejores", { points: pPoints }), "var(--color-accent)");
-            addPoints("player", pts);
+            triggerCall(i18n.t("call_son_mejores", { points: pPoints }), "#00f2ff");
+            addPoints("player", pts, playerWinMsg);
           } else {
             setMatchLog((prev: string[]) => [...prev, `Vos respondés: son buenas. El Rival gana ${pts} puntos de Envido.`]);
-            triggerCall(i18n.t("call_son_buenas"), "var(--color-accent)");
-            addPoints("cpu", pts);
+            triggerCall(i18n.t("call_son_buenas"), "#00f2ff");
+            addPoints("cpu", pts, cpuWinMsg);
           }
         }
 
@@ -147,7 +157,7 @@ export const useTrucoLogic = (state: any) => {
             setSuspendedTruco(null);
             triggerCall(
               state.suspendedTruco.level === 1 ? i18n.t("call_truco") : (state.suspendedTruco.level === 2 ? i18n.t("call_retruco") : i18n.t("call_vale_4")),
-              (state.suspendedTruco.caller === "player" || state.suspendedTruco.caller === "partner") ? "var(--color-accent)" : "var(--color-secondary)"
+              (state.suspendedTruco.caller === "player" || state.suspendedTruco.caller === "partner") ? "var(--color-accent)" : "#F77502"
             );
             setIsCooldown(false);
           }, 1500);

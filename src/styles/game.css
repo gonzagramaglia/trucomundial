@@ -18,23 +18,54 @@
 }
 
 /* Responsive Scoreboard */
+
+.game-scoreboard-wrapper {
+  position: fixed;
+  z-index: 4000;
+  pointer-events: none;
+}
+
+.game-scoreboard-wrapper .scoreboard {
+  flex-direction: row !important;
+  justify-content: space-between !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  min-width: 0 !important;
+}
+
+.game-scoreboard-wrapper .scoreboard::after {
+  display: none !important;
+}
+
+.scoreboard-item {
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  pointer-events: auto;
+}
+
+.scoreboard > .text-digital:not(.scoreboard-value) {
+  display: none !important;
+}
+
 @media (max-width: 1024px), (max-height: 700px) {
   .game-scoreboard-wrapper {
-    position: fixed;
-    top: 1rem;
-    left: 0;
-    right: 0;
-    width: fit-content;
-    margin: 0 auto;
-    transform: none !important;
-    z-index: 2500;
+    top: 3.5rem;
+    left: 50%;
+    right: auto;
+    width: 100%;
+    max-width: 350px;
+    transform: translateX(-50%) !important;
   }
 
-  .game-scoreboard-wrapper .scoreboard {
+  .scoreboard-item {
     padding: 0.5rem 1rem;
-    gap: 1rem;
     border-width: 2px;
-    flex-direction: row !important;
   }
   
   .game-scoreboard-wrapper .scoreboard-value {
@@ -44,30 +75,19 @@
   .game-scoreboard-wrapper .scoreboard-label {
     font-size: 0.6rem;
   }
-  
-  .game-scoreboard-wrapper .text-digital:nth-child(2) {
-    display: block !important;
-  }
 }
 
 @media (min-width: 1025px) and (min-height: 701px) {
   .game-scoreboard-wrapper {
-    position: fixed;
     top: 50%;
+    left: 2.25rem;
     right: 2.25rem;
     transform: translateY(-50%);
-    z-index: 2500;
   }
 
-  .scoreboard {
-    flex-direction: column !important;
-    padding: 2rem 1.5rem !important;
-    gap: 2rem !important;
+  .scoreboard-item {
+    padding: 2rem 1.5rem;
     min-width: 150px;
-  }
-  
-  .scoreboard > .text-digital:not(.scoreboard-value) {
-    display: none;
   }
 
   .scoreboard-value {
@@ -90,9 +110,9 @@
 
 .points-indicator-fixed {
   position: fixed;
-  bottom: 1.5rem;
-  left: 1.5rem;
-  z-index: 2000;
+  bottom: 2rem;
+  left: 2rem;
+  z-index: 3500;
 }
 
 .twitch-btn {
@@ -105,7 +125,7 @@
   top: 1.5rem;
   right: 1.5rem;
   z-index: 2000;
-  display: none !important;
+  display: flex !important;
   align-items: center;
   gap: 0.5rem;
 }
@@ -170,7 +190,7 @@
     right: auto !important;
     bottom: 0.5rem !important;
     transform: translateX(-50%) !important;
-    z-index: 2000;
+    z-index: 3500;
   }
   .player-hand-container { min-height: 120px; }
   .game-mode-secondary-row { flex-direction: column !important; }

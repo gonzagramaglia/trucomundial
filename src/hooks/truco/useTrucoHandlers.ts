@@ -16,14 +16,15 @@ export const useTrucoHandlers = (state: any, logic: any) => {
     if (!remote) {
       setPlayerFolded(true);
     }
-    triggerCall(i18n.t("me_voy_al_mazo"), remote ? "var(--color-secondary)" : "var(--color-accent)");
+    triggerCall(i18n.t("me_voy_al_mazo"), "#ffffff");
     const pts = trucoState.status === "accepted"
       ? (trucoState.level + 1)
       : (trucoState.level + 1 + (envidoState.status === "none" || envidoState.status === "pending" ? 1 : 0));
     
     setMatchLog((prev: string[]) => [...prev, `${actor} se fue al mazo. ${remote ? 'Ganaste' : 'Perdiste'} ${pts} puntos.`]);
 
-    addPoints(win, pts);
+    const reason = remote ? "Se fue al mazo" : "Te fuiste al mazo";
+    addPoints(win, pts, reason);
     setIsRoundEnding(true);
     if (gameMode !== "multiplayer" || isHost) {
       setTimeout(() => resetRound(), 3500);
@@ -62,7 +63,9 @@ export const useTrucoHandlers = (state: any, logic: any) => {
     const speaker = (caller === "player" || caller === "partner") ? "Vos" : "El Rival";
     setMatchLog((prev: string[]) => [...prev, `${speaker} cantó ${text}`]);
 
-    triggerCall(text, (caller === "player" || caller === "partner") ? "var(--color-accent)" : "var(--color-secondary)");
+    const isPlayer = caller === "player" || caller === "partner";
+    const color = !isPlayer ? "#F77502" : (type === "envido" ? "#00f2ff" : "var(--color-accent)");
+    triggerCall(text, color);
 
     if (type === "truco") {
       setTrucoState({ status: "pending", level, caller });
@@ -92,7 +95,9 @@ export const useTrucoHandlers = (state: any, logic: any) => {
     if (!pendingAction) return 0;
     const resp = remote ? "cpu" : "player";
     const responderName = remote ? "El Rival" : "Vos";
-    triggerCall(accept ? i18n.t("call_quiero") : i18n.t("call_no_quiero"), remote ? "var(--color-secondary)" : "var(--color-accent)");
+    const isEnvidoResp = pendingAction && pendingAction.type === "envido";
+    const color = remote ? "#F77502" : (isEnvidoResp ? "#00f2ff" : "var(--color-accent)");
+    triggerCall(accept ? i18n.t("call_quiero") : i18n.t("call_no_quiero"), color);
 
     setMatchLog((prev: string[]) => [...prev, `${responderName} respondió: ${accept ? 'QUIERO' : 'NO QUIERO'}`]);
 
@@ -115,7 +120,12 @@ export const useTrucoHandlers = (state: any, logic: any) => {
       const winnerText = resp === "player" ? "El Rival gana" : "Ganaste";
       setMatchLog((prev: string[]) => [...prev, `Al no querer, ${winnerText} ${pts} puntos.`]);
 
-      addPoints(resp === "player" ? "cpu" : "player", pts);
+      const isPlayerResponder = resp === "player";
+      const reason = pendingAction.type === "envido" ? (isPlayerResponder ? "No quisiste Envido" : "No quiso Envido") :
+        pendingAction.level === 1 ? (isPlayerResponder ? "No quisiste Truco" : "No quiso Truco") :
+        pendingAction.level === 2 ? (isPlayerResponder ? "No quisiste Retruco" : "No quiso Retruco") : 
+        (isPlayerResponder ? "No quisiste Vale 4" : "No quiso Vale 4");
+      addPoints(resp === "player" ? "cpu" : "player", pts, reason);
       if (pendingAction.type === "truco") {
         setIsRoundEnding(true);
         if (gameMode !== "multiplayer") {

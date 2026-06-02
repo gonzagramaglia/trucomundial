@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { BarChart3 } from 'lucide-react';
 import { CARDS } from '../../../data/cards';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '../../../lib/supabase';
@@ -102,40 +103,41 @@ export const RankingSidebar = () => {
   });
 
   return (
-    <>
-      <h3 className="text-display" style={{ color: 'var(--color-accent)', fontSize: '0.9rem', marginBottom: '0.75rem', letterSpacing: '0.05em' }}>
-        {t("card_ranking")}
-      </h3>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', flex: 1, minHeight: 0 }}>
+      <div style={{ flexShrink: 0 }}>
+        <h3 className="text-display" style={{ color: 'var(--color-accent)', fontSize: '0.9rem', marginBottom: '0.75rem', letterSpacing: '0.05em' }}>
+          {t("card_ranking")}
+        </h3>
 
-      {/* Search */}
-      <input
-        type="text"
-        placeholder={t("search_player")}
-        value={search}
-        onChange={e => setSearch(e.target.value)}
-        style={{
-          width: '100%',
-          padding: '0.4rem 0.6rem',
-          marginBottom: '0.75rem',
-          background: 'rgba(255,255,255,0.08)',
-          border: '1px solid rgba(255,255,255,0.15)',
-          borderRadius: '8px',
-          color: '#fff',
-          fontSize: '0.75rem',
-          outline: 'none',
-          boxSizing: 'border-box',
-        }}
-      />
+        {/* Search */}
+        <input
+          type="text"
+          placeholder={t("search_player")}
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          style={{
+            width: '100%',
+            padding: '0.4rem 0.6rem',
+            marginBottom: '0.75rem',
+            background: 'rgba(255,255,255,0.08)',
+            border: '1px solid rgba(255,255,255,0.15)',
+            borderRadius: '8px',
+            color: '#fff',
+            fontSize: '0.75rem',
+            outline: 'none',
+            boxSizing: 'border-box',
+          }}
+        />
+      </div>
 
-      <div style={{
+      <div className="custom-scrollbar" style={{
+        flex: 1,
+        overflowY: 'auto',
         display: 'flex',
         flexDirection: 'column',
         gap: '0.5rem',
-        maxHeight: '420px',
-        overflowY: 'auto',
         paddingRight: '6px',
-        scrollbarWidth: 'thin',
-        scrollbarColor: 'rgba(255,255,255,0.2) transparent'
+        minHeight: 0
       }}>
         {loading ? (
           <div style={{ width: '100%' }}>
@@ -260,9 +262,34 @@ export const RankingSidebar = () => {
         )}
       </div>
 
-      <p style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.3)', textAlign: 'center', marginTop: '0.75rem' }}>
-        Este ranking se actualiza en tiempo real con los votos de la comunidad mundialista.
-      </p>
-    </>
+      <div style={{ flexShrink: 0, marginTop: '0.75rem' }}>
+        <p style={{ fontSize: '0.6rem', color: 'rgba(255,255,255,0.3)', textAlign: 'center', marginBottom: '0.5rem' }}>
+          Este ranking se actualiza en tiempo real con los votos de la comunidad mundialista.
+        </p>
+        <a 
+          href="/ranking" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          style={{
+            display: "block",
+            width: "100%",
+            textAlign: "center",
+            padding: "0.75rem",
+            background: "#a855f7",
+            color: "#fff",
+            fontWeight: 800,
+            borderRadius: "10px",
+            textDecoration: "none",
+            fontSize: "0.85rem",
+            textTransform: "uppercase"
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
+            <BarChart3 size={18} />
+            ¡Votar en el ranking!
+          </div>
+        </a>
+      </div>
+    </div>
   );
 };

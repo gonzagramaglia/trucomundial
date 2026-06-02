@@ -9,6 +9,7 @@ export function useTrucoGame(sessionId: string | undefined, onSync?: (data: any)
   const [isCpuThinking, setIsCpuThinking] = React.useState(false);
   const [isRivalConnected, setIsRivalConnected] = React.useState(true);
   const [isSelfConnected, setIsSelfConnected] = React.useState(true);
+  const [isPaused, setIsPaused] = React.useState(false);
 
   React.useEffect(() => {
     const handleOnline = () => setIsSelfConnected(true);
@@ -22,6 +23,12 @@ export function useTrucoGame(sessionId: string | undefined, onSync?: (data: any)
       window.removeEventListener('offline', handleOffline);
     };
   }, []);
+
+  React.useEffect(() => {
+    if (core.winnerModal) {
+      setIsPaused(true);
+    }
+  }, [core.winnerModal]);
 
   // AI Logic - Only active in non-multiplayer modes
   useTrucoCPU({
@@ -59,7 +66,8 @@ export function useTrucoGame(sessionId: string | undefined, onSync?: (data: any)
     },
     handleCall: (type, level, caller) => core.handleCall(type, level, caller),
     handleResponse: (accept) => core.handleResponse(accept, true),
-    setMatchLog: core.setMatchLog
+    setMatchLog: core.setMatchLog,
+    isPaused
   });
 
   const startGame = useCallback((mode: GameMode, _rName: string, rId: string, points: number) => {
@@ -98,6 +106,8 @@ export function useTrucoGame(sessionId: string | undefined, onSync?: (data: any)
     setIsRivalConnected,
     isSelfConnected,
     setIsSelfConnected,
+    isPaused,
+    setIsPaused,
     handleRestartGame: () => core.resetRound(),
     playCardRemote: (card: Card, owner: PlayerRole) => {
       const isPlayerRival = owner === "cpu" || owner === "cpu2";

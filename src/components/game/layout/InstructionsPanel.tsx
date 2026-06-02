@@ -12,7 +12,7 @@ export const InstructionsPanel: React.FC<InstructionsPanelProps> = ({ maxPoints 
       <h3
         className="text-display"
         style={{
-          color: "var(--color-accent)",
+          color: "#ffffff",
           fontSize: "0.95rem",
           marginBottom: "1rem",
           letterSpacing: "0.05em",
@@ -33,17 +33,18 @@ export const InstructionsPanel: React.FC<InstructionsPanelProps> = ({ maxPoints 
           <p
             style={{
               fontWeight: "bold",
-              color: "#fff",
+              color: "var(--color-accent)",
               marginBottom: "0.3rem",
             }}
           >
             {t("truco_title")}
           </p>
           <p>
-            {t("truco_desc_1")}{" "}
-            <strong style={{ color: "var(--color-accent)" }}>
-              {t("truco_desc_2")}
-            </strong>{" "}
+            {t("truco_desc_1a")}
+            <strong style={{ color: "#ffdf00" }}>{t("truco_desc_1b")}</strong>
+            <strong style={{ color: "#fff" }}>{t("truco_desc_1c")}</strong>
+            {" "}
+            {t("truco_desc_2")}{" "}
             {t("truco_desc_3")}
           </p>
         </div>
@@ -51,7 +52,7 @@ export const InstructionsPanel: React.FC<InstructionsPanelProps> = ({ maxPoints 
           <p
             style={{
               fontWeight: "bold",
-              color: "#fff",
+              color: "#00f2ff",
               marginBottom: "0.3rem",
             }}
           >
@@ -72,7 +73,7 @@ export const InstructionsPanel: React.FC<InstructionsPanelProps> = ({ maxPoints 
           >
             <p
               style={{
-                color: "var(--color-primary)",
+                color: "#00f2ff",
                 fontWeight: "bold",
                 marginBottom: "0.2rem",
               }}
@@ -80,14 +81,14 @@ export const InstructionsPanel: React.FC<InstructionsPanelProps> = ({ maxPoints 
               {t("envido_ex_1")}
             </p>
             <p>
-              {t("envido_ex_1_desc")}{" "}
-              <strong style={{ color: "var(--color-primary)" }}>
-                40
-              </strong>
+              <span dangerouslySetInnerHTML={{ __html: t("envido_ex_1_desc") }} />{" "}
+              <span style={{ color: "#ffffff" }}>
+                20
+              </span>
             </p>
             <p
               style={{
-                color: "var(--color-primary)",
+                color: "#00f2ff",
                 fontWeight: "bold",
                 marginBottom: "0.2rem",
                 marginTop: "0.5rem",
@@ -96,7 +97,7 @@ export const InstructionsPanel: React.FC<InstructionsPanelProps> = ({ maxPoints 
               {t("envido_ex_2")}
             </p>
             <p>
-              {t("envido_ex_2_desc")}
+              <span dangerouslySetInnerHTML={{ __html: t("envido_ex_2_desc") }} />
             </p>
           </div>
         </div>
@@ -125,7 +126,7 @@ export const InstructionsPanel: React.FC<InstructionsPanelProps> = ({ maxPoints 
             {t("game_over_title")}
           </p>
           <p>
-            <strong style={{ color: 'var(--color-accent)' }}>{t("game_over_desc", { points: maxPoints })}</strong>
+            <strong style={{ color: 'white', textTransform: 'uppercase', fontWeight: 900 }}>{t("game_over_desc", { points: maxPoints })}</strong>
           </p>
         </div>
       </div>

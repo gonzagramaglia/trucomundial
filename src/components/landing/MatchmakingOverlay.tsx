@@ -26,6 +26,23 @@ export const MatchmakingOverlay: React.FC<MatchmakingOverlayProps> = ({
   roomCode
 }) => {
   const { t } = useTranslation();
+  const [isMobile, setIsMobile] = React.useState(typeof window !== 'undefined' && window.innerWidth < 768);
+  const [copied, setCopied] = React.useState(false);
+
+  const handleCopy = () => {
+    if (roomCode) {
+      navigator.clipboard.writeText(roomCode);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  React.useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   return (
     <AnimatePresence>
       {isWaiting && (
@@ -105,11 +122,12 @@ export const MatchmakingOverlay: React.FC<MatchmakingOverlayProps> = ({
                     animate={{ scale: [1, 1.1, 1], rotate: [0, 5, -5, 0] }}
                     transition={{ duration: 2, repeat: Infinity }}
                   >
-                    <Zap size={56} fill="currentColor" style={{ color: 'var(--color-accent)', marginBottom: '1.5rem', filter: 'drop-shadow(0 0 15px rgba(255,223,0,0.5))' }} />
+                    <Zap size={56} fill="currentColor" style={{ color: 'var(--color-accent)', marginBottom: '0.75rem', filter: 'drop-shadow(0 0 15px rgba(255,223,0,0.5))' }} />
                   </motion.div>
                   
                   <h2 className="text-display" style={{ fontSize: '2.5rem', marginBottom: '1rem', color: '#fff', lineHeight: 1 }}>
-                    {t("waiting_for_rival").split(' ')[0]}<br />
+                    {t("waiting_for_rival").split(' ')[0]}
+                    {isMobile ? <br /> : ' '}
                     <span style={{ color: 'var(--color-accent)' }}>{t("waiting_for_rival").split(' ').slice(1).join(' ')}</span>
                   </h2>
                   
@@ -117,36 +135,46 @@ export const MatchmakingOverlay: React.FC<MatchmakingOverlayProps> = ({
                     {roomCode ? t("share_code") : t("waiting_for_rival")}
                   </p>
                   
-                  {roomCode && (
-                    <div style={{
-                      background: 'rgba(0, 242, 255, 0.1)',
-                      border: '2px dashed #00f2ff',
-                      borderRadius: '1rem',
-                      padding: '1rem 2rem',
-                      margin: '1rem 0',
-                      fontSize: '3rem',
-                      fontWeight: 950,
-                      color: '#00f2ff',
-                      letterSpacing: '0.5rem'
-                    }}>
-                      {roomCode}
-                    </div>
-                  )}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '2rem', margin: '1rem 0 0.25rem 0' }}>
+                    {roomCode && (
+                      <div 
+                        onClick={handleCopy}
+                        style={{
+                          background: 'rgba(0, 242, 255, 0.1)',
+                          border: '2px dashed #00f2ff',
+                          borderRadius: '1rem',
+                          padding: '1rem 2rem',
+                          fontSize: '3rem',
+                          fontFamily: 'var(--font-display)',
+                          fontStyle: 'italic',
+                          fontWeight: 950,
+                          color: '#00f2ff',
+                          letterSpacing: '0.2rem',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease'
+                        }}
+                        title="Copiar código"
+                      >
+                        {roomCode}
+                      </div>
+                    )}
 
-                  <p style={{ fontSize: '0.9rem', marginBottom: '1.5rem', color: 'var(--color-accent)', fontStyle: 'italic', opacity: 0.8 }}>
-                    
-                  </p>
-                  
-                  <div style={{ 
-                    fontSize: '3rem', 
-                    fontWeight: 900, 
-                    marginBottom: '2rem', 
-                    color: '#fff',
-                    fontFamily: 'var(--font-digital)',
-                    letterSpacing: '2px'
-                  }}>
-                    {formatTime(timeLeft)}
+                    <div style={{ 
+                      fontSize: '3.5rem', 
+                      fontWeight: 950, 
+                      color: '#fff',
+                      fontFamily: 'var(--font-display)',
+                      fontStyle: 'italic',
+                      letterSpacing: '0.1em',
+                      textShadow: '4px 4px 0px rgba(0,0,0,0.5)'
+                    }}>
+                      {formatTime(timeLeft)}
+                    </div>
                   </div>
+
+                  <p style={{ fontSize: '1rem', minHeight: '1.5rem', marginBottom: '0.5rem', color: '#00f2ff', fontStyle: 'italic', fontWeight: 700 }}>
+                    {copied ? "¡Código copiado al portapapeles!" : " "}
+                  </p>
                   
                   <Button 
                     variant="white"

@@ -16,7 +16,7 @@ export const StickerInfo: React.FC<StickerInfoProps> = ({ country, club, isHover
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        gap: "2px",
+        gap: "6px",
         opacity: isHovered ? 1 : 0,
         transition: "opacity 0.15s ease",
         pointerEvents: "none",

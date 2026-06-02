@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Scoreboard } from "./Scoreboard";
-import { GameSidebar } from "./GameSidebar";
 import { RankingSidebar } from "./RankingSidebar";
 import { InstructionsPanel } from "./InstructionsPanel";
 import { GameField } from "../core/GameField";
@@ -51,6 +50,7 @@ interface TrucoGameViewProps {
   onCloseExit: () => void;
   onConfirmExit: () => void;
   playerFolded: boolean;
+  setIsPaused?: (paused: boolean) => void;
 }
 
 export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
@@ -60,23 +60,39 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
   showCountdown, roundWinningCardId, cpuPartnerHandRef, showExitModal,
   roomCode, isRivalConnected = true, isSelfConnected = true,
   onExitRequest, onRestartGame, onPlayCard, onHandleCall, onHandleResponse, onHandleMazo,
-  onCloseExit, onConfirmExit, playerFolded
+  onCloseExit, onConfirmExit, playerFolded, setIsPaused
 }) => {
   const { t } = useTranslation();
-  const [showMobileHelp, setShowMobileHelp] = useState(() => {
-    if (typeof window !== "undefined") {
-      return window.innerWidth <= 1024 && gameMode !== "multiplayer";
-    }
-    return false;
-  });
+  const [showMobileHelp, setShowMobileHelp] = useState(false);
   const [helpTab, setHelpTab] = useState<'rules' | 'ranking'>('rules');
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' && window.innerWidth < 768);
+  const [isTablet, setIsTablet] = useState(typeof window !== 'undefined' && window.innerWidth >= 768 && window.innerWidth <= 1024);
 
   React.useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+      setIsTablet(window.innerWidth >= 768 && window.innerWidth <= 1024);
+    };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  const prevCountdownRef = React.useRef(showCountdown);
+  const hasOpenedRulesRef = React.useRef(false);
+  React.useEffect(() => {
+    if (prevCountdownRef.current && !showCountdown && !hasOpenedRulesRef.current) {
+      setShowMobileHelp(true);
+      setHelpTab('rules');
+      hasOpenedRulesRef.current = true;
+    }
+    prevCountdownRef.current = showCountdown;
+  }, [showCountdown]);
+
+  React.useEffect(() => {
+    if (setIsPaused) {
+      setIsPaused(showMobileHelp);
+    }
+  }, [showMobileHelp, setIsPaused]);
 
   return (
     <motion.div
@@ -146,18 +162,18 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          gap: "0.6rem",
-          border: "1px solid rgba(255, 255, 255, 0.2)",
+          gap: "0.4rem",
+          border: "1px solid rgba(255, 255, 255, 0.1)",
           color: "white",
           pointerEvents: "none"
         }}
       >
         <Zap size={16} fill="currentColor" />
-        <span style={{ fontWeight: 900, fontSize: "0.75rem", letterSpacing: "0.05em", fontStyle: "normal", textTransform: "uppercase" }}>{t("to_points", { points: maxPoints })}</span>
+        <span style={{ fontFamily: "var(--font-display)", fontWeight: 900, fontSize: "0.75rem", letterSpacing: "0.05em", fontStyle: "normal", textTransform: "uppercase" }}>{t("to_points", { points: maxPoints })}</span>
       </div>
 
       {/* Responsive Scoreboard: Rival on Top (A), Player on Bottom (B) */}
-      <div className="game-scoreboard-wrapper">
+      <div className="game-scoreboard-wrapper" style={{ position: "fixed", zIndex: 4000, pointerEvents: "none" }}>
         <Scoreboard
           scoreA={score.cpu}
           scoreB={score.player}
@@ -167,7 +183,7 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
         />
       </div>
 
-      {gameMode !== "2v2" && <GameSidebar maxPoints={maxPoints} />}
+
 
       <div style={{
         display: "flex",
@@ -177,7 +193,7 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
         gap: "0.25rem",
         width: "100%",
         maxWidth: gameMode === "2v2" ? "1200px" : "860px",
-        marginTop: isMobile ? "4.5rem" : "0.5rem"
+        marginTop: isMobile ? "3rem" : "2rem"
       }}>
         <CPUHands
           gameMode={gameMode}
@@ -296,70 +312,53 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            onClick={() => setShowMobileHelp(false)}
             style={{
               position: "fixed",
               inset: 0,
-              background: "rgba(0, 0, 0, 0.85)",
+              background: "rgba(0, 0, 0, 0.65)",
               backdropFilter: "blur(12px)",
               zIndex: 3000,
               display: "flex",
-              alignItems: "center",
+              alignItems: (isMobile || isTablet) ? "flex-start" : "center",
               justifyContent: "center",
-              padding: "1.5rem"
+              padding: isMobile ? "8rem 1.5rem 1.5rem" : isTablet ? "8rem 1.5rem 1.5rem" : "1.5rem"
             }}
           >
             <motion.div
               initial={{ scale: 0.9, y: 20 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.9, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
               style={{
                 background: "rgba(255, 255, 255, 0.05)",
                 border: "1px solid rgba(255, 255, 255, 0.1)",
                 borderRadius: "2rem",
-                padding: "2rem 2rem 2rem 2rem",
-                paddingTop: "4rem",
+                padding: "2rem",
                 width: "100%",
-                maxWidth: "500px",
+                maxWidth: isMobile ? "500px" : isTablet ? "660px" : "500px",
                 maxHeight: "85vh",
                 display: "flex",
                 flexDirection: "column",
                 position: "relative"
               }}
             >
-              {/* Close Button X */}
-              <button
-                onClick={() => setShowMobileHelp(false)}
-                style={{
-                  position: "absolute",
-                  top: "1.25rem",
-                  right: "1.25rem",
-                  background: "rgba(255, 255, 255, 0.1)",
-                  border: "none",
-                  color: "white",
-                  width: "36px",
-                  height: "36px",
-                  borderRadius: "50%",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  cursor: "pointer",
-                  zIndex: 10
-                }}
-              >
-                <X size={18} />
-              </button>
-
-              {/* Tabs */}
+              {/* Tabs + Close Button Row */}
               <div style={{ 
                 display: "flex", 
                 gap: "0.5rem", 
                 marginBottom: "1.25rem",
-                background: "rgba(255,255,255,0.05)",
-                padding: "0.25rem",
-                borderRadius: "12px",
-                border: "1px solid rgba(255,255,255,0.1)",
-                marginTop: "1rem"
+                alignItems: "center",
               }}>
+                <div style={{
+                  flex: 1,
+                  display: "flex",
+                  gap: "0.5rem",
+                  background: "rgba(255,255,255,0.05)",
+                  padding: "0.25rem",
+                  borderRadius: "12px",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                }}>
                 <button
                   onClick={() => setHelpTab('rules')}
                   style={{
@@ -368,7 +367,7 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
                     borderRadius: "10px",
                     border: "none",
                     background: helpTab === 'rules' ? "rgba(255, 255, 255, 0.1)" : "transparent",
-                    color: helpTab === 'rules' ? "var(--color-accent)" : "rgba(255, 255, 255, 0.5)",
+                    color: helpTab === 'rules' ? "#ffffff" : "rgba(255, 255, 255, 0.5)",
                     fontSize: "0.85rem",
                     fontWeight: 800,
                     cursor: "pointer",
@@ -385,7 +384,7 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
                     borderRadius: "10px",
                     border: "none",
                     background: helpTab === 'ranking' ? "rgba(255, 255, 255, 0.1)" : "transparent",
-                    color: helpTab === 'ranking' ? "var(--color-accent)" : "rgba(255, 255, 255, 0.5)",
+                    color: helpTab === 'ranking' ? "#ffffff" : "rgba(255, 255, 255, 0.5)",
                     fontSize: "0.85rem",
                     fontWeight: 800,
                     cursor: "pointer",
@@ -394,10 +393,55 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
                 >
                   {t("ranking")}
                 </button>
+                </div>
+
+                {/* Close Button */}
+                <button
+                  onClick={() => setShowMobileHelp(false)}
+                  style={{
+                    background: "rgba(255, 255, 255, 0.08)",
+                    border: "1px solid rgba(255, 255, 255, 0.15)",
+                    color: "rgba(255, 255, 255, 0.7)",
+                    width: "40px",
+                    height: "40px",
+                    borderRadius: "50%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    cursor: "pointer",
+                    flexShrink: 0,
+                    transition: "all 0.2s",
+                  }}
+                  onMouseEnter={e => {
+                    (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.18)";
+                    (e.currentTarget as HTMLButtonElement).style.color = "white";
+                  }}
+                  onMouseLeave={e => {
+                    (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.08)";
+                    (e.currentTarget as HTMLButtonElement).style.color = "rgba(255,255,255,0.7)";
+                  }}
+                >
+                  <X size={16} />
+                </button>
               </div>
 
               {/* Content */}
-              <div style={{ flex: 1, overflowY: "auto", minHeight: 0 }}>
+              <div className="custom-scrollbar" style={{ flex: 1, overflowY: helpTab === 'rules' ? "auto" : "hidden", minHeight: 0, display: "flex", flexDirection: "column" }}>
+                <style>{`
+                  .custom-scrollbar::-webkit-scrollbar {
+                    width: 4px;
+                  }
+                  .custom-scrollbar::-webkit-scrollbar-track {
+                    background: transparent;
+                  }
+                  .custom-scrollbar::-webkit-scrollbar-thumb {
+                    background: rgba(255, 255, 255, 0.2);
+                    border-radius: 10px;
+                  }
+                  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+                    background: rgba(255, 255, 255, 0.4);
+                  }
+                `}</style>
                 {helpTab === 'rules' ? <InstructionsPanel maxPoints={maxPoints} /> : <RankingSidebar />}
               </div>
             </motion.div>

@@ -123,7 +123,9 @@ export const useTrucoEffects = (state: any, logic: any) => {
           if (winningCard) setRoundWinningCardId(winningCard.id);
           
           if (gameMode !== "multiplayer" || isHost) {
-            addPoints(roundWinner, points);
+            const trucoLabel = points === 1 ? "la Mano" : points === 2 ? "el Truco" : points === 3 ? "el Retruco" : "el Vale 4";
+            const reason = roundWinner === "player" ? `Ganaste ${trucoLabel}` : `Ganó ${trucoLabel}`;
+            addPoints(roundWinner, points, reason);
           }
 
           // Clear visual countdown message shortly after (4s)

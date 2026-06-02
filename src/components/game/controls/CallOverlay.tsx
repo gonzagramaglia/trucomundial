@@ -32,7 +32,7 @@ export const CallOverlay: React.FC<CallOverlayProps> = ({ activeCall, gameState 
           <div
             className="text-display"
             style={{
-              fontSize: "clamp(1.5rem, 10vw, 4.5rem)", 
+              fontSize: "clamp(1.5rem, 8vw, 4rem)", 
               color: activeCall.color,
               textShadow: "8px 8px 0px #000, 0 0 20px rgba(0,0,0,0.5)",
               WebkitTextStroke: "2.5px #000", // Reducido un poco el trazo también

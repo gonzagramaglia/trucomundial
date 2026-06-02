@@ -26,7 +26,7 @@ export const useTrucoState = () => {
   
   const [activeCall, setActiveCall] = useState<{ text: string, id: number, color: string } | null>(null);
   const [winnerModal, setWinnerModal] = useState<null | "player" | "cpu">(null);
-  const [scorePopups, setScorePopups] = useState<{ id: number, points: number, side: "player" | "cpu" }[]>([]);
+  const [scorePopups, setScorePopups] = useState<{ id: number, points: number, side: "player" | "cpu", reason?: string }[]>([]);
   
   const [playerHand, setPlayerHand] = useState<Card[]>([]);
   const [playedCards, setPlayedCards] = useState<PlayedCard[]>([]);

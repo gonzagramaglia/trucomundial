@@ -43,14 +43,29 @@ export const Modal: React.FC<ModalProps> = ({ open, onClose, children, showClose
           <button
             style={{
               position: "absolute",
-              top: 12,
-              right: 16,
-              background: "none",
-              border: "none",
-              color: "#fff",
-              fontSize: 24,
+              top: "1rem",
+              right: "1rem",
+              background: "rgba(255, 255, 255, 0.08)",
+              border: "1px solid rgba(255, 255, 255, 0.15)",
+              color: "rgba(255, 255, 255, 0.7)",
+              width: "36px",
+              height: "36px",
+              borderRadius: "50%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
               cursor: "pointer",
-              opacity: 0.7,
+              fontSize: "18px",
+              lineHeight: 1,
+              transition: "all 0.2s",
+            }}
+            onMouseEnter={e => {
+              (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.18)";
+              (e.currentTarget as HTMLButtonElement).style.color = "white";
+            }}
+            onMouseLeave={e => {
+              (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.08)";
+              (e.currentTarget as HTMLButtonElement).style.color = "rgba(255,255,255,0.7)";
             }}
             onClick={onClose}
             aria-label="Close"
