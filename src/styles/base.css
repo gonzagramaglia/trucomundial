@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=Rubik+Mono+One&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=Rubik+Mono+One&family=Montserrat:wght@800;900&family=Righteous&family=Black+Ops+One&family=Oswald:wght@600;700&display=swap");
 
 * {
   margin: 0;
@@ -36,10 +36,11 @@ button,
 
 /* Typography Utilities */
 .text-display {
+  font-family: var(--font-display);
   font-weight: 900;
   text-transform: uppercase;
-  font-style: italic;
-  letter-spacing: -0.05em;
+  letter-spacing: 0.02em;
+  line-height: 1.1;
   font-size: var(--fs-title);
 }
 

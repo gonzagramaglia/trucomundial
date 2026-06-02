@@ -929,8 +929,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             alignItems: "center",
             justifyContent: "center",
             gap: "0.75rem",
-            fontSize: "0.75rem",
-            fontWeight: 800,
+            fontSize: "0.85rem",
+            fontFamily: "var(--font-display)",
+            fontWeight: 700,
             letterSpacing: "0.05em",
             backdropFilter: "blur(12px)",
             textTransform: "uppercase",
@@ -990,16 +991,20 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
         <p
           style={{
+            fontFamily: "var(--font-display)",
             color: "#00f2ff",
-            fontSize: "1.25rem",
+            fontSize: "1.15rem",
+            textTransform: "uppercase",
             maxWidth: "600px",
-            margin: "1rem 0 2rem 0",
+            margin: "0 0 2rem 0",
             fontWeight: 700,
             opacity: 1,
             textAlign: "center",
+            whiteSpace: "pre-line"
           }}
         >
-          {t("subtitle")}
+          <span className="desktop-only">{t("subtitle")}</span>
+          <span className="mobile-only">{t("subtitle").replace(" con ", " con \n")}</span>
         </p>
 
         <div style={{ width: "100%", paddingLeft: "22px" }}>
@@ -1059,7 +1064,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         className="btn-hover-dark"
         style={{
           position: "fixed",
-          bottom: window.innerWidth < 768 ? "1.5rem" : "4.5rem",
+          bottom: typeof window !== "undefined" && window.innerWidth < 768 ? "0.5rem" : "1.5rem",
           left: "50%",
           transform: "translateX(-50%)",
           background: "rgba(145, 70, 255, 0.2)",
@@ -1073,8 +1078,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           display: "flex",
           alignItems: "center",
           gap: "0.6rem",
-          fontSize: "0.75rem",
+          fontSize: "0.95rem",
           fontWeight: 800,
+          fontFamily: "var(--font-display)",
           letterSpacing: "0.05em",
           zIndex: 1000,
           textTransform: "uppercase",
@@ -1083,8 +1089,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         title="Twitch"
       >
         <svg
-          width="16"
-          height="16"
+          width="20"
+          height="20"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"

@@ -16,12 +16,18 @@ export const GameModeSelector: React.FC<GameModeSelectorProps> = ({ selectedMode
     alignItems: "center",
     justifyContent: "center",
     color: "#000",
-    height: "55px",
-    fontSize: "1.1rem",
-    fontWeight: 900,
+    minHeight: "55px",
+    padding: "0.5rem 1rem",
+    fontFamily: "'Oswald', sans-serif",
+    fontSize: "1.2rem",
+    fontWeight: 700,
+    fontStyle: "normal" as const,
+    textTransform: "uppercase" as const,
+    letterSpacing: "0.02em",
+    lineHeight: "1.2",
     border: "none",
     boxShadow: "4px 4px 0px #000",
-    transition: "transform 0.1s ease", // Keep smooth scale if we want, but filter will be instant via CSS
+    transition: "transform 0.1s ease",
     cursor: "pointer",
     opacity: 1
   };

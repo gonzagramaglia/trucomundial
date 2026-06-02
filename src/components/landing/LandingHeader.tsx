@@ -38,8 +38,8 @@ export const LandingHeader: React.FC<LandingHeaderProps> = ({ user }) => {
       </motion.div>
 
       {/* Title + Pill (Right Column) */}
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '0.75rem' }}>
-        <h1 className="text-display" style={{ fontSize: 'clamp(2.5rem, 8vw, 4rem)', lineHeight: 0.9, color: '#fff', margin: 0 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '0.75rem', marginBottom: '0.5rem' }}>
+        <h1 className="text-display" style={{ fontSize: 'clamp(2.5rem, 8vw, 4rem)', lineHeight: 1.0, color: '#fff', margin: 0 }}>
           {t("title").split(' ')[0]}<br />
           {t("title").split(' ')[1]}
         </h1>
@@ -47,7 +47,7 @@ export const LandingHeader: React.FC<LandingHeaderProps> = ({ user }) => {
         {user && (
           <div style={{ 
             color: '#00f2ff', 
-            fontSize: '0.85rem', 
+            fontSize: '0.75rem', 
             display: 'flex', 
             alignItems: 'center', 
             gap: '0.5rem', 
@@ -55,6 +55,8 @@ export const LandingHeader: React.FC<LandingHeaderProps> = ({ user }) => {
             padding: '0.4rem 0.8rem', 
             borderRadius: '1rem', 
             border: '1px solid rgba(0,242,255,0.2)',
+            fontFamily: 'var(--font-display)',
+            textTransform: 'uppercase',
             fontWeight: 700
           }}>
             <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#00f2ff' }} />
