@@ -44,24 +44,12 @@ interface Tournament {
   code_type?: string;
   codes?: string[];
   description?: string;
+  allowed_teams?: string[];
+  ranking_snapshot?: Record<string, number> | null;
 }
 
 const MOCK_RANKING = [
   { id: 1, name: "TimPayne", score: 2500, position: 1 },
-  { id: 2, name: "Messi10", score: 2350, position: 2 },
-  { id: 3, name: "ElDibu", score: 2100, position: 3 },
-  { id: 4, name: "Player123", score: 1900, position: 4 },
-  { id: 5, name: "TrucoMaster", score: 1850, position: 5 },
-  { id: 6, name: "User_99", score: 1700, position: 6 },
-  { id: 7, name: "Pampa", score: 1650, position: 7 },
-  { id: 8, name: "Bostero", score: 1500, position: 8 },
-  { id: 9, name: "Gallo", score: 1450, position: 9 },
-  { id: 10, name: "Carp", score: 1400, position: 10 },
-  { id: 11, name: "Pepe", score: 1300, position: 11 },
-  { id: 12, name: "Tomi", score: 1200, position: 12 },
-  { id: 13, name: "Juan", score: 1150, position: 13 },
-  { id: 14, name: "Fede", score: 1100, position: 14 },
-  { id: 15, name: "Gaston", score: 1000, position: 15 },
 ];
 
 export const TournamentScreen: React.FC<TournamentScreenProps> = ({
@@ -71,6 +59,8 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({
 }) => {
   const { t } = useTranslation();
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedPlayerForHistory, setSelectedPlayerForHistory] = useState<any | null>(null);
+  const [hoveredPlayerId, setHoveredPlayerId] = useState<string | number | null>(null);
   const ITEMS_PER_PAGE = 10;
 
   const totalPages = Math.ceil(MOCK_RANKING.length / ITEMS_PER_PAGE);
@@ -99,13 +89,7 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({
   const [enrollCode, setEnrollCode] = useState("");
   const [enrollError, setEnrollError] = useState("");
   const [enrolling, setEnrolling] = useState(false);
-  // Info modal state
-  const [infoModalTournament, setInfoModalTournament] =
-    useState<Tournament | null>(null);
-  const [infoRegistrations, setInfoRegistrations] = useState<
-    { user_id: string; code_used: string }[]
-  >([]);
-  const [infoCountdown, setInfoCountdown] = useState("");
+
 
   // Fetch tournaments from DB
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
@@ -154,50 +138,6 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({
     fetchTournaments();
   }, []);
 
-  const openInfoModal = async (tournament: Tournament) => {
-    setInfoModalTournament(tournament);
-    const { data } = await supabase
-      .from("tournament_registrations")
-      .select("user_id, code_used")
-      .eq("tournament_id", tournament.id);
-    setInfoRegistrations(data || []);
-  };
-
-  useEffect(() => {
-    if (!infoModalTournament) {
-      setInfoCountdown("");
-      return;
-    }
-
-    const updateCountdown = () => {
-      const startTime = new Date(infoModalTournament.start_time).getTime();
-      const diff = startTime - Date.now();
-
-      if (Number.isNaN(startTime) || diff <= 0) {
-        setInfoCountdown("Comienza pronto");
-        return;
-      }
-
-      const totalSeconds = Math.floor(diff / 1000);
-      const days = Math.floor(totalSeconds / 86400);
-      const hours = Math.floor((totalSeconds % 86400) / 3600);
-      const minutes = Math.floor((totalSeconds % 3600) / 60);
-      const seconds = totalSeconds % 60;
-
-      const parts = [
-        days > 0 ? `${days}d` : null,
-        hours > 0 || days > 0 ? `${hours}h` : null,
-        `${minutes}m`,
-        `${seconds}s`,
-      ].filter(Boolean);
-
-      setInfoCountdown(parts.join(" "));
-    };
-
-    updateCountdown();
-    const timer = window.setInterval(updateCountdown, 1000);
-    return () => window.clearInterval(timer);
-  }, [infoModalTournament]);
 
   const handleEnrollClick = (tournament: Tournament) => {
     if (!user) {
@@ -349,13 +289,13 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({
               border: "1.5px solid rgba(255, 120, 0, 0.3)",
               backdropFilter: "blur(12px)",
               zIndex: 2000,
-              height: "36px",
+              height: "40px",
               borderRadius: "0.85rem",
-              padding: "0 0.85rem",
+              padding: "0 1.25rem",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              gap: "0.4rem",
+              gap: "0.5rem",
               color: "#ff7800",
               boxShadow: "0 4px 14px rgba(255, 120, 0, 0.08)",
               fontSize: "0.7rem",
@@ -363,7 +303,8 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({
               textShadow: "0 0 8px rgba(255, 120, 0, 0.15)",
             }}
           >
-            <span>⚠️ Aún no habilitados</span>
+            <span>⚠️</span>
+            <span>Aún no habilitados</span>
           </div>
         </>
       )}
@@ -421,19 +362,20 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({
                   background: "rgba(255, 120, 0, 0.06)",
                   border: "1.5px solid rgba(255, 120, 0, 0.3)",
                   borderRadius: "0.75rem",
-                  padding: "0.35rem 0.75rem",
+                  padding: "0.44rem 1.1rem",
                   display: "flex",
                   alignItems: "center",
-                  gap: "0.4rem",
+                  gap: "0.5rem",
                   fontSize: "0.65rem",
                   fontWeight: 850,
                   color: "#ff7800",
-                  maxWidth: "180px",
+                  maxWidth: "200px",
                   textAlign: "center",
                   boxShadow: "2px 2px 0px rgba(0,0,0,0.8)",
                 }}
               >
-                <span>⚠️ Aún no habilitados</span>
+                <span>⚠️</span>
+                <span>Aún no habilitados</span>
               </div>
             </div>
 
@@ -903,24 +845,30 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({
                     top: "-15px",
                     left: "24px",
                     background:
-                      tournament.status === "open"
-                        ? "rgba(168, 85, 247, 0.15)"
-                        : tournament.status === "active"
-                          ? "rgba(255, 120, 0, 0.15)"
-                          : "rgba(255,255,255,0.05)",
+                      isRegistered
+                        ? "#092218"
+                        : tournament.status === "open"
+                          ? "#130924"
+                          : tournament.status === "active"
+                            ? "#1c0d02"
+                            : "#1a1a1a",
                     border: `1.5px solid ${
-                      tournament.status === "open"
-                        ? "#a855f7"
-                        : tournament.status === "active"
-                          ? "#ff7800"
-                          : "rgba(255,255,255,0.2)"
+                      isRegistered
+                        ? "#10b981"
+                        : tournament.status === "open"
+                          ? "#a855f7"
+                          : tournament.status === "active"
+                            ? "#ff7800"
+                            : "rgba(255,255,255,0.2)"
                     }`,
                     color:
-                      tournament.status === "open"
-                        ? "#a855f7"
-                        : tournament.status === "active"
-                          ? "#ff7800"
-                          : "rgba(255,255,255,0.5)",
+                      isRegistered
+                        ? "#10b981"
+                        : tournament.status === "open"
+                          ? "#a855f7"
+                          : tournament.status === "active"
+                            ? "#ff7800"
+                            : "rgba(255,255,255,0.5)",
                     borderRadius: "1rem",
                     padding: "4px 14px",
                     fontSize: "0.7rem",
@@ -972,20 +920,20 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({
                     >
                       {tournament.status === "finished" ? (
                         <>
-                          <Award size={15} style={{ color: "#ffd700" }} />
+                          <Award size={15} style={{ color: "#a855f7" }} />
                           <span>
                             {t("champion")}:{" "}
-                            <strong style={{ color: "#ffd700" }}>
+                            <strong style={{ color: "#c084fc" }}>
                               {tournament.winner}
                             </strong>
                           </span>
                         </>
                       ) : (
                         <>
-                          <Clock size={15} style={{ color: "#00f2ff" }} />
+                          <Clock size={15} style={{ color: "#a855f7" }} />
                           <span>
                             {t("starts")}:{" "}
-                            <strong style={{ color: "#00f2ff" }}>
+                            <strong style={{ color: "#c084fc" }}>
                               {formatTournamentDate(tournament.start_time)}
                             </strong>
                           </span>
@@ -1024,10 +972,10 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({
                         opacity: 0.85,
                       }}
                     >
-                      <ShieldCheck size={15} style={{ color: "#ffd700" }} />
+                      <ShieldCheck size={15} style={{ color: "#a855f7" }} />
                       <span>
                         {t("organized_by")}:{" "}
-                        <strong style={{ color: "#ffd700" }}>
+                        <strong style={{ color: "#c084fc" }}>
                           {tournament.organizer}
                         </strong>
                       </span>
@@ -1071,7 +1019,7 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({
                             style={{
                               width: `${(tournament.participants / tournament.max_participants) * 100}%`,
                               height: "100%",
-                              background: isRegistered ? "#10b981" : "#00f2ff",
+                              background: isRegistered ? "#10b981" : "#a855f7",
                               borderRadius: "3px",
                               transition: "width 0.3s ease",
                             }}
@@ -1084,14 +1032,24 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({
 
                 {/* Action Buttons */}
                 <div style={{ display: "flex", gap: "0.75rem" }}>
-                  {/* Info Button */}
+                   {/* Info Button */}
                   <button
-                    onClick={() => openInfoModal(tournament as any)}
+                    onClick={() => {
+                      try {
+                        const path = window.location.pathname.startsWith("/en")
+                          ? `/en/torneos/${tournament.id}`
+                          : `/torneos/${tournament.id}`;
+                        window.history.pushState({}, "", path);
+                        window.dispatchEvent(new PopStateEvent("popstate"));
+                      } catch (e) {
+                        // ignore navigation errors
+                      }
+                    }}
                     className="btn-hover-dark"
                     style={{
+                      flex: 1,
                       height: "46px",
-                      width: "46px",
-                      flexShrink: 0,
+                      padding: "0 0.25rem",
                       borderRadius: "1.25rem",
                       background: "rgba(255,255,255,0.08)",
                       border: "1px solid rgba(255,255,255,0.2)",
@@ -1099,11 +1057,16 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
+                      gap: "0.6rem",
                       cursor: "pointer",
+                      fontSize: "0.9rem",
+                      fontWeight: 950,
+                      letterSpacing: "0.06em",
                     }}
                     title="Ver info del torneo"
                   >
-                    <Info size={18} />
+                    <Info size={15} />
+                    INFO
                   </button>
 
                   {/* Enroll Button */}
@@ -1208,7 +1171,7 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({
             textAlign: "center",
           }}
         >
-          RANKING GLOBAL DE TORNEOS
+          RANKING GLOBAL DE JUGADORES
         </h3>
 
         <div
@@ -1245,6 +1208,17 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({
               return (
                 <div
                   key={player.id}
+                  onClick={() => {
+                    if (player.name === "TimPayne") {
+                      setSelectedPlayerForHistory(player);
+                    }
+                  }}
+                  onMouseEnter={() => {
+                    if (player.name === "TimPayne") {
+                      setHoveredPlayerId(player.id);
+                    }
+                  }}
+                  onMouseLeave={() => setHoveredPlayerId(null)}
                   style={{
                     display: "grid",
                     gridTemplateColumns: "60px 1fr 100px",
@@ -1254,8 +1228,13 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({
                         ? "none"
                         : "1px solid rgba(255,255,255,0.03)",
                     alignItems: "center",
-                    background: isTop3 ? "rgba(255,223,0,0.03)" : "transparent",
+                    background: hoveredPlayerId === player.id
+                      ? "rgba(0, 242, 255, 0.08)"
+                      : isTop3
+                        ? "rgba(255,223,0,0.03)"
+                        : "transparent",
                     transition: "background 0.2s ease",
+                    cursor: player.name === "TimPayne" ? "pointer" : "default",
                   }}
                 >
                   <div
@@ -1275,14 +1254,34 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({
                   >
                     #{player.position}
                   </div>
-                  <div
+                   <div
                     style={{
                       fontWeight: 800,
                       fontSize: "1rem",
                       color: isTop3 ? "#fff" : "rgba(255,255,255,0.8)",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.5rem",
                     }}
                   >
-                    {player.name}
+                    <span>{player.name}</span>
+                    {player.name === "TimPayne" && (
+                      <span
+                        style={{
+                          fontSize: "0.65rem",
+                          fontWeight: 900,
+                          background: "rgba(0, 242, 255, 0.15)",
+                          border: "1px solid #00f2ff",
+                          color: "#00f2ff",
+                          padding: "0.15rem 0.45rem",
+                          borderRadius: "0.5rem",
+                          letterSpacing: "0.05em",
+                          textTransform: "uppercase",
+                        }}
+                      >
+                        DEMO
+                      </span>
+                    )}
                   </div>
                   <div
                     style={{
@@ -1364,283 +1363,7 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({
 
       {/* ENROLLMENT MODAL */}
       <AnimatePresence>
-        {/* Info Modal */}
-        <AnimatePresence>
-          {infoModalTournament && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              style={{
-                position: "fixed",
-                inset: 0,
-                background: "rgba(0,0,0,0.8)",
-                backdropFilter: "blur(8px)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                zIndex: 2500,
-                padding: "1rem",
-              }}
-              onClick={() => setInfoModalTournament(null)}
-            >
-              <motion.div
-                initial={{ scale: 0.95, y: 20 }}
-                animate={{ scale: 1, y: 0 }}
-                exit={{ scale: 0.95, y: 20 }}
-                onClick={(e) => e.stopPropagation()}
-                style={{
-                  background: "rgba(18, 12, 28, 0.98)",
-                  border: "1px solid rgba(168, 85, 247, 0.3)",
-                  borderRadius: "2rem",
-                  padding: "2rem",
-                  width: "100%",
-                  maxWidth: "520px",
-                  maxHeight: "85vh",
-                  overflowY: "auto",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "1.5rem",
-                }}
-              >
-                {/* Header */}
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "flex-start",
-                  }}
-                >
-                  <div>
-                    <h3
-                      className="text-display"
-                      style={{
-                        margin: 0,
-                        fontSize: "1.4rem",
-                        color: "#a855f7",
-                      }}
-                    >
-                      {infoModalTournament.name}
-                    </h3>
-                    <div
-                      style={{
-                        opacity: 0.5,
-                        fontSize: "0.8rem",
-                        marginTop: "0.25rem",
-                      }}
-                    >
-                      Organizado por {infoModalTournament.organizer}
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => setInfoModalTournament(null)}
-                    style={{
-                      background: "none",
-                      border: "none",
-                      color: "#fff",
-                      cursor: "pointer",
-                      fontSize: "1.4rem",
-                      opacity: 0.6,
-                    }}
-                  >
-                    ✕
-                  </button>
-                </div>
 
-                {/* Description */}
-                {infoModalTournament.description && (
-                  <div
-                    style={{
-                      background: "rgba(255,255,255,0.03)",
-                      borderRadius: "1rem",
-                      padding: "1rem",
-                      fontSize: "0.9rem",
-                      lineHeight: 1.6,
-                      opacity: 0.85,
-                    }}
-                  >
-                    {infoModalTournament.description}
-                  </div>
-                )}
-
-                {/* Prize and Countdown */}
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "0.75rem",
-                  }}
-                >
-                  <div
-                    style={{
-                      background: "rgba(255, 120, 0, 0.08)",
-                      border: "1px solid rgba(255, 120, 0, 0.18)",
-                      borderRadius: "1rem",
-                      padding: "0.9rem 1rem",
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: "0.25rem",
-                    }}
-                  >
-                    <div
-                      style={{
-                        fontSize: "0.72rem",
-                        fontWeight: 900,
-                        textTransform: "uppercase",
-                        letterSpacing: "0.06em",
-                        color: "#ff7800",
-                      }}
-                    >
-                      Premio
-                    </div>
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: "0.6rem",
-                      }}
-                    >
-                      {infoModalTournament.prize.map((prize, index) => (
-                        <div
-                          key={index}
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "0.5rem",
-                            fontSize: "1rem",
-                            fontWeight: 800,
-                            color: "#fff",
-                            flexWrap: "wrap",
-                          }}
-                        >
-                          <Zap size={16} style={{ color: "#ff7800" }} />
-                          <span style={{ color: "#ff7800", minWidth: "72px" }}>
-                            {index + 1}º puesto
-                          </span>
-                          <span>{prize}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {infoModalTournament.status !== "finished" &&
-                    infoCountdown && (
-                      <div
-                        style={{
-                          background: "rgba(0, 242, 255, 0.08)",
-                          border: "1px solid rgba(0, 242, 255, 0.18)",
-                          borderRadius: "1rem",
-                          padding: "0.9rem 1rem",
-                          display: "flex",
-                          flexDirection: "column",
-                          gap: "0.25rem",
-                        }}
-                      >
-                        <div
-                          style={{
-                            fontSize: "0.72rem",
-                            fontWeight: 900,
-                            textTransform: "uppercase",
-                            letterSpacing: "0.06em",
-                            color: "#00f2ff",
-                          }}
-                        >
-                          Cuenta regresiva
-                        </div>
-                        <div
-                          style={{
-                            fontSize: "1rem",
-                            fontWeight: 800,
-                            color: "#fff",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "0.5rem",
-                          }}
-                        >
-                          <Clock size={16} style={{ color: "#00f2ff" }} />
-                          {infoCountdown}
-                        </div>
-                        <div style={{ fontSize: "0.78rem", opacity: 0.65 }}>
-                          Inicio:{" "}
-                          {formatTournamentDate(infoModalTournament.start_time)}
-                        </div>
-                      </div>
-                    )}
-                </div>
-
-                {/* Registered Users */}
-                <div>
-                  <div
-                    style={{
-                      fontSize: "0.8rem",
-                      fontWeight: 800,
-                      color: "#ff7800",
-                      marginBottom: "0.75rem",
-                      textTransform: "uppercase",
-                      letterSpacing: "0.05em",
-                    }}
-                  >
-                    Inscriptos ({infoRegistrations.length} /{" "}
-                    {infoModalTournament.max_participants})
-                  </div>
-                  {infoRegistrations.length === 0 ? (
-                    <div style={{ opacity: 0.4, fontSize: "0.85rem" }}>
-                      Nadie se inscribió todavía.
-                    </div>
-                  ) : (
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: "0.5rem",
-                      }}
-                    >
-                      {infoRegistrations.map((r, idx) => (
-                        <div
-                          key={idx}
-                          style={{
-                            background: "rgba(255,255,255,0.03)",
-                            border: "1px solid rgba(255,255,255,0.06)",
-                            borderRadius: "0.75rem",
-                            padding: "0.5rem 0.75rem",
-                            fontSize: "0.8rem",
-                            fontFamily: "monospace",
-                            display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "center",
-                          }}
-                        >
-                          <span
-                            style={{
-                              opacity: 0.7,
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                              whiteSpace: "nowrap",
-                              maxWidth: "200px",
-                            }}
-                          >
-                            {r.user_id}
-                          </span>
-                          {r.code_used && (
-                            <span
-                              style={{
-                                color: "#a855f7",
-                                fontWeight: 800,
-                                fontSize: "0.75rem",
-                              }}
-                            >
-                              {r.code_used}
-                            </span>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
 
         {enrollModalTournament && (
           <motion.div
@@ -1794,6 +1517,147 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({
                   {enrolling ? "Validando..." : "Inscribite"}
                 </button>
               </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {selectedPlayerForHistory && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              position: "fixed",
+              inset: 0,
+              background: "rgba(0, 0, 0, 0.85)",
+              backdropFilter: "blur(12px)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 3100,
+              padding: "1.5rem",
+            }}
+            onClick={() => setSelectedPlayerForHistory(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              style={{
+                background: "rgba(20, 15, 30, 0.98)",
+                border: "1.5px solid rgba(0, 242, 255, 0.4)",
+                borderRadius: "2.5rem",
+                padding: "2.5rem",
+                width: "100%",
+                maxWidth: "480px",
+                display: "flex",
+                flexDirection: "column",
+                boxShadow: "0 0 40px rgba(0, 242, 255, 0.15)",
+                color: "#fff",
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  marginBottom: "1.5rem",
+                }}
+              >
+                <div>
+                  <h3
+                    className="text-display"
+                    style={{
+                      fontSize: "1.6rem",
+                      color: "#00f2ff",
+                      margin: 0,
+                      letterSpacing: "0.05em",
+                    }}
+                  >
+                    Historial de Torneos
+                  </h3>
+                  <div style={{ fontSize: "0.85rem", opacity: 0.6, marginTop: "0.2rem" }}>
+                    Jugador: <span style={{ color: "#fff", fontWeight: 800 }}>{selectedPlayerForHistory.name}</span> · Puntos Totales: <span style={{ color: "#ffdf00", fontWeight: 800 }}>{selectedPlayerForHistory.score} PTS</span>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setSelectedPlayerForHistory(null)}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    color: "rgba(255,255,255,0.5)",
+                    cursor: "pointer",
+                    padding: "0.5rem",
+                    fontSize: "1.2rem",
+                  }}
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Participaciones list */}
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "0.75rem",
+                  maxHeight: "350px",
+                  overflowY: "auto",
+                  paddingRight: "0.25rem",
+                }}
+              >
+                {[
+                  { torneo: "Copa de Campeones 2026", puesto: "1º (Campeón 🏆)", puntos: "+1000 PTS", fecha: "15/05/2026" },
+                  { torneo: "Mundial de Creadores", puesto: "2º (Subcampeón 🥈)", puntos: "+750 PTS", fecha: "02/05/2026" },
+                  { torneo: "Torneo Apertura Truco", puesto: "3º-4º (Semifinal)", puntos: "+500 PTS", fecha: "18/04/2026" },
+                  { torneo: "Desafío de Estrellas", puesto: "Octavos de Final", puntos: "+250 PTS", fecha: "05/04/2026" }
+                ].map((p, idx) => (
+                  <div
+                    key={idx}
+                    style={{
+                      background: "rgba(255,255,255,0.02)",
+                      border: "1px solid rgba(255,255,255,0.05)",
+                      borderRadius: "1rem",
+                      padding: "1rem",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "0.35rem",
+                    }}
+                  >
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <span style={{ fontWeight: 800, color: "#fff", fontSize: "0.95rem" }}>{p.torneo}</span>
+                      <span style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.4)" }}>{p.fecha}</span>
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "0.85rem" }}>
+                      <span style={{ color: p.puesto.includes("1º") ? "#ffdf00" : p.puesto.includes("2º") ? "#c0c0c0" : "#a855f7", fontWeight: 700 }}>
+                        {p.puesto}
+                      </span>
+                      <span style={{ color: "#00f2ff", fontWeight: 800 }}>{p.puntos}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <button
+                onClick={() => setSelectedPlayerForHistory(null)}
+                style={{
+                  marginTop: "2rem",
+                  background: "#00f2ff",
+                  border: "none",
+                  color: "#000",
+                  height: "48px",
+                  borderRadius: "1rem",
+                  fontWeight: 950,
+                  fontSize: "0.95rem",
+                  cursor: "pointer",
+                  boxShadow: "4px 4px 0px #000",
+                }}
+              >
+                Cerrar Historial
+              </button>
             </motion.div>
           </motion.div>
         )}

@@ -1,19 +1,14 @@
 import React from "react";
 import { motion } from "framer-motion";
 import TournamentDetails from "./TournamentDetails";
-import type { Tournament, Registration } from "./types";
-
+import type { Tournament } from "./types";
 interface Props {
   infoModalTournament: Tournament | null;
-  infoRegistrations: Registration[];
-  infoCountdown: string;
   setInfoModalTournament: (t: Tournament | null) => void;
 }
 
 const TournamentInfoModal: React.FC<Props> = ({
   infoModalTournament,
-  infoRegistrations,
-  infoCountdown,
   setInfoModalTournament,
 }) => {
   if (!infoModalTournament) return null;
@@ -107,8 +102,7 @@ const TournamentInfoModal: React.FC<Props> = ({
 
         <TournamentDetails
           tournament={infoModalTournament}
-          registrations={infoRegistrations}
-          countdown={infoCountdown}
+          registrations={[]}
         />
       </motion.div>
     </motion.div>

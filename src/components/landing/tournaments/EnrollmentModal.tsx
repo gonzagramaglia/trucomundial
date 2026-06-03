@@ -47,7 +47,8 @@ const EnrollmentModal: React.FC<Props> = ({
         animate={{ scale: 1, y: 0 }}
         exit={{ scale: 0.9, y: 20 }}
         style={{
-          background: "rgba(20, 15, 30, 0.95)",
+          background: "rgba(20, 15, 30, 0.7)",
+          backdropFilter: "blur(12px)",
           border: "1.5px solid rgba(168, 85, 247, 0.4)",
           borderRadius: "2.5rem",
           padding: "2.5rem",
@@ -94,16 +95,21 @@ const EnrollmentModal: React.FC<Props> = ({
           <br />
           <br />
           {enrollModalTournament.code_type === "unique"
-            ? "Por favor, ingresá tu código personal y único de acceso."
-            : "Por favor, ingresá el código general de acceso al torneo."}
+            ? (
+                <>Por favor, ingresá tu <strong>código de acceso</strong> personal y único.</>
+              )
+            : (
+                <>Por favor, ingresá el <strong>código de acceso</strong> al torneo.</>
+              )}
         </div>
 
         <input
           type="text"
-          placeholder="Ingresar Código..."
+          placeholder="CODE"
           value={enrollCode}
           onChange={(e) => setEnrollCode(e.target.value)}
           disabled={enrolling}
+          maxLength={4}
           style={{
             width: "100%",
             background: "rgba(0,0,0,0.3)",
@@ -119,6 +125,9 @@ const EnrollmentModal: React.FC<Props> = ({
             boxSizing: "border-box",
             textTransform: "uppercase",
             marginBottom: "1rem",
+            fontFamily: "var(--font-display)",
+            letterSpacing: "0.05em",
+            textAlign: "center",
           }}
         />
 

@@ -16,6 +16,7 @@ import { AdminScreen } from "../admin/AdminScreen";
 import { CreatorScreen } from "../admin/CreatorScreen";
 import { CreatorsApplicationScreen } from "./CreatorsApplicationScreen";
 import { TwitchButton } from '../shared/TwitchButton';
+import { setTournamentVotesSnapshot } from "../../lib/votesStore";
 
 
 interface LandingPageProps {
@@ -336,8 +337,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     }
   };
 
-  const handleCreateRoom = async (pointsToUse: number) => {
-    const code = generateRoomCode();
+  const handleCreateRoom = async (pointsToUse: number, customCode?: string) => {
+    const code = customCode || generateRoomCode();
     setRoomCode(code);
     setIsCreator(true);
     setIsWaiting(true);
@@ -367,12 +368,42 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     if (error) console.error("Error creating room:", error);
   };
 
-  const handleJoinRoom = async () => {
-    if (inputCode.length !== 4) return;
+  const handleJoinRoom = async (customCode?: string) => {
+    const code = customCode ? customCode.toUpperCase() : inputCode.toUpperCase();
+    if (!customCode && code.length !== 4) return;
     setIsCreator(false);
 
-    const code = inputCode.toUpperCase();
     console.log("Buscando sala en la tabla:", code);
+
+    // If it's a tournament match code (8 characters), fetch the allowed teams and snapshot ratings first!
+    if (code.length === 8) {
+      try {
+        const { data: mData } = await supabase
+          .from("tournament_matches")
+          .select("tournament_id")
+          .eq("match_code", code)
+          .maybeSingle();
+
+        if (mData && mData.tournament_id) {
+          const { data: tData } = await supabase
+            .from("tournaments")
+            .select("allowed_teams, ranking_snapshot")
+            .eq("id", mData.tournament_id)
+            .maybeSingle();
+
+          if (tData) {
+            if (tData.allowed_teams && tData.allowed_teams.length === 4) {
+              setSelectedTeams(tData.allowed_teams);
+            }
+            if (tData.ranking_snapshot) {
+              setTournamentVotesSnapshot(tData.ranking_snapshot);
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Error loading tournament details on join:", err);
+      }
+    }
 
     // 1. Check if room exists
     const { data, error } = await supabase
@@ -442,6 +473,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           false,
           code,
           false,
+          selectedTeams,
         );
       }, 3500);
     } else {
@@ -491,12 +523,58 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             false,
             code,
             true,
+            selectedTeams,
           );
         }, 2000);
       } else {
         setJoinError("La sala ya está en juego con otros jugadores.");
         setInputCode("");
       }
+    }
+  };
+
+  const startTournamentMatch = async (matchCode: string, isHost: boolean) => {
+    setShowTournament(false);
+    setShowTournamentEvent(false);
+    setSelectedMode("multiplayer");
+    setSelectedPoints(30);
+
+    // 1. Fetch allowed_teams & ranking_snapshot
+    try {
+      const { data: mData } = await supabase
+        .from("tournament_matches")
+        .select("tournament_id")
+        .eq("match_code", matchCode)
+        .maybeSingle();
+
+      let allowed = ["Argentina", "Francia", "España", "Brasil"];
+      if (mData && mData.tournament_id) {
+        const { data: tData } = await supabase
+          .from("tournaments")
+          .select("allowed_teams, ranking_snapshot")
+          .eq("id", mData.tournament_id)
+          .maybeSingle();
+
+        if (tData) {
+          if (tData.allowed_teams && tData.allowed_teams.length === 4) {
+            allowed = tData.allowed_teams;
+          }
+          if (tData.ranking_snapshot) {
+            setTournamentVotesSnapshot(tData.ranking_snapshot);
+          }
+        }
+      }
+
+      setSelectedTeams(allowed);
+
+      if (isHost) {
+        await handleCreateRoom(30, matchCode);
+      } else {
+        await handleJoinRoom(matchCode);
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error al iniciar la partida del torneo.");
     }
   };
 
@@ -613,6 +691,40 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     );
   }
 
+  if (showTournamentEvent) {
+    return (
+      <div
+        style={{
+          position: "fixed",
+          inset: 0,
+          background: "transparent",
+          width: "100%",
+          height: "100vh",
+          overflowY: "auto",
+          zIndex: 1500,
+        }}
+      >
+        <TournamentEventPage
+          user={user}
+          handleAuth={handleAuth}
+          onPlayMatch={startTournamentMatch}
+          onBack={() => {
+            setShowTournamentEvent(false);
+            if (typeof window !== "undefined") {
+              const isEn = window.location.pathname.startsWith("/en");
+              window.history.pushState(
+                {},
+                "",
+                isEn ? "/en/torneos" : "/torneos",
+              );
+              window.dispatchEvent(new PopStateEvent("popstate"));
+            }
+          }}
+        />
+      </div>
+    );
+  }
+
   if (showTournament) {
     return (
       <div
@@ -656,38 +768,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       >
         <RoadmapScreen
           onBack={() => {
-            if (showTournamentEvent) {
-              return (
-                <div
-                  style={{
-                    position: "fixed",
-                    inset: 0,
-                    background: "transparent",
-                    width: "100%",
-                    height: "100vh",
-                    overflowY: "auto",
-                    zIndex: 1500,
-                  }}
-                >
-                  <TournamentEventPage
-                    user={user}
-                    handleAuth={handleAuth}
-                    onBack={() => {
-                      setShowTournamentEvent(false);
-                      if (typeof window !== "undefined") {
-                        const isEn = window.location.pathname.startsWith("/en");
-                        window.history.pushState(
-                          {},
-                          "",
-                          isEn ? "/en/torneos" : "/torneos",
-                        );
-                        window.dispatchEvent(new PopStateEvent("popstate"));
-                      }
-                    }}
-                  />
-                </div>
-              );
-            }
             setShowRoadmap(false);
             if (typeof window !== "undefined") {
               const isEn = window.location.pathname.startsWith("/en");
@@ -1546,7 +1626,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     </motion.div>
                   )}
                   <button
-                    onClick={handleJoinRoom}
+                    onClick={() => handleJoinRoom()}
                     className="btn-hover-dark"
                     style={{
                       background: "#00f2ff",

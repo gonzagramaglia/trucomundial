@@ -12,7 +12,6 @@ interface GameModeSelectorProps {
 
 export const GameModeSelector: React.FC<GameModeSelectorProps> = ({ selectedMode, onSelect, user: _user }) => {
   const { t } = useTranslation();
-  const showTournamentAsLocked = true;
   const showRoadmapAsLocked = true;
   const commonStyle = {
     display: "flex",
@@ -58,6 +57,21 @@ export const GameModeSelector: React.FC<GameModeSelectorProps> = ({ selectedMode
         {t("play_online")}
       </Button>
 
+      {/* Tournaments Option — right below Online, white, "próximamente" */}
+      <Button
+        onClick={() => onSelect("tournament" as any)}
+        className="btn-hover-dark"
+        style={{
+          ...getButtonStyle("multiplayer", "#ffffff"),
+          color: "#000",
+          width: "100%",
+          gap: "0.75rem",
+        }}
+      >
+        <Trophy size={22} />
+        {t("tournaments")} <span style={{ opacity: 0.45 }}>(PRÓXIMAMENTE)</span>
+      </Button>
+
       {/* Secondary Options: Local Modes */}
       <div className="game-mode-secondary-row" style={{ display: "flex", gap: "1rem", width: "100%" }}>
         <Button
@@ -85,28 +99,6 @@ export const GameModeSelector: React.FC<GameModeSelectorProps> = ({ selectedMode
           {t("vote")}
         </Button>
       </div>
-
-      {/* Tournaments Option */}
-      <Button
-        onClick={() => {
-          if (!showTournamentAsLocked) {
-            onSelect("tournament" as any);
-          }
-        }}
-        className={showTournamentAsLocked ? "" : "btn-hover-dark"}
-        style={{
-          ...getButtonStyle("multiplayer", showTournamentAsLocked ? "rgba(255, 255, 255, 0.05)" : "#ffffff"),
-          color: showTournamentAsLocked ? "rgba(255, 255, 255, 0.4)" : "#000",
-          border: showTournamentAsLocked ? "1px solid rgba(255, 255, 255, 0.1)" : "none",
-          width: "100%",
-          gap: "0.75rem",
-          cursor: showTournamentAsLocked ? "not-allowed" : "pointer",
-          boxShadow: showTournamentAsLocked ? "none" : "4px 4px 0px #000"
-        }}
-      >
-        {showTournamentAsLocked ? <Lock size={22} style={{ opacity: 0.5 }} /> : <Trophy size={22} />}
-        {t("tournaments")} {showTournamentAsLocked && `(${t("locked", "Bloqueado")})`}
-      </Button>
 
       {/* Roadmap Option */}
       <Button

@@ -11,7 +11,11 @@ export interface Tournament {
   organizer: string;
   code_type?: string;
   codes?: string[];
+  allowed_teams?: string[];
+  ranking_snapshot?: Record<string, number> | null;
   description?: string;
+  min_participants?: number;
 }
 
 export type Registration = { user_id: string; code_used: string };
+
