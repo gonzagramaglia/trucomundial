@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Shuffle, Trophy, GripVertical, Play } from "lucide-react";
 import { generateMatchCodes } from "../../lib/matches";
 import { supabase } from "../../lib/supabase";
+import { votesRegistry } from "../../lib/votesStore";
 
 interface Registration {
   user_id: string;
@@ -138,10 +139,11 @@ export const TournamentBracketModal: React.FC<TournamentBracketModalProps> = ({
         .insert(rows);
       if (insertErr) throw insertErr;
 
-      // Set tournament to active
+      // Set tournament to active and snapshot the ratings
+      const snapshot = { ...votesRegistry };
       const { error: updateErr } = await supabase
         .from("tournaments")
-        .update({ status: "active" })
+        .update({ status: "active", ranking_snapshot: snapshot })
         .eq("id", tournament.id);
       if (updateErr) throw updateErr;
 
@@ -157,12 +159,22 @@ export const TournamentBracketModal: React.FC<TournamentBracketModalProps> = ({
   const handleGenerateCodes = async () => {
     if (!tournament) return;
     try {
-      const rows = slots.map((s, idx) => ({
-        round: 1,
-        match_position: idx,
-        player_a_id: s.player_id || null,
-        player_b_id: null,
-      }));
+      const rows = [];
+      const matchCount = slots.length / 2;
+      for (let idx = 0; idx < matchCount; idx++) {
+        const p1 = slots[idx * 2];
+        const p2 = slots[idx * 2 + 1];
+        
+        // Skip match generation if BOTH are BYE (null)
+        if (!p1.player_id && !p2.player_id) continue;
+        
+        rows.push({
+          round: 1,
+          match_position: idx,
+          player_a_id: p1.player_id || null,
+          player_b_id: p2.player_id || null,
+        });
+      }
       await generateMatchCodes(tournament.id, rows as any);
       alert("Códigos generados para la ronda 1");
     } catch (err: any) {

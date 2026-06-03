@@ -9,7 +9,7 @@ import { AnimatePresence } from "framer-motion";
 import type { GameMode, PlayerRole } from "./lib/truco/types";
 import { ScrollIndicator } from "./components/ui/ScrollIndicator";
 import i18n from "./lib/i18n";
-import { updateVotesRegistry, snapshotVotesForGame, setGameActive } from "./lib/votesStore";
+import { updateVotesRegistry, snapshotVotesForGame, setGameActive, setTournamentVotesSnapshot } from "./lib/votesStore";
 
 function App() {
   const [user, setUser] = useState<any>(null);
@@ -300,6 +300,7 @@ function App() {
 
   const handleConfirmExit = () => {
     setGameActive(false);
+    setTournamentVotesSnapshot(null);
     setShowExitModal(false);
     core.setWinnerModal(null);
     core.handleRestartGame();

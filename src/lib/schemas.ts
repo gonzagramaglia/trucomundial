@@ -24,6 +24,9 @@ export const tournamentSchema = z
     code_type: z.enum(["single", "unique"]),
     codes: z.array(z.string()).optional(),
     description: z.string().optional(),
+    allowed_teams: z
+      .array(z.string())
+      .length(4, "Debes seleccionar exactamente 4 selecciones"),
   })
   .refine((data) => data.min_participants <= data.max_participants, {
     message: "El mínimo de participantes no puede superar al máximo",

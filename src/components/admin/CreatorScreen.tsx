@@ -59,6 +59,8 @@ export interface Tournament {
   visibility: "public" | "unlisted" | "private";
   code_type: "single" | "unique";
   codes: string[];
+  allowed_teams?: string[];
+  ranking_snapshot?: Record<string, number> | null;
 }
 
 export const CreatorScreen: React.FC<CreatorScreenProps> = ({

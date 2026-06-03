@@ -60,6 +60,7 @@ export const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
         reset({
           ...tournament,
           prize: normalizeTournamentPrizes(tournament.prize),
+          allowed_teams: tournament.allowed_teams || ["Argentina", "Francia", "España", "Brasil"],
         });
       } else {
         const now = new Date();
@@ -81,6 +82,7 @@ export const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
           visibility: "public",
           code_type: "single",
           codes: [],
+          allowed_teams: ["Argentina", "Francia", "España", "Brasil"],
         });
       }
     }
@@ -600,6 +602,89 @@ export const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
                   <option value="private">{t("private")}</option>
                 </select>
               </div>
+            </div>
+
+            <div>
+              <label
+                style={{
+                  display: "block",
+                  marginBottom: "0.5rem",
+                  fontSize: "0.85rem",
+                  fontWeight: 800,
+                }}
+              >
+                Selecciones del Torneo (Elegí exactamente 4)
+              </label>
+              <div
+                style={{
+                  display: "flex",
+                  gap: "0.5rem",
+                  flexWrap: "wrap",
+                  marginTop: "0.5rem",
+                  marginBottom: "0.5rem",
+                }}
+              >
+                {[
+                  { id: 'Argentina', flag: '🇦🇷' },
+                  { id: 'Francia', flag: '🇫🇷' },
+                  { id: 'España', flag: '🇪🇸' },
+                  { id: 'Nueva Zelanda', flag: '🇳🇿' },
+                  { id: 'Brasil', flag: '🇧🇷' }
+                ].map((team) => {
+                  const allowedTeams = formData.allowed_teams || [];
+                  const isChecked = allowedTeams.includes(team.id);
+                  const isLimitReached = allowedTeams.length >= 4;
+                  const isDisabled = !isChecked && isLimitReached;
+
+                  return (
+                    <button
+                      key={team.id}
+                      type="button"
+                      disabled={isDisabled}
+                      onClick={() => {
+                        const nextAllowed = isChecked
+                          ? allowedTeams.filter(t => t !== team.id)
+                          : [...allowedTeams, team.id];
+                        updateFormData({ allowed_teams: nextAllowed });
+                      }}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.5rem",
+                        padding: "0.5rem 1rem",
+                        background: isChecked ? "rgba(255, 120, 0, 0.15)" : "rgba(0,0,0,0.3)",
+                        border: isChecked
+                          ? "2px solid #ff7800"
+                          : "1px solid rgba(255,255,255,0.2)",
+                        borderRadius: "1rem",
+                        color: "#fff",
+                        cursor: isDisabled ? "not-allowed" : "pointer",
+                        opacity: isDisabled ? 0.5 : 1,
+                        fontSize: "0.9rem",
+                        fontWeight: isChecked ? 900 : 600,
+                        transition: "all 0.2s ease",
+                      }}
+                    >
+                      <span>{team.flag}</span>
+                      <span>{team.id}</span>
+                      {isChecked && <span style={{ color: "#ff7800", marginLeft: "0.25rem" }}>✓</span>}
+                    </button>
+                  );
+                })}
+              </div>
+              {errors.allowed_teams && (
+                <span
+                  style={{
+                    color: "#ef4444",
+                    fontSize: "0.8rem",
+                    marginTop: "0.5rem",
+                    display: "block",
+                    fontWeight: 700,
+                  }}
+                >
+                  {errors.allowed_teams.message}
+                </span>
+              )}
             </div>
 
             <div>

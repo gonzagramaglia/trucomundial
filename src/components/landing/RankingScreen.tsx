@@ -6,6 +6,7 @@ import { CARDS } from '../../data/cards';
 import { Sticker } from '../shared/Sticker';
 import { supabase } from '../../lib/supabase';
 import { TwitchButton } from '../shared/TwitchButton';
+import { updateVotesRegistry } from '../../lib/votesStore';
 
 
 interface RankingScreenProps {
@@ -101,9 +102,16 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
         if (user) {
           const myDbRecord = data.find(item => item.match_id === `user_votes_${user.id}`);
           if (myDbRecord && myDbRecord.last_move && myDbRecord.last_move.votes) {
-            setMyVotes(myDbRecord.last_move.votes);
             lastSavedVotesRef.current = myDbRecord.last_move.votes;
-            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(myDbRecord.last_move.votes));
+            
+            // Only overwrite myVotes if local storage was empty
+            const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
+            if (!stored) {
+              setMyVotes(myDbRecord.last_move.votes);
+              localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(myDbRecord.last_move.votes));
+            }
+          } else {
+            lastSavedVotesRef.current = {};
           }
         }
       }
@@ -117,6 +125,33 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
   useEffect(() => {
     fetchGlobalVotes();
   }, [user]);
+
+  // Reactively aggregate and update the global votes registry whenever local myVotes or dbVotesData change
+  useEffect(() => {
+    const aggregate: Record<string, number> = {};
+    
+    // 1. Add other users' votes from DB
+    dbVotesData.forEach(item => {
+      if (user && item.match_id === `user_votes_${user.id}`) return;
+      const recordVotes = item.last_move?.votes;
+      if (recordVotes && typeof recordVotes === 'object') {
+        Object.entries(recordVotes).forEach(([cardId, count]) => {
+          if (typeof count === 'number') {
+            aggregate[cardId] = (aggregate[cardId] || 0) + count;
+          }
+        });
+      }
+    });
+
+    // 2. Add current user's local myVotes
+    Object.entries(myVotes).forEach(([cardId, count]) => {
+      if (typeof count === 'number') {
+        aggregate[cardId] = (aggregate[cardId] || 0) + count;
+      }
+    });
+
+    updateVotesRegistry(aggregate);
+  }, [myVotes, dbVotesData, user]);
 
   // Calculate current user's distributed votes
   const totalMyVotes = Object.values(myVotes).reduce((sum, v) => sum + v, 0);
@@ -339,6 +374,8 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
     );
   });
 
+  const unsaved = hasUnsavedChanges();
+
   return (
     <div style={{
       width: '100%',
@@ -553,7 +590,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
               top: '1rem',
               zIndex: 100,
               background: 'rgba(15, 10, 25, 0.9)',
-              border: '2px solid rgba(168, 85, 247, 0.25)',
+              border: unsaved ? '2px solid rgba(255, 184, 0, 0.45)' : '2px solid rgba(168, 85, 247, 0.25)',
               borderRadius: '2rem',
               padding: '1.25rem 2rem',
               marginBottom: '2rem',
@@ -562,13 +599,13 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
               alignItems: 'center',
               justifyContent: 'space-between',
               gap: '1.5rem',
-              boxShadow: '0 10px 30px rgba(168, 85, 247, 0.05), inset 0 0 20px rgba(168, 85, 247, 0.05)',
+              boxShadow: unsaved ? '0 10px 30px rgba(255, 184, 0, 0.05), inset 0 0 20px rgba(255, 184, 0, 0.05)' : '0 10px 30px rgba(168, 85, 247, 0.05), inset 0 0 20px rgba(168, 85, 247, 0.05)',
               backdropFilter: 'blur(16px)'
             }}
           >
             <div style={{ flex: '1 1 300px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.9rem', fontWeight: 800 }}>
-                <span style={{ color: '#a855f7', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <span style={{ color: unsaved ? '#ffb800' : '#a855f7', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <Trophy size={18} />
                   {t('your_votes_distributed')}
                 </span>
@@ -584,8 +621,12 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
                   animate={{ width: `${(totalMyVotes / 100) * 100}%` }}
                   style={{
                     height: '100%',
-                    background: availableVotes === 0 ? 'linear-gradient(to right, #10b981, #059669)' : 'linear-gradient(to right, #a855f7, #7c3aed)',
-                    boxShadow: availableVotes === 0 ? '0 0 8px rgba(16, 185, 129, 0.8)' : '0 0 8px rgba(168, 85, 247, 0.8)'
+                    background: unsaved 
+                      ? 'linear-gradient(to right, #ffb800, #f59e0b)' 
+                      : (availableVotes === 0 ? 'linear-gradient(to right, #10b981, #059669)' : 'linear-gradient(to right, #a855f7, #7c3aed)'),
+                    boxShadow: unsaved 
+                      ? '0 0 8px rgba(255, 184, 0, 0.8)' 
+                      : (availableVotes === 0 ? '0 0 8px rgba(16, 185, 129, 0.8)' : '0 0 8px rgba(168, 85, 247, 0.8)')
                   }}
                 />
               </div>
@@ -604,7 +645,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
                 disabled={saving || saveSuccess}
                 className="btn-hover-dark"
                 style={{
-                  background: saveSuccess ? '#10b981' : '#a855f7',
+                  background: saveSuccess ? '#10b981' : (unsaved ? '#ffb800' : '#a855f7'),
                   border: 'none',
                   color: '#fff',
                   height: '48px',
@@ -1074,6 +1115,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
           width: '100%'
         }}>
           {filteredPlayers.map((player, index) => {
+            const hasCardUnsavedChanges = (myVotes[player.id] ?? 0) !== (lastSavedVotesRef.current[player.id] ?? 0);
             return (
               <motion.div
                 key={player.id}
@@ -1171,7 +1213,9 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
                       style={{
                         background: 'transparent',
                         border: 'none',
-                        color: (player.myActiveVotes > 0 && !isOrderChanging) ? '#ffffff' : 'rgba(255,255,255,0.15)',
+                        color: (player.myActiveVotes > 0 && !isOrderChanging) 
+                          ? (hasCardUnsavedChanges ? '#ffb800' : '#a855f7') 
+                          : 'rgba(255,255,255,0.15)',
                         width: '38px',
                         height: '38px',
                         display: 'flex',
@@ -1191,7 +1235,9 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
                       textAlign: 'center',
                       fontWeight: 950,
                       fontSize: '1rem',
-                      color: player.myActiveVotes > 0 ? '#a855f7' : '#ffffff'
+                      color: player.myActiveVotes > 0 
+                        ? (hasCardUnsavedChanges ? '#ffb800' : '#a855f7') 
+                        : '#ffffff'
                     }}>
                       {player.myActiveVotes}
                     </div>
@@ -1203,7 +1249,9 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
                       style={{
                         background: 'transparent',
                         border: 'none',
-                        color: (availableVotes > 0 && !isOrderChanging) ? '#a855f7' : 'rgba(255,255,255,0.15)',
+                        color: (availableVotes > 0 && !isOrderChanging) 
+                          ? (hasCardUnsavedChanges ? '#ffb800' : '#a855f7') 
+                          : 'rgba(255,255,255,0.15)',
                         width: '38px',
                         height: '38px',
                         display: 'flex',
@@ -1259,8 +1307,8 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
             style={{
               position: 'fixed',
               inset: 0,
-              background: 'rgba(0, 0, 0, 0.85)',
-              backdropFilter: 'blur(15px)',
+              background: 'rgba(0, 0, 0, 0.5)',
+              backdropFilter: 'blur(5px)',
               zIndex: 2000,
               display: 'flex',
               alignItems: 'center',
@@ -1316,6 +1364,8 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
               <div style={{ display: 'flex', gap: '1rem', width: '100%', marginTop: '0.5rem' }}>
                 <button
                   onClick={() => {
+                    setMyVotes(lastSavedVotesRef.current);
+                    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(lastSavedVotesRef.current));
                     setShowUnsavedModal(false);
                     onBack();
                   }}

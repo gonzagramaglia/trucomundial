@@ -6,6 +6,13 @@ export const votesRegistry: Record<string, number> = {};
 // Store the snapshot of votes taken when the match starts
 export const gameVotesRegistry: Record<string, number> = {};
 
+export let tournamentVotesSnapshot: Record<string, number> | null = null;
+
+export function setTournamentVotesSnapshot(snapshot: Record<string, number> | null) {
+  tournamentVotesSnapshot = snapshot;
+  listeners.forEach(l => l());
+}
+
 let isGameActive = false;
 
 export function setGameActive(active: boolean) {
@@ -48,6 +55,9 @@ export function getCardVotes(cardId: string): number {
   // Card IDs themselves may contain underscores (e.g. "nico_williams"), so we cannot
   // use split('_')[0] — instead we remove only the trailing numeric/remote suffix.
   const baseId = cardId.replace(/(_rem|_cpu)?_\d+$/, '');
+  if (isGameActive && tournamentVotesSnapshot) {
+    return tournamentVotesSnapshot[baseId] || 0;
+  }
   const extra = (isGameActive ? gameVotesRegistry[baseId] : votesRegistry[baseId]) || 0;
   return extra;
 }
