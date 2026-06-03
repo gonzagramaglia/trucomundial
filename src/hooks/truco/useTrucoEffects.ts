@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { determineWinner } from "../../lib/truco/engine";
+import { determineWinner, getCardValue } from "../../lib/truco/engine";
 import { supabase } from "../../lib/supabase";
 
 export const useTrucoEffects = (state: any, logic: any) => {
@@ -108,8 +108,20 @@ export const useTrucoEffects = (state: any, logic: any) => {
         setHandWinners(newWinners);
 
         // Track winning cards
-        const winningCard = currentHandCards.find((c: any) => c.owner === handWinner);
-        if (winningCard) setHandWinningCardIds((prev: string[]) => [...prev, winningCard.id]);
+        let winningCard: any = undefined;
+        if (handWinner === "draw") {
+          let maxVal = -1;
+          currentHandCards.forEach((c: any) => {
+            const val = getCardValue(c);
+            if (val > maxVal) maxVal = val;
+          });
+          const tiedCards = currentHandCards.filter((c: any) => getCardValue(c) === maxVal);
+          const tiedCardIds = tiedCards.map((c: any) => c.id);
+          setHandWinningCardIds((prev: string[]) => [...prev, ...tiedCardIds]);
+        } else {
+          winningCard = currentHandCards.find((c: any) => c.owner === handWinner);
+          if (winningCard) setHandWinningCardIds((prev: string[]) => [...prev, winningCard.id]);
+        }
 
         // Delay the transition by 1 second so the player has time to see the winner/loser highlights on the table
         setTimeout(() => {

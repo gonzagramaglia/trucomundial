@@ -189,3 +189,66 @@
     font-size: 0.85rem !important;
   }
 }
+
+/* Team Selection Modal Styles */
+.team-selection-card {
+  background: rgba(15, 10, 25, 0.7);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 3rem;
+  border-radius: 2.5rem;
+  width: 100%;
+  max-width: 500px;
+  text-align: center;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  box-sizing: border-box;
+}
+
+.team-selection-title {
+  font-size: 2.2rem;
+  color: #fff;
+  margin-bottom: 2rem;
+  line-height: 1.2;
+  white-space: pre-wrap;
+}
+
+.team-selection-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+  text-align: left;
+  max-height: 275px;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+/* Custom scrollbar styling for the selection list */
+.team-selection-list::-webkit-scrollbar {
+  width: 6px;
+}
+.team-selection-list::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 4px;
+}
+.team-selection-list::-webkit-scrollbar-thumb {
+  background: rgba(0, 242, 255, 0.3);
+  border-radius: 4px;
+}
+.team-selection-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 242, 255, 0.6);
+}
+
+@media (max-width: 768px) {
+  .team-selection-card {
+    padding: 2rem 1.5rem !important;
+    border-radius: 1.75rem !important;
+    max-width: 90% !important;
+  }
+
+  .team-selection-title {
+    font-size: 1.6rem !important;
+    margin-bottom: 1.5rem !important;
+  }
+}
+

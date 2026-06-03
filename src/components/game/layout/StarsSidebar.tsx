@@ -9,10 +9,11 @@ const BASE_PLAYERS = CARDS.map(card => ({
   name: card.name,
   country: card.country,
   club: card.club,
-  power: card.power,
+  stars: 0,
   env: card.env,
   image: card.image,
-  stickerNumber: card.stickerNumber
+  stickerNumber: card.stickerNumber,
+  randomOffset: Math.random()
 }));
 
 
@@ -62,9 +63,23 @@ export const StarsSidebar = () => {
   const sorted = [...BASE_PLAYERS]
     .map(p => ({
       ...p,
-      totalVotes: aggregateVotes[p.id] ?? 0
+      totalVotes: p.stars + (aggregateVotes[p.id] ?? 0)
     }))
-    .sort((a, b) => b.totalVotes - a.totalVotes);
+    .sort((a, b) => {
+      if (b.totalVotes !== a.totalVotes) {
+        return b.totalVotes - a.totalVotes;
+      }
+      return a.randomOffset - b.randomOffset;
+    });
+
+  const ranksMap = new Map<string, number>();
+  let currentRank = 1;
+  sorted.forEach((p, idx) => {
+    if (idx > 0 && p.totalVotes < sorted[idx - 1].totalVotes) {
+      currentRank = idx + 1;
+    }
+    ranksMap.set(p.id, currentRank);
+  });
 
   const cleanString = (str: string): string => {
     return str
@@ -185,7 +200,7 @@ export const StarsSidebar = () => {
         ) : filtered.length === 0 ? (
           <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.75rem', textAlign: 'center' }}>{t("no_results")}</p>
         ) : (
-          filtered.map((p, i) => {
+          filtered.map((p) => {
             return (
               <div key={p.id} style={{
                 display: 'flex',
@@ -205,7 +220,7 @@ export const StarsSidebar = () => {
                   fontStyle: 'italic',
                   fontWeight: 900
                 }}>
-                  {i + 1}.
+                  {ranksMap.get(p.id)}.
                 </span>
 
                 {/* Player info */}

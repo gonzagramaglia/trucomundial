@@ -80,8 +80,8 @@
 @media (min-width: 1025px) and (min-height: 701px) {
   .game-scoreboard-wrapper {
     top: 50%;
-    left: 2.25rem;
-    right: 2.25rem;
+    left: 1.25rem;
+    right: 1.25rem;
     transform: translateY(-50%);
   }
 

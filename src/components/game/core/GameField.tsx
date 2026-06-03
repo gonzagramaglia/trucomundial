@@ -25,6 +25,7 @@ interface GameFieldProps {
   onHandleMazo?: () => void;
   isMazoDisabled?: boolean;
   envHighlightIds?: Set<string>;
+  isCooldown?: boolean;
 }
 
 export const GameField: React.FC<GameFieldProps> = ({
@@ -40,7 +41,8 @@ export const GameField: React.FC<GameFieldProps> = ({
   whoseTurn,
   onHandleMazo,
   isMazoDisabled = false,
-  envHighlightIds
+  envHighlightIds,
+  isCooldown = false
 }) => {
   const { t } = useTranslation();
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -219,6 +221,45 @@ export const GameField: React.FC<GameFieldProps> = ({
       <RoundCountdown isActive={isRoundEnding || isGameStarting} isGameStarting={isGameStarting} />
 
       <AnimatePresence>
+        {isCooldown && handWinners.length === 1 && handWinners[0] === "draw" && (
+          <motion.div
+            initial={{ scale: 0.5, opacity: 0, x: "-50%", y: "-50%" }}
+            animate={{ 
+              scale: [1, 1.08, 1], 
+              opacity: 1,
+              x: "-50%",
+              y: "-50%"
+            }}
+            exit={{ scale: 1.3, opacity: 0, x: "-50%", y: "-50%" }}
+            transition={{ 
+              scale: { duration: 1.2, repeat: Infinity, ease: "easeInOut" },
+              opacity: { duration: 0.3 }
+            }}
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              zIndex: 3100, // Above cards but below other overlays
+              pointerEvents: 'none',
+              textAlign: 'center',
+              whiteSpace: 'nowrap',
+              fontFamily: "var(--font-display)",
+              fontSize: "clamp(2rem, 7vw, 4rem)",
+              fontWeight: 900,
+              color: "#22c55e",
+              textShadow: "5px 5px 0px #000, 0 0 20px rgba(34, 197, 94, 0.5)",
+              WebkitTextStroke: "2px #000",
+              paintOrder: "stroke fill",
+              textTransform: "uppercase",
+              letterSpacing: "0.08em"
+            }}
+          >
+            ¡Parda! La mejor
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
         {playedCards.map((card, idx) => {
           const isPlayer = card.owner === "player";
           const isPartner = card.owner === "partner";
@@ -231,9 +272,15 @@ export const GameField: React.FC<GameFieldProps> = ({
 
           let isLoser = false;
           let isWinner = false;
-          if (isHandDecided && handWinner !== "draw") {
-            isLoser = card.owner !== handWinner;
-            isWinner = card.owner === handWinner;
+          if (isHandDecided) {
+            if (handWinner === "draw") {
+              // On a draw, both cards glow as winners
+              isWinner = true;
+              isLoser = false;
+            } else {
+              isLoser = card.owner !== handWinner;
+              isWinner = card.owner === handWinner;
+            }
           }
 
           const isHero = card.id === roundWinningCardId;
@@ -258,7 +305,8 @@ export const GameField: React.FC<GameFieldProps> = ({
             else if (isCpu2) { xPos = isMobile ? 145 : 280; yPos = (handIdx - 1) * lateralCardSpacing; rotate = -90; }
           }
 
-          const baseId = card.id.split('_')[0];
+          // Strip instance suffix to get the original card id (e.g. "nico_williams_1234" → "nico_williams")
+          const baseId = card.id.replace(/(_rem|_cpu)?_\d+$/, '');
           const isPlayerHighlighted = envHighlightIds?.has(baseId) && isPlayer;
           const envColor = isPlayerHighlighted ? "#00f2ff" : "#fff";
 

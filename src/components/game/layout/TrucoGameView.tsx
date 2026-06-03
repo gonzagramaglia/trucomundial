@@ -35,6 +35,7 @@ interface TrucoGameViewProps {
   whoseTurn: PlayerRole | null;
   maxPoints: number;
   showCountdown: boolean;
+  isCooldown: boolean;
   roundWinningCardId: string | null;
   cpuPartnerHandRef: any;
   showExitModal: boolean;
@@ -57,7 +58,7 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
   user, gameMode, gameState, playerHand, playedCards, cpuHandCount, cpuPartnerHandCount,
   score, activeCall, trucoState, envidoState, pendingAction, handWinners, handWinningCardIds,
   scorePopups, winnerModal, rivalName, isBusy, isRoundEnding, whoseTurn, maxPoints,
-  showCountdown, roundWinningCardId, cpuPartnerHandRef, showExitModal,
+  showCountdown, isCooldown, roundWinningCardId, cpuPartnerHandRef, showExitModal,
   roomCode, isRivalConnected = true, isSelfConnected = true,
   onExitRequest, onRestartGame, onPlayCard, onHandleCall, onHandleResponse, onHandleMazo,
   onCloseExit, onConfirmExit, playerFolded, setIsPaused
@@ -81,7 +82,7 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
   const initialHand = [...playerHand, ...playerPlayed];
   const cardsPerHand = gameMode === '2v2' ? 4 : 2;
   const isFirstRound = (playedCards ? playedCards.length : 0) < cardsPerHand;
-  const showEnvHint = isFirstRound && (envidoState.status === 'none' || envidoState.status === 'pending');
+  const showEnvHint = isFirstRound && (envidoState.status === 'none' || envidoState.status === 'pending' || envidoState.status === 'accepted');
   const envHighlightIds = showEnvHint ? getEnvHighlightIds(initialHand) : new Set<string>();
 
   React.useEffect(() => {
@@ -206,10 +207,10 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
               transition={{ duration: 2, repeat: Infinity }}
               style={{
                 padding: "0.3rem 1rem",
-                background: (!isRivalConnected && gameMode === "multiplayer") ? "rgba(255, 60, 0, 0.2)" : ((whoseTurn === "player" && !showCountdown) ? "rgba(0, 242, 255, 0.2)" : "rgba(255, 255, 255, 0.05)"),
-                border: `1px solid ${(!isRivalConnected && gameMode === "multiplayer") ? "#ff3c00" : ((whoseTurn === "player" && !showCountdown) ? "#00f2ff" : "rgba(255,255,255,0.2)")}`,
+                background: (!isRivalConnected && gameMode === "multiplayer") ? "rgba(255, 60, 0, 0.2)" : ((whoseTurn === "player" && !showCountdown && !isCooldown) ? "rgba(0, 242, 255, 0.2)" : "rgba(255, 255, 255, 0.05)"),
+                border: `1px solid ${(!isRivalConnected && gameMode === "multiplayer") ? "#ff3c00" : ((whoseTurn === "player" && !showCountdown && !isCooldown) ? "#00f2ff" : "rgba(255,255,255,0.2)")}`,
                 borderRadius: "2rem",
-                color: (!isRivalConnected && gameMode === "multiplayer") ? "#ff3c00" : ((whoseTurn === "player" && !showCountdown) ? "#00f2ff" : "white"),
+                color: (!isRivalConnected && gameMode === "multiplayer") ? "#ff3c00" : ((whoseTurn === "player" && !showCountdown && !isCooldown) ? "#00f2ff" : "white"),
                 fontSize: "0.6rem",
                 fontWeight: 900,
                 textTransform: "uppercase",
@@ -218,7 +219,7 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
             >
               {(!isRivalConnected && gameMode === "multiplayer")
                 ? t("waiting_reconnect", { name: rivalName.toUpperCase() })
-                : showCountdown
+                : (showCountdown || isCooldown)
                   ? "• • •"
                   : pendingAction && (pendingAction.caller === "player" || pendingAction.caller === "partner")
                     ? t("waiting_for", { name: rivalName.toUpperCase() })
@@ -245,6 +246,7 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
           onHandleMazo={onHandleMazo}
           isMazoDisabled={!(whoseTurn === "player" || whoseTurn === "partner") || isBusy || pendingAction !== null}
           envHighlightIds={envHighlightIds}
+          isCooldown={isCooldown}
         />
 
         <GameBottomBar

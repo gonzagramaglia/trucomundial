@@ -20,11 +20,11 @@ const BASE_PLAYERS = CARDS.map(card => ({
   name: card.name,
   country: card.country,
   club: card.club,
-  power: card.power,
+  stars: 0,
   env: card.env,
   image: card.image,
   stickerNumber: card.stickerNumber,
-  baseVotes: 0
+  randomOffset: Math.random()
 }));
 
 export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, onBack }) => {
@@ -234,26 +234,31 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
     }
   });
 
-  // Calculate absolute ranks (always based on most voted to least voted)
+  // Calculate absolute ranks (always based on most voted to least voted, sharing ranks for ties)
   const absoluteRanks = new Map<string, number>();
-  [...BASE_PLAYERS]
+  const rankedList = [...BASE_PLAYERS]
     .map(player => {
       const otherVotes = aggregateOtherVotes[player.id] ?? 0;
       const myActiveVotes = myVotes[player.id] ?? 0;
-      const totalVotes = player.baseVotes + otherVotes + myActiveVotes;
+      const totalVotes = player.stars + otherVotes + myActiveVotes;
       return { id: player.id, totalVotes };
     })
-    .sort((a, b) => b.totalVotes - a.totalVotes)
-    .forEach((p, idx) => {
-      absoluteRanks.set(p.id, idx + 1);
-    });
+    .sort((a, b) => b.totalVotes - a.totalVotes);
+
+  let currentRank = 1;
+  rankedList.forEach((p, idx) => {
+    if (idx > 0 && p.totalVotes < rankedList[idx - 1].totalVotes) {
+      currentRank = idx + 1;
+    }
+    absoluteRanks.set(p.id, currentRank);
+  });
 
   // Combine: baseVotes + other users' votes + current user's active local votes
   const sortedPlayers = [...BASE_PLAYERS]
     .map(player => {
       const otherVotes = aggregateOtherVotes[player.id] ?? 0;
       const myActiveVotes = myVotes[player.id] ?? 0;
-      const totalVotes = player.baseVotes + otherVotes + myActiveVotes;
+      const totalVotes = player.stars + otherVotes + myActiveVotes;
 
       return {
         ...player,
@@ -263,10 +268,13 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
       };
     })
     .sort((a, b) => {
-      if (sortBy === 'least_voted') {
-        return a.totalVotes - b.totalVotes;
+      if (b.totalVotes !== a.totalVotes) {
+        if (sortBy === 'least_voted') {
+          return a.totalVotes - b.totalVotes;
+        }
+        return b.totalVotes - a.totalVotes;
       }
-      return b.totalVotes - a.totalVotes;
+      return a.randomOffset - b.randomOffset;
     });
 
   const currentOrder = sortedPlayers.map(p => p.id).join(',');
@@ -838,6 +846,28 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
             >
               <span style={{ marginRight: '0.4rem' }}>🇳🇿</span> {t("country_Nueva Zelanda")}
             </button>
+            <button
+              onClick={() => toggleCountryFilter('Brasil')}
+              style={{
+                height: '42px',
+                padding: '0 1.25rem',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxSizing: 'border-box',
+                borderRadius: '1.1rem',
+                background: selectedCountries.includes('Brasil') ? 'rgba(234, 179, 8, 0.2)' : 'rgba(255, 255, 255, 0.05)',
+                border: selectedCountries.includes('Brasil') ? '1.5px solid #eab308' : '1px solid rgba(255, 255, 255, 0.1)',
+                color: '#fff',
+                fontSize: '0.85rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                boxShadow: selectedCountries.includes('Brasil') ? '0 0 10px rgba(234, 179, 8, 0.2)' : 'none'
+              }}
+            >
+              <span style={{ marginRight: '0.4rem' }}>🇧🇷</span> {t("country_Brasil")}
+            </button>
           </div>
 
           {/* Sort Selector */}
@@ -1106,7 +1136,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
                   height: '180px',
                   margin: '1rem 0 1.25rem 0'
                 }}>
-                  <Sticker card={{ ...player, power: player.totalVotes } as any} disabled={true} />
+                  <Sticker card={{ ...player, stars: player.totalVotes } as any} disabled={true} />
                 </div>
 
                 {/* PLAYER INFO PANEL */}

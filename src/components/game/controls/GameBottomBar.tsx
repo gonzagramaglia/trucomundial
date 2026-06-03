@@ -76,7 +76,7 @@ export const GameBottomBar: React.FC<GameBottomBarProps> = ({
     const initialHand = [...playerHand, ...playerPlayed];
     const cardsPerHand = gameMode === '2v2' ? 4 : 2;
     const isFirstRound = (playedCards ? playedCards.length : 0) < cardsPerHand;
-    const showEnvHint = isFirstRound && (envidoState.status === 'none' || envidoState.status === 'pending');
+    const showEnvHint = isFirstRound && (envidoState.status === 'none' || envidoState.status === 'pending' || envidoState.status === 'accepted');
     computedHighlightIds = showEnvHint ? getEnvHighlightIds(initialHand) : new Set<string>();
   }
 

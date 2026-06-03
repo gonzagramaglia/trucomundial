@@ -1185,44 +1185,30 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               initial={{ scale: 0.9, y: 20 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.9, y: 20 }}
-              style={{
-                background: "rgba(255, 255, 255, 0.05)",
-                border: "1px solid rgba(255, 255, 255, 0.1)",
-                padding: "3rem",
-                borderRadius: "2.5rem",
-                width: "100%",
-                maxWidth: "500px",
-                textAlign: "center",
-                boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)",
-              }}
+              className="team-selection-card"
             >
-              <h2
-                className="text-display"
-                style={{
-                  fontSize: "2.2rem",
-                  color: "#fff",
-                  marginBottom: "2rem",
-                  lineHeight: 1.2,
-                  whiteSpace: "pre-wrap",
-                }}
-              >
+              <h2 className="text-display team-selection-title">
                 {t("deck_selection_title_line1")}
                 <br />
                 <span style={{ color: "#00f2ff" }}>{t("deck_selection_title_line2")}</span>
               </h2>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.25rem', textAlign: 'left' }}>
+              <div className="team-selection-list">
                 {[
                   { id: 'Argentina', flag: '🇦🇷' },
                   { id: 'Francia', flag: '🇫🇷' },
                   { id: 'España', flag: '🇪🇸' },
-                  { id: 'Nueva Zelanda', flag: '🇳🇿' }
+                  { id: 'Nueva Zelanda', flag: '🇳🇿' },
+                  { id: 'Brasil', flag: '🇧🇷' }
                 ].map(team => {
                   const isChecked = selectedTeams.includes(team.id);
+                  const isLimitReached = selectedTeams.length >= 4;
+                  const isDisabled = !isChecked && isLimitReached;
                   return (
                     <div
                       key={team.id}
                       onClick={() => {
+                        if (isDisabled) return;
                         setSelectedTeams(prev =>
                           prev.includes(team.id)
                             ? prev.filter(t => t !== team.id)
@@ -1237,9 +1223,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                         background: isChecked ? 'rgba(0, 242, 255, 0.1)' : 'rgba(255,255,255,0.03)',
                         border: isChecked ? '1.5px solid #00f2ff' : '1px solid rgba(255,255,255,0.1)',
                         borderRadius: '1.25rem',
-                        cursor: 'pointer',
+                        cursor: isDisabled ? 'not-allowed' : 'pointer',
                         transition: 'all 0.2s',
-                        boxShadow: isChecked ? '0 0 10px rgba(0, 242, 255, 0.15)' : 'none'
+                        boxShadow: isChecked ? '0 0 10px rgba(0, 242, 255, 0.15)' : 'none',
+                        opacity: isDisabled ? 0.45 : 1
                       }}
                     >
                       <span style={{ fontSize: '1rem', fontWeight: 800, color: '#fff', display: 'inline-flex', alignItems: 'center' }}>

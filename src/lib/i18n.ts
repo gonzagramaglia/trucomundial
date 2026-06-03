@@ -172,6 +172,7 @@ const resources = {
       "country_Argentina": "Argentina",
       "country_España": "Spain",
       "country_Nueva Zelanda": "New Zealand",
+      "country_Brasil": "Brazil",
 
       // GameModeSelector
       "roadmap": "ROADMAP",
@@ -512,6 +513,7 @@ const resources = {
       "country_Argentina": "Argentina",
       "country_España": "España",
       "country_Nueva Zelanda": "Nueva Zelanda",
+      "country_Brasil": "Brasil",
 
       // GameModeSelector
       "roadmap": "HOJA DE RUTA",
@@ -668,7 +670,7 @@ const resources = {
       "delete_tournament": "Eliminar Torneo",
       "confirm_delete_tournament": "¿Estás seguro de que querés eliminar este torneo? Esta acción no se puede deshacer.",
       "deck_selection_title_line1": "¿QUÉ SELECCIONES",
-      "deck_selection_title_line2": "FORMAN EL MAZO?",
+      "deck_selection_title_line2": "FORMARÁN EL MAZO?",
       "accept": "ACEPTAR",
       "play": "JUGAR",
       "filter_all": "TODOS",
