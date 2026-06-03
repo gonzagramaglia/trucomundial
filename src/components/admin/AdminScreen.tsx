@@ -16,6 +16,7 @@ import {
   Edit2,
   CheckCircle2,
   MessageSquare,
+  Star,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { supabase } from "../../lib/supabase";
@@ -24,6 +25,7 @@ import { CreatorProfileModal } from "./CreatorProfileModal";
 import { TournamentBracketModal } from "./TournamentBracketModal";
 import { TournamentPlayersModal } from "./TournamentPlayersModal";
 import { TwitchButton } from '../shared/TwitchButton';
+import { UserStarsModal } from "./UserStarsModal";
 import {
 
   formatTournamentPrizes,
@@ -52,10 +54,13 @@ interface MatchSummary {
 
 interface PlayerStats {
   userId: string;
+  userName: string;
+  email: string;
   totalGames: number;
   wins: number;
   losses: number;
   lastPlayed: string;
+  votes: Record<string, number>;
 }
 
 interface CreatorApplication {
@@ -92,6 +97,10 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
   const [playersModalRegs, setPlayersModalRegs] = useState<any[]>([]);
   const [bracketModalTournament, setBracketModalTournament] = useState<any>(null);
   const [bracketModalRegs, setBracketModalRegs] = useState<any[]>([]);
+  const [profiles, setProfiles] = useState<any[]>([]);
+  const [globalVotesData, setGlobalVotesData] = useState<any[]>([]);
+  const [selectedUserStars, setSelectedUserStars] = useState<any | null>(null);
+  const [userRoles, setUserRoles] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<
     | "players"
     | "matches"
@@ -123,15 +132,42 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
     setLoading(true);
 
     try {
-      // Fetch Matches
-      const { data: historyData, error: historyError } = await supabase
+      // 1. Fetch Profiles (Everyone who logged in at least once)
+      const { data: profilesData, error: profilesError } = await supabase
+        .from("profiles")
+        .select("*");
+
+      if (profilesError) {
+        console.error("Error fetching profiles:", profilesError);
+      } else if (profilesData) {
+        setProfiles(profilesData);
+      }
+
+      // 2. Fetch User Roles
+      const { data: rolesData, error: rolesError } = await supabase
+        .from("user_roles")
+        .select("*");
+
+      if (rolesError) {
+        console.error("Error fetching user roles:", rolesError);
+      } else if (rolesData) {
+        setUserRoles(rolesData);
+      }
+
+      // 3. Fetch Matches and Votes
+      const { data: syncData, error: syncError } = await supabase
         .from("game_sync")
         .select("id, match_id, last_move, updated_at")
-        .like("match_id", "user_history_%");
+        .or("match_id.like.user_history_%,match_id.like.user_votes_%");
 
-      if (historyError) {
-        console.error("Error fetching global history:", historyError);
-      } else if (historyData) {
+      if (syncError) {
+        console.error("Error fetching global sync data:", syncError);
+      } else if (syncData) {
+        const historyData = syncData.filter(item => item.match_id.startsWith("user_history_"));
+        const votesData = syncData.filter(item => item.match_id.startsWith("user_votes_"));
+
+        setGlobalVotesData(votesData);
+
         const formattedHistory: MatchSummary[] = historyData
           .map((item: any) => {
             const summary = item.last_move;
@@ -316,19 +352,40 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
   const playerStats = useMemo(() => {
     const statsMap = new Map<string, PlayerStats>();
 
-    history.forEach((match) => {
-      const pId = match.userId;
+    // 1. Initialize with all profiles (users logged in at least once)
+    profiles.forEach((profile) => {
+      statsMap.set(profile.id, {
+        userId: profile.id,
+        userName: profile.username || "Usuario",
+        email: profile.email || "Sin Email",
+        totalGames: 0,
+        wins: 0,
+        losses: 0,
+        lastPlayed: profile.last_sign_in_at || profile.created_at || new Date().toISOString(),
+        votes: {}
+      });
+    });
+
+    const getOrCreatePlayer = (pId: string, defaultName: string = "Usuario", lastActiveDate: string = ""): PlayerStats => {
       if (!statsMap.has(pId)) {
         statsMap.set(pId, {
           userId: pId,
+          userName: defaultName,
+          email: "Sin Email",
           totalGames: 0,
           wins: 0,
           losses: 0,
-          lastPlayed: match.date,
+          lastPlayed: lastActiveDate || new Date().toISOString(),
+          votes: {}
         });
       }
+      return statsMap.get(pId)!;
+    };
 
-      const pStats = statsMap.get(pId)!;
+    // 2. Add Match History data
+    history.forEach((match) => {
+      const pId = match.userId;
+      const pStats = getOrCreatePlayer(pId, "Usuario", match.date);
       pStats.totalGames += 1;
       if (match.winner === "player") {
         pStats.wins += 1;
@@ -341,50 +398,105 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
       }
     });
 
-    return Array.from(statsMap.values()).sort(
-      (a, b) => b.totalGames - a.totalGames,
-    );
-  }, [history]);
+    // 3. Add Star distribution data (user_votes_*)
+    globalVotesData.forEach((item) => {
+      const userId = item.match_id.replace(/^user_votes_/, '');
+      const votes = item.last_move?.votes || {};
+      const userName = item.last_move?.userName || "Usuario";
+      const updatedAt = item.last_move?.updatedAt || item.updated_at;
 
-  const handleAssignRole = async (
-    userId: string,
-    role: "admin" | "mod" | "creator",
-  ) => {
+      const pStats = getOrCreatePlayer(userId, userName, updatedAt);
+      pStats.votes = votes;
+
+      if (updatedAt && new Date(updatedAt) > new Date(pStats.lastPlayed)) {
+        pStats.lastPlayed = updatedAt;
+      }
+      if (item.last_move?.userName && pStats.userName === "Usuario") {
+        pStats.userName = item.last_move.userName;
+      }
+    });
+
+    return Array.from(statsMap.values()).sort(
+      (a, b) => new Date(b.lastPlayed).getTime() - new Date(a.lastPlayed).getTime(),
+    );
+  }, [profiles, history, globalVotesData]);
+
+  const getPlayerRole = (userId: string): "normal" | "mod" | "admin" | "creator" => {
+    const roleRecord = userRoles.find(r => r.user_id === userId);
+    if (roleRecord) return roleRecord.role;
+
+    const isCreator = applications.some(app => app.user_id === userId && app.status === "approved");
+    if (isCreator) return "creator";
+
+    return "normal";
+  };
+
+  const handleRoleChange = async (userId: string, newRole: string) => {
+    setLoading(true);
     try {
-      if (role === "creator") {
-        const { error } = await supabase.from("creator_applications").insert([
-          {
-            user_id: userId,
-            email: "assigned-by-admin@trucomundial.com",
-            channel_name: "Nuevo Creador",
-            status: "approved",
-          },
-        ]);
-        if (error) throw error;
-        alert("Perfil de creador asignado con éxito (status: approved).");
-        fetchGlobalData(); // Refresh creators list
-      } else {
+      if (newRole === "normal") {
+        // Delete from user_roles
+        await supabase.from("user_roles").delete().eq("user_id", userId);
+        // Delete from creator_applications
+        await supabase.from("creator_applications").delete().eq("user_id", userId);
+        alert("Rol de usuario restablecido a NORMAL.");
+      } else if (newRole === "admin" || newRole === "mod") {
+        // Delete from creator_applications
+        await supabase.from("creator_applications").delete().eq("user_id", userId);
+        // Upsert new role in user_roles
         const { error } = await supabase
           .from("user_roles")
-          .upsert([{ user_id: userId, role }]);
+          .upsert([{ user_id: userId, role: newRole }], { onConflict: 'user_id' });
         if (error) throw error;
-        alert(`Rol ${role.toUpperCase()} asignado con éxito a ${userId}.`);
+        alert(`Rol ${newRole.toUpperCase()} asignado con éxito.`);
+      } else if (newRole === "creator") {
+        // Delete from user_roles
+        await supabase.from("user_roles").delete().eq("user_id", userId);
+        // Manage creator applications
+        const existingApp = applications.find(app => app.user_id === userId);
+        if (existingApp) {
+          const { error } = await supabase
+            .from("creator_applications")
+            .update({ status: "approved" })
+            .eq("id", existingApp.id);
+          if (error) throw error;
+        } else {
+          const { error } = await supabase
+            .from("creator_applications")
+            .insert([{
+              user_id: userId,
+              email: "assigned-by-admin@trucomundial.com",
+              channel_name: "Nuevo Creador",
+              status: "approved",
+            }]);
+          if (error) throw error;
+        }
+        alert("Rol CREADOR asignado con éxito.");
       }
+
+      await fetchGlobalData();
     } catch (err: any) {
-      alert("Error asignando rol: " + err.message);
+      console.error("Error changing role:", err);
+      alert("Error al cambiar el rol: " + err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
   const formatDate = (dateStr: string) => {
     try {
       const d = new Date(dateStr);
-      return d.toLocaleDateString(undefined, {
-        day: "numeric",
+      const datePart = d.toLocaleDateString("en-US", {
         month: "short",
+        day: "numeric",
         year: "numeric",
+      });
+      const timePart = d.toLocaleTimeString("en-US", {
         hour: "2-digit",
         minute: "2-digit",
+        hour12: false,
       });
+      return `${datePart}, ${timePart}`;
     } catch {
       return dateStr;
     }
@@ -1026,7 +1138,7 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
                       textTransform: "uppercase",
                     }}
                   >
-                    ID Usuario
+                    Usuario
                   </th>
                   <th
                     style={{
@@ -1101,12 +1213,15 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
                       <td
                         style={{
                           padding: "1rem 1.5rem",
-                          fontSize: "0.9rem",
-                          fontFamily: "monospace",
-                          opacity: 0.8,
+                          fontSize: "0.95rem",
                         }}
                       >
-                        {stats.userId}
+                        <div style={{ fontWeight: 800, color: '#fff' }}>
+                          {stats.userName}
+                        </div>
+                        <div style={{ fontSize: "0.75rem", opacity: 0.5, marginTop: "0.15rem", fontFamily: "monospace" }}>
+                          {stats.email}
+                        </div>
                       </td>
                       <td
                         style={{
@@ -1156,55 +1271,58 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
                         >
                           <button
                             onClick={() =>
-                              handleAssignRole(stats.userId, "mod")
+                              setSelectedUserStars({
+                                userName: stats.userName,
+                                userEmail: stats.email,
+                                votes: stats.votes
+                              })
                             }
                             style={{
-                              background: "rgba(16, 185, 129, 0.2)",
-                              border: "1px solid rgba(16, 185, 129, 0.3)",
-                              color: "#10b981",
-                              padding: "0.25rem 0.75rem",
+                              background: "rgba(254, 240, 138, 0.15)",
+                              border: "1px solid rgba(254, 240, 138, 0.3)",
+                              color: "var(--color-accent)",
+                              padding: "0.25rem 0.6rem",
                               borderRadius: "0.5rem",
                               fontSize: "0.75rem",
                               fontWeight: 800,
                               cursor: "pointer",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              gap: "0.25rem",
+                              marginRight: "0.25rem"
                             }}
+                            title="Ver Distribución de Estrellas"
                           >
-                            Mod
+                            <Star size={11} fill="var(--color-accent)" /> Estrellas
                           </button>
-                          <button
-                            onClick={() =>
-                              handleAssignRole(stats.userId, "admin")
-                            }
+                          <select
+                            value={getPlayerRole(stats.userId)}
+                            onChange={(e) => handleRoleChange(stats.userId, e.target.value)}
                             style={{
-                              background: "rgba(239, 68, 68, 0.2)",
-                              border: "1px solid rgba(239, 68, 68, 0.3)",
-                              color: "#ef4444",
-                              padding: "0.25rem 0.75rem",
+                              background: "rgba(0, 0, 0, 0.4)",
+                              border: "1px solid rgba(255, 255, 255, 0.2)",
+                              color: "#fff",
+                              padding: "0.35rem 1.6rem 0.35rem 0.65rem",
                               borderRadius: "0.5rem",
                               fontSize: "0.75rem",
                               fontWeight: 800,
                               cursor: "pointer",
+                              outline: "none",
+                              boxSizing: "border-box",
+                              appearance: "none",
+                              WebkitAppearance: "none",
+                              backgroundImage: `url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`,
+                              backgroundRepeat: "no-repeat",
+                              backgroundPosition: "right 0.55rem center",
+                              backgroundSize: "0.7rem",
                             }}
                           >
-                            Admin
-                          </button>
-                          <button
-                            onClick={() =>
-                              handleAssignRole(stats.userId, "creator")
-                            }
-                            style={{
-                              background: "rgba(168, 85, 247, 0.2)",
-                              border: "1px solid rgba(168, 85, 247, 0.3)",
-                              color: "#a855f7",
-                              padding: "0.25rem 0.75rem",
-                              borderRadius: "0.5rem",
-                              fontSize: "0.75rem",
-                              fontWeight: 800,
-                              cursor: "pointer",
-                            }}
-                          >
-                            Creador
-                          </button>
+                            <option value="normal" style={{ background: "#180c28", color: "#fff" }}>NORMAL</option>
+                            <option value="mod" style={{ background: "#180c28", color: "#10b981" }}>MOD</option>
+                            <option value="admin" style={{ background: "#180c28", color: "#ef4444" }}>ADMIN</option>
+                            <option value="creator" style={{ background: "#180c28", color: "#ff7800" }}>CREADOR</option>
+                          </select>
                         </div>
                       </td>
                     </tr>
@@ -2449,6 +2567,13 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
         tournament={bracketModalTournament}
         registrations={bracketModalRegs}
         onSuccess={fetchGlobalData}
+      />
+      <UserStarsModal
+        isOpen={!!selectedUserStars}
+        onClose={() => setSelectedUserStars(null)}
+        userName={selectedUserStars?.userName || ""}
+        userEmail={selectedUserStars?.userEmail || ""}
+        votes={selectedUserStars?.votes || {}}
       />
     </div>
   );
