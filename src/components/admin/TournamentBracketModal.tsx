@@ -89,6 +89,7 @@ export const TournamentBracketModal: React.FC<TournamentBracketModalProps> = ({
   const [dragFrom, setDragFrom] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [nameMap, setNameMap] = useState<Record<string, string>>({});
 
   const bracketSize = nextPow2(registrations.length);
   const rounds = buildBracket(slots);
@@ -99,6 +100,26 @@ export const TournamentBracketModal: React.FC<TournamentBracketModalProps> = ({
       const players = registrations;
       setSlots(buildSlots(players, nextPow2(players.length)));
       setMode("random");
+
+      // Fetch usernames
+      const fetchUsernames = async () => {
+        const userIds = players.map(p => p.user_id).filter(Boolean);
+        if (userIds.length > 0) {
+          const { data: profilesData, error } = await supabase
+            .from("profiles")
+            .select("id, username")
+            .in("id", userIds);
+          
+          if (profilesData && !error) {
+            const map: Record<string, string> = {};
+            profilesData.forEach((profile: any) => {
+              map[profile.id] = profile.username || "";
+            });
+            setNameMap(map);
+          }
+        }
+      };
+      fetchUsernames();
     }
   }, [isOpen, registrations]);
 
@@ -513,9 +534,9 @@ export const TournamentBracketModal: React.FC<TournamentBracketModalProps> = ({
                                         >
                                           {isFirstRound
                                             ? player.player_id
-                                              ? seedLabel(player.player_id)
+                                              ? (nameMap[player.player_id] || seedLabel(player.player_id))
                                               : "BYE"
-                                            : player.player_label}
+                                            : (nameMap[player.player_label] || player.player_label)}
                                         </span>
                                       </div>
                                     );

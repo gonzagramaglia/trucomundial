@@ -50,7 +50,7 @@ export async function saveMatchLog(matchId: string, log: unknown) {
   return data;
 }
 
-export async function saveMatchLogByCode(matchCode: string, log: unknown, winnerId?: string) {
+export async function saveMatchLogByCode(matchCode: string, log: unknown, winnerId?: string, myUserId?: string) {
   const { data: currentMatch, error: fetchError } = await supabase
     .from("tournament_matches")
     .select("*")
@@ -103,6 +103,82 @@ export async function saveMatchLogByCode(matchCode: string, log: unknown, winner
     }
   }
 
+  let finalPlacement = 0;
+  let pointsEarned = 0;
+  let prizes: string[] = [];
+  let tName = "Torneo";
+
+  // Calculate Global Leaderboard Points and Placement
+  if (myUserId) {
+    try {
+      const { data: tournamentData } = await supabase
+        .from("tournaments")
+        .select("name, max_participants, prize")
+        .eq("id", currentMatch.tournament_id)
+        .single();
+        
+      if (tournamentData) {
+        tName = tournamentData.name;
+        const maxRound = Math.log2(tournamentData.max_participants);
+        
+        // Find if there is a next match in the tournament (round + 1)
+        const { data: hasNextMatch } = await supabase
+          .from("tournament_matches")
+          .select("id")
+          .eq("tournament_id", currentMatch.tournament_id)
+          .eq("round", currentMatch.round + 1)
+          .limit(1);
+
+        if (winnerId !== myUserId) {
+          // Lost
+          const roundsLeft = maxRound - currentMatch.round;
+          finalPlacement = Math.pow(2, roundsLeft + 1); // 2, 4, 8, 16...
+        } else if (!hasNextMatch || hasNextMatch.length === 0) {
+          // Won final
+          finalPlacement = 1;
+        }
+
+        if (finalPlacement > 0) {
+          if (finalPlacement === 1) pointsEarned = 100;
+          else if (finalPlacement === 2) pointsEarned = 50;
+          else if (finalPlacement <= 4) pointsEarned = 25;
+          else if (finalPlacement <= 8) pointsEarned = 10;
+          
+          if (tournamentData.prize) {
+             const prizeStr = tournamentData.prize.find((p: string) => p.startsWith(`${finalPlacement}º`));
+             if (prizeStr) prizes.push(prizeStr);
+          }
+
+          if (pointsEarned > 0) {
+            // Check if player exists in global_leaderboard
+            const { data: existingPlayer } = await supabase
+              .from("global_leaderboard")
+              .select("points, tournaments_played, tournaments_won")
+              .eq("user_id", myUserId)
+              .single();
+              
+            if (existingPlayer) {
+               await supabase.from("global_leaderboard").update({
+                  points: existingPlayer.points + pointsEarned,
+                  tournaments_played: existingPlayer.tournaments_played + 1,
+                  tournaments_won: existingPlayer.tournaments_won + (finalPlacement === 1 ? 1 : 0)
+               }).eq("user_id", myUserId);
+            } else {
+               await supabase.from("global_leaderboard").insert({
+                  user_id: myUserId,
+                  points: pointsEarned,
+                  tournaments_played: 1,
+                  tournaments_won: finalPlacement === 1 ? 1 : 0
+               });
+            }
+          }
+        }
+      }
+    } catch (e) {
+      console.error("Failed calculating global leaderboard stats", e);
+    }
+  }
+
   // Insert to global history for Admin View
   try {
     const { data: tournamentData } = await supabase
@@ -130,7 +206,7 @@ export async function saveMatchLogByCode(matchCode: string, log: unknown, winner
     console.error("Failed to save global tournament history", err);
   }
 
-  return data;
+  return { ...data, finalPlacement, pointsEarned, prizes, tournamentName: tName };
 }
 
 export async function getMatchesByTournament(tournamentId: string) {

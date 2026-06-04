@@ -10,6 +10,7 @@ import type { GameMode, PlayerRole } from "./lib/truco/types";
 import { ScrollIndicator } from "./components/ui/ScrollIndicator";
 import i18n from "./lib/i18n";
 import { updateVotesRegistry, snapshotVotesForGame, setGameActive, setTournamentVotesSnapshot } from "./lib/votesStore";
+import { TournamentResultModal } from "./components/game/modals/TournamentResultModal";
 
 function App() {
   const [user, setUser] = useState<any>(null);
@@ -19,6 +20,7 @@ function App() {
   const [showExitModal, setShowExitModal] = useState(false);
   const [currentRoomCode, setCurrentRoomCode] = useState<string | null>(null);
   const [isCreator, setIsCreator] = useState(false);
+  const [tournamentResult, setTournamentResult] = useState<any>(null);
 
   useEffect(() => {
     const fetchGlobalVotes = async () => {
@@ -306,6 +308,7 @@ function App() {
     core.handleRestartGame();
     core.setRivalName("CPU");
     core.setGameState("landing");
+    setTournamentResult(null);
   };
 
   // Persist match logs to tournament_matches when a match finishes and a room code exists
@@ -325,9 +328,18 @@ function App() {
           date: new Date().toISOString(),
           log: core.matchLog,
         };
-        const winnerId = core.winnerModal === "player" ? userId : undefined;
-        await saveMatchLogByCode(currentRoomCode, summary, winnerId);
+        const winnerId = core.winnerModal === "player" ? userId : (core.rivalId || undefined);
+        const result = await saveMatchLogByCode(currentRoomCode, summary, winnerId, userId);
         console.log("Saved tournament match log for code", currentRoomCode);
+        
+        if (result && result.finalPlacement && result.finalPlacement > 0) {
+          setTournamentResult({
+             finalPlacement: result.finalPlacement,
+             pointsEarned: result.pointsEarned || 0,
+             prizes: result.prizes || [],
+             tournamentName: result.tournamentName || "Torneo"
+          });
+        }
       } catch (err) {
         console.error("Failed saving tournament match log:", err);
       }
@@ -366,6 +378,11 @@ function App() {
           </>
         )}
       </AnimatePresence>
+      <TournamentResultModal
+        isOpen={!!tournamentResult}
+        onClose={() => setTournamentResult(null)}
+        result={tournamentResult}
+      />
     </main>
   );
 }

@@ -94,6 +94,7 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({
   // Fetch tournaments from DB
   const [tournaments, setTournaments] = useState<Tournament[]>([]);
   const [loading, setLoading] = useState(true);
+  const [globalStats, setGlobalStats] = useState({ played: 0, position: 0 });
 
   useEffect(() => {
     const fetchRegistrations = async () => {
@@ -106,9 +107,40 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({
       if (data) {
         setRegisteredIds(data.map((r) => r.tournament_id));
       }
+      const { data: globalData, error: globalErr } = await supabase
+        .from("global_leaderboard")
+        .select("tournaments_played, points")
+        .eq("user_id", user.id)
+        .single();
+      
+      if (!globalErr && globalData) {
+        // Find position based on points
+        const { count, error: countErr } = await supabase
+          .from("global_leaderboard")
+          .select("*", { count: 'exact', head: true })
+          .gt("points", globalData.points);
+          
+        setGlobalStats({
+          played: globalData.tournaments_played || 0,
+          position: countErr ? 0 : (count || 0) + 1
+        });
+      }
+
+      setLoading(false);
     };
+
     fetchRegistrations();
   }, [user]);
+
+  const upcomingTournament = tournaments
+    .filter(t => registeredIds.includes(t.id) && new Date(t.start_time) > new Date())
+    .sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime())[0];
+
+  const formatNextTournament = (dateStr?: string) => {
+    if (!dateStr) return "--:--:--";
+    const d = new Date(dateStr);
+    return d.toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit" }) + " " + d.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" });
+  };
 
   useEffect(() => {
     const fetchTournaments = async () => {
@@ -680,7 +712,7 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({
                     color: "#fff",
                   }}
                 >
-                  0
+                  {globalStats.played}
                 </div>
                 <div
                   style={{
@@ -707,7 +739,7 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({
                     textShadow: "0 0 8px rgba(255,223,0,0.3)",
                   }}
                 >
-                  #---
+                  {globalStats.position > 0 ? `#${globalStats.position}` : "#---"}
                 </div>
                 <div
                   style={{
@@ -734,7 +766,7 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({
                     marginTop: "0.3rem",
                   }}
                 >
-                  --:--:--
+                  {formatNextTournament(upcomingTournament?.start_time)}
                 </div>
                 <div
                   style={{

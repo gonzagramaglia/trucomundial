@@ -11,7 +11,7 @@ interface TournamentMatchHistoryProps {
 export const TournamentMatchHistory: React.FC<TournamentMatchHistoryProps> = ({ finishedMatches, nameMap }) => {
   const [selectedLog, setSelectedLog] = useState<any | null>(null);
 
-  if (!finishedMatches || finishedMatches.length === 0) return null;
+  if (!finishedMatches) return null;
 
   return (
     <div
@@ -31,82 +31,95 @@ export const TournamentMatchHistory: React.FC<TournamentMatchHistoryProps> = ({ 
           margin: "0 0 1.5rem 0",
           color: "#a855f7",
           letterSpacing: "0.05em",
+          display: "flex",
+          alignItems: "center",
+          gap: "0.5rem"
         }}
       >
-        Historial de Partidas Finalizadas
+        <Scroll size={20} color="#a855f7" /> Historial de Partidas
       </h3>
 
-      <div style={{ display: "grid", gap: "1rem", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))" }}>
-        {finishedMatches.map((m) => {
-          const logData = m.log as any;
-          if (!logData) return null;
+      {finishedMatches.length === 0 ? (
+        <div style={{
+          textAlign: "center",
+          padding: "2rem",
+          opacity: 0.6,
+          fontStyle: "italic",
+          color: "#fff"
+        }}>
+          Aún no se ha jugado ninguna partida en este torneo.
+        </div>
+      ) : (
+        <div style={{ display: "grid", gap: "1rem", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))" }}>
+          {finishedMatches.map((m) => {
+            const logData = m.log as any;
+            if (!logData) return null;
 
-          const playerAName = nameMap[m.player_a_id!] || `Jugador ${m.player_a_id?.slice(0, 5)}`;
-          const playerBName = nameMap[m.player_b_id!] || `Jugador ${m.player_b_id?.slice(0, 5)}`;
-          const aWon = m.winner_id === m.player_a_id;
-          const bWon = m.winner_id === m.player_b_id;
+            const playerAName = nameMap[m.player_a_id!] || `Jugador ${m.player_a_id?.slice(0, 5)}`;
+            const playerBName = nameMap[m.player_b_id!] || `Jugador ${m.player_b_id?.slice(0, 5)}`;
+            const aWon = m.winner_id === m.player_a_id;
+            const bWon = m.winner_id === m.player_b_id;
 
-          return (
-            <div
-              key={m.id}
-              style={{
-                background: "rgba(255, 255, 255, 0.03)",
-                border: "1px solid rgba(255, 255, 255, 0.1)",
-                borderRadius: "1.25rem",
-                padding: "1.25rem",
-                display: "flex",
-                flexDirection: "column",
-                gap: "1rem",
-              }}
-            >
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                <div style={{ fontSize: "0.75rem", opacity: 0.5, textTransform: "uppercase", fontWeight: 900, letterSpacing: "0.05em" }}>
-                  Ronda {m.round}
-                </div>
-                <div style={{ fontSize: "0.75rem", opacity: 0.5 }}>
-                  {new Date(m.ended_at!).toLocaleDateString()}
-                </div>
-              </div>
-
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                {/* Player A */}
-                <div style={{ flex: 1, textAlign: "right", fontWeight: aWon ? 900 : 500, color: aWon ? "#10b981" : "#fff" }}>
-                  {aWon && <Trophy size={12} style={{ color: "#ffd700", marginRight: "0.25rem", display: "inline" }} />}
-                  {playerAName}
-                </div>
-                <div style={{ padding: "0 1rem", fontSize: "0.8rem", opacity: 0.3 }}>vs</div>
-                {/* Player B */}
-                <div style={{ flex: 1, textAlign: "left", fontWeight: bWon ? 900 : 500, color: bWon ? "#10b981" : "#fff" }}>
-                  {playerBName}
-                  {bWon && <Trophy size={12} style={{ color: "#ffd700", marginLeft: "0.25rem", display: "inline" }} />}
-                </div>
-              </div>
-
-              <button
-                onClick={() => setSelectedLog(logData)}
-                className="btn-hover-dark"
+            return (
+              <div
+                key={m.id}
                 style={{
-                  background: "rgba(168, 85, 247, 0.15)",
-                  border: "1px solid rgba(168, 85, 247, 0.3)",
-                  color: "#d8b4fe",
-                  padding: "0.6rem",
-                  borderRadius: "0.85rem",
-                  fontSize: "0.8rem",
-                  fontWeight: 800,
+                  background: "rgba(255, 255, 255, 0.03)",
+                  border: "1px solid rgba(255, 255, 255, 0.1)",
+                  borderRadius: "1.25rem",
+                  padding: "1.25rem",
                   display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "0.4rem",
-                  cursor: "pointer",
-                  marginTop: "0.5rem"
+                  flexDirection: "column",
+                  gap: "1rem",
                 }}
               >
-                <Scroll size={14} /> Ver Registro (Replay)
-              </button>
-            </div>
-          );
-        })}
-      </div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <div style={{ fontSize: "0.75rem", opacity: 0.5, textTransform: "uppercase", fontWeight: 900, letterSpacing: "0.05em" }}>
+                    Ronda {m.round}
+                  </div>
+                  <div style={{ fontSize: "0.75rem", opacity: 0.5 }}>
+                    {new Date(m.ended_at!).toLocaleDateString()}
+                  </div>
+                </div>
+
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  <div style={{ flex: 1, textAlign: "right", fontWeight: aWon ? 900 : 500, color: aWon ? "#10b981" : "#fff" }}>
+                    {aWon && <Trophy size={12} style={{ color: "#ffd700", marginRight: "0.25rem", display: "inline" }} />}
+                    {playerAName}
+                  </div>
+                  <div style={{ padding: "0 1rem", fontSize: "0.8rem", opacity: 0.3 }}>vs</div>
+                  <div style={{ flex: 1, textAlign: "left", fontWeight: bWon ? 900 : 500, color: bWon ? "#10b981" : "#fff" }}>
+                    {playerBName}
+                    {bWon && <Trophy size={12} style={{ color: "#ffd700", marginLeft: "0.25rem", display: "inline" }} />}
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setSelectedLog(logData)}
+                  className="btn-hover-dark"
+                  style={{
+                    background: "rgba(168, 85, 247, 0.15)",
+                    border: "1px solid rgba(168, 85, 247, 0.3)",
+                    color: "#d8b4fe",
+                    padding: "0.6rem",
+                    borderRadius: "0.85rem",
+                    fontSize: "0.8rem",
+                    fontWeight: 800,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "0.4rem",
+                    cursor: "pointer",
+                    marginTop: "0.5rem"
+                  }}
+                >
+                  <Scroll size={14} /> Ver Registro (Replay)
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
       <AnimatePresence>
         {selectedLog && (

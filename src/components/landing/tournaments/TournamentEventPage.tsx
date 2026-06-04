@@ -113,17 +113,17 @@ const TournamentEventPage: React.FC<Props> = ({ user, handleAuth, onBack, onPlay
         const regsData = regs.data || [];
         setRegistrations(regsData);
 
-        if (regsData.length > 0) {
-          const { data: voteSyncs } = await supabase
-            .from("game_sync")
-            .select("match_id, last_move")
-            .in("match_id", regsData.map((r: any) => `user_votes_${r.user_id}`));
+        if (regsData && regsData.length > 0) {
+          const userIds = regsData.map((r: any) => r.user_id);
+          const { data: profilesData } = await supabase
+            .from("profiles")
+            .select("id, username")
+            .in("id", userIds);
           
           const names: Record<string, string> = {};
-          if (voteSyncs) {
-            voteSyncs.forEach((sync: any) => {
-              const userId = sync.match_id.replace("user_votes_", "");
-              names[userId] = sync.last_move?.userName || "";
+          if (profilesData) {
+            profilesData.forEach((profile: any) => {
+              names[profile.id] = profile.username || "";
             });
           }
           setNameMap(names);
@@ -1075,12 +1075,10 @@ const TournamentEventPage: React.FC<Props> = ({ user, handleAuth, onBack, onPlay
         </div>
       </div>
 
-      {tournament.status !== "open" && (
-        <TournamentMatchHistory
-          finishedMatches={matches.filter(m => m.ended_at)}
-          nameMap={nameMap}
-        />
-      )}
+      <TournamentMatchHistory
+        finishedMatches={matches.filter(m => m.ended_at)}
+        nameMap={nameMap}
+      />
 
       <EnrollmentModal
         enrollModalTournament={enrollModalTournament}
