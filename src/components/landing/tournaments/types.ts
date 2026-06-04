@@ -1,6 +1,7 @@
 export interface Tournament {
   id: string;
   name: string;
+  is_approved?: boolean;
   status: "open" | "active" | "finished";
   participants: number;
   max_participants: number;

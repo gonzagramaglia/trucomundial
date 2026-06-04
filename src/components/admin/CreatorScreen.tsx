@@ -121,6 +121,7 @@ export const CreatorScreen: React.FC<CreatorScreenProps> = ({
         type: "support",
         subject: data.subject,
         message: data.message,
+        status: "open",
       });
 
       if (error) throw error;

@@ -14,6 +14,7 @@ interface TournamentFormModalProps {
   tournament: any | null;
   creatorName: string;
   onSuccess: () => void;
+  
 }
 
 export const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
@@ -94,7 +95,7 @@ export const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
     try {
       const targetCount =
         data.code_type === "single" ? 1 : data.max_participants || 16;
-      let currentCodes = [...(data.codes || [])];
+      const currentCodes = [...(data.codes || [])];
 
       while (currentCodes.length < targetCount) {
         currentCodes.push(
@@ -117,7 +118,11 @@ export const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
         if (error) throw error;
       } else {
         // Create
-        const { error } = await supabase.from("tournaments").insert([payload]);
+        const insertPayload = {
+          ...payload,
+          is_approved: false,
+        };
+        const { error } = await supabase.from("tournaments").insert([insertPayload]);
 
         if (error) throw error;
       }

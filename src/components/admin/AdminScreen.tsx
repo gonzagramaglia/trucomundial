@@ -1,4 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, react-hooks/exhaustive-deps, react-hooks/set-state-in-effect */
 import React, { useState, useEffect, useMemo } from "react";
+import { PlayersTab } from "./tabs/PlayersTab";
+import { MatchesTab } from "./tabs/MatchesTab";
+import { TournamentsTab } from "./tabs/TournamentsTab";
+import { ApplicationsTab } from "./tabs/ApplicationsTab";
+import { TicketsTab } from "./tabs/TicketsTab";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ShieldAlert,
@@ -6,29 +12,17 @@ import {
   Swords,
   ArrowLeft,
   LogOut,
-  Scroll,
-  Calendar,
   FileText,
-  Check,
-  X,
   Trophy,
-  Trash2,
-  Edit2,
-  CheckCircle2,
   MessageSquare,
-  Star,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { supabase } from "../../lib/supabase";
 import { TournamentFormModal } from "./TournamentFormModal";
 import { CreatorProfileModal } from "./CreatorProfileModal";
-import { TournamentBracketModal } from "./TournamentBracketModal";
-import { TournamentPlayersModal } from "./TournamentPlayersModal";
 import { TwitchButton } from '../shared/TwitchButton';
 import { UserStarsModal } from "./UserStarsModal";
 import {
-
-  formatTournamentPrizes,
   normalizeTournamentPrizes,
 } from "../../lib/formatters";
 
@@ -96,22 +90,14 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
   const [isCreatorProfileModalOpen, setIsCreatorProfileModalOpen] =
     useState(false);
   const [editingCreator, setEditingCreator] = useState<any>(null);
-  const [playersModalTournament, setPlayersModalTournament] = useState<any>(null);
-  const [playersModalRegs, setPlayersModalRegs] = useState<any[]>([]);
-  const [bracketModalTournament, setBracketModalTournament] = useState<any>(null);
-  const [bracketModalRegs, setBracketModalRegs] = useState<any[]>([]);
   const [profiles, setProfiles] = useState<any[]>([]);
   const [globalVotesData, setGlobalVotesData] = useState<any[]>([]);
   const [selectedUserStars, setSelectedUserStars] = useState<any | null>(null);
   const [userRoles, setUserRoles] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<
-    | "players"
-    | "matches"
-    | "applications"
-    | "tournaments"
-    | "suggestions"
-    | "support"
+    "players" | "matches" | "tournaments" | "applications" | "suggestions" | "support"
   >("players");
+  const [playerSearchTerm, setPlayerSearchTerm] = useState("");
   const [isMobile, setIsMobile] = useState(
     typeof window !== "undefined" ? window.innerWidth < 768 : false,
   );
@@ -290,38 +276,9 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
     }
   };
 
-  const handleCloseRegistrations = async (tournamentId: string) => {
-    const { error } = await supabase
-      .from("tournaments")
-      .update({ status: "closed" })
-      .eq("id", tournamentId);
-    if (!error)
-      setTournaments((prev) =>
-        prev.map((t) =>
-          t.id === tournamentId ? { ...t, status: "closed" } : t,
-        ),
-      );
-    else alert("Error al cerrar: " + error.message);
-  };
-
-  const openPlayersModal = async (tournament: any) => {
-    const { data } = await supabase
-      .from("tournament_registrations")
-      .select("user_id, code_used")
-      .eq("tournament_id", tournament.id);
-    setPlayersModalRegs(data || []);
-    setPlayersModalTournament(tournament);
-  };
-
-  const openBracketModal = async (tournament: any) => {
-    const { data } = await supabase
-      .from("tournament_registrations")
-      .select("user_id, code_used")
-      .eq("tournament_id", tournament.id);
-    setBracketModalRegs(data || []);
-    setBracketModalTournament(tournament);
-  };
-
+  
+  
+  
   /*
   const handleDeleteTournament = async (id: string) => {
     try {
@@ -334,6 +291,22 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
     }
   };
   */
+
+  
+  const handleApproveTournament = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from("tournaments")
+        .update({ is_approved: true })
+        .eq("id", id);
+      if (error) throw error;
+      setTournaments((prev) =>
+        prev.map((t) => (t.id === id ? { ...t, is_approved: true } : t)),
+      );
+    } catch (err: any) {
+      alert("Error al aprobar torneo: " + err.message);
+    }
+  };
 
   const handleTicketStatus = async (
     ticketId: string,
@@ -352,6 +325,20 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
       );
     } catch (err: any) {
       alert("Error cambiando estado del ticket: " + err.message);
+    }
+  };
+
+  const handleDeleteTicket = async (ticketId: string) => {
+    if (!confirm("¿Estás seguro de eliminar este ticket permanentemente?")) return;
+    try {
+      const { error } = await supabase
+        .from("tickets")
+        .delete()
+        .eq("id", ticketId);
+      if (error) throw error;
+      setTickets((prev) => prev.filter((t) => t.id !== ticketId));
+    } catch (err: any) {
+      alert("Error al eliminar ticket: " + err.message);
     }
   };
 
@@ -1111,1267 +1098,49 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
             Cargando datos de la plataforma...
           </div>
         ) : activeTab === "players" ? (
-          <div
-            style={{
-              background: "rgba(255, 255, 255, 0.02)",
-              border: "1px solid rgba(255, 255, 255, 0.05)",
-              borderRadius: "1.5rem",
-              overflow: "hidden",
-              overflowX: "auto",
-            }}
-          >
-            <table
-              style={{
-                width: "100%",
-                borderCollapse: "collapse",
-                minWidth: "600px",
-              }}
-            >
-              <thead>
-                <tr
-                  style={{
-                    background: "rgba(255, 255, 255, 0.05)",
-                    textAlign: "left",
-                    borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
-                  }}
-                >
-                  <th
-                    style={{
-                      padding: "1.25rem 1.5rem",
-                      fontWeight: 800,
-                      color: "rgba(255, 255, 255, 0.7)",
-                      fontSize: "0.8rem",
-                      textTransform: "uppercase",
-                    }}
-                  >
-                    Usuario
-                  </th>
-                  <th
-                    style={{
-                      padding: "1.25rem 1.5rem",
-                      fontWeight: 800,
-                      color: "rgba(255, 255, 255, 0.7)",
-                      fontSize: "0.8rem",
-                      textTransform: "uppercase",
-                    }}
-                  >
-                    Partidas
-                  </th>
-                  <th
-                    style={{
-                      padding: "1.25rem 1.5rem",
-                      fontWeight: 800,
-                      color: "#10b981",
-                      fontSize: "0.8rem",
-                      textTransform: "uppercase",
-                    }}
-                  >
-                    Victorias
-                  </th>
-                  <th
-                    style={{
-                      padding: "1.25rem 1.5rem",
-                      fontWeight: 800,
-                      color: "#ef4444",
-                      fontSize: "0.8rem",
-                      textTransform: "uppercase",
-                    }}
-                  >
-                    Derrotas
-                  </th>
-                  <th
-                    style={{
-                      padding: "1.25rem 1.5rem",
-                      fontWeight: 800,
-                      color: "rgba(255, 255, 255, 0.7)",
-                      fontSize: "0.8rem",
-                      textTransform: "uppercase",
-                    }}
-                  >
-                    Última Vez
-                  </th>
-                  <th
-                    style={{
-                      padding: "1.25rem 1.5rem",
-                      fontWeight: 800,
-                      color: "rgba(255, 255, 255, 0.7)",
-                      fontSize: "0.8rem",
-                      textTransform: "uppercase",
-                      textAlign: "right",
-                    }}
-                  >
-                    Acciones
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {playerStats.map((stats, idx) => {
-                  return (
-                    <tr
-                      key={stats.userId}
-                      style={{
-                        borderBottom:
-                          idx === playerStats.length - 1
-                            ? "none"
-                            : "1px solid rgba(255, 255, 255, 0.05)",
-                      }}
-                    >
-                      <td
-                        style={{
-                          padding: "1rem 1.5rem",
-                          fontSize: "0.95rem",
-                        }}
-                      >
-                        <div style={{ fontWeight: 800, color: '#fff' }}>
-                          {stats.userName}
-                        </div>
-                        <div style={{ fontSize: "0.75rem", opacity: 0.5, marginTop: "0.15rem", fontFamily: "monospace" }}>
-                          {stats.email}
-                        </div>
-                      </td>
-                      <td
-                        style={{
-                          padding: "1rem 1.5rem",
-                          fontWeight: 800,
-                          fontSize: "1rem",
-                        }}
-                      >
-                        {stats.totalGames}
-                      </td>
-                      <td
-                        style={{
-                          padding: "1rem 1.5rem",
-                          fontWeight: 800,
-                          color: "#10b981",
-                        }}
-                      >
-                        {stats.wins}
-                      </td>
-                      <td
-                        style={{
-                          padding: "1rem 1.5rem",
-                          fontWeight: 800,
-                          color: "#ef4444",
-                        }}
-                      >
-                        {stats.losses}
-                      </td>
-                      <td
-                        style={{
-                          padding: "1rem 1.5rem",
-                          fontSize: "0.85rem",
-                          opacity: 0.6,
-                        }}
-                      >
-                        {formatDate(stats.lastPlayed)}
-                      </td>
-                      <td
-                        style={{ padding: "1rem 1.5rem", textAlign: "right" }}
-                      >
-                        <div
-                          style={{
-                            display: "flex",
-                            gap: "0.5rem",
-                            justifyContent: "flex-end",
-                          }}
-                        >
-                          <button
-                            onClick={() =>
-                              setSelectedUserStars({
-                                userName: stats.userName,
-                                userEmail: stats.email,
-                                votes: stats.votes
-                              })
-                            }
-                            style={{
-                              background: "rgba(254, 240, 138, 0.15)",
-                              border: "1px solid rgba(254, 240, 138, 0.3)",
-                              color: "var(--color-accent)",
-                              padding: "0.25rem 0.6rem",
-                              borderRadius: "0.5rem",
-                              fontSize: "0.75rem",
-                              fontWeight: 800,
-                              cursor: "pointer",
-                              display: "flex",
-                              alignItems: "center",
-                              justifyContent: "center",
-                              gap: "0.25rem",
-                              marginRight: "0.25rem"
-                            }}
-                            title="Ver Distribución de Estrellas"
-                          >
-                            <Star size={11} fill="var(--color-accent)" /> Estrellas
-                          </button>
-                          <select
-                            value={getPlayerRole(stats.userId)}
-                            onChange={(e) => handleRoleChange(stats.userId, e.target.value)}
-                            style={{
-                              background: "rgba(0, 0, 0, 0.4)",
-                              border: "1px solid rgba(255, 255, 255, 0.2)",
-                              color: "#fff",
-                              padding: "0.35rem 1.6rem 0.35rem 0.65rem",
-                              borderRadius: "0.5rem",
-                              fontSize: "0.75rem",
-                              fontWeight: 800,
-                              cursor: "pointer",
-                              outline: "none",
-                              boxSizing: "border-box",
-                              appearance: "none",
-                              WebkitAppearance: "none",
-                              backgroundImage: `url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`,
-                              backgroundRepeat: "no-repeat",
-                              backgroundPosition: "right 0.55rem center",
-                              backgroundSize: "0.7rem",
-                            }}
-                          >
-                            <option value="normal" style={{ background: "#180c28", color: "#fff" }}>NORMAL</option>
-                            <option value="mod" style={{ background: "#180c28", color: "#10b981" }}>MOD</option>
-                            <option value="admin" style={{ background: "#180c28", color: "#ef4444" }}>ADMIN</option>
-                            <option value="creator" style={{ background: "#180c28", color: "#ff7800" }}>CREADOR</option>
-                          </select>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-            {playerStats.length === 0 && (
-              <div
-                style={{ textAlign: "center", padding: "2rem 0", opacity: 0.5 }}
-              >
-                No hay jugadores registrados con partidas.
-              </div>
-            )}
-          </div>
+          <PlayersTab
+            playerStats={playerStats}
+            playerSearchTerm={playerSearchTerm}
+            setPlayerSearchTerm={setPlayerSearchTerm}
+            setSelectedUserStars={setSelectedUserStars}
+            getPlayerRole={getPlayerRole}
+            handleRoleChange={handleRoleChange}
+            formatDate={formatDate}
+          />
         ) : activeTab === "matches" ? (
-          <div
-            style={{ display: "flex", flexDirection: "column", gap: "1rem" }}
-          >
-            {history.map((match) => {
-              const playerWon = match.winner === "player";
-              return (
-                <div
-                  key={match.id}
-                  style={{
-                    background: "rgba(255, 255, 255, 0.03)",
-                    border: "1px solid rgba(255, 255, 255, 0.1)",
-                    borderRadius: "1.5rem",
-                    padding: "1.5rem",
-                    display: "flex",
-                    flexWrap: "wrap",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    gap: "1rem",
-                  }}
-                >
-                  <div>
-                    <div
-                      style={{
-                        fontSize: "0.7rem",
-                        fontFamily: "monospace",
-                        opacity: 0.5,
-                        marginBottom: "0.5rem",
-                      }}
-                    >
-                      Match: {match.match_id}
-                    </div>
-                    {match.isTournament && (
-                      <div
-                        style={{
-                          display: "inline-flex",
-                          alignItems: "center",
-                          gap: "0.3rem",
-                          background: "rgba(255, 120, 0, 0.15)",
-                          border: "1px solid rgba(255, 120, 0, 0.3)",
-                          color: "#ff7800",
-                          padding: "0.2rem 0.6rem",
-                          borderRadius: "0.4rem",
-                          fontSize: "0.65rem",
-                          fontWeight: 800,
-                          textTransform: "uppercase",
-                          marginBottom: "0.5rem"
-                        }}
-                      >
-                        <Trophy size={10} /> Torneo: {match.tournamentName}
-                      </div>
-                    )}
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "0.5rem",
-                        fontWeight: 800,
-                        fontSize: "1.1rem",
-                      }}
-                    >
-                      <span style={{ color: playerWon ? "#10b981" : "#fff" }}>
-                        Player
-                      </span>
-                      <span style={{ opacity: 0.3 }}>vs</span>
-                      <span style={{ color: !playerWon ? "#ef4444" : "#fff" }}>
-                        {match.rivalName}
-                      </span>
-                    </div>
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "0.4rem",
-                        opacity: 0.5,
-                        fontSize: "0.75rem",
-                        marginTop: "0.5rem",
-                      }}
-                    >
-                      <Calendar size={12} />
-                      {formatDate(match.date)}
-                    </div>
-                  </div>
-
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "2rem",
-                    }}
-                  >
-                    <div style={{ fontSize: "1.75rem", fontWeight: 900 }}>
-                      <span style={{ color: playerWon ? "#10b981" : "#fff" }}>
-                        {match.myScore}
-                      </span>
-                      <span style={{ opacity: 0.3, margin: "0 0.5rem" }}>
-                        -
-                      </span>
-                      <span style={{ color: !playerWon ? "#ef4444" : "#fff" }}>
-                        {match.rivalScore}
-                      </span>
-                    </div>
-
-                    <button
-                      onClick={() => setSelectedMatch(match)}
-                      className="btn-hover-dark"
-                      style={{
-                        background: "rgba(255,255,255,0.08)",
-                        border: "1px solid rgba(255,255,255,0.15)",
-                        color: "#fff",
-                        height: "38px",
-                        borderRadius: "0.85rem",
-                        padding: "0 1rem",
-                        fontSize: "0.8rem",
-                        fontWeight: 800,
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "0.4rem",
-                        cursor: "pointer",
-                        boxShadow: "3px 3px 0px #000",
-                      }}
-                    >
-                      <Scroll size={14} />
-                      {isMobile ? "" : "Log"}
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-            {history.length === 0 && (
-              <div
-                style={{ textAlign: "center", padding: "2rem 0", opacity: 0.5 }}
-              >
-                No hay partidas globales registradas.
-              </div>
-            )}
-          </div>
+          <MatchesTab
+            history={history}
+            formatDate={formatDate}
+            setSelectedMatch={setSelectedMatch}
+            isMobile={isMobile}
+          />
         ) : activeTab === "tournaments" ? (
-          <div style={{ display: "grid", gap: "1rem" }}>
-            {tournaments.length === 0 ? (
-              <div
-                style={{ textAlign: "center", padding: "2rem 0", opacity: 0.5 }}
-              >
-                No hay torneos creados.
-              </div>
-            ) : (
-              tournaments.map((tournament) => (
-                <div
-                  key={tournament.id}
-                  style={{
-                    background: "rgba(255, 255, 255, 0.03)",
-                    border: "1px solid rgba(255, 255, 255, 0.1)",
-                    borderRadius: "1.5rem",
-                    padding: "1.5rem",
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "stretch",
-                    justifyContent: "flex-start",
-                    gap: "0.5rem",
-                  }}
-                >
-                  {/* Top Row: Title & Actions */}
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      flexWrap: "wrap",
-                      gap: "1rem",
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "0.75rem",
-                      }}
-                    >
-                      <span
-                        style={{
-                          background:
-                            tournament.status === "open"
-                              ? "rgba(168, 85, 247, 0.2)"
-                              : tournament.status === "active"
-                                ? "rgba(255, 120, 0, 0.2)"
-                                : "rgba(255,255,255,0.1)",
-                          color:
-                            tournament.status === "open"
-                              ? "#e9d5ff"
-                              : tournament.status === "active"
-                                ? "#ffedd5"
-                                : "rgba(255,255,255,0.7)",
-                          padding: "0.25rem 0.75rem",
-                          borderRadius: "0.5rem",
-                          fontSize: "0.7rem",
-                          fontWeight: 900,
-                          textTransform: "uppercase",
-                        }}
-                      >
-                        {tournament.status}
-                      </span>
-                      <h3
-                        style={{ margin: 0, fontSize: "1.2rem", color: "#fff" }}
-                      >
-                        {tournament.name}
-                      </h3>
-                    </div>
-
-                    {/* Actions */}
-                    <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
-                      {tournament.status === "open" && (
-                        <button
-                          onClick={() => handleCloseRegistrations(tournament.id)}
-                          style={{
-                            background: "rgba(255, 120, 0, 0.15)",
-                            border: "1px solid rgba(255, 120, 0, 0.3)",
-                            color: "#ff7800",
-                            height: "36px",
-                            padding: "0 0.85rem",
-                            borderRadius: "0.75rem",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "0.4rem",
-                            cursor: "pointer",
-                            fontSize: "0.75rem",
-                            fontWeight: 800,
-                          }}
-                        >
-                          Cerrar Inscripciones
-                        </button>
-                      )}
-                      {(tournament.status === "open" ||
-                        tournament.status === "closed") && (
-                        <button
-                          onClick={() => openPlayersModal(tournament)}
-                          style={{
-                            background: "rgba(255,255,255,0.08)",
-                            border: "1px solid rgba(255,255,255,0.15)",
-                            color: "#fff",
-                            height: "36px",
-                            padding: "0 0.85rem",
-                            borderRadius: "0.75rem",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "0.4rem",
-                            cursor: "pointer",
-                            fontSize: "0.75rem",
-                            fontWeight: 800,
-                          }}
-                        >
-                          Editar Jugadores
-                        </button>
-                      )}
-                      {tournament.status === "closed" && (
-                        <button
-                          onClick={() => {
-                            const enrolled = usedCodes[tournament.id]?.length || 0;
-                            const min = tournament.min_participants || 4;
-                            if (enrolled < min) {
-                              alert(`No se puede iniciar el torneo. Faltan jugadores. (Inscritos: ${enrolled}, Mínimo requerido: ${min})`);
-                              return;
-                            }
-                            openBracketModal(tournament);
-                          }}
-                          style={{
-                            background: "rgba(168, 85, 247, 0.2)",
-                            border: "1px solid rgba(168, 85, 247, 0.4)",
-                            color: "#a855f7",
-                            height: "36px",
-                            padding: "0 0.85rem",
-                            borderRadius: "0.75rem",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "0.4rem",
-                            cursor: "pointer",
-                            fontSize: "0.75rem",
-                            fontWeight: 800,
-                            boxShadow: "3px 3px 0 #000",
-                          }}
-                        >
-                          ▶ Iniciar con Bracket
-                        </button>
-                      )}
-                      <button
-                        onClick={() => {
-                          setFormTournament(tournament);
-                          setIsFormOpen(true);
-                        }}
-                        style={{
-                          background: "rgba(255,255,255,0.1)",
-                          border: "none",
-                          color: "#fff",
-                          width: "36px",
-                          height: "36px",
-                          borderRadius: "0.75rem",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          cursor: "pointer",
-                        }}
-                        title="Editar"
-                      >
-                        <Edit2 size={16} />
-                      </button>
-                      <button
-                        onClick={() => setDeleteConfirmId(tournament.id)}
-                        style={{
-                          background: "rgba(239, 68, 68, 0.2)",
-                          border: "none",
-                          color: "#ef4444",
-                          width: "36px",
-                          height: "36px",
-                          borderRadius: "0.75rem",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          cursor: "pointer",
-                        }}
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Stats */}
-                  <div
-                    style={{
-                      fontSize: "0.85rem",
-                      opacity: 0.7,
-                      display: "flex",
-                      gap: "1.5rem",
-                      flexWrap: "wrap",
-                      marginTop: "0.5rem",
-                    }}
-                  >
-                    <span>
-                      Inicio:{" "}
-                      <strong>{formatDate(tournament.start_time)}</strong>
-                    </span>
-                    <span>
-                      Organizador: <strong>{tournament.organizer}</strong>
-                    </span>
-                    <span>
-                      Cupos:{" "}
-                      <strong>
-                        {usedCodes[tournament.id]?.length || 0} /{" "}
-                        {tournament.max_participants}
-                      </strong>
-                    </span>
-                    <span>
-                      Premio:{" "}
-                      <strong>
-                        {formatTournamentPrizes(tournament.prize)}
-                      </strong>
-                    </span>
-                    <span>
-                      Visibilidad:{" "}
-                      <strong>
-                        {tournament.visibility === "public"
-                          ? "Público"
-                          : tournament.visibility === "unlisted"
-                            ? "No Listado"
-                            : "Privado"}
-                      </strong>
-                    </span>
-                  </div>
-
-                  {/* Codes */}
-                  <div
-                    style={{
-                      marginTop: "0.5rem",
-                      background: "rgba(0,0,0,0.2)",
-                      padding: "1rem",
-                      borderRadius: "1rem",
-                    }}
-                  >
-                    <div
-                      style={{
-                        fontSize: "0.85rem",
-                        fontWeight: 800,
-                        marginBottom: "0.5rem",
-                        color: "#ff7800",
-                      }}
-                    >
-                      Códigos de Acceso (
-                      {tournament.code_type === "single"
-                        ? "General"
-                        : "Individuales"}
-                      )
-                    </div>
-                    {tournament.code_type === "single" ? (
-                      <div
-                        style={{
-                          display: "flex",
-                          gap: "0.5rem",
-                          alignItems: "center",
-                        }}
-                      >
-                        <span
-                          style={{
-                            fontSize: "1.25rem",
-                            fontWeight: 900,
-                            letterSpacing: "2px",
-                            fontFamily: "monospace",
-                          }}
-                        >
-                          {tournament.codes?.[0] || "N/A"}
-                        </span>
-                      </div>
-                    ) : (
-                      <div
-                        style={{
-                          display: "flex",
-                          gap: "0.5rem",
-                          flexWrap: "wrap",
-                        }}
-                      >
-                        {tournament.codes?.map((code: string, idx: number) => {
-                          const usedEntry = usedCodes[tournament.id]?.find(
-                            (e) => e.code === code,
-                          );
-                          const isUsed = !!usedEntry;
-                          return (
-                            <div
-                              key={idx}
-                              style={{
-                                background: "rgba(255,255,255,0.05)",
-                                padding: "0.4rem 0.8rem",
-                                borderRadius: "0.5rem",
-                                fontSize: "0.9rem",
-                                fontFamily: "monospace",
-                                border: isUsed
-                                  ? "1px solid rgba(16, 185, 129, 0.5)"
-                                  : "1px solid rgba(255,255,255,0.1)",
-                                color: isUsed ? "#10b981" : "#fff",
-                                display: "flex",
-                                flexDirection: "column",
-                                alignItems: "flex-start",
-                                gap: "0.2rem",
-                              }}
-                            >
-                              <span
-                                style={{
-                                  display: "flex",
-                                  alignItems: "center",
-                                  gap: "0.4rem",
-                                }}
-                              >
-                                {code}
-                                {isUsed && (
-                                  <CheckCircle2 size={14} color="#10b981" />
-                                )}
-                              </span>
-                              {isUsed && usedEntry.userId && (
-                                <span
-                                  style={{
-                                    fontSize: "0.65rem",
-                                    opacity: 0.6,
-                                    letterSpacing: "0",
-                                    maxWidth: "130px",
-                                    overflow: "hidden",
-                                    textOverflow: "ellipsis",
-                                    whiteSpace: "nowrap",
-                                  }}
-                                >
-                                  {usedEntry.userId}
-                                </span>
-                              )}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
+          <TournamentsTab
+            tournaments={tournaments}
+            usedCodes={usedCodes}
+            formatDate={formatDate}
+            setFormTournament={setFormTournament}
+            setIsFormOpen={setIsFormOpen}
+            setDeleteConfirmId={setDeleteConfirmId}
+            handleApproveTournament={handleApproveTournament}
+          />
         ) : activeTab === "applications" ? (
-          <div
-            style={{ display: "flex", flexDirection: "column", gap: "2rem" }}
-          >
-            {/* SECTION: SOLICITUDES PENDIENTES */}
-            <div
-              style={{
-                background: "rgba(255, 255, 255, 0.03)",
-                padding: "1.5rem",
-                borderRadius: "1.5rem",
-              }}
-            >
-              <h3
-                style={{
-                  fontSize: "1.2rem",
-                  margin: "0 0 1rem 0",
-                  color: "#ff7800",
-                }}
-              >
-                Solicitudes Pendientes
-              </h3>
-              <div style={{ display: "grid", gap: "1rem" }}>
-                {applications
-                  .filter((app) => app.status === "pending")
-                  .map((app) => (
-                    <div
-                      key={app.id}
-                      style={{
-                        background: "rgba(255, 255, 255, 0.03)",
-                        border: "1px solid rgba(255, 255, 255, 0.1)",
-                        borderRadius: "1.5rem",
-                        padding: "1.5rem",
-                        display: "flex",
-                        flexWrap: "wrap",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        gap: "1rem",
-                      }}
-                    >
-                      <div>
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "0.75rem",
-                            marginBottom: "0.5rem",
-                          }}
-                        >
-                          <span
-                            style={{
-                              background: "rgba(245, 158, 11, 0.2)",
-                              color: "#f59e0b",
-                              padding: "0.25rem 0.75rem",
-                              borderRadius: "0.5rem",
-                              fontSize: "0.7rem",
-                              fontWeight: 900,
-                              textTransform: "uppercase",
-                            }}
-                          >
-                            Pendiente
-                          </span>
-                          <h3
-                            style={{
-                              margin: 0,
-                              fontSize: "1.2rem",
-                              color: "#fff",
-                            }}
-                          >
-                            {app.channel_name}
-                          </h3>
-                        </div>
-                        <div
-                          style={{
-                            fontSize: "0.85rem",
-                            opacity: 0.7,
-                            display: "flex",
-                            gap: "1.5rem",
-                            flexWrap: "wrap",
-                            flexDirection: "column",
-                          }}
-                        >
-                          <span>
-                            Email: <strong>{app.email}</strong>
-                          </span>
-                          {app.social_link && (
-                            <span>
-                              Red Social:{" "}
-                              <a
-                                href={
-                                  app.social_link.startsWith("http")
-                                    ? app.social_link
-                                    : `https://${app.social_link}`
-                                }
-                                target="_blank"
-                                rel="noreferrer"
-                                style={{ color: "#00f2ff" }}
-                              >
-                                {app.social_link}
-                              </a>
-                            </span>
-                          )}
-                          {app.streaming_link && (
-                            <span>
-                              Streaming:{" "}
-                              <a
-                                href={
-                                  app.streaming_link.startsWith("http")
-                                    ? app.streaming_link
-                                    : `https://${app.streaming_link}`
-                                }
-                                target="_blank"
-                                rel="noreferrer"
-                                style={{ color: "#a855f7" }}
-                              >
-                                {app.streaming_link}
-                              </a>
-                            </span>
-                          )}
-                          <span>
-                            Fecha: <strong>{formatDate(app.created_at)}</strong>
-                          </span>
-                          {app.motivation && (
-                            <span style={{ marginTop: "0.25rem", borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: "0.5rem" }}>
-                              Motivación: <strong style={{ fontStyle: "italic", opacity: 0.9 }}>"{app.motivation}"</strong>
-                            </span>
-                          )}
-                        </div>
-                      </div>
-
-                      <div style={{ display: "flex", gap: "0.75rem" }}>
-                        <button
-                          onClick={() =>
-                            handleApplicationStatus(app.id, "approved")
-                          }
-                          style={{
-                            background: "rgba(16, 185, 129, 0.2)",
-                            border: "1px solid rgba(16, 185, 129, 0.5)",
-                            color: "#10b981",
-                            width: "40px",
-                            height: "40px",
-                            borderRadius: "0.75rem",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            cursor: "pointer",
-                          }}
-                          title="Aprobar"
-                        >
-                          <Check size={18} />
-                        </button>
-                        <button
-                          onClick={() =>
-                            handleApplicationStatus(app.id, "rejected")
-                          }
-                          style={{
-                            background: "rgba(239, 68, 68, 0.2)",
-                            border: "1px solid rgba(239, 68, 68, 0.5)",
-                            color: "#ef4444",
-                            width: "40px",
-                            height: "40px",
-                            borderRadius: "0.75rem",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            cursor: "pointer",
-                          }}
-                          title="Rechazar"
-                        >
-                          <X size={18} />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                {applications.filter((app) => app.status === "pending")
-                  .length === 0 && (
-                  <div
-                    style={{
-                      textAlign: "center",
-                      padding: "1.5rem 0",
-                      opacity: 0.5,
-                    }}
-                  >
-                    No hay solicitudes pendientes.
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* SECTION: CREADORES ACTUALES */}
-            <div
-              style={{
-                background: "rgba(255, 255, 255, 0.03)",
-                padding: "1.5rem",
-                borderRadius: "1.5rem",
-                marginTop: "2rem",
-              }}
-            >
-              <h3
-                style={{
-                  fontSize: "1.2rem",
-                  margin: "0 0 1rem 0",
-                  color: "#ff7800",
-                }}
-              >
-                Creadores Actuales
-              </h3>
-              <div style={{ display: "grid", gap: "1rem" }}>
-                {applications
-                  .filter((app) => app.status === "approved")
-                  .map((app) => (
-                    <div
-                      key={app.id}
-                      style={{
-                        background: "rgba(255, 255, 255, 0.03)",
-                        border: "1px solid rgba(16, 185, 129, 0.3)",
-                        borderRadius: "1.5rem",
-                        padding: "1.5rem",
-                        display: "flex",
-                        flexWrap: "wrap",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        gap: "1rem",
-                      }}
-                    >
-                      <div>
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "0.75rem",
-                            marginBottom: "0.5rem",
-                          }}
-                        >
-                          <span
-                            style={{
-                              background: "rgba(16, 185, 129, 0.2)",
-                              color: "#10b981",
-                              padding: "0.25rem 0.75rem",
-                              borderRadius: "0.5rem",
-                              fontSize: "0.7rem",
-                              fontWeight: 900,
-                              textTransform: "uppercase",
-                            }}
-                          >
-                            Aprobado
-                          </span>
-                          <h3
-                            style={{
-                              margin: 0,
-                              fontSize: "1.2rem",
-                              color: "#fff",
-                            }}
-                          >
-                            {app.channel_name}
-                          </h3>
-                        </div>
-                        <div
-                          style={{
-                            fontSize: "0.85rem",
-                            opacity: 0.7,
-                            display: "flex",
-                            gap: "1.5rem",
-                            flexWrap: "wrap",
-                            flexDirection: "column",
-                          }}
-                        >
-                          <span>
-                            Email: <strong>{app.email}</strong>
-                          </span>
-                          {app.social_link && (
-                            <span>
-                              Red Social:{" "}
-                              <a
-                                href={
-                                  app.social_link.startsWith("http")
-                                    ? app.social_link
-                                    : `https://${app.social_link}`
-                                }
-                                target="_blank"
-                                rel="noreferrer"
-                                style={{ color: "#00f2ff" }}
-                              >
-                                {app.social_link}
-                              </a>
-                            </span>
-                          )}
-                          {app.streaming_link && (
-                            <span>
-                              Streaming:{" "}
-                              <a
-                                href={
-                                  app.streaming_link.startsWith("http")
-                                    ? app.streaming_link
-                                    : `https://${app.streaming_link}`
-                                }
-                                target="_blank"
-                                rel="noreferrer"
-                                style={{ color: "#a855f7" }}
-                              >
-                                {app.streaming_link}
-                              </a>
-                            </span>
-                          )}
-                          <span>
-                            Fecha: <strong>{formatDate(app.created_at)}</strong>
-                          </span>
-                          {app.motivation && (
-                            <span style={{ marginTop: "0.25rem", borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: "0.5rem" }}>
-                              Motivación: <strong style={{ fontStyle: "italic", opacity: 0.9 }}>"{app.motivation}"</strong>
-                            </span>
-                          )}
-                        </div>
-                      </div>
-
-                      <div style={{ display: "flex", gap: "0.75rem" }}>
-                        <button
-                          onClick={() => {
-                            setEditingCreator(app);
-                            setIsCreatorProfileModalOpen(true);
-                          }}
-                          style={{
-                            background: "rgba(168, 85, 247, 0.2)",
-                            border: "1px solid rgba(168, 85, 247, 0.5)",
-                            color: "#a855f7",
-                            height: "40px",
-                            padding: "0 1rem",
-                            borderRadius: "0.75rem",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "0.5rem",
-                            cursor: "pointer",
-                            fontWeight: 800,
-                          }}
-                          title="Editar Perfil"
-                        >
-                          <Edit2 size={16} /> Editar Perfil
-                        </button>
-                        <button
-                          onClick={() =>
-                            handleApplicationStatus(app.id, "rejected")
-                          }
-                          style={{
-                            background: "rgba(239, 68, 68, 0.2)",
-                            border: "1px solid rgba(239, 68, 68, 0.5)",
-                            color: "#ef4444",
-                            height: "40px",
-                            padding: "0 1rem",
-                            borderRadius: "0.75rem",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "0.5rem",
-                            cursor: "pointer",
-                            fontWeight: 800,
-                          }}
-                          title="Revocar Acceso"
-                        >
-                          <X size={16} /> Revocar Acceso
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                {applications.filter((app) => app.status === "approved")
-                  .length === 0 && (
-                  <div
-                    style={{
-                      textAlign: "center",
-                      padding: "1.5rem 0",
-                      opacity: 0.5,
-                    }}
-                  >
-                    No hay creadores aprobados.
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
+          <ApplicationsTab
+            applications={applications}
+            formatDate={formatDate}
+            handleApplicationStatus={handleApplicationStatus}
+            setEditingCreator={setEditingCreator}
+            setIsCreatorProfileModalOpen={setIsCreatorProfileModalOpen}
+          />
         ) : activeTab === "suggestions" || activeTab === "support" ? (
-          <div style={{ display: "grid", gap: "1rem" }}>
-            {tickets.filter(
-              (t) =>
-                t.type ===
-                (activeTab === "suggestions" ? "suggestion" : "support"),
-            ).length === 0 ? (
-              <div
-                style={{ textAlign: "center", padding: "2rem 0", opacity: 0.5 }}
-              >
-                No hay{" "}
-                {activeTab === "suggestions"
-                  ? "sugerencias"
-                  : "tickets de soporte"}
-                .
-              </div>
-            ) : (
-              tickets
-                .filter(
-                  (t) =>
-                    t.type ===
-                    (activeTab === "suggestions" ? "suggestion" : "support"),
-                )
-                .map((ticket) => (
-                  <div
-                    key={ticket.id}
-                    style={{
-                      background: "rgba(255, 255, 255, 0.03)",
-                      border: "1px solid rgba(255, 255, 255, 0.1)",
-                      borderRadius: "1.5rem",
-                      padding: "1.5rem",
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: "1rem",
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "flex-start",
-                        flexWrap: "wrap",
-                        gap: "1rem",
-                      }}
-                    >
-                      <div>
-                        <div
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "0.75rem",
-                            marginBottom: "0.5rem",
-                          }}
-                        >
-                          <span
-                            style={{
-                              background:
-                                ticket.status === "open"
-                                  ? "rgba(239, 68, 68, 0.2)"
-                                  : "rgba(16, 185, 129, 0.2)",
-                              color:
-                                ticket.status === "open"
-                                  ? "#ef4444"
-                                  : "#10b981",
-                              padding: "0.25rem 0.75rem",
-                              borderRadius: "0.5rem",
-                              fontSize: "0.7rem",
-                              fontWeight: 900,
-                              textTransform: "uppercase",
-                            }}
-                          >
-                            {ticket.status === "open" ? "Abierto" : "Cerrado"}
-                          </span>
-                          <h3
-                            style={{
-                              margin: 0,
-                              fontSize: "1.1rem",
-                              color: "#fff",
-                            }}
-                          >
-                            {ticket.subject}
-                          </h3>
-                        </div>
-                        <div
-                          style={{
-                            fontSize: "0.8rem",
-                            opacity: 0.6,
-                            display: "flex",
-                            gap: "1rem",
-                          }}
-                        >
-                          <span>
-                            Usuario ID: <strong>{ticket.user_id}</strong>
-                          </span>
-                          <span>
-                            Fecha:{" "}
-                            <strong>{formatDate(ticket.created_at)}</strong>
-                          </span>
-                        </div>
-                      </div>
-
-                      <div style={{ display: "flex", gap: "0.75rem" }}>
-                        <button
-                          onClick={() =>
-                            handleTicketStatus(ticket.id, "closed")
-                          }
-                          disabled={ticket.status === "closed"}
-                          style={{
-                            background:
-                              ticket.status === "closed"
-                                ? "rgba(16, 185, 129, 0.1)"
-                                : "rgba(16, 185, 129, 0.2)",
-                            border: "1px solid rgba(16, 185, 129, 0.5)",
-                            color: "#10b981",
-                            height: "40px",
-                            padding: "0 1rem",
-                            borderRadius: "0.75rem",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "0.5rem",
-                            cursor:
-                              ticket.status === "closed"
-                                ? "not-allowed"
-                                : "pointer",
-                            fontWeight: 800,
-                            opacity: ticket.status === "closed" ? 0.5 : 1,
-                          }}
-                          title="Marcar como Resuelto/Cerrado"
-                        >
-                          <Check size={16} /> Cerrar
-                        </button>
-                        {ticket.status === "closed" && (
-                          <button
-                            onClick={() =>
-                              handleTicketStatus(ticket.id, "open")
-                            }
-                            style={{
-                              background: "rgba(239, 68, 68, 0.2)",
-                              border: "1px solid rgba(239, 68, 68, 0.5)",
-                              color: "#ef4444",
-                              height: "40px",
-                              padding: "0 1rem",
-                              borderRadius: "0.75rem",
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "0.5rem",
-                              cursor: "pointer",
-                              fontWeight: 800,
-                            }}
-                            title="Reabrir"
-                          >
-                            Reabrir
-                          </button>
-                        )}
-                      </div>
-                    </div>
-
-                    <div
-                      style={{
-                        background: "rgba(0,0,0,0.3)",
-                        padding: "1rem",
-                        borderRadius: "1rem",
-                        fontSize: "0.9rem",
-                        lineHeight: "1.5",
-                        color: "rgba(255,255,255,0.9)",
-                        whiteSpace: "pre-wrap",
-                      }}
-                    >
-                      {ticket.message}
-                    </div>
-                  </div>
-                ))
-            )}
-          </div>
+          <TicketsTab
+            tickets={tickets}
+            activeTab={activeTab}
+            profiles={profiles}
+            formatDate={formatDate}
+            handleTicketStatus={handleTicketStatus}
+            handleDeleteTicket={handleDeleteTicket}
+          />
         ) : null}
 
         {/* DETAILED LOG MODAL */}
@@ -2579,21 +1348,7 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
         creator={editingCreator}
         onSuccess={fetchGlobalData}
       />
-      <TournamentPlayersModal
-        isOpen={!!playersModalTournament}
-        onClose={() => setPlayersModalTournament(null)}
-        tournament={playersModalTournament}
-        registrations={playersModalRegs}
-        onSuccess={fetchGlobalData}
-      />
 
-      <TournamentBracketModal
-        isOpen={!!bracketModalTournament}
-        onClose={() => setBracketModalTournament(null)}
-        tournament={bracketModalTournament}
-        registrations={bracketModalRegs}
-        onSuccess={fetchGlobalData}
-      />
       <UserStarsModal
         isOpen={!!selectedUserStars}
         onClose={() => setSelectedUserStars(null)}

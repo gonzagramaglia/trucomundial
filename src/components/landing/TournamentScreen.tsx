@@ -117,6 +117,7 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({
         const { data, error } = await supabase
           .from("tournaments")
           .select("*")
+          .eq("is_approved", true)
           .order("created_at", { ascending: false });
 
         if (error) {
