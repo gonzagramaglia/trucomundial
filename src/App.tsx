@@ -325,7 +325,8 @@ function App() {
           date: new Date().toISOString(),
           log: core.matchLog,
         };
-        await saveMatchLogByCode(currentRoomCode, summary);
+        const winnerId = core.winnerModal === "player" ? userId : undefined;
+        await saveMatchLogByCode(currentRoomCode, summary, winnerId);
         console.log("Saved tournament match log for code", currentRoomCode);
       } catch (err) {
         console.error("Failed saving tournament match log:", err);

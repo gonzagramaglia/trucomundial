@@ -7,6 +7,8 @@ import { InlineBracketManager } from "./TournamentBracketManager";
 import { normalizeTournamentPrizes } from "../../../lib/formatters";
 import TournamentDetails from "./TournamentDetails";
 import EnrollmentModal from "./EnrollmentModal";
+import { ActivePlayerMatch } from "./ActivePlayerMatch";
+import { TournamentMatchHistory } from "./TournamentMatchHistory";
 import { TwitchButton } from "../../shared/TwitchButton";
 import type { Tournament } from "./types";
 
@@ -46,6 +48,9 @@ const TournamentEventPage: React.FC<Props> = ({ user, handleAuth, onBack, onPlay
   const [showUnenrollModal, setShowUnenrollModal] = useState(false);
   const [unenrolling, setUnenrolling] = useState(false);
   const [unenrollError, setUnenrollError] = useState("");
+
+  // Player waiting state
+  const [waitingMatchId, setWaitingMatchId] = useState<string | null>(null);
 
   // Organizer auth state
   const [isCreatorOrAdmin, setIsCreatorOrAdmin] = useState(false);
@@ -322,7 +327,7 @@ const TournamentEventPage: React.FC<Props> = ({ user, handleAuth, onBack, onPlay
     if (!pId) return "BYE (Pasa libre)";
     if (user && pId === user.id) {
       const myName = nameMap[pId] || user.user_metadata?.custom_username || user.email?.split("@")[0] || "Usuario";
-      return `${myName} (vos)`;
+      return `${myName}`;
     }
     return nameMap[pId] || `Jugador ${pId.slice(0, 5)}`;
   };
@@ -353,30 +358,46 @@ const TournamentEventPage: React.FC<Props> = ({ user, handleAuth, onBack, onPlay
     }
 
     if (user && (m.player_a_id === user.id || m.player_b_id === user.id)) {
+      const isHost = m.player_a_id === user.id;
+      const rivalId = isHost ? m.player_b_id : m.player_a_id;
+      const rivalName = formatPlayerName(rivalId);
+      const isWaiting = waitingMatchId === m.id;
+
       return (
-        <button
-          onClick={() => {
-            const isHost = m.player_a_id === user.id;
-            onPlayMatch?.(m.match_code, isHost);
-          }}
-          className="btn-hover-dark"
-          style={{
-            marginTop: "0.4rem",
-            padding: "0.4rem 0",
-            background: "#ff7800",
-            color: "#000",
-            border: "none",
-            borderRadius: "0.5rem",
-            fontWeight: 900,
-            cursor: "pointer",
-            fontSize: "0.8rem",
-            boxShadow: "2px 2px 0px #000",
-            width: "100%",
-            textAlign: "center"
-          }}
-        >
-          Jugar Partida
-        </button>
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+          {tournament?.status === "active" && (
+            <div style={{ fontSize: "0.7rem", color: "#a855f7", textAlign: "right", marginTop: "0.2rem", fontWeight: 700 }}>
+              ⏱ 05:00
+            </div>
+          )}
+          <button
+            disabled={isWaiting}
+            onClick={() => {
+              setWaitingMatchId(m.id);
+              setTimeout(() => {
+                onPlayMatch?.(m.match_code, isHost);
+              }, 600);
+            }}
+            className={!isWaiting ? "btn-hover-dark" : ""}
+            style={{
+              marginTop: "0.2rem",
+              padding: "0.5rem 0",
+              background: isWaiting ? "rgba(255, 120, 0, 0.2)" : "#ff7800",
+              color: isWaiting ? "rgba(255, 255, 255, 0.7)" : "#000",
+              border: isWaiting ? "1px solid rgba(255, 120, 0, 0.5)" : "none",
+              borderRadius: "0.5rem",
+              fontWeight: 900,
+              cursor: isWaiting ? "not-allowed" : "pointer",
+              fontSize: "0.8rem",
+              boxShadow: isWaiting ? "none" : "2px 2px 0px #000",
+              width: "100%",
+              textAlign: "center",
+              transition: "all 0.2s"
+            }}
+          >
+            {isWaiting ? `Esperando a ${rivalName}...` : `Jugar contra ${rivalName}`}
+          </button>
+        </div>
       );
     }
 
@@ -693,7 +714,7 @@ const TournamentEventPage: React.FC<Props> = ({ user, handleAuth, onBack, onPlay
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+          gridTemplateColumns: isMobile ? "1fr" : "350px 1fr",
           gap: "2.5rem",
           width: "100%",
         }}
@@ -739,7 +760,7 @@ const TournamentEventPage: React.FC<Props> = ({ user, handleAuth, onBack, onPlay
           {/* Enroll / Inscripto Button */}
           {!isRegistered && (
             <div style={{ marginTop: "0.5rem", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-              <div style={{ display: "flex", gap: "0.5rem", flexDirection: isMobile ? "column" : "row" }}>
+              <div style={{ display: "flex", gap: "0.5rem", flexDirection: "column" }}>
                 {tournament.code_type && tournament.code_type !== "none" && (
                   <input
                     type="text"
@@ -926,7 +947,16 @@ const TournamentEventPage: React.FC<Props> = ({ user, handleAuth, onBack, onPlay
                 alignItems: "stretch",
               }}
             >
-              {roundsArray.map((roundNum) => {
+              {!isCreatorOrAdmin && tournament.status === "active" ? (
+                <div style={{ width: "100%" }}>
+                  <ActivePlayerMatch
+                    myCurrentMatch={matches.find(m => !m.ended_at && (m.player_a_id === user?.id || m.player_b_id === user?.id))}
+                    user={user}
+                    nameMap={nameMap}
+                    onPlayMatch={onPlayMatch}
+                  />
+                </div>
+              ) : roundsArray.map((roundNum) => {
                 const roundMatches = matches
                   .filter((m) => m.round === roundNum)
                   .sort((a, b) => a.match_position - b.match_position);
@@ -1045,6 +1075,12 @@ const TournamentEventPage: React.FC<Props> = ({ user, handleAuth, onBack, onPlay
         </div>
       </div>
 
+      {tournament.status !== "open" && (
+        <TournamentMatchHistory
+          finishedMatches={matches.filter(m => m.ended_at)}
+          nameMap={nameMap}
+        />
+      )}
 
       <EnrollmentModal
         enrollModalTournament={enrollModalTournament}

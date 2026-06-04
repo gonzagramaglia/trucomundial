@@ -49,7 +49,7 @@ interface Tournament {
 }
 
 const MOCK_RANKING = [
-  { id: 1, name: "TimPayne", score: 2500, position: 1 },
+  { id: 1, name: "TimPayne", score: 1300, position: 1 },
 ];
 
 export const TournamentScreen: React.FC<TournamentScreenProps> = ({
@@ -1610,10 +1610,10 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({
                 }}
               >
                 {[
-                  { torneo: "Copa de Campeones 2026", puesto: "1º (Campeón 🏆)", puntos: "+1000 PTS", fecha: "15/05/2026" },
-                  { torneo: "Mundial de Creadores", puesto: "2º (Subcampeón 🥈)", puntos: "+750 PTS", fecha: "02/05/2026" },
-                  { torneo: "Torneo Apertura Truco", puesto: "3º-4º (Semifinal)", puntos: "+500 PTS", fecha: "18/04/2026" },
-                  { torneo: "Desafío de Estrellas", puesto: "Octavos de Final", puntos: "+250 PTS", fecha: "05/04/2026" }
+                  { torneo: "Copa de Campeones 2026", puesto: "1º (Campeón 🏆)", puntos: "+500 PTS", fecha: "15/05/2026" },
+                  { torneo: "Mundial de Creadores", puesto: "2º (Subcampeón 🥈)", puntos: "+400 PTS", fecha: "02/05/2026" },
+                  { torneo: "Torneo Apertura Truco", puesto: "3º-4º (Semifinal)", puntos: "+300 PTS", fecha: "18/04/2026" },
+                  { torneo: "Desafío de Estrellas", puesto: "Octavos de Final", puntos: "+100 PTS", fecha: "05/04/2026" }
                 ].map((p, idx) => (
                   <div
                     key={idx}

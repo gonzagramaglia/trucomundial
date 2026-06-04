@@ -180,8 +180,8 @@ const TournamentDetails: React.FC<Props> = ({
                       }}
                     >
                       <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "160px" }}>
-                        {isMe 
-                          ? `${nameMap[r.user_id] || user.user_metadata?.full_name?.split(" ")[0] || user.email?.split("@")[0] || "Usuario"} (vos)` 
+                        {r.user_id === user?.id 
+                          ? `${nameMap[r.user_id] || user.user_metadata?.full_name?.split(" ")[0] || user.email?.split("@")[0] || "Usuario"}` 
                           : (nameMap[r.user_id] || `Jugador ${r.user_id.slice(0, 5)}`)}
                       </span>
                       {isMe && <Check size={18} strokeWidth={3} style={{ color: "#10b981", flexShrink: 0 }} />}

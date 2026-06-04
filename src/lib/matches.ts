@@ -16,6 +16,9 @@ export type MatchRow = {
   match_code?: string;
   player_a_id?: string | null;
   player_b_id?: string | null;
+  winner_id?: string | null;
+  ended_at?: string | null;
+  log?: any;
 };
 
 export async function generateMatchCodes(
@@ -47,12 +50,86 @@ export async function saveMatchLog(matchId: string, log: unknown) {
   return data;
 }
 
-export async function saveMatchLogByCode(matchCode: string, log: unknown) {
+export async function saveMatchLogByCode(matchCode: string, log: unknown, winnerId?: string) {
+  const { data: currentMatch, error: fetchError } = await supabase
+    .from("tournament_matches")
+    .select("*")
+    .eq("match_code", matchCode)
+    .single();
+
+  if (fetchError || !currentMatch) {
+    console.error("Match not found for code", matchCode);
+    return null;
+  }
+
+  // Update current match
+  const updatePayload: any = { log, ended_at: new Date().toISOString() };
+  if (winnerId) {
+    updatePayload.winner_id = winnerId;
+  }
+
   const { data, error } = await supabase
     .from("tournament_matches")
-    .update({ log: log, ended_at: new Date().toISOString() })
-    .eq("match_code", matchCode);
+    .update(updatePayload)
+    .eq("id", currentMatch.id)
+    .select()
+    .single();
+
   if (error) throw error;
+
+  // Auto-advance logic
+  if (winnerId) {
+    const nextRound = currentMatch.round + 1;
+    const nextPosition = Math.floor(currentMatch.match_position / 2);
+
+    const { data: nextMatch } = await supabase
+      .from("tournament_matches")
+      .select("id, player_a_id, player_b_id")
+      .eq("tournament_id", currentMatch.tournament_id)
+      .eq("round", nextRound)
+      .eq("match_position", nextPosition)
+      .single();
+
+    if (nextMatch) {
+      const isPlayerA = currentMatch.match_position % 2 === 0;
+      const advancePayload = isPlayerA
+        ? { player_a_id: winnerId }
+        : { player_b_id: winnerId };
+      
+      await supabase
+        .from("tournament_matches")
+        .update(advancePayload)
+        .eq("id", nextMatch.id);
+    }
+  }
+
+  // Insert to global history for Admin View
+  try {
+    const { data: tournamentData } = await supabase
+      .from("tournaments")
+      .select("name")
+      .eq("id", currentMatch.tournament_id)
+      .single();
+
+    const extendedLog: any = {
+      ...(log as object),
+      tournamentId: currentMatch.tournament_id,
+      tournamentName: tournamentData?.name || "Torneo",
+      isTournament: true
+    };
+
+    if (winnerId) {
+      // Only the winner saves the global history so we don't get duplicates
+      await supabase.from("game_sync").upsert({
+        match_id: `user_history_${winnerId}_${matchCode}`,
+        last_move: extendedLog,
+        updated_at: new Date().toISOString(),
+      });
+    }
+  } catch (err) {
+    console.error("Failed to save global tournament history", err);
+  }
+
   return data;
 }
 

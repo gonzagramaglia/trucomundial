@@ -50,6 +50,9 @@ interface MatchSummary {
   winner: "player" | "cpu";
   date: string;
   log: string[];
+  isTournament?: boolean;
+  tournamentId?: string;
+  tournamentName?: string;
 }
 
 interface PlayerStats {
@@ -181,6 +184,9 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
               winner: summary.winner || "cpu",
               date: summary.date || item.updated_at,
               log: summary.log || [],
+              isTournament: summary.isTournament,
+              tournamentId: summary.tournamentId,
+              tournamentName: summary.tournamentName,
             };
           })
           .sort(
@@ -1370,6 +1376,26 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
                     >
                       Match: {match.match_id}
                     </div>
+                    {match.isTournament && (
+                      <div
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "0.3rem",
+                          background: "rgba(255, 120, 0, 0.15)",
+                          border: "1px solid rgba(255, 120, 0, 0.3)",
+                          color: "#ff7800",
+                          padding: "0.2rem 0.6rem",
+                          borderRadius: "0.4rem",
+                          fontSize: "0.65rem",
+                          fontWeight: 800,
+                          textTransform: "uppercase",
+                          marginBottom: "0.5rem"
+                        }}
+                      >
+                        <Trophy size={10} /> Torneo: {match.tournamentName}
+                      </div>
+                    )}
                     <div
                       style={{
                         display: "flex",
