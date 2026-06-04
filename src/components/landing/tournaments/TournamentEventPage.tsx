@@ -327,7 +327,7 @@ const TournamentEventPage: React.FC<Props> = ({ user, handleAuth, onBack, onPlay
   const formatPlayerName = (pId: string | null) => {
     if (!pId) return "BYE (Pasa libre)";
     if (user && pId === user.id) {
-      const myName = user.user_metadata?.custom_username || nameMap[pId] || user.email?.split("@")[0] || "Usuario";
+      const myName = user.user_metadata?.custom_username || user.email?.split("@")[0] || "Usuario";
       return `${myName}`;
     }
     return nameMap[pId] || `Jugador ${pId.slice(0, 5)}`;

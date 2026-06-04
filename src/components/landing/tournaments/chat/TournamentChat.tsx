@@ -25,10 +25,12 @@ export const TournamentChat: React.FC<TournamentChatProps> = ({
   const [messages, setMessages] = useState<ChatMessageType[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [sending, setSending] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+    }
   };
 
   useEffect(() => {
@@ -95,7 +97,7 @@ export const TournamentChat: React.FC<TournamentChatProps> = ({
   const formatPlayerName = (pId: string | null) => {
     if (!pId) return "Usuario";
     if (user && pId === user.id) {
-      return user.user_metadata?.custom_username || nameMap[pId] || user.email?.split("@")[0] || "Usuario";
+      return user.user_metadata?.custom_username || user.email?.split("@")[0] || "Usuario";
     }
     return nameMap[pId] || `Jugador ${pId.slice(0, 5)}`;
   };
@@ -131,6 +133,7 @@ export const TournamentChat: React.FC<TournamentChatProps> = ({
       </div>
 
       <div
+        ref={messagesContainerRef}
         style={{
           flex: 1,
           overflowY: "auto",
@@ -165,7 +168,6 @@ export const TournamentChat: React.FC<TournamentChatProps> = ({
             />
           ))
         )}
-        <div ref={messagesEndRef} />
       </div>
 
       <ChatInput
