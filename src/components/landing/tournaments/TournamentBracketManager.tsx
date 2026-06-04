@@ -78,10 +78,6 @@ const buildBracket = (slots: BracketSlot[]): BracketSlot[][] => {
   return rounds;
 };
 
-const seedLabel = (userId: string | null) => {
-  if (!userId) return "BYE";
-  return userId.slice(0, 10) + "…";
-};
 
 export const InlineBracketManager: React.FC<InlineBracketManagerProps> = ({
   tournament,
@@ -216,7 +212,7 @@ export const InlineBracketManager: React.FC<InlineBracketManagerProps> = ({
         background: "rgba(14, 10, 24, 0.4)",
         border: "1px dashed rgba(168, 85, 247, 0.3)",
         borderRadius: "1.5rem",
-        padding: "2rem",
+        padding: typeof window !== 'undefined' && window.innerWidth < 768 ? "1rem" : "2rem",
         width: "100%",
         display: "flex",
         flexDirection: "column",
@@ -462,10 +458,8 @@ export const InlineBracketManager: React.FC<InlineBracketManagerProps> = ({
                                             whiteSpace: "nowrap",
                                           }}
                                         >
-                                          {isFirstRound
-                                            ? player.player_id
-                                              ? seedLabel(player.player_id)
-                                              : "BYE"
+                                          {isFirstRound && !player.player_id 
+                                            ? "BYE" 
                                             : player.player_label}
                                         </span>
                                       </div>

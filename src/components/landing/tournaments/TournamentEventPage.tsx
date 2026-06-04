@@ -724,13 +724,15 @@ const TournamentEventPage: React.FC<Props> = ({ user, handleAuth, onBack, onPlay
           style={{
             background: "rgba(30, 15, 50, 0.35)",
             border: "1px solid rgba(255, 255, 255, 0.08)",
-            borderRadius: "2.25rem",
-            padding: "2rem",
+            borderRadius: isMobile ? "1.5rem" : "2.25rem",
+            padding: isMobile ? "1.25rem" : "2rem",
             backdropFilter: "blur(8px)",
             display: "flex",
             flexDirection: "column",
             gap: "1.5rem",
             alignSelf: "start",
+            width: "100%",
+            boxSizing: "border-box"
           }}
         >
           <TournamentDetails
@@ -839,13 +841,16 @@ const TournamentEventPage: React.FC<Props> = ({ user, handleAuth, onBack, onPlay
           style={{
             background: "rgba(30, 15, 50, 0.35)",
             border: "1px solid rgba(255, 255, 255, 0.08)",
-            borderRadius: "2.25rem",
-            padding: "2rem",
+            borderRadius: isMobile ? "1.5rem" : "2.25rem",
+            padding: isMobile ? "1.25rem" : "2rem",
             backdropFilter: "blur(8px)",
             display: "flex",
             flexDirection: "column",
             gap: "1.5rem",
             minHeight: "400px",
+            width: "100%",
+            boxSizing: "border-box",
+            overflow: "hidden"
           }}
         >
           <h3
@@ -893,7 +898,7 @@ const TournamentEventPage: React.FC<Props> = ({ user, handleAuth, onBack, onPlay
                   opacity: 0.8,
                   fontSize: "0.95rem",
                   textAlign: "center",
-                  padding: "3rem 2rem",
+                  padding: isMobile ? "2rem 1rem" : "3rem 2rem",
                   border: "1px dashed rgba(255,255,255,0.15)",
                   borderRadius: "1.5rem",
                   lineHeight: 1.6,

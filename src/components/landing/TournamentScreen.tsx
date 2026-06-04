@@ -136,11 +136,39 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({
     .filter(t => registeredIds.includes(t.id) && new Date(t.start_time) > new Date())
     .sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime())[0];
 
-  const formatNextTournament = (dateStr?: string) => {
-    if (!dateStr) return "--:--:--";
-    const d = new Date(dateStr);
-    return d.toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit" }) + " " + d.toLocaleTimeString("es-AR", { hour: "2-digit", minute: "2-digit" });
-  };
+  const [nextTournamentCountdown, setNextTournamentCountdown] = useState("--:--:--");
+
+  useEffect(() => {
+    if (!upcomingTournament?.start_time) {
+      setNextTournamentCountdown("--:--:--");
+      return;
+    }
+
+    const updateCountdown = () => {
+      const now = new Date().getTime();
+      const target = new Date(upcomingTournament.start_time).getTime();
+      const diff = target - now;
+
+      if (diff <= 0) {
+        setNextTournamentCountdown("00:00:00");
+        return;
+      }
+
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+      const parts = [];
+      if (days > 0) parts.push(`${days}d`);
+      parts.push(`${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`);
+      setNextTournamentCountdown(parts.join(" "));
+    };
+
+    updateCountdown();
+    const interval = setInterval(updateCountdown, 1000);
+    return () => clearInterval(interval);
+  }, [upcomingTournament?.start_time]);
 
   useEffect(() => {
     const fetchTournaments = async () => {
@@ -766,7 +794,7 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({
                     marginTop: "0.3rem",
                   }}
                 >
-                  {formatNextTournament(upcomingTournament?.start_time)}
+                  {nextTournamentCountdown}
                 </div>
                 <div
                   style={{

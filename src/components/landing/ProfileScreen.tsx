@@ -106,6 +106,14 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, handleAuth, 
       });
       
       if (error) throw error;
+
+      // Sync with profiles table so other users see the updated username
+      if (user?.id) {
+        await supabase
+          .from("profiles")
+          .update({ username: newName.trim() })
+          .eq("id", user.id);
+      }
       
       setEditingName(false);
     } catch (err: any) {
