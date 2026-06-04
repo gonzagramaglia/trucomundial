@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { ArrowLeft, Trophy, Hourglass, Clock, LogOut, Lock } from "lucide-react";
+import { ArrowLeft, Clock, Trophy, Hourglass, LogOut, Lock } from "lucide-react";
 import { motion } from "framer-motion";
 import { supabase } from "../../../lib/supabase";
 import { getMatchesByTournament } from "../../../lib/matches";
+import { InlineBracketManager } from "./TournamentBracketManager";
 import { normalizeTournamentPrizes } from "../../../lib/formatters";
 import TournamentDetails from "./TournamentDetails";
 import EnrollmentModal from "./EnrollmentModal";
@@ -45,6 +46,38 @@ const TournamentEventPage: React.FC<Props> = ({ user, handleAuth, onBack, onPlay
   const [showUnenrollModal, setShowUnenrollModal] = useState(false);
   const [unenrolling, setUnenrolling] = useState(false);
   const [unenrollError, setUnenrollError] = useState("");
+
+  // Organizer auth state
+  const [isCreatorOrAdmin, setIsCreatorOrAdmin] = useState(false);
+
+  useEffect(() => {
+    const checkCreatorAuth = async () => {
+      if (!user) {
+        setIsCreatorOrAdmin(false);
+        return;
+      }
+      
+      const isSuperAdmin = ["gonzagramaglia@gmail.com", "ciberportero@gmail.com"].includes(user.email || "");
+      if (isSuperAdmin) {
+        setIsCreatorOrAdmin(true);
+        return;
+      }
+
+      try {
+        const { data } = await supabase
+          .from("creator_applications")
+          .select("id")
+          .eq("user_id", user.id)
+          .eq("status", "approved")
+          .single();
+        
+        setIsCreatorOrAdmin(!!data);
+      } catch (e) {
+        setIsCreatorOrAdmin(false);
+      }
+    };
+    checkCreatorAuth();
+  }, [user]);
 
   useEffect(() => {
     const path = typeof window !== "undefined" ? window.location.pathname : "";
@@ -207,9 +240,15 @@ const TournamentEventPage: React.FC<Props> = ({ user, handleAuth, onBack, onPlay
         return;
       }
 
+      const newCount = tournament.participants + 1;
+      await supabase
+        .from("tournaments")
+        .update({ participants: newCount })
+        .eq("id", tournament.id);
+
       // update participants locally (optimistic)
       setTournament((prev) =>
-        prev ? { ...prev, participants: prev.participants + 1 } : prev,
+        prev ? { ...prev, participants: newCount } : prev,
       );
       setRegistrations((p) => [
         ...p,
@@ -252,9 +291,15 @@ const TournamentEventPage: React.FC<Props> = ({ user, handleAuth, onBack, onPlay
         return;
       }
 
+      const newCount = Math.max(0, tournament.participants - 1);
+      await supabase
+        .from("tournaments")
+        .update({ participants: newCount })
+        .eq("id", tournament.id);
+
       // update locally (optimistic)
       setTournament((prev) =>
-        prev ? { ...prev, participants: Math.max(0, prev.participants - 1) } : prev,
+        prev ? { ...prev, participants: newCount } : prev,
       );
       setRegistrations((p) => p.filter((r) => r.user_id !== user.id));
       setShowUnenrollModal(false);
@@ -808,60 +853,69 @@ const TournamentEventPage: React.FC<Props> = ({ user, handleAuth, onBack, onPlay
           </div>
 
           {matches.length === 0 ? (
-            <div
-              style={{
-                flex: 1,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "1.2rem",
-                opacity: 0.8,
-                fontSize: "0.95rem",
-                textAlign: "center",
-                padding: "3rem 2rem",
-                border: "1px dashed rgba(255,255,255,0.15)",
-                borderRadius: "1.5rem",
-                lineHeight: 1.6,
-              }}
-            >
-              <motion.div
-                animate={{ rotate: 180 }}
-                transition={{
-                  repeat: Infinity,
-                  duration: 2.2,
-                  ease: "easeInOut",
-                  repeatDelay: 0.6
+            isCreatorOrAdmin ? (
+              <InlineBracketManager
+                tournament={tournament}
+                registrations={registrations}
+                nameMap={nameMap}
+                onSuccess={() => window.location.reload()}
+              />
+            ) : (
+              <div
+                style={{
+                  flex: 1,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "1.2rem",
+                  opacity: 0.8,
+                  fontSize: "0.95rem",
+                  textAlign: "center",
+                  padding: "3rem 2rem",
+                  border: "1px dashed rgba(255,255,255,0.15)",
+                  borderRadius: "1.5rem",
+                  lineHeight: 1.6,
                 }}
-                style={{ display: "inline-block", color: "#a855f7" }}
               >
-                <Hourglass size={44} strokeWidth={1.8} />
-              </motion.div>
-              <div style={{ opacity: 0.65 }}>
-                Esperando el inicio del torneo.<br />El organizador generará las llaves próximamente.
-              </div>
-              {tournament.status !== "finished" && countdown && (
-                <div
-                  style={{
-                    background: "rgba(168, 85, 247, 0.08)",
-                    border: "1px solid rgba(168, 85, 247, 0.18)",
-                    borderRadius: "0.85rem",
-                    padding: "0.5rem 1rem",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "0.45rem",
-                    fontSize: "0.85rem",
-                    fontWeight: 800,
-                    color: "#a855f7",
-                    marginTop: "0.4rem",
-                    boxShadow: "0 0 12px rgba(168, 85, 247, 0.05)",
+                <motion.div
+                  animate={{ rotate: 180 }}
+                  transition={{
+                    repeat: Infinity,
+                    duration: 2.2,
+                    ease: "easeInOut",
+                    repeatDelay: 0.6
                   }}
+                  style={{ display: "inline-block", color: "#a855f7" }}
                 >
-                  <Clock size={15} style={{ color: "#a855f7" }} />
-                  <span style={{ color: "#d8b4fe" }}>Comienza en: {countdown}</span>
+                  <Hourglass size={44} strokeWidth={1.8} />
+                </motion.div>
+                <div style={{ opacity: 0.65 }}>
+                  Esperando el inicio del torneo.<br />El organizador generará las llaves próximamente.
                 </div>
-              )}
-            </div>
+                {tournament.status !== "finished" && countdown && (
+                  <div
+                    style={{
+                      background: "rgba(168, 85, 247, 0.08)",
+                      border: "1px solid rgba(168, 85, 247, 0.18)",
+                      borderRadius: "0.85rem",
+                      padding: "0.5rem 1rem",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.45rem",
+                      fontSize: "0.85rem",
+                      fontWeight: 800,
+                      color: "#a855f7",
+                      marginTop: "0.4rem",
+                      boxShadow: "0 0 12px rgba(168, 85, 247, 0.05)",
+                    }}
+                  >
+                    <Clock size={15} style={{ color: "#a855f7" }} />
+                    <span style={{ color: "#d8b4fe" }}>Comienza en: {countdown}</span>
+                  </div>
+                )}
+              </div>
+            )
           ) : (
             <div
               style={{

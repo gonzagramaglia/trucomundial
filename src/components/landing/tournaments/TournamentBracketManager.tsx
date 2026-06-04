@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { X, Shuffle, Trophy, GripVertical, Play } from "lucide-react";
+import { Shuffle, Trophy, GripVertical, Play } from "lucide-react";
 import { generateMatchCodes } from "../../../lib/matches";
 import { supabase } from "../../../lib/supabase";
 import { votesRegistry } from "../../../lib/votesStore";
@@ -16,12 +15,11 @@ interface BracketSlot {
   player_label: string;
 }
 
-interface TournamentBracketModalProps {
-  isOpen: boolean;
-  onClose: () => void;
+interface InlineBracketManagerProps {
   tournament: any | null;
   registrations: Registration[];
   onSuccess: () => void;
+  nameMap?: Record<string, string>;
 }
 
 // Compute next power of 2 >= n
@@ -32,14 +30,22 @@ const nextPow2 = (n: number) => {
 };
 
 // Build initial round 1 slots from players
-const buildSlots = (players: Registration[], size: number): BracketSlot[] => {
+const buildSlots = (players: Registration[], size: number, nameMap?: Record<string, string>): BracketSlot[] => {
   const slots: BracketSlot[] = [];
   for (let i = 0; i < size; i++) {
     const p = players[i];
+    let label = "BYE";
+    if (p) {
+      if (nameMap && nameMap[p.user_id]) {
+        label = nameMap[p.user_id];
+      } else {
+        label = p.user_id.slice(0, 8) + "...";
+      }
+    }
     slots.push({
       position: i,
       player_id: p ? p.user_id : null,
-      player_label: p ? p.user_id.slice(0, 8) + "..." : "BYE",
+      player_label: label,
     });
   }
   return slots;
@@ -59,7 +65,7 @@ const buildBracket = (slots: BracketSlot[]): BracketSlot[][] => {
   const size = slots.length;
   const rounds: BracketSlot[][] = [slots];
   let currentSize = size / 2;
-  while (currentSize >= 1) {
+  while (currentSize > 1) {
     rounds.push(
       Array.from({ length: currentSize }, (_, i) => ({
         position: i,
@@ -77,12 +83,11 @@ const seedLabel = (userId: string | null) => {
   return userId.slice(0, 10) + "…";
 };
 
-export const TournamentBracketModal: React.FC<TournamentBracketModalProps> = ({
-  isOpen,
-  onClose,
+export const InlineBracketManager: React.FC<InlineBracketManagerProps> = ({
   tournament,
   registrations,
   onSuccess,
+  nameMap,
 }) => {
   const [mode, setMode] = useState<"random" | "manual">("random");
   const [slots, setSlots] = useState<BracketSlot[]>([]);
@@ -90,21 +95,21 @@ export const TournamentBracketModal: React.FC<TournamentBracketModalProps> = ({
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
-  const bracketSize = nextPow2(registrations.length);
+  const bracketSize = nextPow2(Math.max(registrations.length, tournament?.max_participants || 4));
   const rounds = buildBracket(slots);
   const roundNames = ["Octavos", "Cuartos", "Semis", "Final"];
 
   useEffect(() => {
-    if (isOpen) {
+    if (tournament) {
       const players = registrations;
-      setSlots(buildSlots(players, nextPow2(players.length)));
+      setSlots(buildSlots(players, bracketSize, nameMap));
       setMode("random");
     }
-  }, [isOpen, registrations]);
+  }, [tournament, registrations, nameMap]);
 
   const applyRandom = () => {
     const shuffled = shuffle(registrations);
-    setSlots(buildSlots(shuffled, bracketSize));
+    setSlots(buildSlots(shuffled, bracketSize, nameMap));
   };
 
   const swapSlots = (a: number, b: number) => {
@@ -147,19 +152,8 @@ export const TournamentBracketModal: React.FC<TournamentBracketModalProps> = ({
         .eq("id", tournament.id);
       if (updateErr) throw updateErr;
 
-      onSuccess();
-      onClose();
-    } catch (err: any) {
-      setError("Error al guardar: " + err.message);
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleGenerateCodes = async () => {
-    if (!tournament) return;
-    try {
-      const rows = [];
+      // Generate Match Codes
+      const matchRows = [];
       const matchCount = slots.length / 2;
       for (let idx = 0; idx < matchCount; idx++) {
         const p1 = slots[idx * 2];
@@ -168,22 +162,28 @@ export const TournamentBracketModal: React.FC<TournamentBracketModalProps> = ({
         // Skip match generation if BOTH are BYE (null)
         if (!p1.player_id && !p2.player_id) continue;
         
-        rows.push({
+        matchRows.push({
           round: 1,
           match_position: idx,
           player_a_id: p1.player_id || null,
           player_b_id: p2.player_id || null,
         });
       }
-      await generateMatchCodes(tournament.id, rows as any);
-      alert("Códigos generados para la ronda 1");
+      if (matchRows.length > 0) {
+        await generateMatchCodes(tournament.id, matchRows as any);
+      }
+
+      onSuccess();
     } catch (err: any) {
-      console.error(err);
-      alert("Error generando códigos: " + err.message);
+      setError("Error al iniciar torneo: " + err.message);
+    } finally {
+      setSaving(false);
     }
   };
 
-  if (!isOpen || !tournament) return null;
+
+
+  if (!tournament) return null;
 
   const slotStyle = (
     isPlayer: boolean,
@@ -211,43 +211,20 @@ export const TournamentBracketModal: React.FC<TournamentBracketModalProps> = ({
   });
 
   return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        style={{
-          position: "fixed",
-          inset: 0,
-          background: "rgba(0,0,0,0.88)",
-          backdropFilter: "blur(10px)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          zIndex: 3200,
-          padding: "1rem",
-          overflowY: "auto",
-        }}
-        onClick={onClose}
-      >
-        <motion.div
-          initial={{ scale: 0.95, y: 20 }}
-          animate={{ scale: 1, y: 0 }}
-          exit={{ scale: 0.95, y: 20 }}
-          onClick={(e) => e.stopPropagation()}
-          style={{
-            background: "rgba(14, 10, 24, 0.99)",
-            border: "1px solid rgba(168, 85, 247, 0.3)",
-            borderRadius: "2rem",
-            padding: "2rem",
-            width: "100%",
-            maxWidth: "900px",
-            display: "flex",
-            flexDirection: "column",
-            gap: "1.5rem",
-          }}
-        >
-          {/* Header */}
+    <div
+      style={{
+        background: "rgba(14, 10, 24, 0.4)",
+        border: "1px dashed rgba(168, 85, 247, 0.3)",
+        borderRadius: "1.5rem",
+        padding: "2rem",
+        width: "100%",
+        display: "flex",
+        flexDirection: "column",
+        gap: "1.5rem",
+        marginTop: "1rem",
+      }}
+    >
+      {/* Header */}
           <div
             style={{
               display: "flex",
@@ -269,21 +246,10 @@ export const TournamentBracketModal: React.FC<TournamentBracketModalProps> = ({
                   marginTop: "0.2rem",
                 }}
               >
-                {tournament.name} · {registrations.length} jugadores · bracket
+                {tournament.name} · {registrations.length} jugadores · Bracket
                 de {bracketSize}
               </div>
             </div>
-            <button
-              onClick={onClose}
-              style={{
-                background: "none",
-                border: "none",
-                color: "#fff",
-                cursor: "pointer",
-              }}
-            >
-              <X size={22} />
-            </button>
           </div>
 
           {/* Mode Selector */}
@@ -291,7 +257,13 @@ export const TournamentBracketModal: React.FC<TournamentBracketModalProps> = ({
             {(["random", "manual"] as const).map((m) => (
               <button
                 key={m}
-                onClick={() => setMode(m)}
+                onClick={() => {
+                  if (m === "random" && mode === "random") {
+                    applyRandom();
+                  } else {
+                    setMode(m);
+                  }
+                }}
                 style={{
                   background: mode === m ? "#a855f7" : "rgba(255,255,255,0.06)",
                   border:
@@ -313,27 +285,6 @@ export const TournamentBracketModal: React.FC<TournamentBracketModalProps> = ({
                 {m === "random" ? "Aleatorio" : "Manual"}
               </button>
             ))}
-
-            {mode === "random" && (
-              <button
-                onClick={applyRandom}
-                style={{
-                  background: "rgba(255, 120, 0, 0.15)",
-                  border: "1px solid rgba(255, 120, 0, 0.3)",
-                  color: "#ff7800",
-                  padding: "0.5rem 1.25rem",
-                  borderRadius: "2rem",
-                  fontWeight: 800,
-                  fontSize: "0.85rem",
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.4rem",
-                }}
-              >
-                <Shuffle size={15} /> Re-sortear
-              </button>
-            )}
           </div>
 
           {mode === "manual" && (
@@ -363,7 +314,7 @@ export const TournamentBracketModal: React.FC<TournamentBracketModalProps> = ({
                 const isFirstRound = roundIdx === 0;
                 const totalRounds = rounds.length;
                 const roundName =
-                  roundNames[totalRounds - 1 - roundIdx] ??
+                  roundNames[roundNames.length - totalRounds + roundIdx] ??
                   `Ronda ${roundIdx + 1}`;
 
                 return (
@@ -389,7 +340,7 @@ export const TournamentBracketModal: React.FC<TournamentBracketModalProps> = ({
                         opacity: isFirstRound ? 1 : 0.7,
                       }}
                     >
-                      {isFirstRound ? "Ronda 1" : roundName}
+                      {roundName}
                     </div>
 
                     {/* Matches */}
@@ -550,7 +501,7 @@ export const TournamentBracketModal: React.FC<TournamentBracketModalProps> = ({
                   display: "flex",
                   flexDirection: "column",
                   justifyContent: "center",
-                  minWidth: "80px",
+                  minWidth: "160px",
                   paddingLeft: "0px",
                 }}
               >
@@ -559,9 +510,10 @@ export const TournamentBracketModal: React.FC<TournamentBracketModalProps> = ({
                     fontSize: "0.7rem",
                     fontWeight: 800,
                     color: "#fbbf24",
-                    textAlign: "center",
+                    textAlign: "left",
                     marginBottom: "0.5rem",
                     textTransform: "uppercase",
+                    paddingLeft: "0.2rem",
                   }}
                 >
                   Ganador
@@ -571,13 +523,15 @@ export const TournamentBracketModal: React.FC<TournamentBracketModalProps> = ({
                     background: "rgba(251, 191, 36, 0.1)",
                     border: "1px solid rgba(251, 191, 36, 0.3)",
                     borderRadius: "0.75rem",
-                    padding: "0.75rem",
+                    padding: "0.75rem 1rem",
                     display: "flex",
                     alignItems: "center",
-                    justifyContent: "center",
+                    justifyContent: "flex-start",
+                    gap: "0.6rem",
                   }}
                 >
-                  <Trophy size={20} color="#fbbf24" />
+                  <Trophy size={18} color="#fbbf24" />
+                  <span style={{ color: "#fbbf24", fontWeight: 800, fontSize: "0.95rem" }}>?</span>
                 </div>
               </div>
             </div>
@@ -591,52 +545,48 @@ export const TournamentBracketModal: React.FC<TournamentBracketModalProps> = ({
             </div>
           )}
 
-          {/* Save Button */}
-          <div
-            style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}
-          >
-            <button
-              onClick={handleGenerateCodes}
-              style={{
-                background: "rgba(0, 242, 255, 0.08)",
-                border: "1px solid rgba(0, 242, 255, 0.18)",
-                color: "#00f2ff",
-                height: "48px",
-                borderRadius: "1rem",
-                fontWeight: 900,
-                fontSize: "0.95rem",
-                cursor: "pointer",
-                padding: "0 1rem",
-              }}
+          {/* Save Button & Notifications */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", marginTop: "1rem" }}>
+            <div style={{ fontSize: "0.8rem", color: "rgba(255,255,255,0.5)", fontStyle: "italic", textAlign: "center" }}>
+              💡 Nota: Los espacios vacíos se emparejarán automáticamente con "BYE" (pase directo a la siguiente ronda).
+            </div>
+            <div style={{ fontSize: "0.85rem", color: "#fbbf24", fontWeight: 700, textAlign: "center", marginBottom: "0.5rem" }}>
+              🏆 Puntos Globales: Semifinalistas +100 | Finalistas +200 | Ganador +300
+            </div>
+            
+            <div
+              style={{ display: "flex", gap: "0.75rem", alignItems: "center", justifyContent: "center" }}
             >
-              Generar Códigos
-            </button>
-
-            <button
-              onClick={handleSave}
-              disabled={saving}
-              style={{
-                background: "#a855f7",
-                border: "none",
-                color: "#fff",
-                height: "50px",
-                borderRadius: "1.25rem",
-                fontWeight: 900,
-                fontSize: "1rem",
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "0.5rem",
-                boxShadow: "4px 4px 0 #000",
-                opacity: saving ? 0.7 : 1,
-              }}
-            >
-              <Play size={18} /> Confirmar Bracket e Iniciar Torneo
-            </button>
+              <button
+                onClick={handleSave}
+                disabled={saving || registrations.length < tournament.min_participants}
+                style={{
+                  background: "#a855f7",
+                  border: "none",
+                  color: "#fff",
+                  height: "50px",
+                  borderRadius: "1.25rem",
+                  fontWeight: 900,
+                  fontSize: "1rem",
+                  cursor: registrations.length < tournament.min_participants ? "not-allowed" : "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "0.5rem",
+                  boxShadow: registrations.length < tournament.min_participants ? "none" : "4px 4px 0 #000",
+                  opacity: saving || registrations.length < tournament.min_participants ? 0.5 : 1,
+                  padding: "0 1.5rem",
+                }}
+              >
+                <Play size={18} /> Iniciar Torneo
+              </button>
+            </div>
+            {registrations.length < tournament.min_participants && (
+              <div style={{ color: "#ef4444", fontSize: "0.8rem", textAlign: "center", fontWeight: 700 }}>
+                Faltan jugadores. Mínimo requerido: {tournament.min_participants}. Actual: {registrations.length}.
+              </div>
+            )}
           </div>
-        </motion.div>
-      </motion.div>
-    </AnimatePresence>
+    </div>
   );
 };
