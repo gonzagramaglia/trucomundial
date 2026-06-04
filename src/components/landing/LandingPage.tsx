@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import { Home, User, Music, Globe, ArrowLeft } from "lucide-react";
+import { Home, User, Music, Globe, ArrowLeft, Trophy, ShieldAlert } from "lucide-react";
 import { supabase } from "../../lib/supabase";
 import { LandingHeader } from "./LandingHeader";
 import { GameModeSelector } from "./GameModeSelector";
@@ -58,6 +58,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   const [inputCode, setInputCode] = useState("");
   const [joinError, setJoinError] = useState("");
   const [isCreator, setIsCreator] = useState(false);
+  const [isApprovedCreator, setIsApprovedCreator] = useState(false);
+  const isSuperAdmin = user?.email && ["gonzagramaglia@gmail.com", "ciberportero@gmail.com"].includes(user.email);
   const [showRanking, setShowRanking] = useState(
     () =>
       typeof window !== "undefined" &&
@@ -148,6 +150,31 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     });
     return () => subscription.unsubscribe();
   }, []);
+
+  useEffect(() => {
+    const checkCreatorStatus = async () => {
+      if (!user) {
+        setIsApprovedCreator(false);
+        return;
+      }
+      if (isSuperAdmin) {
+        setIsApprovedCreator(true);
+        return;
+      }
+      try {
+        const { data } = await supabase
+          .from("creator_applications")
+          .select("status")
+          .eq("user_id", user.id)
+          .eq("status", "approved")
+          .single();
+        if (data) setIsApprovedCreator(true);
+      } catch (err) {
+        setIsApprovedCreator(false);
+      }
+    };
+    checkCreatorStatus();
+  }, [user, isSuperAdmin]);
 
   // Dynamic SEO, Open Graph & Twitter metadata updates
   useEffect(() => {
@@ -877,48 +904,105 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       }}
     >
       {/* Profile / Language Switch - Top Left */}
-      <button
-        onClick={() => {
-          if (user) {
-            setShowProfile(true);
-            if (typeof window !== "undefined") {
+      <div style={{ position: "absolute", top: "1.5rem", left: "1.5rem", display: "flex", gap: "0.5rem", zIndex: 1000 }}>
+        <button
+          onClick={() => {
+            if (user) {
               const isEn = window.location.pathname.startsWith("/en");
-              window.history.pushState({}, "", isEn ? "/en/perfil" : "/perfil");
+              const target = isEn ? "/en/perfil" : "/perfil";
+              if (window.location.pathname !== target) {
+                window.history.pushState({}, "", target);
+                window.dispatchEvent(new PopStateEvent("popstate"));
+              }
+            } else {
+              const isEn = window.location.pathname.startsWith("/en");
+              const newLang = isEn ? "es" : "en";
+              localStorage.setItem("lang", newLang);
+              window.location.href = newLang === "en" ? "/en" : "/";
             }
-          } else {
-            const isEn = window.location.pathname.startsWith("/en");
-            const newLang = isEn ? "es" : "en";
-            localStorage.setItem("lang", newLang);
-            window.location.href = newLang === "en" ? "/en" : "/";
-          }
-        }}
-        className="btn-hover-dark"
-        style={{
-          position: "absolute",
-          top: "1.5rem",
-          left: "1.5rem",
-          background: "rgba(255, 255, 255, 0.1)",
-          border: "1px solid rgba(255, 255, 255, 0.2)",
-          color: "white",
-          height: "40px",
-          width: "40px",
-          borderRadius: "50%",
-          cursor: "pointer",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          backdropFilter: "blur(12px)",
-          transition: "none",
-          zIndex: 1000,
-        }}
-        title={user ? t("profile") : "Cambiar Idioma / Change Language"}
-      >
-        {user ? (
-          <User size={20} style={{ color: "#ffffff" }} />
-        ) : (
-          <Globe size={20} style={{ color: "#ffffff" }} />
+          }}
+          className="btn-hover-dark"
+          style={{
+            background: "rgba(255, 255, 255, 0.1)",
+            border: "1px solid rgba(255, 255, 255, 0.2)",
+            color: "white",
+            height: "40px",
+            width: "40px",
+            borderRadius: "50%",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backdropFilter: "blur(12px)",
+            transition: "none",
+          }}
+          title={user ? t("profile") : "Cambiar Idioma / Change Language"}
+        >
+          {user ? (
+            <User size={20} style={{ color: "#ffffff" }} />
+          ) : (
+            <Globe size={20} style={{ color: "#ffffff" }} />
+          )}
+        </button>
+
+        {isApprovedCreator && (
+          <button
+            onClick={() => {
+              const isEn = window.location.pathname.startsWith("/en");
+              const path = isEn ? "/en/creador" : "/creador";
+              window.history.pushState({}, "", path);
+              window.dispatchEvent(new PopStateEvent("popstate"));
+            }}
+            className="btn-hover-dark"
+            style={{
+              background: "rgba(255, 255, 255, 0.1)",
+              border: "1px solid rgba(255, 255, 255, 0.2)",
+              color: "white",
+              height: "40px",
+              width: "40px",
+              borderRadius: "50%",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              backdropFilter: "blur(12px)",
+              transition: "none",
+            }}
+            title="Panel de Creador"
+          >
+            <Trophy size={18} style={{ color: "#ffffff" }} />
+          </button>
         )}
-      </button>
+
+        {isSuperAdmin && (
+          <button
+            onClick={() => {
+              const isEn = window.location.pathname.startsWith("/en");
+              const path = isEn ? "/en/admin" : "/admin";
+              window.history.pushState({}, "", path);
+              window.dispatchEvent(new PopStateEvent("popstate"));
+            }}
+            className="btn-hover-dark"
+            style={{
+              background: "rgba(255, 255, 255, 0.1)",
+              border: "1px solid rgba(255, 255, 255, 0.2)",
+              color: "white",
+              height: "40px",
+              width: "40px",
+              borderRadius: "50%",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              backdropFilter: "blur(12px)",
+              transition: "none",
+            }}
+            title="Panel de Admin"
+          >
+            <ShieldAlert size={18} style={{ color: "#ffffff" }} />
+          </button>
+        )}
+      </div>
 
       {/* Utility buttons column (Top Right) */}
       <div

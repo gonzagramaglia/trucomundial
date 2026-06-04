@@ -139,8 +139,8 @@ export const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
         style={{
           position: "fixed",
           inset: 0,
-          background: "rgba(0,0,0,0.85)",
-          backdropFilter: "blur(8px)",
+          background: "rgba(0, 0, 0, 0.4)",
+          backdropFilter: "blur(5px)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -613,7 +613,7 @@ export const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
                   fontWeight: 800,
                 }}
               >
-                Selecciones del Torneo (Elegí exactamente 4)
+                Selecciones del Torneo (Elegí de 2 a 4)
               </label>
               <div
                 style={{

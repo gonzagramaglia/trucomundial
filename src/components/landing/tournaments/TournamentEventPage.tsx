@@ -694,7 +694,7 @@ const TournamentEventPage: React.FC<Props> = ({ user, handleAuth, onBack, onPlay
           {/* Enroll / Inscripto Button */}
           {!isRegistered && (
             <div style={{ marginTop: "0.5rem", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-              <div style={{ display: "flex", gap: "0.5rem" }}>
+              <div style={{ display: "flex", gap: "0.5rem", flexDirection: isMobile ? "column" : "row" }}>
                 {tournament.code_type && tournament.code_type !== "none" && (
                   <input
                     type="text"
@@ -720,6 +720,7 @@ const TournamentEventPage: React.FC<Props> = ({ user, handleAuth, onBack, onPlay
                       fontFamily: "var(--font-display)",
                       letterSpacing: "0.05em",
                       textAlign: "center",
+                      width: isMobile ? "100%" : "auto"
                     }}
                   />
                 )}
@@ -751,6 +752,7 @@ const TournamentEventPage: React.FC<Props> = ({ user, handleAuth, onBack, onPlay
                     textTransform: "uppercase",
                     fontFamily: "var(--font-display)",
                     letterSpacing: "0.05em",
+                    width: isMobile ? "100%" : "auto"
                   }}
                 >
                   <Lock size={18} />

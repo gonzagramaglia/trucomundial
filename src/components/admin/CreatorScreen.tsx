@@ -91,14 +91,10 @@ export const CreatorScreen: React.FC<CreatorScreenProps> = ({
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [playersModalTournament, setPlayersModalTournament] =
     useState<any>(null);
-  const [playersModalRegs, setPlayersModalRegs] = useState<
-    { user_id: string; code_used: string }[]
-  >([]);
+  const [playersModalRegs] = useState<any[]>([]);
   const [bracketModalTournament, setBracketModalTournament] =
     useState<any>(null);
-  const [bracketModalRegs, setBracketModalRegs] = useState<
-    { user_id: string; code_used?: string }[]
-  >([]);
+  const [bracketModalRegs] = useState<any[]>([]);
 
   // Support ticket states
   const [isSubmittingTicket, setIsSubmittingTicket] = useState(false);
@@ -143,9 +139,19 @@ export const CreatorScreen: React.FC<CreatorScreenProps> = ({
     handleSubmit: handleProfileSubmit,
     formState: { errors: profileErrors },
     reset: resetProfile,
+    watch: watchProfile,
   } = useForm<CreatorApplicationFormData>({
     resolver: zodResolver(creatorApplicationSchema),
   });
+
+  const currentChannelName = watchProfile("channel_name");
+  const currentSocialLink = watchProfile("social_link");
+  const currentStreamingLink = watchProfile("streaming_link");
+
+  const isProfileChanged = 
+    currentChannelName !== (creatorProfile?.channel_name || "") ||
+    currentSocialLink !== (creatorProfile?.social_link || "") ||
+    currentStreamingLink !== (creatorProfile?.streaming_link || "");
 
   const onProfileSubmit = async (data: CreatorApplicationFormData) => {
     if (!creatorProfile) return;
@@ -158,7 +164,6 @@ export const CreatorScreen: React.FC<CreatorScreenProps> = ({
           channel_name: data.channel_name,
           social_link: data.social_link,
           streaming_link: data.streaming_link || null,
-          motivation: data.motivation || null,
         })
         .eq("id", creatorProfile.id);
 
@@ -171,6 +176,12 @@ export const CreatorScreen: React.FC<CreatorScreenProps> = ({
         social_link: data.social_link,
         streaming_link: data.streaming_link,
       });
+      resetProfile({
+        channel_name: data.channel_name,
+        social_link: data.social_link,
+        streaming_link: data.streaming_link,
+        motivation: creatorProfile.motivation || "",
+      }, { keepDirty: false });
     } catch (err: any) {
       console.error(err);
       setProfileSuccess("Error al actualizar el perfil.");
@@ -297,37 +308,7 @@ export const CreatorScreen: React.FC<CreatorScreenProps> = ({
     }
   };
 
-  const handleCloseRegistrations = async (tournamentId: string) => {
-    const { error } = await supabase
-      .from("tournaments")
-      .update({ status: "closed" })
-      .eq("id", tournamentId);
-    if (!error)
-      setTournaments((prev) =>
-        prev.map((t) =>
-          t.id === tournamentId ? { ...t, status: "closed" } : t,
-        ),
-      );
-    else alert("Error al cerrar: " + error.message);
-  };
 
-  const openPlayersModal = async (tournament: any) => {
-    const { data } = await supabase
-      .from("tournament_registrations")
-      .select("user_id, code_used")
-      .eq("tournament_id", tournament.id);
-    setPlayersModalRegs(data || []);
-    setPlayersModalTournament(tournament);
-  };
-
-  const openBracketModal = async (tournament: any) => {
-    const { data } = await supabase
-      .from("tournament_registrations")
-      .select("user_id, code_used")
-      .eq("tournament_id", tournament.id);
-    setBracketModalRegs(data || []);
-    setBracketModalTournament(tournament);
-  };
 
   // --- RENDERING ACCESO RESTRINGIDO ---
   if (!user) {
@@ -883,79 +864,31 @@ export const CreatorScreen: React.FC<CreatorScreenProps> = ({
                   <div
                     style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}
                   >
-                    {tournament.status === "open" && (
-                      <button
-                        onClick={() => handleCloseRegistrations(tournament.id)}
-                        style={{
-                          background: "rgba(255, 120, 0, 0.15)",
-                          border: "1px solid rgba(255, 120, 0, 0.3)",
-                          color: "#ff7800",
-                          height: "36px",
-                          padding: "0 0.85rem",
-                          borderRadius: "0.75rem",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "0.4rem",
-                          cursor: "pointer",
-                          fontSize: "0.75rem",
-                          fontWeight: 800,
-                        }}
-                      >
-                        Cerrar Inscripciones
-                      </button>
-                    )}
-                    {(tournament.status === "open" ||
-                      tournament.status === "closed") && (
-                      <button
-                        onClick={() => openPlayersModal(tournament)}
-                        style={{
-                          background: "rgba(255,255,255,0.08)",
-                          border: "1px solid rgba(255,255,255,0.15)",
-                          color: "#fff",
-                          height: "36px",
-                          padding: "0 0.85rem",
-                          borderRadius: "0.75rem",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "0.4rem",
-                          cursor: "pointer",
-                          fontSize: "0.75rem",
-                          fontWeight: 800,
-                        }}
-                      >
-                        Editar Jugadores
-                      </button>
-                    )}
-                    {tournament.status === "closed" && (
-                      <button
-                        onClick={() => {
-                          const enrolled = usedCodes[tournament.id]?.length || 0;
-                          const min = tournament.min_participants || 4;
-                          if (enrolled < min) {
-                            alert(`No se puede iniciar el torneo. Faltan jugadores. (Inscritos: ${enrolled}, Mínimo requerido: ${min})`);
-                            return;
-                          }
-                          openBracketModal(tournament);
-                        }}
-                        style={{
-                          background: "rgba(168, 85, 247, 0.2)",
-                          border: "1px solid rgba(168, 85, 247, 0.4)",
-                          color: "#a855f7",
-                          height: "36px",
-                          padding: "0 0.85rem",
-                          borderRadius: "0.75rem",
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "0.4rem",
-                          cursor: "pointer",
-                          fontSize: "0.75rem",
-                          fontWeight: 800,
-                          boxShadow: "3px 3px 0 #000",
-                        }}
-                      >
-                        ▶ Iniciar con Bracket
-                      </button>
-                    )}
+                    <button
+                      onClick={() => {
+                        const path = window.location.pathname.startsWith("/en")
+                          ? `/en/torneos/${tournament.id}`
+                          : `/torneos/${tournament.id}`;
+                        window.history.pushState({}, "", path);
+                        window.dispatchEvent(new PopStateEvent("popstate"));
+                      }}
+                      style={{
+                        background: "rgba(168, 85, 247, 0.15)",
+                        border: "1px solid rgba(168, 85, 247, 0.3)",
+                        color: "#e9d5ff",
+                        height: "36px",
+                        padding: "0 1rem",
+                        borderRadius: "0.75rem",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.6rem",
+                        cursor: "pointer",
+                        fontSize: "0.75rem",
+                        fontWeight: 800,
+                      }}
+                    >
+                      <Trophy size={14} /> Ver Torneo
+                    </button>
                     <button
                       onClick={() => openEditForm(tournament)}
                       style={{
@@ -1154,8 +1087,8 @@ export const CreatorScreen: React.FC<CreatorScreenProps> = ({
       <div
         style={{
           marginTop: "3rem",
-          background: "rgba(255, 120, 0, 0.05)",
-          border: "2px dashed rgba(255, 120, 0, 0.25)",
+          background: "rgba(16, 185, 129, 0.05)",
+          border: "2px dashed rgba(16, 185, 129, 0.25)",
           borderRadius: "1.5rem",
           padding: "2rem",
         }}
@@ -1164,7 +1097,7 @@ export const CreatorScreen: React.FC<CreatorScreenProps> = ({
           style={{
             margin: "0 0 1.5rem 0",
             fontSize: "1.4rem",
-            color: "#ff7800",
+            color: "#10b981",
           }}
         >
           {t("creator_profile_edit")}
@@ -1201,7 +1134,7 @@ export const CreatorScreen: React.FC<CreatorScreenProps> = ({
               display: "grid",
               gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr 1fr auto",
               gap: "1.5rem",
-              alignItems: "end",
+              alignItems: "start",
             }}
           >
             <div>
@@ -1347,7 +1280,7 @@ export const CreatorScreen: React.FC<CreatorScreenProps> = ({
               disabled={profileUpdating}
               className="btn-hover-dark"
               style={{
-                background: "#ff7800",
+                background: isProfileChanged ? "#10b981" : "#ff7800",
                 border: "none",
                 color: "#000",
                 height: "50px",
@@ -1571,8 +1504,8 @@ export const CreatorScreen: React.FC<CreatorScreenProps> = ({
             style={{
               position: "fixed",
               inset: 0,
-              background: "rgba(0, 0, 0, 0.8)",
-              backdropFilter: "blur(8px)",
+              background: "rgba(0, 0, 0, 0.4)",
+              backdropFilter: "blur(5px)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
