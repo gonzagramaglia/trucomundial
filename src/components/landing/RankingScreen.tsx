@@ -822,93 +822,71 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
               <span style={{ marginRight: '0.4rem' }}>🇦🇷</span> {t("country_Argentina")}
             </button>
             <button
-              onClick={() => toggleCountryFilter('Francia')}
+              className="filter-btn"
+              onClick={() => toggleCountryFilter('Brasil')}
               style={{
-                height: '42px',
-                padding: '0 1.25rem',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxSizing: 'border-box',
-                borderRadius: '1.1rem',
-                background: selectedCountries.includes('Francia') ? 'rgba(168, 85, 247, 0.2)' : 'rgba(255, 255, 255, 0.05)',
-                border: selectedCountries.includes('Francia') ? '1.5px solid #a855f7' : '1px solid rgba(255, 255, 255, 0.1)',
-                color: '#fff',
-                fontSize: '0.85rem',
-                fontWeight: 700,
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                boxShadow: selectedCountries.includes('Francia') ? '0 0 10px rgba(168, 85, 247, 0.2)' : 'none'
+                background: selectedCountries.includes('Brasil') ? 'rgba(0, 242, 255, 0.2)' : 'rgba(255, 255, 255, 0.05)',
+                border: selectedCountries.includes('Brasil') ? '1.5px solid #00f2ff' : '1px solid rgba(255, 255, 255, 0.1)',
+                color: selectedCountries.includes('Brasil') ? '#fff' : 'rgba(255, 255, 255, 0.6)',
+                fontWeight: selectedCountries.includes('Brasil') ? 'bold' : 'normal',
+                boxShadow: selectedCountries.includes('Brasil') ? '0 0 10px rgba(0, 242, 255, 0.2)' : 'none'
               }}
             >
-              <span style={{ marginRight: '0.4rem' }}>🇫🇷</span> {t("country_Francia")}
+              <span style={{ marginRight: '0.4rem' }}>🇧🇷</span> {t("country_Brasil")}
             </button>
             <button
+              className="filter-btn"
               onClick={() => toggleCountryFilter('España')}
               style={{
-                height: '42px',
-                padding: '0 1.25rem',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxSizing: 'border-box',
-                borderRadius: '1.1rem',
-                background: selectedCountries.includes('España') ? 'rgba(239, 68, 68, 0.2)' : 'rgba(255, 255, 255, 0.05)',
-                border: selectedCountries.includes('España') ? '1.5px solid #ef4444' : '1px solid rgba(255, 255, 255, 0.1)',
-                color: '#fff',
-                fontSize: '0.85rem',
-                fontWeight: 700,
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                boxShadow: selectedCountries.includes('España') ? '0 0 10px rgba(239, 68, 68, 0.2)' : 'none'
+                background: selectedCountries.includes('España') ? 'rgba(0, 242, 255, 0.2)' : 'rgba(255, 255, 255, 0.05)',
+                border: selectedCountries.includes('España') ? '1.5px solid #00f2ff' : '1px solid rgba(255, 255, 255, 0.1)',
+                color: selectedCountries.includes('España') ? '#fff' : 'rgba(255, 255, 255, 0.6)',
+                fontWeight: selectedCountries.includes('España') ? 'bold' : 'normal',
+                boxShadow: selectedCountries.includes('España') ? '0 0 10px rgba(0, 242, 255, 0.2)' : 'none'
               }}
             >
               <span style={{ marginRight: '0.4rem' }}>🇪🇸</span> {t("country_España")}
             </button>
             <button
+              className="filter-btn"
+              onClick={() => toggleCountryFilter('Francia')}
+              style={{
+                background: selectedCountries.includes('Francia') ? 'rgba(0, 242, 255, 0.2)' : 'rgba(255, 255, 255, 0.05)',
+                border: selectedCountries.includes('Francia') ? '1.5px solid #00f2ff' : '1px solid rgba(255, 255, 255, 0.1)',
+                color: selectedCountries.includes('Francia') ? '#fff' : 'rgba(255, 255, 255, 0.6)',
+                fontWeight: selectedCountries.includes('Francia') ? 'bold' : 'normal',
+                boxShadow: selectedCountries.includes('Francia') ? '0 0 10px rgba(0, 242, 255, 0.2)' : 'none'
+              }}
+            >
+              <span style={{ marginRight: '0.4rem' }}>🇫🇷</span> {t("country_Francia")}
+            </button>
+            <button
+              className="filter-btn"
               onClick={() => toggleCountryFilter('Nueva Zelanda')}
               style={{
-                height: '42px',
-                padding: '0 1.25rem',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxSizing: 'border-box',
-                borderRadius: '1.1rem',
-                background: selectedCountries.includes('Nueva Zelanda') ? 'rgba(34, 197, 94, 0.2)' : 'rgba(255, 255, 255, 0.05)',
-                border: selectedCountries.includes('Nueva Zelanda') ? '1.5px solid #22c55e' : '1px solid rgba(255, 255, 255, 0.1)',
-                color: '#fff',
-                fontSize: '0.85rem',
-                fontWeight: 700,
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                boxShadow: selectedCountries.includes('Nueva Zelanda') ? '0 0 10px rgba(34, 197, 94, 0.2)' : 'none'
+                background: selectedCountries.includes('Nueva Zelanda') ? 'rgba(0, 242, 255, 0.2)' : 'rgba(255, 255, 255, 0.05)',
+                border: selectedCountries.includes('Nueva Zelanda') ? '1.5px solid #00f2ff' : '1px solid rgba(255, 255, 255, 0.1)',
+                color: selectedCountries.includes('Nueva Zelanda') ? '#fff' : 'rgba(255, 255, 255, 0.6)',
+                fontWeight: selectedCountries.includes('Nueva Zelanda') ? 'bold' : 'normal',
+                boxShadow: selectedCountries.includes('Nueva Zelanda') ? '0 0 10px rgba(0, 242, 255, 0.2)' : 'none'
               }}
             >
               <span style={{ marginRight: '0.4rem' }}>🇳🇿</span> {t("country_Nueva Zelanda")}
             </button>
             <button
-              onClick={() => toggleCountryFilter('Brasil')}
+              className="filter-btn"
+              onClick={() => toggleCountryFilter('Argelia')}
               style={{
-                height: '42px',
-                padding: '0 1.25rem',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxSizing: 'border-box',
-                borderRadius: '1.1rem',
-                background: selectedCountries.includes('Brasil') ? 'rgba(234, 179, 8, 0.2)' : 'rgba(255, 255, 255, 0.05)',
-                border: selectedCountries.includes('Brasil') ? '1.5px solid #eab308' : '1px solid rgba(255, 255, 255, 0.1)',
-                color: '#fff',
-                fontSize: '0.85rem',
-                fontWeight: 700,
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                boxShadow: selectedCountries.includes('Brasil') ? '0 0 10px rgba(234, 179, 8, 0.2)' : 'none'
+                background: selectedCountries.includes('Argelia') ? 'rgba(0, 242, 255, 0.2)' : 'rgba(255, 255, 255, 0.05)',
+                border: selectedCountries.includes('Argelia') ? '1.5px solid #00f2ff' : '1px solid rgba(255, 255, 255, 0.1)',
+                color: selectedCountries.includes('Argelia') ? '#fff' : 'rgba(255, 255, 255, 0.6)',
+                fontWeight: selectedCountries.includes('Argelia') ? 'bold' : 'normal',
+                boxShadow: selectedCountries.includes('Argelia') ? '0 0 10px rgba(0, 242, 255, 0.2)' : 'none'
               }}
             >
-              <span style={{ marginRight: '0.4rem' }}>🇧🇷</span> {t("country_Brasil")}
+              <span style={{ marginRight: '0.4rem' }}>🇩🇿</span> {t("country_Argelia")}
             </button>
+
           </div>
 
           {/* Sort Selector */}

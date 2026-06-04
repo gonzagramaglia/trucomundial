@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Scroll, X, Trophy } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslation } from "react-i18next";
 import type { MatchRow } from "../../../lib/matches";
 
 interface TournamentMatchHistoryProps {
@@ -10,6 +11,7 @@ interface TournamentMatchHistoryProps {
 
 export const TournamentMatchHistory: React.FC<TournamentMatchHistoryProps> = ({ finishedMatches, nameMap }) => {
   const [selectedLog, setSelectedLog] = useState<any | null>(null);
+  const { t } = useTranslation();
 
   if (!finishedMatches) return null;
 
@@ -36,7 +38,7 @@ export const TournamentMatchHistory: React.FC<TournamentMatchHistoryProps> = ({ 
           gap: "0.5rem"
         }}
       >
-        <Scroll size={20} color="#a855f7" /> Historial de Partidas
+        <Scroll size={20} color="#a855f7" /> {t("match_history_title")}
       </h3>
 
       {finishedMatches.length === 0 ? (
@@ -47,7 +49,7 @@ export const TournamentMatchHistory: React.FC<TournamentMatchHistoryProps> = ({ 
           fontStyle: "italic",
           color: "#fff"
         }}>
-          Aún no se ha jugado ninguna partida en este torneo.
+          {t("no_matches_played_yet")}
         </div>
       ) : (
         <div style={{ display: "grid", gap: "1rem", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))" }}>
@@ -55,8 +57,8 @@ export const TournamentMatchHistory: React.FC<TournamentMatchHistoryProps> = ({ 
             const logData = m.log as any;
             if (!logData) return null;
 
-            const playerAName = nameMap[m.player_a_id!] || `Jugador ${m.player_a_id?.slice(0, 5)}`;
-            const playerBName = nameMap[m.player_b_id!] || `Jugador ${m.player_b_id?.slice(0, 5)}`;
+            const playerAName = nameMap[m.player_a_id!] || `${t("player")} ${m.player_a_id?.slice(0, 5)}`;
+            const playerBName = nameMap[m.player_b_id!] || `${t("player")} ${m.player_b_id?.slice(0, 5)}`;
             const aWon = m.winner_id === m.player_a_id;
             const bWon = m.winner_id === m.player_b_id;
 
@@ -75,7 +77,7 @@ export const TournamentMatchHistory: React.FC<TournamentMatchHistoryProps> = ({ 
               >
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <div style={{ fontSize: "0.75rem", opacity: 0.5, textTransform: "uppercase", fontWeight: 900, letterSpacing: "0.05em" }}>
-                    Ronda {m.round}
+                    {t("round_label")} {m.round}
                   </div>
                   <div style={{ fontSize: "0.75rem", opacity: 0.5 }}>
                     {new Date(m.ended_at!).toLocaleDateString()}
@@ -113,7 +115,7 @@ export const TournamentMatchHistory: React.FC<TournamentMatchHistoryProps> = ({ 
                     marginTop: "0.5rem"
                   }}
                 >
-                  <Scroll size={14} /> Ver Registro (Replay)
+                  <Scroll size={14} /> {t("view_match_log")}
                 </button>
               </div>
             );
@@ -168,7 +170,7 @@ export const TournamentMatchHistory: React.FC<TournamentMatchHistoryProps> = ({ 
                 }}
               >
                 <h3 style={{ margin: 0, color: "#fff", display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                  <Scroll size={20} color="#a855f7" /> Registro de Partida
+                  <Scroll size={20} color="#a855f7" /> {t("match_log_title")}
                 </h3>
                 <button
                   onClick={() => setSelectedLog(null)}

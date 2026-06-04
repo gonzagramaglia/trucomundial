@@ -69,7 +69,7 @@ export const GameModeSelector: React.FC<GameModeSelectorProps> = ({ selectedMode
         }}
       >
         <Trophy size={22} />
-        {t("tournaments")} <span style={{ opacity: 0.45 }}>(PRÓXIMAMENTE)</span>
+        {t("tournaments")} <span style={{ opacity: 0.45 }}>({t("coming_soon")})</span>
       </Button>
 
       {/* Secondary Options: Local Modes */}

@@ -634,7 +634,8 @@ export const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
                   { id: 'Francia', flag: '🇫🇷' },
                   { id: 'España', flag: '🇪🇸' },
                   { id: 'Nueva Zelanda', flag: '🇳🇿' },
-                  { id: 'Brasil', flag: '🇧🇷' }
+                  { id: 'Brasil', flag: '🇧🇷' },
+                  { id: 'Argelia', flag: '🇩🇿' }
                 ].map((team) => {
                   const allowedTeams = formData.allowed_teams || [];
                   const isChecked = allowedTeams.includes(team.id);

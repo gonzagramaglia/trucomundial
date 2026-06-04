@@ -1,5 +1,6 @@
 import React from "react";
 import { Send } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface ChatInputProps {
   newMessage: string;
@@ -16,6 +17,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   user,
   sending,
 }) => {
+  const { t } = useTranslation();
+
   return (
     <form
       onSubmit={handleSendMessage}
@@ -29,7 +32,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         type="text"
         value={newMessage}
         onChange={(e) => setNewMessage(e.target.value)}
-        placeholder={user ? "Escribe un mensaje..." : "Inicia sesión para chatear"}
+        placeholder={user ? t("type_a_message") : t("login_to_chat")}
         disabled={!user || sending}
         style={{
           flex: 1,

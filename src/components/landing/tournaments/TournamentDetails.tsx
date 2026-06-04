@@ -1,5 +1,6 @@
 import React from "react";
 import { Clock, Check, LogOut } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import type { Tournament, Registration } from "./types";
 
 const FLAG_MAP: Record<string, string> = {
@@ -7,7 +8,8 @@ const FLAG_MAP: Record<string, string> = {
   "Francia": "🇫🇷",
   "España": "🇪🇸",
   "Nueva Zelanda": "🇳🇿",
-  "Brasil": "🇧🇷"
+  "Brasil": "🇧🇷",
+  "Argelia": "🇩🇿"
 };
 
 interface Props {
@@ -27,6 +29,7 @@ const TournamentDetails: React.FC<Props> = ({
   showPrize = true,
   onUnenrollClick,
 }) => {
+  const { t, i18n } = useTranslation();
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", width: "100%" }}>
@@ -51,7 +54,7 @@ const TournamentDetails: React.FC<Props> = ({
               color: "#ff7800",
             }}
           >
-            Premio
+            {t("prize_title")}
           </div>
           <div
             style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}
@@ -82,17 +85,20 @@ const TournamentDetails: React.FC<Props> = ({
             <Clock size={15} style={{ color: "#ff7800", marginTop: "0.15rem", flexShrink: 0 }} />
             <div>
               <div style={{ fontSize: "0.68rem", fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.06em", color: "#ff7800", marginBottom: "0.1rem" }}>
-                Inicio
+                {t("start_label")}
               </div>
               <div style={{ fontSize: "0.88rem", fontWeight: 800, color: "#fed7aa" }}>
-                {new Date(tournament.start_time).toLocaleString("es-AR", {
-                  weekday: "long",
-                  day: "numeric",
-                  month: "long",
-                  year: "numeric",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
+                {new Date(tournament.start_time).toLocaleString(
+                  i18n.language === "en" ? "en-US" : "es-AR",
+                  {
+                    weekday: "long",
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  }
+                )}
               </div>
             </div>
           </div>
@@ -102,7 +108,7 @@ const TournamentDetails: React.FC<Props> = ({
         {tournament.allowed_teams && tournament.allowed_teams.length > 0 && (
           <div style={{ borderTop: "1px solid rgba(255, 120, 0, 0.15)", paddingTop: "0.65rem", display: "flex", flexDirection: "column", gap: "0.45rem" }}>
             <div style={{ fontSize: "0.68rem", fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.06em", color: "#ff7800" }}>
-              Composición del Mazo
+              {t("deck_composition")}
             </div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem" }}>
               {tournament.allowed_teams.map((team, index) => (
@@ -122,12 +128,12 @@ const TournamentDetails: React.FC<Props> = ({
                   }}
                 >
                   <span>{FLAG_MAP[team] || "🏳️"}</span>
-                  <span>{team}</span>
+                  <span>{t(`country_${team.toLowerCase().replace("ñ", "n")}`, team)}</span>
                 </div>
               ))}
             </div>
             <div style={{ fontSize: "0.7rem", opacity: 0.75, color: "#fdba74", lineHeight: 1.4 }}>
-              ℹ️ Las cartas se juegan con la valoración del ranking congelada al inicio del torneo.
+              {t("frozen_ranking_info")}
             </div>
           </div>
         )}
@@ -144,7 +150,7 @@ const TournamentDetails: React.FC<Props> = ({
             letterSpacing: "0.05em",
           }}
         >
-          Inscriptos ({registrations.length} / {tournament.max_participants})
+          {t("enrolled_label")} ({registrations.length} / {tournament.max_participants})
         </div>
         {(() => {
           const list = [...registrations];
@@ -209,7 +215,7 @@ const TournamentDetails: React.FC<Props> = ({
                           }}
                         >
                           <LogOut size={14} strokeWidth={3} style={{ transform: "scaleX(-1)" }} />
-                          Salir
+                          {t("unenroll_button")}
                         </button>
                       )}
                     </div>
@@ -235,12 +241,12 @@ const TournamentDetails: React.FC<Props> = ({
                   }}
                 >
                   <div style={{ fontWeight: 700, fontStyle: "italic", opacity: 0.6 }}>
-                    Esperando jugador...
+                    {t("waiting_player")}
                   </div>
                   <div style={{ opacity: 0.4, fontSize: "0.75rem", fontFamily: "monospace", fontWeight: 700 }}>
                     {tournament.code_type === "single" && tournament.codes?.[0]
                       ? tournament.codes[0]
-                      : "Vacío"}
+                      : t("empty_slot")}
                   </div>
                 </div>
               ))}

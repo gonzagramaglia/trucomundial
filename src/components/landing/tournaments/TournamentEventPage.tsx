@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { ArrowLeft, Clock, Trophy, Hourglass, LogOut, Lock } from "lucide-react";
+import { ArrowLeft, Clock, Trophy, Hourglass, LogOut, CheckCircle2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { supabase } from "../../../lib/supabase";
 import { getMatchesByTournament } from "../../../lib/matches";
@@ -11,6 +11,7 @@ import { ActivePlayerMatch } from "./ActivePlayerMatch";
 import { TournamentMatchHistory } from "./TournamentMatchHistory";
 import { TournamentChat } from "./chat/TournamentChat";
 import { TwitchButton } from "../../shared/TwitchButton";
+import { useTranslation } from "react-i18next";
 import type { Tournament } from "./types";
 
 interface Props {
@@ -21,6 +22,7 @@ interface Props {
 }
 
 const TournamentEventPage: React.FC<Props> = ({ user, handleAuth, onBack, onPlayMatch }) => {
+  const { t } = useTranslation();
   const [tournament, setTournament] = useState<Tournament | null>(null);
   const [matches, setMatches] = useState<any[]>([]);
   const [registrations, setRegistrations] = useState<any[]>([]);
@@ -206,13 +208,13 @@ const TournamentEventPage: React.FC<Props> = ({ user, handleAuth, onBack, onPlay
     try {
       if (tournament.code_type === "single") {
         if (!tournament.codes || tournament.codes[0] !== enrollCode) {
-          setEnrollError("Código incorrecto");
+          setEnrollError(t("incorrect_code"));
           setEnrolling(false);
           return;
         }
       } else if (tournament.code_type === "unique") {
         if (!tournament.codes || !tournament.codes.includes(enrollCode)) {
-          setEnrollError("Código inválido o no existe");
+          setEnrollError(t("invalid_code"));
           setEnrolling(false);
           return;
         }
@@ -222,7 +224,7 @@ const TournamentEventPage: React.FC<Props> = ({ user, handleAuth, onBack, onPlay
           .eq("tournament_id", tournament.id)
           .eq("code_used", enrollCode);
         if (usedData && usedData.length > 0) {
-          setEnrollError("Ese código ya fue utilizado");
+          setEnrollError(t("code_already_used"));
           setEnrolling(false);
           return;
         }
@@ -452,7 +454,7 @@ const TournamentEventPage: React.FC<Props> = ({ user, handleAuth, onBack, onPlay
           }}
         >
           <ArrowLeft size={18} />
-          <span>Volver</span>
+          <span>{t("back")}</span>
         </button>
       )}
 
@@ -481,7 +483,7 @@ const TournamentEventPage: React.FC<Props> = ({ user, handleAuth, onBack, onPlay
         }}
       >
         <span>⚠️</span>
-        <span>Aún no habilitado</span>
+        <span>{t("not_enabled_yet")}</span>
       </div>
 
       <div
@@ -528,7 +530,7 @@ const TournamentEventPage: React.FC<Props> = ({ user, handleAuth, onBack, onPlay
                 }}
               >
                 <ArrowLeft size={14} />
-                Volver
+                {t("back")}
               </button>
             </div>
             <div
@@ -609,7 +611,7 @@ const TournamentEventPage: React.FC<Props> = ({ user, handleAuth, onBack, onPlay
                     textShadow: "0 0 15px rgba(255, 255, 255, 0.2)",
                   }}
                 >
-                  {tournament.name}
+                  {tournament?.name}
                 </h1>
               </div>
               <p
@@ -666,10 +668,10 @@ const TournamentEventPage: React.FC<Props> = ({ user, handleAuth, onBack, onPlay
                 textAlign: isMobile ? "center" : "left",
               }}
             >
-              Premios del Torneo
+              {t("tournament_prizes")}
             </div>
             <div style={{ fontSize: "0.85rem", opacity: 0.7, marginTop: "0.1rem", textAlign: isMobile ? "center" : "left" }}>
-              Distribución oficial de premios
+              {t("official_prize_distribution")}
             </div>
           </div>
         </div>
@@ -757,7 +759,7 @@ const TournamentEventPage: React.FC<Props> = ({ user, handleAuth, onBack, onPlay
               lineHeight: 1.45,
             }}
           >
-            ⚠️ <strong>Requisito de inicio:</strong> Una vez que se alcance el mínimo de <strong>{tournament.min_participants || 4}</strong> jugadores, el organizador podrá iniciar la generación del bracket y comenzar el torneo.
+            ⚠️ <strong>{t("start_requirement")}</strong> {t("once_minimum_reached")} <strong>{tournament.min_participants || 4}</strong> {t("organizer_can_start")}
           </div>
 
           {/* Enroll / Inscripto Button */}
@@ -767,7 +769,7 @@ const TournamentEventPage: React.FC<Props> = ({ user, handleAuth, onBack, onPlay
                 {tournament.code_type && tournament.code_type !== "none" && (
                   <input
                     type="text"
-                    placeholder="CODE"
+                    placeholder={t("enter_code_placeholder")}
                     value={enrollCode}
                     onChange={(e) => setEnrollCode(e.target.value)}
                     disabled={enrolling}
@@ -824,8 +826,8 @@ const TournamentEventPage: React.FC<Props> = ({ user, handleAuth, onBack, onPlay
                     width: isMobile ? "100%" : "auto"
                   }}
                 >
-                  <Lock size={18} />
-                  {enrolling ? "Validando..." : "INSCRIBITE"}
+                  <CheckCircle2 size={18} />
+                  {enrolling ? "..." : t("accept_enrollment")}
                 </button>
               </div>
               {enrollError && (
@@ -863,7 +865,7 @@ const TournamentEventPage: React.FC<Props> = ({ user, handleAuth, onBack, onPlay
               letterSpacing: "0.05em",
             }}
           >
-            Llaves / Partidos
+            {t("brackets_matches_tab")}
           </h3>
 
           {/* Organizer */}
@@ -871,7 +873,7 @@ const TournamentEventPage: React.FC<Props> = ({ user, handleAuth, onBack, onPlay
             <span style={{ fontSize: "1rem" }}>🎙️</span>
             <div>
               <div style={{ fontSize: "0.62rem", fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.06em", color: "#a855f7", marginBottom: "0.02rem" }}>
-                Organizador
+                {t("organizer_label_emoji")}
               </div>
               <div style={{ fontSize: "0.88rem", fontWeight: 800, color: "#fff" }}>
                 {tournament.organizer || "Truco Mundial"}
@@ -931,7 +933,7 @@ const TournamentEventPage: React.FC<Props> = ({ user, handleAuth, onBack, onPlay
                   <Hourglass size={44} strokeWidth={1.8} />
                 </motion.div>
                 <div style={{ opacity: 0.65, position: "relative", zIndex: 1 }}>
-                  Esperando el inicio del torneo.<br />El organizador generará las llaves próximamente.
+                  {t("waiting_tournament_start")}<br />{t("organizer_will_generate_brackets")}
                 </div>
                 {tournament.status !== "finished" && countdown && (
                   <div
@@ -953,7 +955,7 @@ const TournamentEventPage: React.FC<Props> = ({ user, handleAuth, onBack, onPlay
                     }}
                   >
                     <Clock size={15} style={{ color: "#a855f7" }} />
-                    <span style={{ color: "#d8b4fe" }}>Comienza en: {countdown}</span>
+                    <span style={{ color: "#d8b4fe" }}>{t("starts_in_countdown")} {countdown}</span>
                   </div>
                 )}
               </div>
@@ -1152,10 +1154,10 @@ const TournamentEventPage: React.FC<Props> = ({ user, handleAuth, onBack, onPlay
             }}
           >
             <h3 style={{ color: "#fff", fontSize: "1.25rem", fontWeight: 800, marginBottom: "1rem" }}>
-              ¿Desinscribirse del torneo?
+              {t("unenroll_tournament")}?
             </h3>
             <p style={{ color: "rgba(255,255,255,0.7)", fontSize: "0.95rem", marginBottom: "1.5rem" }}>
-              Estás a punto de salir del torneo <strong>{tournament?.name}</strong>. Podrás volver a inscribirte si aún hay cupos disponibles.
+              {t("about_to_unenroll")} <strong>{tournament?.name}</strong>. {t("action_will_free_slot")}
             </p>
 
             {unenrollError && (
@@ -1179,7 +1181,7 @@ const TournamentEventPage: React.FC<Props> = ({ user, handleAuth, onBack, onPlay
                   opacity: unenrolling ? 0.5 : 1,
                 }}
               >
-                Cancelar
+                {t("cancel_enrollment")}
               </button>
               <button
                 onClick={handleUnenroll}
@@ -1199,7 +1201,7 @@ const TournamentEventPage: React.FC<Props> = ({ user, handleAuth, onBack, onPlay
                 }}
               >
                 <LogOut size={16} strokeWidth={2.5} style={{ transform: "scaleX(-1)" }} />
-                {unenrolling ? "Saliendo..." : "Desinscribirse"}
+                {unenrolling ? "..." : t("unenroll_button")}
               </button>
             </div>
           </motion.div>

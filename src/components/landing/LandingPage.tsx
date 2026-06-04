@@ -1363,7 +1363,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   { id: 'Francia', flag: '🇫🇷' },
                   { id: 'España', flag: '🇪🇸' },
                   { id: 'Nueva Zelanda', flag: '🇳🇿' },
-                  { id: 'Brasil', flag: '🇧🇷' }
+                  { id: 'Brasil', flag: '🇧🇷' },
+                  { id: 'Argelia', flag: '🇩🇿' }
                 ].map(team => {
                   const isChecked = selectedTeams.includes(team.id);
                   const isLimitReached = selectedTeams.length >= 4;

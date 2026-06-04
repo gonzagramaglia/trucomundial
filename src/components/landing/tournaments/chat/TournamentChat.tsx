@@ -3,6 +3,7 @@ import { MessageSquare } from "lucide-react";
 import { supabase } from "../../../../lib/supabase";
 import { ChatMessage } from "./ChatMessage";
 import { ChatInput } from "./ChatInput";
+import { useTranslation } from "react-i18next";
 
 interface TournamentChatProps {
   tournamentId: string;
@@ -22,6 +23,7 @@ export const TournamentChat: React.FC<TournamentChatProps> = ({
   user,
   nameMap,
 }) => {
+  const { t } = useTranslation();
   const [messages, setMessages] = useState<ChatMessageType[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [sending, setSending] = useState(false);
@@ -128,7 +130,7 @@ export const TournamentChat: React.FC<TournamentChatProps> = ({
             letterSpacing: "0.05em",
           }}
         >
-          Chat del Torneo
+          {t("tournament_chat_title")}
         </h3>
       </div>
 
@@ -155,7 +157,7 @@ export const TournamentChat: React.FC<TournamentChatProps> = ({
               textAlign: "center",
             }}
           >
-            No hay mensajes aún. ¡Sé el primero en saludar!
+            {t("no_messages_yet")}
           </div>
         ) : (
           messages.map((msg) => (

@@ -365,7 +365,7 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({
             }}
           >
             <span>⚠️</span>
-            <span>Aún no habilitados</span>
+            <span>{t("not_enabled_yet")}</span>
           </div>
         </>
       )}
@@ -436,7 +436,7 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({
                 }}
               >
                 <span>⚠️</span>
-                <span>Aún no habilitados</span>
+                <span>{t("not_enabled_yet")}</span>
               </div>
             </div>
 
@@ -750,9 +750,9 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({
                     fontWeight: 800,
                   }}
                 >
-                  Torneos
+                  {t("tournaments_played").split("\n")[0]}
                   <br />
-                  Jugados
+                  {t("tournaments_played").split("\n")[1]}
                 </div>
               </div>
               <div
@@ -777,9 +777,9 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({
                     fontWeight: 800,
                   }}
                 >
-                  Posición
+                  {t("global_position").split("\n")[0]}
                   <br />
-                  Global
+                  {t("global_position").split("\n")[1]}
                 </div>
               </div>
               <div
@@ -805,9 +805,9 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({
                     marginTop: "0.3rem",
                   }}
                 >
-                  Próximo
+                  {t("next_tournament").split("\n")[0]}
                   <br />
-                  Torneo
+                  {t("next_tournament").split("\n")[1]}
                 </div>
               </div>
             </div>
@@ -829,7 +829,7 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({
           textAlign: "center",
         }}
       >
-        LISTADO DE TORNEOS
+        {t("tournaments_list")}
       </h3>
 
       {loading ? (
@@ -846,7 +846,7 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({
             width: "100%",
           }}
         >
-          Cargando torneos...
+          {t("loading_tournaments")}
         </div>
       ) : tournaments.length === 0 ? (
         <div
@@ -861,7 +861,7 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({
             width: "100%",
           }}
         >
-          No hay torneos disponibles en este momento.
+          {t("no_tournaments_available")}
         </div>
       ) : (
         <div
@@ -1014,7 +1014,7 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({
                     >
                       <Zap size={17} style={{ color: "#ff7800", marginTop: "0.15rem", flexShrink: 0 }} />
                       <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
-                        <span>{tournament.prize.length > 1 ? "Premios:" : `${t("prize")}:`}</span>
+                        <span>{tournament.prize.length > 1 ? t("prizes") : `${t("prize")}:`}</span>
                         {tournament.prize.map((p: string, i: number) => (
                           <strong key={i} style={{ color: "#ff7800" }}>
                             {i + 1}º {p}
@@ -1127,7 +1127,7 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({
                     title="Ver info del torneo"
                   >
                     <Info size={15} />
-                    INFO
+                    {t("info_button")}
                   </button>
 
                   {/* Enroll Button */}
@@ -1193,23 +1193,23 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({
                     {isRegistered ? (
                       <>
                         <CheckCircle2 size={16} />
-                        INSCRIPTO
+                        {t("enrolled_button_label")}
                       </>
                     ) : tournament.participants >=
                       tournament.max_participants ? (
                       <>
                         <Lock size={16} />
-                        TORNEO LLENO
+                        {t("tournament_full")}
                       </>
                     ) : tournament.status === "open" ? (
                       <>
                         <Lock size={16} />
-                        INSCRIBITE
+                        {t("sign_up_button")}
                       </>
                     ) : (
                       <>
                         <Lock size={16} />
-                        INSCRIPCIONES CERRADAS
+                        {t("enrollments_closed")}
                       </>
                     )}
                   </button>
@@ -1232,7 +1232,7 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({
             textAlign: "center",
           }}
         >
-          RANKING GLOBAL DE JUGADORES
+          {t("global_ranking")}
         </h3>
 
         <div
@@ -1257,9 +1257,9 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({
               textTransform: "uppercase",
             }}
           >
-            <div style={{ textAlign: "center" }}>POS</div>
-            <div>JUGADOR</div>
-            <div style={{ textAlign: "right" }}>PTS</div>
+            <div style={{ textAlign: "center" }}>{t("pos")}</div>
+            <div>{t("player")}</div>
+            <div style={{ textAlign: "right" }}>{t("pts_ranking")}</div>
           </div>
 
           {/* List */}
@@ -1395,7 +1395,7 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({
               color: "rgba(255,255,255,0.5)",
             }}
           >
-            PÁGINA {currentPage} DE {totalPages}
+            {t("page_x_of_y", { current: currentPage, total: totalPages })}
           </div>
           <button
             onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
@@ -1478,7 +1478,7 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({
                     letterSpacing: "0.05em",
                   }}
                 >
-                  Ingreso al Torneo
+                  {enrollModalTournament.name}
                 </h3>
               </div>
 
@@ -1490,19 +1490,19 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({
                   lineHeight: 1.5,
                 }}
               >
-                Estás a punto de inscribirte al torneo{" "}
-                <strong>{enrollModalTournament.name}</strong> organizado por{" "}
+                {t("about_to_enroll")}{" "}
+                <strong>{enrollModalTournament.name}</strong> {t("organized_by").toLowerCase()}{" "}
                 <strong>{enrollModalTournament.organizer}</strong>.
                 <br />
                 <br />
                 {enrollModalTournament.code_type === "unique"
-                  ? "Por favor, ingresá tu código personal y único de acceso."
-                  : "Por favor, ingresá el código general de acceso al torneo."}
+                  ? t("enter_unique_code")
+                  : t("enter_general_code")}
               </div>
 
               <input
                 type="text"
-                placeholder="Ingresar Código..."
+                placeholder={t("enter_code_placeholder")}
                 value={enrollCode}
                 onChange={(e) => setEnrollCode(e.target.value)}
                 disabled={enrolling}
@@ -1552,7 +1552,7 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({
                     cursor: "pointer",
                   }}
                 >
-                  Cancelar
+                  {t("cancel_enrollment")}
                 </button>
                 <button
                   onClick={submitEnrollment}
@@ -1575,7 +1575,7 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({
                   }}
                 >
                   <CheckCircle2 size={18} />
-                  {enrolling ? "Validando..." : "Inscribite"}
+                  {enrolling ? "..." : t("accept_enrollment")}
                 </button>
               </div>
             </motion.div>
@@ -1638,10 +1638,10 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({
                       letterSpacing: "0.05em",
                     }}
                   >
-                    Historial de Torneos
+                    {t("tournament_history")}
                   </h3>
                   <div style={{ fontSize: "0.85rem", opacity: 0.6, marginTop: "0.2rem" }}>
-                    Jugador: <span style={{ color: "#fff", fontWeight: 800 }}>{selectedPlayerForHistory.name}</span> · Puntos Totales: <span style={{ color: "#ffdf00", fontWeight: 800 }}>{selectedPlayerForHistory.score} PTS</span>
+                    {t("player")}: <span style={{ color: "#fff", fontWeight: 800 }}>{selectedPlayerForHistory.name}</span> · {t("total_points")}: <span style={{ color: "#ffdf00", fontWeight: 800 }}>{selectedPlayerForHistory.score} PTS</span>
                   </div>
                 </div>
                 <button
@@ -1671,10 +1671,10 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({
                 }}
               >
                 {[
-                  { torneo: "Copa de Campeones 2026", puesto: "1º (Campeón 🏆)", puntos: "+500 PTS", fecha: "15/05/2026" },
-                  { torneo: "Mundial de Creadores", puesto: "2º (Subcampeón 🥈)", puntos: "+400 PTS", fecha: "02/05/2026" },
-                  { torneo: "Torneo Apertura Truco", puesto: "3º-4º (Semifinal)", puntos: "+300 PTS", fecha: "18/04/2026" },
-                  { torneo: "Desafío de Estrellas", puesto: "Octavos de Final", puntos: "+100 PTS", fecha: "05/04/2026" }
+                  { torneo: t("tournament_champions"), puesto: t("champion_1"), puntos: "+500 PTS", fecha: "15/05/2026" },
+                  { torneo: t("creators_world_cup"), puesto: t("runner_up_2"), puntos: "+400 PTS", fecha: "02/05/2026" },
+                  { torneo: t("apertura_tournament"), puesto: t("semifinal_3_4"), puntos: "+300 PTS", fecha: "18/04/2026" },
+                  { torneo: t("stars_challenge"), puesto: t("round_of_16"), puntos: "+100 PTS", fecha: "05/04/2026" }
                 ].map((p, idx) => (
                   <div
                     key={idx}
@@ -1717,7 +1717,7 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({
                   boxShadow: "4px 4px 0px #000",
                 }}
               >
-                Cerrar Historial
+                {t("close_history")}
               </button>
             </motion.div>
           </motion.div>

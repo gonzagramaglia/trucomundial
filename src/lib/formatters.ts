@@ -1,12 +1,24 @@
+import i18n from "./i18n";
+
 export const formatTournamentDate = (dateStr: string) => {
   if (!dateStr) return "";
   const match = dateStr.match(/(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/);
   if (!match) return dateStr;
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_, year, month, day, hour, min] = match;
 
-  const months = [
+  const lang = i18n.language || "es";
+
+  if (lang.startsWith("en")) {
+    const monthsEn = [
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"
+    ];
+    const monthName = monthsEn[parseInt(month, 10) - 1];
+    return `${monthName} ${parseInt(day, 10)}, ${year} at ${hour}:${min} (GMT-3)`;
+  }
+
+  const monthsEs = [
     "Enero",
     "Febrero",
     "Marzo",
@@ -20,7 +32,7 @@ export const formatTournamentDate = (dateStr: string) => {
     "Noviembre",
     "Diciembre",
   ];
-  const monthName = months[parseInt(month, 10) - 1];
+  const monthName = monthsEs[parseInt(month, 10) - 1];
 
   return `${parseInt(day, 10)} de ${monthName} de ${year} a las ${hour}:${min}hs (GMT-3)`;
 };
