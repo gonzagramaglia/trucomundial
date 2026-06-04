@@ -1,5 +1,5 @@
 -- Run this in the Supabase SQL Editor to sync custom_usernames to the profiles table
-UPDATE public.profiles p
+UPDATE profiles p
 SET username = u.raw_user_meta_data->>'custom_username'
 FROM auth.users u
 WHERE p.id = u.id

@@ -9,6 +9,7 @@ import TournamentDetails from "./TournamentDetails";
 import EnrollmentModal from "./EnrollmentModal";
 import { ActivePlayerMatch } from "./ActivePlayerMatch";
 import { TournamentMatchHistory } from "./TournamentMatchHistory";
+import { TournamentChat } from "./chat/TournamentChat";
 import { TwitchButton } from "../../shared/TwitchButton";
 import type { Tournament } from "./types";
 
@@ -326,7 +327,7 @@ const TournamentEventPage: React.FC<Props> = ({ user, handleAuth, onBack, onPlay
   const formatPlayerName = (pId: string | null) => {
     if (!pId) return "BYE (Pasa libre)";
     if (user && pId === user.id) {
-      const myName = nameMap[pId] || user.user_metadata?.custom_username || user.email?.split("@")[0] || "Usuario";
+      const myName = user.user_metadata?.custom_username || nameMap[pId] || user.email?.split("@")[0] || "Usuario";
       return `${myName}`;
     }
     return nameMap[pId] || `Jugador ${pId.slice(0, 5)}`;
@@ -895,15 +896,28 @@ const TournamentEventPage: React.FC<Props> = ({ user, handleAuth, onBack, onPlay
                   alignItems: "center",
                   justifyContent: "center",
                   gap: "1.2rem",
-                  opacity: 0.8,
                   fontSize: "0.95rem",
                   textAlign: "center",
                   padding: isMobile ? "2rem 1rem" : "3rem 2rem",
                   border: "1px dashed rgba(255,255,255,0.15)",
                   borderRadius: "1.5rem",
                   lineHeight: 1.6,
+                  position: "relative",
+                  overflow: "hidden",
                 }}
               >
+                <div style={{
+                  position: "absolute",
+                  top: 0, left: 0, right: 0, bottom: 0,
+                  backgroundImage: `url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MDAiIGhlaWdodD0iMzAwIiB2aWV3Qm94PSIwIDAgNDAwIDMwMCI+PHBhdGggZD0iTSA5MCA1MCBIIDEyNSBWIDE1MCBIIDE2MCBNIDkwIDI1MCBIIDEyNSBWIDE1MCBIIDE2MCBNIDI0MCAxNTAgSCAzMTAiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iNCIgZmlsbD0ibm9uZSIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjxyZWN0IHg9IjEwIiB5PSIzMCIgd2lkdGg9IjgwIiBoZWlnaHQ9IjQwIiByeD0iNiIgZmlsbD0id2hpdGUiIG9wYWNpdHk9IjAuOCIvPjxyZWN0IHg9IjEwIiB5PSIyMzAiIHdpZHRoPSI4MCIgaGVpZ2h0PSI0MCIgcng9IjYiIGZpbGw9IndoaXRlIiBvcGFjaXR5PSIwLjgiLz48cmVjdCB4PSIxNjAiIHk9IjEzMCIgd2lkdGg9IjgwIiBoZWlnaHQ9IjQwIiByeD0iNiIgZmlsbD0id2hpdGUiIG9wYWNpdHk9IjAuOCIvPjxyZWN0IHg9IjMxMCIgeT0iMTMwIiB3aWR0aD0iODAiIGhlaWdodD0iNDAiIHJ4PSI2IiBmaWxsPSJ3aGl0ZSIgb3BhY2l0eT0iMC44Ii8+PC9zdmc+")`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                  filter: "blur(6px)",
+                  opacity: 0.1,
+                  zIndex: 0,
+                  pointerEvents: "none"
+                }} />
+                
                 <motion.div
                   animate={{ rotate: 180 }}
                   transition={{
@@ -912,16 +926,18 @@ const TournamentEventPage: React.FC<Props> = ({ user, handleAuth, onBack, onPlay
                     ease: "easeInOut",
                     repeatDelay: 0.6
                   }}
-                  style={{ display: "inline-block", color: "#a855f7" }}
+                  style={{ display: "inline-block", color: "#a855f7", position: "relative", zIndex: 1 }}
                 >
                   <Hourglass size={44} strokeWidth={1.8} />
                 </motion.div>
-                <div style={{ opacity: 0.65 }}>
+                <div style={{ opacity: 0.65, position: "relative", zIndex: 1 }}>
                   Esperando el inicio del torneo.<br />El organizador generará las llaves próximamente.
                 </div>
                 {tournament.status !== "finished" && countdown && (
                   <div
                     style={{
+                      position: "relative",
+                      zIndex: 1,
                       background: "rgba(168, 85, 247, 0.08)",
                       border: "1px solid rgba(168, 85, 247, 0.18)",
                       borderRadius: "0.85rem",
@@ -1079,6 +1095,12 @@ const TournamentEventPage: React.FC<Props> = ({ user, handleAuth, onBack, onPlay
 
         </div>
       </div>
+
+      <TournamentChat
+        tournamentId={tournament.id}
+        user={user}
+        nameMap={nameMap}
+      />
 
       <TournamentMatchHistory
         finishedMatches={matches.filter(m => m.ended_at)}
