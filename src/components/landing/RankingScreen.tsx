@@ -7,6 +7,7 @@ import { Sticker } from '../shared/Sticker';
 import { supabase } from '../../lib/supabase';
 import { TwitchButton } from '../shared/TwitchButton';
 import { updateVotesRegistry } from '../../lib/votesStore';
+import { useBaseStars } from '../../hooks/useBaseStars';
 
 
 interface RankingScreenProps {
@@ -54,6 +55,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
   const lastVoteActionRef = useRef<'add' | 'sub' | null>(null);
   const lastSavedVotesRef = useRef<Record<string, number>>({});
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
+  const baseStarsByCountry = useBaseStars();
 
   useEffect(() => {
     const handleResize = () => {
@@ -275,7 +277,8 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
     .map(player => {
       const otherVotes = aggregateOtherVotes[player.id] ?? 0;
       const myActiveVotes = myVotes[player.id] ?? 0;
-      const totalVotes = player.stars + otherVotes + myActiveVotes;
+      const baseStars = baseStarsByCountry[player.country] || 0;
+      const totalVotes = player.stars + baseStars + otherVotes + myActiveVotes;
       return { id: player.id, totalVotes };
     })
     .sort((a, b) => b.totalVotes - a.totalVotes);
@@ -293,7 +296,8 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
     .map(player => {
       const otherVotes = aggregateOtherVotes[player.id] ?? 0;
       const myActiveVotes = myVotes[player.id] ?? 0;
-      const totalVotes = player.stars + otherVotes + myActiveVotes;
+      const baseStars = baseStarsByCountry[player.country] || 0;
+      const totalVotes = player.stars + baseStars + otherVotes + myActiveVotes;
 
       return {
         ...player,
@@ -365,7 +369,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
     const q = cleanString(search);
     if (!q) return true;
 
-    const translatedCountry = t(`country_${p.country}`, p.country);
+    const translatedCountry = t(`country_${p.country.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase()}`, p.country);
     return (
       cleanString(p.name).includes(q) ||
       cleanString(p.country).includes(q) ||
@@ -775,8 +779,8 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
           flexWrap: 'wrap',
           width: '100%'
         }}>
-          {/* Nationality Filters (Pills) */}
-          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+            {/* Nationality Filters (Pills) */}
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', flex: 1 }}>
             <button
               onClick={() => setSelectedCountries([])}
               style={{
@@ -794,99 +798,45 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
                 fontWeight: 700,
                 cursor: 'pointer',
                 transition: 'all 0.2s ease',
-                boxShadow: selectedCountries.length === 0 ? '0 0 10px rgba(0, 242, 255, 0.2)' : 'none'
+                boxShadow: selectedCountries.length === 0 ? '0 0 10px rgba(0, 242, 255, 0.2)' : 'none',
+                whiteSpace: 'nowrap'
               }}
             >
               <span style={{ marginRight: '0.4rem' }}>🌎</span> {t('filter_all')}
             </button>
-            <button
-              onClick={() => toggleCountryFilter('Argentina')}
-              style={{
-                height: '42px',
-                padding: '0 1.25rem',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxSizing: 'border-box',
-                borderRadius: '1.1rem',
-                background: selectedCountries.includes('Argentina') ? 'rgba(0, 242, 255, 0.2)' : 'rgba(255, 255, 255, 0.05)',
-                border: selectedCountries.includes('Argentina') ? '1.5px solid #00f2ff' : '1px solid rgba(255, 255, 255, 0.1)',
-                color: '#fff',
-                fontSize: '0.85rem',
-                fontWeight: 700,
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                boxShadow: selectedCountries.includes('Argentina') ? '0 0 10px rgba(0, 242, 255, 0.2)' : 'none'
-              }}
-            >
-              <span style={{ marginRight: '0.4rem' }}>🇦🇷</span> {t("country_Argentina")}
-            </button>
-            <button
-              className="filter-btn"
-              onClick={() => toggleCountryFilter('Brasil')}
-              style={{
-                background: selectedCountries.includes('Brasil') ? 'rgba(0, 242, 255, 0.2)' : 'rgba(255, 255, 255, 0.05)',
-                border: selectedCountries.includes('Brasil') ? '1.5px solid #00f2ff' : '1px solid rgba(255, 255, 255, 0.1)',
-                color: selectedCountries.includes('Brasil') ? '#fff' : 'rgba(255, 255, 255, 0.6)',
-                fontWeight: selectedCountries.includes('Brasil') ? 'bold' : 'normal',
-                boxShadow: selectedCountries.includes('Brasil') ? '0 0 10px rgba(0, 242, 255, 0.2)' : 'none'
-              }}
-            >
-              <span style={{ marginRight: '0.4rem' }}>🇧🇷</span> {t("country_Brasil")}
-            </button>
-            <button
-              className="filter-btn"
-              onClick={() => toggleCountryFilter('España')}
-              style={{
-                background: selectedCountries.includes('España') ? 'rgba(0, 242, 255, 0.2)' : 'rgba(255, 255, 255, 0.05)',
-                border: selectedCountries.includes('España') ? '1.5px solid #00f2ff' : '1px solid rgba(255, 255, 255, 0.1)',
-                color: selectedCountries.includes('España') ? '#fff' : 'rgba(255, 255, 255, 0.6)',
-                fontWeight: selectedCountries.includes('España') ? 'bold' : 'normal',
-                boxShadow: selectedCountries.includes('España') ? '0 0 10px rgba(0, 242, 255, 0.2)' : 'none'
-              }}
-            >
-              <span style={{ marginRight: '0.4rem' }}>🇪🇸</span> {t("country_España")}
-            </button>
-            <button
-              className="filter-btn"
-              onClick={() => toggleCountryFilter('Francia')}
-              style={{
-                background: selectedCountries.includes('Francia') ? 'rgba(0, 242, 255, 0.2)' : 'rgba(255, 255, 255, 0.05)',
-                border: selectedCountries.includes('Francia') ? '1.5px solid #00f2ff' : '1px solid rgba(255, 255, 255, 0.1)',
-                color: selectedCountries.includes('Francia') ? '#fff' : 'rgba(255, 255, 255, 0.6)',
-                fontWeight: selectedCountries.includes('Francia') ? 'bold' : 'normal',
-                boxShadow: selectedCountries.includes('Francia') ? '0 0 10px rgba(0, 242, 255, 0.2)' : 'none'
-              }}
-            >
-              <span style={{ marginRight: '0.4rem' }}>🇫🇷</span> {t("country_Francia")}
-            </button>
-            <button
-              className="filter-btn"
-              onClick={() => toggleCountryFilter('Nueva Zelanda')}
-              style={{
-                background: selectedCountries.includes('Nueva Zelanda') ? 'rgba(0, 242, 255, 0.2)' : 'rgba(255, 255, 255, 0.05)',
-                border: selectedCountries.includes('Nueva Zelanda') ? '1.5px solid #00f2ff' : '1px solid rgba(255, 255, 255, 0.1)',
-                color: selectedCountries.includes('Nueva Zelanda') ? '#fff' : 'rgba(255, 255, 255, 0.6)',
-                fontWeight: selectedCountries.includes('Nueva Zelanda') ? 'bold' : 'normal',
-                boxShadow: selectedCountries.includes('Nueva Zelanda') ? '0 0 10px rgba(0, 242, 255, 0.2)' : 'none'
-              }}
-            >
-              <span style={{ marginRight: '0.4rem' }}>🇳🇿</span> {t("country_Nueva Zelanda")}
-            </button>
-            <button
-              className="filter-btn"
-              onClick={() => toggleCountryFilter('Argelia')}
-              style={{
-                background: selectedCountries.includes('Argelia') ? 'rgba(0, 242, 255, 0.2)' : 'rgba(255, 255, 255, 0.05)',
-                border: selectedCountries.includes('Argelia') ? '1.5px solid #00f2ff' : '1px solid rgba(255, 255, 255, 0.1)',
-                color: selectedCountries.includes('Argelia') ? '#fff' : 'rgba(255, 255, 255, 0.6)',
-                fontWeight: selectedCountries.includes('Argelia') ? 'bold' : 'normal',
-                boxShadow: selectedCountries.includes('Argelia') ? '0 0 10px rgba(0, 242, 255, 0.2)' : 'none'
-              }}
-            >
-              <span style={{ marginRight: '0.4rem' }}>🇩🇿</span> {t("country_Argelia")}
-            </button>
 
+            {[
+              { id: 'Argelia', label: 'country_argelia', flag: '🇩🇿' },
+              { id: 'Argentina', label: 'country_argentina', flag: '🇦🇷' },
+              { id: 'Brasil', label: 'country_brasil', flag: '🇧🇷' },
+              { id: 'España', label: 'country_espana', flag: '🇪🇸' },
+              { id: 'Francia', label: 'country_francia', flag: '🇫🇷' },
+              { id: 'México', label: 'country_mexico', flag: '🇲🇽' },
+              { id: 'Nueva Zelanda', label: 'country_nueva zelanda', flag: '🇳🇿' },
+            ].map((country) => (
+              <button
+                key={country.id}
+                className="filter-btn"
+                onClick={() => toggleCountryFilter(country.id)}
+                style={{
+                  height: '42px',
+                  padding: '0 1.25rem',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxSizing: 'border-box',
+                  borderRadius: '1.1rem',
+                  background: selectedCountries.includes(country.id) ? 'rgba(0, 242, 255, 0.2)' : 'rgba(255, 255, 255, 0.05)',
+                  border: selectedCountries.includes(country.id) ? '1.5px solid #00f2ff' : '1px solid rgba(255, 255, 255, 0.1)',
+                  color: selectedCountries.includes(country.id) ? '#fff' : 'rgba(255, 255, 255, 0.6)',
+                  fontWeight: selectedCountries.includes(country.id) ? 'bold' : 'normal',
+                  boxShadow: selectedCountries.includes(country.id) ? '0 0 10px rgba(0, 242, 255, 0.2)' : 'none',
+                  whiteSpace: 'nowrap'
+                }}
+              >
+                <span style={{ marginRight: '0.4rem' }}>{country.flag}</span> {t(country.label)}
+              </button>
+            ))}
           </div>
 
           {/* Sort Selector */}
@@ -1165,7 +1115,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
                     {player.name}
                   </h4>
                   <p style={{ margin: 0, fontSize: '0.75rem', opacity: 0.6, textTransform: 'uppercase' }}>
-                    {t(`country_${player.country}`)} · {player.club}
+                    {t(`country_${player.country.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase()}`)} · {player.club}
                   </p>
                 </div>
 

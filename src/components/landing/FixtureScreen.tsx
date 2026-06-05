@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { TwitchButton } from '../shared/TwitchButton';
 import { fixtureMatches } from '../../lib/fixtureData';
 import type { FixtureMatch } from '../../lib/fixtureData';
+import { supabase } from '../../lib/supabase';
 
 type TabType = 'groups' | 'round_16' | 'quarterfinals' | 'semifinals' | 'final';
 
@@ -17,6 +18,25 @@ export const FixtureScreen: React.FC<FixtureScreenProps> = ({ onBack }) => {
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
   const [activeTab, setActiveTab] = useState<TabType>('groups');
   const [searchQuery, setSearchQuery] = useState('');
+  const [liveResults, setLiveResults] = useState<Record<string, {scoreA: number, scoreB: number, status: string}>>({});
+
+  useEffect(() => {
+    const fetchResults = async () => {
+      try {
+        const { data, error } = await supabase.from('fixture_results').select('*');
+        if (!error && data) {
+          const map: Record<string, any> = {};
+          data.forEach(r => {
+            map[r.match_id] = { scoreA: r.score_a, scoreB: r.score_b, status: r.status };
+          });
+          setLiveResults(map);
+        }
+      } catch (err) {
+        // ignore
+      }
+    };
+    fetchResults();
+  }, []);
 
   useEffect(() => {
     const handleResize = () => {
@@ -28,7 +48,17 @@ export const FixtureScreen: React.FC<FixtureScreenProps> = ({ onBack }) => {
 
   // Filter and group matches by date
   const groupedMatches = useMemo(() => {
-    let filtered = fixtureMatches;
+    let filtered = fixtureMatches.map(m => {
+      if (liveResults[m.id]) {
+        return {
+          ...m,
+          scoreA: liveResults[m.id].scoreA,
+          scoreB: liveResults[m.id].scoreB,
+          status: liveResults[m.id].status as 'finished'
+        };
+      }
+      return m;
+    });
     
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
@@ -56,7 +86,7 @@ export const FixtureScreen: React.FC<FixtureScreenProps> = ({ onBack }) => {
       date,
       matches: groups[date]
     }));
-  }, [searchQuery]);
+  }, [searchQuery, liveResults]);
 
   const renderTab = (id: TabType, label: string, Icon: any) => (
     <button
@@ -182,7 +212,7 @@ export const FixtureScreen: React.FC<FixtureScreenProps> = ({ onBack }) => {
           marginTop: '0.75rem',
           marginBottom: 0
         }}>
-          Calendario oficial de los partidos de la Copa del Mundo.
+          {t('fixture_desc')}
         </p>
 
         <div style={{
@@ -209,15 +239,16 @@ export const FixtureScreen: React.FC<FixtureScreenProps> = ({ onBack }) => {
           }}>
             <Trophy size={20} color="#ffd700" />
           </div>
-          <p style={{
-            margin: 0,
-            fontSize: '0.85rem',
-            color: 'rgba(255,255,255,0.9)',
-            lineHeight: 1.4,
-            textAlign: 'left'
-          }}>
-            Al finalizar cada partido, sumarán <strong>+2 estrellas de base</strong> los jugadores de los equipos que ganen, y <strong>+1 estrella</strong> aquellos que empaten.
-          </p>
+          <p 
+            style={{
+              margin: 0,
+              fontSize: '0.85rem',
+              color: 'rgba(255,255,255,0.9)',
+              lineHeight: 1.4,
+              textAlign: 'left'
+            }}
+            dangerouslySetInnerHTML={{ __html: t('fixture_info') }}
+          />
         </div>
       </div>
 
@@ -230,13 +261,15 @@ export const FixtureScreen: React.FC<FixtureScreenProps> = ({ onBack }) => {
         overflowX: 'auto',
         paddingBottom: '0.5rem',
         scrollbarWidth: 'none', // For Firefox
-        msOverflowStyle: 'none', // For IE/Edge
+        msOverflowStyle: 'none' // For IE/Edge
       }}>
-        {renderTab('groups', 'Fase de Grupos', Globe)}
-        {renderTab('round_16', 'Octavos', Trophy)}
-        {renderTab('quarterfinals', 'Cuartos', Trophy)}
-        {renderTab('semifinals', 'Semifinal', Trophy)}
-        {renderTab('final', 'Final', Trophy)}
+        <div style={{ display: 'flex', gap: '0.5rem', width: 'max-content' }}>
+          {renderTab('groups', t('group_stage'), Globe)}
+          {renderTab('round_16', t('round_of_16'), Trophy)}
+          {renderTab('quarterfinals', t('quarterfinals'), Trophy)}
+          {renderTab('semifinals', t('semifinals'), Trophy)}
+          {renderTab('final', t('final'), Trophy)}
+        </div>
       </div>
 
       {/* Search and Filters */}
@@ -263,7 +296,7 @@ export const FixtureScreen: React.FC<FixtureScreenProps> = ({ onBack }) => {
             }} />
             <input
               type="text"
-              placeholder="Buscar equipo, Grupo A o fecha (ej: Jueves 18 de Junio)..."
+              placeholder={t('search_team')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               style={{
@@ -339,7 +372,7 @@ export const FixtureScreen: React.FC<FixtureScreenProps> = ({ onBack }) => {
                     opacity: 0.8 
                   }}>
                     <span style={{ fontSize: '1rem', fontWeight: 800 }}>{match.time}</span>
-                    <span style={{ fontSize: '0.8rem', opacity: 0.6 }}>{match.group}</span>
+                    <span style={{ fontSize: '0.8rem', opacity: 0.6 }}>{match.group.replace('Group', t('group'))}</span>
                   </div>
 
                   {/* Teams vs */}
@@ -367,7 +400,11 @@ export const FixtureScreen: React.FC<FixtureScreenProps> = ({ onBack }) => {
                       color: 'rgba(255,255,255,0.4)',
                       minWidth: '60px'
                     }}>
-                      VS
+                        {match.status === 'finished' ? (
+                          <span style={{ fontSize: '1.25rem', fontWeight: 900 }}>{match.scoreA} - {match.scoreB}</span>
+                        ) : (
+                          'VS'
+                        )}
                     </div>
 
                     {/* Team B */}
@@ -386,9 +423,18 @@ export const FixtureScreen: React.FC<FixtureScreenProps> = ({ onBack }) => {
                       alignItems: 'center',
                       gap: '0.25rem'
                     }}>
-                      <span style={{ fontSize: '0.7rem', textTransform: 'uppercase', opacity: 0.5, fontWeight: 700 }}>Marcador</span>
-                      <span style={{ fontSize: '1rem', fontWeight: 800 }}>-</span>
-                      <span style={{ fontSize: '0.65rem', opacity: 0.4, fontWeight: 700 }}>Por Jugar</span>
+                      <span style={{ fontSize: '0.7rem', textTransform: 'uppercase', opacity: 0.5, fontWeight: 700 }}>{t('score', 'Marcador')}</span>
+                      {match.status === 'finished' ? (
+                        <>
+                          <span style={{ fontSize: '1.25rem', fontWeight: 900, color: '#00f2ff' }}>{match.scoreA} - {match.scoreB}</span>
+                          <span style={{ fontSize: '0.65rem', opacity: 0.8, fontWeight: 700, color: '#00f2ff' }}>{t('finished', 'Finalizado')}</span>
+                        </>
+                      ) : (
+                        <>
+                          <span style={{ fontSize: '1rem', fontWeight: 800 }}>-</span>
+                          <span style={{ fontSize: '0.65rem', opacity: 0.4, fontWeight: 700 }}>{t('to_be_played')}</span>
+                        </>
+                      )}
                     </div>
                   )}
 
@@ -408,10 +454,10 @@ export const FixtureScreen: React.FC<FixtureScreenProps> = ({ onBack }) => {
           }}>
             <Search size={48} style={{ color: 'rgba(255,255,255,0.2)', marginBottom: '1rem' }} />
             <h3 style={{ fontSize: '1.5rem', fontWeight: 800, margin: '0 0 0.5rem 0', color: 'rgba(255,255,255,0.6)' }}>
-              No se encontraron partidos
+              {t('no_matches_found', 'No se encontraron partidos')}
             </h3>
             <p style={{ opacity: 0.5, fontSize: '0.9rem', maxWidth: '400px', margin: '0 auto' }}>
-              No hay partidos que coincidan con tu búsqueda. Intentá con otro equipo, grupo o fecha.
+              {t('no_matches_desc', 'No hay partidos que coincidan con tu búsqueda. Intentá con otro equipo, grupo o fecha.')}
             </p>
           </div>
         )}

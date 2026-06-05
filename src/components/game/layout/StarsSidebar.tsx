@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { BarChart3 } from 'lucide-react';
 import { CARDS } from '../../../data/cards';
 import { useTranslation } from 'react-i18next';
 import { supabase } from '../../../lib/supabase';
+import { subscribeToVotes, votesRegistry } from '../../../lib/votesStore';
+import { useBaseStars } from '../../../hooks/useBaseStars';
 
 const BASE_PLAYERS = CARDS.map(card => ({
   id: card.id,
@@ -22,8 +24,14 @@ export const StarsSidebar = () => {
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [dbVotesData, setDbVotesData] = useState<any[]>([]);
+  const [aggregateVotes, setAggregateVotes] = useState<Record<string, number>>(votesRegistry);
+  const baseStarsByCountry = useBaseStars();
 
   useEffect(() => {
+    const unsub = subscribeToVotes(() => {
+      setAggregateVotes({ ...votesRegistry });
+    });
+    
     const fetchGlobalVotes = async () => {
       setLoading(true);
       try {
@@ -45,32 +53,37 @@ export const StarsSidebar = () => {
     };
 
     fetchGlobalVotes();
+    return () => unsub();
   }, []);
 
-  // Compile aggregate votes
-  const aggregateVotes: Record<string, number> = {};
-  dbVotesData.forEach(item => {
-    const recordVotes = item.last_move?.votes;
-    if (recordVotes && typeof recordVotes === 'object') {
-      Object.entries(recordVotes).forEach(([cardId, count]) => {
-        if (typeof count === 'number') {
-          aggregateVotes[cardId] = (aggregateVotes[cardId] ?? 0) + count;
-        }
-      });
-    }
-  });
-
-  const sorted = [...BASE_PLAYERS]
-    .map(p => ({
-      ...p,
-      totalVotes: p.stars + (aggregateVotes[p.id] ?? 0)
-    }))
-    .sort((a, b) => {
-      if (b.totalVotes !== a.totalVotes) {
-        return b.totalVotes - a.totalVotes;
+  const sorted = useMemo(() => {
+    const remoteVotes: Record<string, number> = {};
+    dbVotesData.forEach(item => {
+      const recordVotes = item.last_move?.votes;
+      if (recordVotes && typeof recordVotes === 'object') {
+        Object.entries(recordVotes).forEach(([cardId, count]) => {
+          if (typeof count === 'number') {
+            remoteVotes[cardId] = (remoteVotes[cardId] ?? 0) + count;
+          }
+        });
       }
-      return a.randomOffset - b.randomOffset;
     });
+
+    return [...BASE_PLAYERS]
+      .map(p => {
+        const baseStars = baseStarsByCountry[p.country] || 0;
+        return {
+          ...p,
+          totalVotes: p.stars + baseStars + (aggregateVotes[p.id] ?? 0) + (remoteVotes[p.id] ?? 0)
+        };
+      })
+      .sort((a, b) => {
+        if (b.totalVotes !== a.totalVotes) {
+          return b.totalVotes - a.totalVotes;
+        }
+        return a.randomOffset - b.randomOffset;
+      });
+  }, [dbVotesData, aggregateVotes, baseStarsByCountry]);
 
   const ranksMap = new Map<string, number>();
   let currentRank = 1;
@@ -91,7 +104,7 @@ export const StarsSidebar = () => {
   const filtered = sorted.filter(p => {
     const q = cleanString(search);
     if (!q) return true;
-    const translatedCountry = t(`country_${p.country}`, p.country);
+    const translatedCountry = t(`country_${p.country.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase()}`, p.country);
     return (
       cleanString(p.name).includes(q) ||
       cleanString(p.country).includes(q) ||
@@ -230,7 +243,7 @@ export const StarsSidebar = () => {
                   </div>
                   {/* Line 2: Country · Club */}
                   <div style={{ opacity: 0.5, fontSize: '0.65rem', textTransform: 'uppercase', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {t(`country_${p.country}`)} · {p.club}
+                    {t(`country_${p.country.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase()}`, p.country)} · {p.club}
                   </div>
                 </div>
 

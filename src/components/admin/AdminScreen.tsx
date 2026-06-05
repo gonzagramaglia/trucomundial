@@ -5,6 +5,7 @@ import { MatchesTab } from "./tabs/MatchesTab";
 import { TournamentsTab } from "./tabs/TournamentsTab";
 import { ApplicationsTab } from "./tabs/ApplicationsTab";
 import { TicketsTab } from "./tabs/TicketsTab";
+import { FixtureTab } from "./tabs/FixtureTab";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ShieldAlert,
@@ -15,6 +16,7 @@ import {
   FileText,
   Trophy,
   MessageSquare,
+  CalendarDays,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { supabase } from "../../lib/supabase";
@@ -95,7 +97,7 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
   const [selectedUserStars, setSelectedUserStars] = useState<any | null>(null);
   const [userRoles, setUserRoles] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<
-    "players" | "matches" | "tournaments" | "applications" | "suggestions" | "support"
+    "players" | "matches" | "tournaments" | "applications" | "suggestions" | "support" | "fixture"
   >("players");
   const [playerSearchTerm, setPlayerSearchTerm] = useState("");
   const [isMobile, setIsMobile] = useState(
@@ -960,6 +962,36 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
           <Swords size={18} /> Partidas Globales ({history.length})
         </button>
         <button
+          onClick={() => setActiveTab("fixture")}
+          style={{
+            background:
+              activeTab === "fixture"
+                ? "#a855f7"
+                : "rgba(255, 255, 255, 0.05)",
+            border:
+              activeTab === "fixture"
+                ? "none"
+                : "1px solid rgba(255, 255, 255, 0.1)",
+            color:
+              activeTab === "fixture"
+                ? "#fff"
+                : "rgba(255, 255, 255, 0.5)",
+            padding: "0.75rem 1.5rem",
+            borderRadius: "1rem",
+            fontWeight: 800,
+            fontSize: "0.9rem",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            gap: "0.5rem",
+            boxShadow:
+              activeTab === "fixture" ? "4px 4px 0px #000" : "none",
+            transition: "all 0.2s",
+          }}
+        >
+          <CalendarDays size={18} /> Fixture
+        </button>
+        <button
           onClick={() => setActiveTab("applications")}
           style={{
             background:
@@ -1141,6 +1173,8 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
             handleTicketStatus={handleTicketStatus}
             handleDeleteTicket={handleDeleteTicket}
           />
+        ) : activeTab === "fixture" ? (
+          <FixtureTab />
         ) : null}
 
         {/* DETAILED LOG MODAL */}

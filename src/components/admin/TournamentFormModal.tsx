@@ -61,7 +61,7 @@ export const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
         reset({
           ...tournament,
           prize: normalizeTournamentPrizes(tournament.prize),
-          allowed_teams: tournament.allowed_teams || ["Argentina", "Francia", "España", "Brasil"],
+          allowed_teams: tournament.allowed_teams || ["Argentina", "Francia", "España", "Nueva Zelanda", "Brasil", "Argelia", "México"],
         });
       } else {
         const now = new Date();
@@ -83,7 +83,7 @@ export const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
           visibility: "public",
           code_type: "single",
           codes: [],
-          allowed_teams: ["Argentina", "Francia", "España", "Brasil"],
+          allowed_teams: ["Argentina", "Francia", "España", "Nueva Zelanda", "Brasil", "Argelia", "México"],
         });
       }
     }
@@ -635,7 +635,8 @@ export const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
                   { id: 'España', flag: '🇪🇸' },
                   { id: 'Nueva Zelanda', flag: '🇳🇿' },
                   { id: 'Brasil', flag: '🇧🇷' },
-                  { id: 'Argelia', flag: '🇩🇿' }
+                  { id: 'Argelia', flag: '🇩🇿' },
+                  { id: 'México', flag: '🇲🇽' }
                 ].map((team) => {
                   const allowedTeams = formData.allowed_teams || [];
                   const isChecked = allowedTeams.includes(team.id);

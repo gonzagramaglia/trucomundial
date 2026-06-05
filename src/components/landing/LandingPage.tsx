@@ -589,7 +589,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         .eq("match_code", matchCode)
         .maybeSingle();
 
-      let allowed = ["Argentina", "Francia", "España", "Brasil"];
+      let allowed = ["Argentina", "Francia", "España", "Nueva Zelanda", "Brasil", "Argelia", "México"];
       if (mData && mData.tournament_id) {
         const { data: tData } = await supabase
           .from("tournaments")
@@ -1412,7 +1412,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   { id: 'Francia', flag: '🇫🇷' },
                   { id: 'España', flag: '🇪🇸' },
                   { id: 'Nueva Zelanda', flag: '🇳🇿' },
-                  { id: 'Brasil', flag: '🇧🇷' }
+                  { id: 'Brasil', flag: '🇧🇷' },
+                  { id: 'Argelia', flag: '🇩🇿' },
+                  { id: 'México', flag: '🇲🇽' }
                 ].map(team => {
                   const isChecked = selectedTeams.includes(team.id);
                   const isLimitReached = selectedTeams.length >= 4;
@@ -1444,7 +1446,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     >
                       <span style={{ fontSize: '1rem', fontWeight: 800, color: '#fff', display: 'inline-flex', alignItems: 'center' }}>
                         <span style={{ marginRight: '0.65rem' }}>{team.flag}</span>
-                        {t("country_" + team.id)}
+                        {t("country_" + team.id.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase())}
                       </span>
                       <div style={{
                         width: '20px',

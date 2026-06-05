@@ -9,7 +9,8 @@ const FLAG_MAP: Record<string, string> = {
   "España": "🇪🇸",
   "Nueva Zelanda": "🇳🇿",
   "Brasil": "🇧🇷",
-  "Argelia": "🇩🇿"
+  "Argelia": "🇩🇿",
+  "México": "🇲🇽"
 };
 
 interface Props {
@@ -128,7 +129,7 @@ const TournamentDetails: React.FC<Props> = ({
                   }}
                 >
                   <span>{FLAG_MAP[team] || "🏳️"}</span>
-                  <span>{t(`country_${team.toLowerCase().replace("ñ", "n")}`, team)}</span>
+                  <span>{t(`country_${team.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase()}`, team)}</span>
                 </div>
               ))}
             </div>

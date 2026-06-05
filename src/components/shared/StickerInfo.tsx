@@ -32,7 +32,7 @@ export const StickerInfo: React.FC<StickerInfoProps> = ({ country, club, isHover
           lineHeight: 1.2,
         }}
       >
-        {t(`country_${country}`)}
+        {t(`country_${country.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase()}`)}
       </span>
       <span
         className="text-display"

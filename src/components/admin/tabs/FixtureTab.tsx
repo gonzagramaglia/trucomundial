@@ -1,0 +1,255 @@
+import React, { useState, useEffect, useMemo } from 'react';
+import { supabase } from '../../../lib/supabase';
+import { fixtureMatches } from '../../../lib/fixtureData';
+import { Search, Save } from 'lucide-react';
+
+export const FixtureTab: React.FC = () => {
+  const [results, setResults] = useState<Record<string, { scoreA: number; scoreB: number; status: string }>>({});
+  const [loading, setLoading] = useState(true);
+  const [savingId, setSavingId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const fetchResults = async () => {
+    try {
+      const { data, error } = await supabase.from('fixture_results').select('*');
+      if (error) throw error;
+      
+      const resultsMap: Record<string, { scoreA: number; scoreB: number; status: string }> = {};
+      data?.forEach(row => {
+        resultsMap[row.match_id] = {
+          scoreA: row.score_a,
+          scoreB: row.score_b,
+          status: row.status
+        };
+      });
+      setResults(resultsMap);
+    } catch (err) {
+      console.error("Error fetching fixture results:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchResults();
+  }, []);
+
+  const handleScoreChange = (matchId: string, team: 'A' | 'B', val: string) => {
+    const num = parseInt(val);
+    if (isNaN(num)) return;
+    
+    setResults(prev => ({
+      ...prev,
+      [matchId]: {
+        scoreA: team === 'A' ? num : (prev[matchId]?.scoreA || 0),
+        scoreB: team === 'B' ? num : (prev[matchId]?.scoreB || 0),
+        status: 'finished'
+      }
+    }));
+  };
+
+  const handleSave = async (matchId: string) => {
+    const res = results[matchId];
+    if (!res) return;
+    
+    setSavingId(matchId);
+    try {
+      const { error } = await supabase.from('fixture_results').upsert({
+        match_id: matchId,
+        score_a: res.scoreA,
+        score_b: res.scoreB,
+        status: 'finished',
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'match_id' });
+      
+      if (error) throw error;
+      
+      // Update local state temporarily to show success
+      const btn = document.getElementById(`btn-save-${matchId}`);
+      if (btn) {
+        btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Guardado';
+        setTimeout(() => {
+          btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg> Guardar';
+        }, 2000);
+      }
+    } catch (err: any) {
+      alert("Error guardando el resultado: " + err.message);
+    } finally {
+      setSavingId(null);
+    }
+  };
+
+  const filteredMatches = useMemo(() => {
+    if (!searchQuery) return fixtureMatches;
+    const q = searchQuery.toLowerCase();
+    const groupSearch = q.replace('grupo', 'group');
+    
+    return fixtureMatches.filter(m => 
+      m.teamA.toLowerCase().includes(q) || 
+      m.teamB.toLowerCase().includes(q) || 
+      m.group.toLowerCase().includes(q) ||
+      m.group.toLowerCase().includes(groupSearch) ||
+      m.date.toLowerCase().includes(q)
+    );
+  }, [searchQuery]);
+
+  if (loading) {
+    return <div style={{ textAlign: 'center', padding: '2rem', opacity: 0.5 }}>Cargando fixture...</div>;
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <h3 className="text-display" style={{ fontSize: '1.5rem', margin: 0, color: '#fff' }}>Resultados del Mundial</h3>
+      </div>
+      
+      {/* Search Bar */}
+      <div style={{
+        background: 'rgba(255, 255, 255, 0.05)',
+        border: '1px solid rgba(255, 255, 255, 0.1)',
+        borderRadius: '1rem',
+        padding: '0.5rem 1rem',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.75rem',
+      }}>
+        <Search size={18} style={{ opacity: 0.5 }} />
+        <input 
+          type="text" 
+          placeholder="Buscar equipo, grupo o fecha..." 
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          style={{
+            background: 'transparent',
+            border: 'none',
+            outline: 'none',
+            color: 'white',
+            width: '100%',
+            fontSize: '1rem',
+            fontFamily: 'inherit'
+          }}
+        />
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        {filteredMatches.map(match => (
+          <div key={match.id} style={{
+            background: 'rgba(20, 20, 25, 0.8)',
+            border: '1px solid rgba(255, 255, 255, 0.05)',
+            borderRadius: '1rem',
+            padding: '1rem',
+            display: 'flex',
+            flexDirection: isMobile ? 'column' : 'row',
+            gap: isMobile ? '1rem' : '2rem',
+            alignItems: 'center',
+          }}>
+            <div style={{ flex: isMobile ? 'none' : '0 0 180px', display: 'flex', flexDirection: 'column', textAlign: isMobile ? 'center' : 'left' }}>
+              <span style={{ fontSize: '0.9rem', fontWeight: 800 }}>{match.date}</span>
+              <span style={{ fontSize: '0.8rem', opacity: 0.6 }}>{match.group.replace('Group', 'Grupo')} - {match.time}</span>
+            </div>
+
+            {/* Editor */}
+            <div style={{ 
+              flex: 1, 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center',
+              gap: '1rem',
+              width: isMobile ? '100%' : 'auto'
+            }}>
+              {/* Team A */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1, justifyContent: 'flex-end' }}>
+                <span style={{ fontWeight: 800 }}>{match.teamA}</span>
+                <span style={{ fontSize: '1.5rem' }}>{match.flagA}</span>
+              </div>
+              
+              {/* Score Inputs */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(0,0,0,0.5)', padding: '0.5rem', borderRadius: '0.5rem' }}>
+                <input 
+                  type="number"
+                  min="0"
+                  value={results[match.id]?.scoreA ?? ''}
+                  onChange={(e) => handleScoreChange(match.id, 'A', e.target.value)}
+                  style={{
+                    width: '40px',
+                    height: '40px',
+                    textAlign: 'center',
+                    background: 'rgba(255,255,255,0.1)',
+                    border: '1px solid rgba(255,255,255,0.2)',
+                    borderRadius: '0.5rem',
+                    color: 'white',
+                    fontSize: '1.25rem',
+                    fontWeight: 'bold'
+                  }}
+                />
+                <span style={{ opacity: 0.5, fontWeight: 'bold' }}>-</span>
+                <input 
+                  type="number"
+                  min="0"
+                  value={results[match.id]?.scoreB ?? ''}
+                  onChange={(e) => handleScoreChange(match.id, 'B', e.target.value)}
+                  style={{
+                    width: '40px',
+                    height: '40px',
+                    textAlign: 'center',
+                    background: 'rgba(255,255,255,0.1)',
+                    border: '1px solid rgba(255,255,255,0.2)',
+                    borderRadius: '0.5rem',
+                    color: 'white',
+                    fontSize: '1.25rem',
+                    fontWeight: 'bold'
+                  }}
+                />
+              </div>
+
+              {/* Team B */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1, justifyContent: 'flex-start' }}>
+                <span style={{ fontSize: '1.5rem' }}>{match.flagB}</span>
+                <span style={{ fontWeight: 800 }}>{match.teamB}</span>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div style={{ flex: isMobile ? 'none' : '0 0 100px', display: 'flex', justifyContent: 'center', width: isMobile ? '100%' : 'auto' }}>
+              <button
+                id={`btn-save-${match.id}`}
+                disabled={results[match.id]?.scoreA === undefined || results[match.id]?.scoreB === undefined || savingId === match.id}
+                onClick={() => handleSave(match.id)}
+                className="btn-hover-dark"
+                style={{
+                  background: 'rgba(34, 197, 94, 0.2)',
+                  border: '1px solid rgba(34, 197, 94, 0.5)',
+                  color: '#4ade80',
+                  padding: '0.5rem 1rem',
+                  borderRadius: '0.5rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  fontWeight: 'bold',
+                  cursor: (results[match.id]?.scoreA === undefined || results[match.id]?.scoreB === undefined || savingId === match.id) ? 'not-allowed' : 'pointer',
+                  opacity: (results[match.id]?.scoreA === undefined || results[match.id]?.scoreB === undefined) ? 0.5 : 1,
+                  width: isMobile ? '100%' : 'auto',
+                  justifyContent: 'center'
+                }}
+              >
+                {savingId === match.id ? (
+                  <div style={{ width: '16px', height: '16px', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+                ) : (
+                  <Save size={16} />
+                )}
+                Guardar
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};

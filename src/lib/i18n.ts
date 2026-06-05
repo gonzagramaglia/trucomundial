@@ -174,6 +174,8 @@ const resources = {
       "country_Nueva Zelanda": "New Zealand",
       "country_Brasil": "Brazil",
       "country_Argelia": "Algeria",
+      "country_México": "Mexico",
+      "country_Mexico": "Mexico",
 
       // GameModeSelector
       "roadmap": "ROADMAP",
@@ -251,8 +253,8 @@ const resources = {
       "accept_enrollment": "Accept",
       "unenroll_tournament": "Unenroll from Tournament",
       "about_to_unenroll": "You are about to cancel your enrollment for the tournament",
-      "action_will_free_slot": "This action will free up your slot and cannot be undone.",
-      "unenroll_button": "Unenroll",
+      "action_will_free_slot": "This action will free your slot and cannot be undone.",
+      "unenroll_button": "Leave",
       "deck_composition": "Deck Composition",
       "start_label": "Start",
       "frozen_ranking_info": "ℹ️ Cards are played with the ranking rating frozen at the start of the tournament.",
@@ -297,6 +299,8 @@ const resources = {
       "country_espana": "Spain",
       "country_brasil": "Brazil",
       "country_algeria": "Algeria",
+      "country_méxico": "Mexico",
+      "country_mexico": "Mexico",
       "tournaments_subtitle": "Compete in 1v1 tournaments and qualify for the 2v2 grand final",
       "t1_name": "COPA MUCHO MOVIMIENTO (1v1)",
       "t1_start": "In 8 minutes",
@@ -421,7 +425,18 @@ const resources = {
       "err_subject_max": "Subject is too long",
       "err_message_min": "Message must be more descriptive",
       "err_message_max": "Message is too long",
-      "error_sending_suggestion": "Error sending suggestion: "
+      "error_sending_suggestion": "Error sending suggestion: ",
+      "fixture_desc": "Official schedule of the World Cup matches.",
+      "fixture_info": "At the end of each match, players from the winning teams will earn <strong>+2 base stars</strong>, and <strong>+1 star</strong> for those who tie.",
+      "search_team": "Search team, group or date...",
+      "group_stage": "Group Stage",
+
+      "quarterfinals": "Quarterfinals",
+      "semifinals": "Semifinals",
+      "final": "Final",
+      "groups": "Groups",
+      "group": "Group",
+      "to_be_played": "To be played"
     }
   },
   es: {
@@ -586,6 +601,8 @@ const resources = {
       "country_Nueva Zelanda": "Nueva Zelanda",
       "country_Brasil": "Brasil",
       "country_Argelia": "Argelia",
+      "country_México": "México",
+      "country_Mexico": "México",
 
       // GameModeSelector
       "roadmap": "HOJA DE RUTA",
@@ -664,7 +681,7 @@ const resources = {
       "unenroll_tournament": "Desinscribirse del Torneo",
       "about_to_unenroll": "Estás a punto de cancelar tu inscripción al torneo",
       "action_will_free_slot": "Esta acción liberará tu cupo y no podrá deshacerse.",
-      "unenroll_button": "Desinscribirme",
+      "unenroll_button": "Salir",
       "deck_composition": "Composición del Mazo",
       "start_label": "Inicio",
       "frozen_ranking_info": "ℹ️ Las cartas se juegan con la valoración del ranking congelada al inicio del torneo.",
@@ -709,6 +726,8 @@ const resources = {
       "country_espana": "España",
       "country_brasil": "Brasil",
       "country_algeria": "Argelia",
+      "country_méxico": "México",
+      "country_mexico": "México",
       "tournaments_subtitle": "Competí en torneos 1vs1 y clasificá a la gran final 2vs2",
       "t1_name": "COPA MUCHO MOVIMIENTO (1v1)",
       "t1_start": "En 8 minutos",
@@ -833,7 +852,18 @@ const resources = {
       "err_subject_max": "El asunto es muy largo",
       "err_message_min": "El mensaje debe ser más descriptivo",
       "err_message_max": "El mensaje es muy largo",
-      "error_sending_suggestion": "Error al enviar la sugerencia: "
+      "error_sending_suggestion": "Error al enviar la sugerencia: ",
+      "fixture_desc": "Calendario oficial de los partidos de la Copa del Mundo.",
+      "fixture_info": "Al finalizar cada partido, sumarán <strong>+2 estrellas de base</strong> los jugadores de los equipos que ganen, y <strong>+1 estrella</strong> aquellos que empaten.",
+      "search_team": "Buscar equipo, grupo o fecha...",
+      "group_stage": "Fase de Grupos",
+
+      "quarterfinals": "Cuartos de Final",
+      "semifinals": "Semifinal",
+      "final": "Final",
+      "groups": "Grupos",
+      "group": "Grupo",
+      "to_be_played": "Por jugar"
     }
   }
 };
