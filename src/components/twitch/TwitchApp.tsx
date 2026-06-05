@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Home, Music } from "lucide-react";
 import { useTrucoGame } from "../../hooks/useTrucoGame";
 import { TrucoGameView } from "../game/layout/TrucoGameView";
 import { useTwitchChat } from "../../hooks/useTwitchChat";
@@ -10,6 +11,13 @@ export function TwitchApp() {
   const [isConfigured, setIsConfigured] = useState(false);
   const [showExitModal, setShowExitModal] = useState(false);
   const [sessionId] = useState(() => `twitch_${Math.random().toString(36).substr(2, 9)}`);
+
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const core = useTrucoGame(sessionId);
   const { activeUser, clearActiveUser, forceActiveUser, lastCommand, connectionStatus } = useTwitchChat(isConfigured ? channel : null);
@@ -92,148 +100,242 @@ export function TwitchApp() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        backgroundImage: "linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('/background.png')",
-        backgroundSize: "cover",
+        backgroundImage: "linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('/background.png')",
         backgroundPosition: "center",
+        backgroundSize: "cover",
         color: "white"
       }}>
-        <div style={{
-          background: "rgba(24, 24, 27, 0.9)",
-          padding: "2.5rem 2rem",
-          borderRadius: "1rem",
-          boxShadow: "0 0 30px rgba(145, 70, 255, 0.3)",
-          border: "1px solid #9146FF",
-          maxWidth: "450px",
-          width: "100%",
-          textAlign: "center"
-        }}>
-          <h2 style={{ color: "#9146FF", marginBottom: "1rem" }}>Twitch Plays Truco Mundial</h2>
-          <p style={{ marginBottom: "2rem", opacity: 0.8 }}>Ingresa el nombre del canal de Twitch para conectar el chat.</p>
-          <form onSubmit={startGame}>
-            <div style={{ marginBottom: "1rem", textAlign: "left" }}>
-              <label style={{ display: "block", marginBottom: "0.5rem", fontSize: "0.9rem", color: "#ccc" }}>Canal de Twitch</label>
-              <input
-                type="text"
-                placeholder="Ej: muchomovimiento"
-                value={channel}
-                onChange={(e) => setChannel(e.target.value)}
-                style={{
-                  width: "100%",
-                  padding: "0.8rem",
-                  borderRadius: "0.5rem",
-                  border: "1px solid rgba(255,255,255,0.2)",
-                  background: "rgba(0,0,0,0.5)",
-                  color: "white",
-                  boxSizing: "border-box"
-                }}
-              />
-            </div>
-            
-            <div style={{ marginBottom: "1rem", textAlign: "left" }}>
-              <label style={{ display: "block", marginBottom: "0.5rem", fontSize: "0.9rem", color: "#ccc" }}>¿A cuántos puntos va a jugarse la partida?</label>
-              <div style={{ display: "flex", gap: "0.5rem" }}>
-                <button
-                  type="button"
-                  onClick={() => setPoints(15)}
-                  style={{
-                    flex: 1,
-                    padding: "0.8rem",
-                    borderRadius: "0.5rem",
-                    border: points === 15 ? "1px solid #9146FF" : "1px solid rgba(255,255,255,0.2)",
-                    background: points === 15 ? "rgba(145, 70, 255, 0.2)" : "rgba(0,0,0,0.5)",
-                    color: "white",
-                    cursor: "pointer",
-                    transition: "all 0.2s",
-                    fontSize: "0.9rem"
-                  }}
-                >
-                  A 15 (Rápida)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setPoints(30)}
-                  style={{
-                    flex: 1,
-                    padding: "0.8rem",
-                    borderRadius: "0.5rem",
-                    border: points === 30 ? "1px solid #9146FF" : "1px solid rgba(255,255,255,0.2)",
-                    background: points === 30 ? "rgba(145, 70, 255, 0.2)" : "rgba(0,0,0,0.5)",
-                    color: "white",
-                    cursor: "pointer",
-                    transition: "all 0.2s",
-                    fontSize: "0.9rem"
-                  }}
-                >
-                  A 30 (Clásica)
-                </button>
-              </div>
-            </div>
+      
+      {/* Home Button */}
+      {!isConfigured && (
+        <button
+          onClick={() => window.location.href = '/'}
+          className="btn-hover-dark"
+          style={{
+            position: "fixed",
+            top: "1.5rem",
+            left: "1.5rem",
+            background: "rgba(255, 255, 255, 0.1)",
+            backdropFilter: "blur(12px)",
+            zIndex: 2000,
+            height: "40px",
+            borderRadius: "1rem",
+            padding: "0 1.25rem",
+            display: "flex",
+            alignItems: "center",
+            gap: "0.5rem",
+            color: "white",
+            border: "1px solid rgba(255, 255, 255, 0.2)",
+            fontWeight: 900,
+            fontSize: "0.75rem",
+            letterSpacing: "0.05em",
+            textTransform: "uppercase",
+            cursor: "pointer"
+          }}
+        >
+          <Home size={18} />
+          <span>INICIO</span>
+        </button>
+      )}
 
-            <div style={{ marginBottom: "1.5rem", textAlign: "left" }}>
-              <label style={{ display: "block", marginBottom: "0.5rem", fontSize: "0.9rem", color: "#ccc" }}>Mazo ({selectedTeams.length}/2+)</label>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
-                {[
-                  { id: 'Argentina', flag: '🇦🇷' },
-                  { id: 'Francia', flag: '🇫🇷' },
-                  { id: 'España', flag: '🇪🇸' },
-                  { id: 'Brasil', flag: '🇧🇷' },
-                  { id: 'Argelia', flag: '🇩🇿' },
-                  { id: 'México', flag: '🇲🇽' },
-                  { id: 'Colombia', flag: '🇨🇴' },
-                  { id: 'Japón', flag: '🇯🇵' },
-                  { id: 'Uruguay', flag: '🇺🇾' },
-                  { id: 'Nueva Zelanda', flag: '🇳🇿' }
-                ].map(team => {
-                  const isSelected = selectedTeams.includes(team.id);
-                  return (
+      {/* Music Button */}
+      {!isConfigured && (
+        <a
+          href="https://youtu.be/sBB0bQB4Sms"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="btn-hover-dark"
+          style={{
+            position: "fixed",
+            top: "1.5rem",
+            right: "1.5rem",
+            background: "rgba(255, 255, 255, 0.1)",
+            border: "1px solid rgba(255, 255, 255, 0.2)",
+            color: "white",
+            height: "40px",
+            width: "40px",
+            borderRadius: "50%",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            
+            backdropFilter: "blur(12px)",
+            textDecoration: "none",
+            zIndex: 2000,
+          }}
+          title="Música"
+        >
+          <Music size={20} />
+        </a>
+      )}
+
+        {!isConfigured ? (
+          isMobile ? (
+            <div style={{
+              background: "rgba(255,255,255,0.05)",
+              padding: "2rem",
+              borderRadius: "1rem",
+              border: "1px solid rgba(255,255,255,0.1)",
+              textAlign: "center",
+              maxWidth: "90%",
+              color: "white",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: "1rem"
+            }}>
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#9146FF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 2H3v16h5v4l4-4h5l4-4V2zm-10 9V7m5 4V7"/></svg>
+            <h2 style={{ color: "#9146FF", margin: 0 }}>Twitch Plays Truco Mundial</h2>
+              <p style={{ fontSize: "1.1rem", margin: 0 }}>Este modo está diseñado para streamers y solo funciona en pantallas grandes (PC o Tablets en horizontal).</p>
+              <p style={{ margin: 0, opacity: 0.8 }}>Por favor, ingresá desde tu computadora para conectar tu canal de Twitch.</p>
+            </div>
+          ) : (
+            <div style={{
+              background: "rgba(24, 24, 27, 0.9)",
+              padding: "2.5rem 2rem",
+              borderRadius: "1rem",
+              boxShadow: "0 0 30px rgba(145, 70, 255, 0.3)",
+              border: "1px solid #9146FF",
+              maxWidth: "450px",
+              width: "100%",
+              textAlign: "center"
+            }}>
+              <h2 style={{ color: "#9146FF", marginBottom: "1rem" }}>Twitch Plays Truco Mundial</h2>
+              <p style={{ marginBottom: "2rem", opacity: 0.8 }}>Ingresa el nombre del canal de Twitch para conectar el chat.</p>
+              <form onSubmit={startGame}>
+                <div style={{ marginBottom: "1rem", textAlign: "left" }}>
+                  <label style={{ display: "block", marginBottom: "0.5rem", fontSize: "0.9rem", color: "#ccc" }}>Canal de Twitch</label>
+                  <input
+                    type="text"
+                    placeholder="Ej: muchomovimiento"
+                    value={channel}
+                    onChange={(e) => setChannel(e.target.value)}
+                    style={{
+                      width: "100%",
+                      padding: "0.8rem",
+                      borderRadius: "0.5rem",
+                      border: "1px solid rgba(255,255,255,0.2)",
+                      background: "rgba(0,0,0,0.5)",
+                      color: "white",
+                      boxSizing: "border-box"
+                    }}
+                  />
+                </div>
+                
+                <div style={{ marginBottom: "1rem", textAlign: "left" }}>
+                  <label style={{ display: "block", marginBottom: "0.5rem", fontSize: "0.9rem", color: "#ccc" }}>¿A cuántos puntos va a jugarse la partida?</label>
+                  <div style={{ display: "flex", gap: "0.5rem" }}>
                     <button
-                      key={team.id}
                       type="button"
-                      onClick={() => {
-                        if (isSelected) {
-                          if (selectedTeams.length > 2) setSelectedTeams(prev => prev.filter(t => t !== team.id));
-                        } else {
-                          setSelectedTeams(prev => [...prev, team.id]);
-                        }
-                      }}
+                      onClick={() => setPoints(15)}
                       style={{
-                        background: isSelected ? "#9146FF" : "rgba(255,255,255,0.1)",
-                        border: "1px solid",
-                        borderColor: isSelected ? "#9146FF" : "transparent",
-                        borderRadius: "2rem",
-                        padding: "0.4rem 0.8rem",
-                        color: isSelected ? "white" : "rgba(255,255,255,0.7)",
+                        flex: 1,
+                        padding: "0.8rem",
+                        borderRadius: "0.5rem",
+                        border: points === 15 ? "1px solid #9146FF" : "1px solid rgba(255,255,255,0.2)",
+                        background: points === 15 ? "rgba(145, 70, 255, 0.2)" : "rgba(0,0,0,0.5)",
+                        color: "white",
                         cursor: "pointer",
-                        fontSize: "0.85rem",
-                        transition: "all 0.2s"
+                        transition: "all 0.2s",
+                        fontSize: "0.9rem"
                       }}
                     >
-                      {team.flag} {team.id}
+                      A 15 (Rápida)
                     </button>
-                  );
-                })}
-              </div>
-            </div>
+                    <button
+                      type="button"
+                      onClick={() => setPoints(30)}
+                      style={{
+                        flex: 1,
+                        padding: "0.8rem",
+                        borderRadius: "0.5rem",
+                        border: points === 30 ? "1px solid #9146FF" : "1px solid rgba(255,255,255,0.2)",
+                        background: points === 30 ? "rgba(145, 70, 255, 0.2)" : "rgba(0,0,0,0.5)",
+                        color: "white",
+                        cursor: "pointer",
+                        transition: "all 0.2s",
+                        fontSize: "0.9rem"
+                      }}
+                    >
+                      A 30 (Clásica)
+                    </button>
+                  </div>
+                </div>
 
-            <button
-              type="submit"
-              disabled={selectedTeams.length < 2 || channel.trim() === ""}
-              style={{
-                width: "100%",
-                padding: "0.8rem",
-                borderRadius: "0.5rem",
-                border: "none",
-                background: selectedTeams.length < 2 || channel.trim() === "" ? "rgba(145, 70, 255, 0.5)" : "#9146FF",
-                color: "white",
-                fontWeight: "bold",
-                cursor: selectedTeams.length < 2 || channel.trim() === "" ? "default" : "pointer",
-                transition: "all 0.2s"
-              }}
-            >
-              Conectar y Jugar
-            </button>
-          </form>
-        </div>
+                <div style={{ marginBottom: "1.5rem", textAlign: "left" }}>
+                  <label style={{ display: "block", marginBottom: "0.5rem", fontSize: "0.9rem", color: "#ccc" }}>Mazo ({selectedTeams.length}/2+)</label>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
+                    {[
+                      { id: 'Argentina', flag: '🇦🇷' },
+                      { id: 'Francia', flag: '🇫🇷' },
+                      { id: 'España', flag: '🇪🇸' },
+                      { id: 'Brasil', flag: '🇧🇷' },
+                      { id: 'Argelia', flag: '🇩🇿' },
+                      { id: 'México', flag: '🇲🇽' },
+                      { id: 'Colombia', flag: '🇨🇴' },
+                      { id: 'Japón', flag: '🇯🇵' },
+                      { id: 'Uruguay', flag: '🇺🇾' },
+                      { id: 'Nueva Zelanda', flag: '🇳🇿' }
+                    ].map(team => {
+                      const isSelected = selectedTeams.includes(team.id);
+                      return (
+                        <button
+                          key={team.id}
+                          type="button"
+                          onClick={() => {
+                            if (isSelected) {
+                              if (selectedTeams.length > 2) setSelectedTeams(prev => prev.filter(t => t !== team.id));
+                            } else {
+                              setSelectedTeams(prev => [...prev, team.id]);
+                            }
+                          }}
+                          style={{
+                            background: isSelected ? "#9146FF" : "rgba(255,255,255,0.1)",
+                            border: "1px solid",
+                            borderColor: isSelected ? "#9146FF" : "transparent",
+                            borderRadius: "2rem",
+                            padding: "0.4rem 0.8rem",
+                            color: isSelected ? "white" : "rgba(255,255,255,0.7)",
+                            cursor: "pointer",
+                            fontSize: "0.85rem",
+                            transition: "all 0.2s"
+                          }}
+                        >
+                          {team.flag} {team.id}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={selectedTeams.length < 2 || channel.trim() === ""}
+                  style={{
+                    width: "100%",
+                    padding: "0.8rem",
+                    borderRadius: "0.5rem",
+                    border: "none",
+                    background: selectedTeams.length < 2 || channel.trim() === "" ? "rgba(145, 70, 255, 0.5)" : "#9146FF",
+                    color: "white",
+                    fontWeight: "bold",
+                    cursor: selectedTeams.length < 2 || channel.trim() === "" ? "default" : "pointer",
+                    transition: "all 0.2s",
+                    marginTop: "1rem",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "0.5rem"
+                  }}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 2H3v16h5v4l4-4h5l4-4V2zm-10 9V7m5 4V7"/></svg>
+                  Conectar y Jugar
+                </button>
+              </form>
+            </div>
+          )
+        ) : null}
       </div>
     );
   }
@@ -323,8 +425,8 @@ export function TwitchApp() {
         right: "20px",
         background: "rgba(24, 24, 27, 0.9)",
         border: "1px solid #9146FF",
-        padding: "1rem",
         borderRadius: "0.5rem",
+        padding: "1rem",
         color: "white",
         fontSize: "0.85rem",
         zIndex: 100,
