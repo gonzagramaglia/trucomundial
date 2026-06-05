@@ -181,6 +181,7 @@ const resources = {
       "country_uruguay": "Uruguay",
       "country_portugal": "Portugal",
       "country_ecuador": "Ecuador",
+      "country_paraguay": "Paraguay",
 
       // GameModeSelector
       "roadmap": "ROADMAP",
@@ -620,6 +621,7 @@ const resources = {
       "country_uruguay": "Uruguay",
       "country_portugal": "Portugal",
       "country_ecuador": "Ecuador",
+      "country_paraguay": "Paraguay",
 
       // GameModeSelector
       "roadmap": "HOJA DE RUTA",

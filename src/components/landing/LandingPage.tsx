@@ -53,7 +53,21 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   const [isSelectingPoints, setIsSelectingPoints] = useState(false);
   const [isSelectingTeams, setIsSelectingTeams] = useState(false);
   const [selectedPoints, setSelectedPoints] = useState<15 | 30>(15);
-  const [selectedTeams, setSelectedTeams] = useState<string[]>(["Argentina", "Francia", "España", "Nueva Zelanda"]);
+  const [selectedTeams, setSelectedTeams] = useState<string[]>(() => {
+    const saved = localStorage.getItem('truco_selected_teams');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length >= 2) return parsed;
+      } catch (e) {}
+    }
+    return ["Argentina", "Francia", "España", "Nueva Zelanda"];
+  });
+
+  useEffect(() => {
+    localStorage.setItem('truco_selected_teams', JSON.stringify(selectedTeams));
+  }, [selectedTeams]);
+
   const [roomCode, setRoomCode] = useState<string>("");
   const [isJoining, setIsJoining] = useState(false);
   const [inputCode, setInputCode] = useState("");
@@ -589,7 +603,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         .eq("match_code", matchCode)
         .maybeSingle();
 
-      let allowed = ["Argentina", "Francia", "España", "Nueva Zelanda", "Brasil", "Argelia", "México", "Colombia", "Japón", "Uruguay", "Portugal", "Ecuador"];
+      let allowed = ["Argentina", "Francia", "España", "Nueva Zelanda", "Brasil", "Argelia", "México", "Colombia", "Japón", "Uruguay", "Portugal", "Ecuador", "Paraguay"];
       if (mData && mData.tournament_id) {
         const { data: tData } = await supabase
           .from("tournaments")
@@ -1423,6 +1437,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   { id: 'Uruguay', flag: '🇺🇾' },
                   { id: 'Portugal', flag: '🇵🇹' },
                   { id: 'Ecuador', flag: '🇪🇨' }
+                  , { id: 'Paraguay', flag: '🇵🇾' }
                 ].map(team => {
                   const isChecked = selectedTeams.includes(team.id);
                   const isLimitReached = selectedTeams.length >= 4;

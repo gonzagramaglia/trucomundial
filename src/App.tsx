@@ -296,7 +296,7 @@ function App() {
       }
     } else {
       // Local modes
-      core.startGame(mode, rName || "CPU", rId || "", points);
+      core.startGame(mode, rName || "CPU", rId || "", points, selectedTeams);
     }
   };
 

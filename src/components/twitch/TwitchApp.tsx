@@ -7,7 +7,21 @@ import { useTwitchChat } from "../../hooks/useTwitchChat";
 export function TwitchApp() {
   const [channel, setChannel] = useState<string>("");
   const [points, setPoints] = useState<number>(30);
-  const [selectedTeams, setSelectedTeams] = useState<string[]>(["Argentina", "Francia", "España", "Nueva Zelanda"]);
+  const [selectedTeams, setSelectedTeams] = useState<string[]>(() => {
+    const saved = localStorage.getItem('truco_selected_teams_twitch');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length >= 2) return parsed;
+      } catch (e) {}
+    }
+    return ["Argentina", "Francia", "España", "Nueva Zelanda"];
+  });
+
+  useEffect(() => {
+    localStorage.setItem('truco_selected_teams_twitch', JSON.stringify(selectedTeams));
+  }, [selectedTeams]);
+
   const [isConfigured, setIsConfigured] = useState(false);
   const [showExitModal, setShowExitModal] = useState(false);
   const [sessionId] = useState(() => `twitch_${Math.random().toString(36).substr(2, 9)}`);
@@ -278,6 +292,7 @@ export function TwitchApp() {
                       { id: 'Uruguay', flag: '🇺🇾' },
                       { id: 'Portugal', flag: '🇵🇹' },
                       { id: 'Ecuador', flag: '🇪🇨' },
+                      { id: 'Paraguay', flag: '🇵🇾' },
                       { id: 'Nueva Zelanda', flag: '🇳🇿' }
                     ].map(team => {
                       const isSelected = selectedTeams.includes(team.id);
