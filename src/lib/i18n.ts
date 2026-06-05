@@ -177,6 +177,7 @@ const resources = {
 
       // GameModeSelector
       "roadmap": "ROADMAP",
+      "world_cup_fixture": "2026 WORLD CUP FIXTURE",
 
       // RankingScreen
       "sort_by": "Sort by",
@@ -588,6 +589,7 @@ const resources = {
 
       // GameModeSelector
       "roadmap": "HOJA DE RUTA",
+      "world_cup_fixture": "FIXTURE DEL MUNDIAL 2026",
 
       // RankingScreen
       "sort_by": "Ordenar por",

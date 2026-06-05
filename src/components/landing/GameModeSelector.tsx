@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from '../ui/Button';
-import { User, Globe, Trophy, BarChart3, Milestone, Lock } from 'lucide-react';
+import { User, Globe, Trophy, BarChart3, Lock, Calendar } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { GameMode } from '../../lib/truco/types';
 
@@ -12,7 +12,7 @@ interface GameModeSelectorProps {
 
 export const GameModeSelector: React.FC<GameModeSelectorProps> = ({ selectedMode, onSelect, user: _user }) => {
   const { t } = useTranslation();
-  const showRoadmapAsLocked = true;
+  const showRoadmapAsLocked = false;
   const commonStyle = {
     display: "flex",
     alignItems: "center",
@@ -104,7 +104,7 @@ export const GameModeSelector: React.FC<GameModeSelectorProps> = ({ selectedMode
       <Button
         onClick={() => {
           if (!showRoadmapAsLocked) {
-            onSelect("roadmap" as any);
+            onSelect("fixture" as any);
           }
         }}
         className={showRoadmapAsLocked ? "" : "btn-hover-dark"}
@@ -118,8 +118,8 @@ export const GameModeSelector: React.FC<GameModeSelectorProps> = ({ selectedMode
           boxShadow: showRoadmapAsLocked ? "none" : "4px 4px 0px #000"
         }}
       >
-        {showRoadmapAsLocked ? <Lock size={20} style={{ opacity: 0.5 }} /> : <Milestone size={20} />}
-        {t("roadmap")} {showRoadmapAsLocked && `(${t("locked", "Bloqueado")})`}
+        {showRoadmapAsLocked ? <Lock size={20} style={{ opacity: 0.5 }} /> : <Calendar size={20} />}
+        {t("world_cup_fixture")}
       </Button>
     </div>
   );

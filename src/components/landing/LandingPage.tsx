@@ -11,6 +11,7 @@ import { RankingScreen } from "./RankingScreen";
 import { TournamentScreen } from "./TournamentScreen";
 import TournamentEventPage from "./tournaments/TournamentEventPage";
 import { RoadmapScreen } from "./RoadmapScreen";
+import { FixtureScreen } from "./FixtureScreen";
 import { ProfileScreen } from "./ProfileScreen";
 import { AdminScreen } from "../admin/AdminScreen";
 import { CreatorScreen } from "../admin/CreatorScreen";
@@ -77,6 +78,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       typeof window !== "undefined" &&
       (window.location.pathname === "/ruta" ||
         window.location.pathname === "/en/ruta"),
+  );
+  const [showFixture, setShowFixture] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      (window.location.pathname === "/fixture" ||
+        window.location.pathname === "/en/fixture"),
   );
   const [showProfile, setShowProfile] = useState(
     () =>
@@ -226,6 +233,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         "twitter:description",
         "Conocé la hoja de ruta de Truco Mundial. Descubrí el futuro competitivo, torneos con sponsors, personalizaciones y el juego cooperativo 2v2.",
       );
+    } else if (showFixture) {
+      document.title = "Fixture del Mundial 2026";
+      updateMetaTag("description", "Fixture del Mundial 2026 de Truco Mundial.");
+      updateMetaTag("og:title", "Fixture del Mundial 2026");
+      updateMetaTag("og:description", "Fixture del Mundial 2026 de Truco Mundial.");
+      updateMetaTag("twitter:title", "Fixture del Mundial 2026");
+      updateMetaTag("twitter:description", "Fixture del Mundial 2026 de Truco Mundial.");
     } else if (showTournament) {
       document.title = "Torneos de Truco Mundial";
       updateMetaTag(
@@ -281,7 +295,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         "Viví la evolución del Truco argentino con figuritas coleccionables de tus jugadores de fútbol favoritos. ¡Jugá partidas online en tiempo real gratis contra amigos o local contra la CPU!",
       );
     }
-  }, [showRanking, showRoadmap, showTournament, showProfile]);
+  }, [showRanking, showRoadmap, showFixture, showTournament, showProfile]);
 
   useEffect(() => {
     let timer: any;
@@ -307,6 +321,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         p.startsWith("/torneos/") || p.startsWith("/en/torneos/"),
       );
       setShowRoadmap(p === "/ruta" || p === "/en/ruta");
+      setShowFixture(p === "/fixture" || p === "/en/fixture");
       setShowProfile(p === "/perfil" || p === "/en/perfil");
       setShowAdmin(p === "/admin" || p === "/en/admin");
       setShowCreator(p === "/creador" || p === "/en/creador");
@@ -806,6 +821,32 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     );
   }
 
+  if (showFixture) {
+    return (
+      <div
+        style={{
+          position: "fixed",
+          inset: 0,
+          background: "transparent",
+          width: "100%",
+          height: "100vh",
+          overflowY: "auto",
+          zIndex: 1500,
+        }}
+      >
+        <FixtureScreen
+          onBack={() => {
+            setShowFixture(false);
+            if (typeof window !== "undefined") {
+              const isEn = window.location.pathname.startsWith("/en");
+              window.history.pushState({}, "", isEn ? "/en" : "/");
+            }
+          }}
+        />
+      </div>
+    );
+  }
+
   if (showAdmin) {
     return (
       <div
@@ -1218,6 +1259,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 }
                 return;
               }
+              if ((mode as string) === "fixture") {
+                setShowFixture(true);
+                if (typeof window !== "undefined") {
+                  const isEn = window.location.pathname.startsWith("/en");
+                  window.history.pushState({}, "", isEn ? "/en/fixture" : "/fixture");
+                }
+                return;
+              }
 
               setSelectedMode(mode);
               if (mode !== "multiplayer") {
@@ -1363,8 +1412,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   { id: 'Francia', flag: '🇫🇷' },
                   { id: 'España', flag: '🇪🇸' },
                   { id: 'Nueva Zelanda', flag: '🇳🇿' },
-                  { id: 'Brasil', flag: '🇧🇷' },
-                  { id: 'Argelia', flag: '🇩🇿' }
+                  { id: 'Brasil', flag: '🇧🇷' }
                 ].map(team => {
                   const isChecked = selectedTeams.includes(team.id);
                   const isLimitReached = selectedTeams.length >= 4;
