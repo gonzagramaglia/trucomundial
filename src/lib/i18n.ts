@@ -178,6 +178,7 @@ const resources = {
       "country_Mexico": "Mexico",
       "country_colombia": "Colombia",
       "country_japon": "Japan",
+      "country_uruguay": "Uruguay",
 
       // GameModeSelector
       "roadmap": "ROADMAP",
@@ -306,6 +307,7 @@ const resources = {
       "country_nueva zelanda": "New Zealand",
       "country_méxico": "Mexico",
       "country_mexico": "Mexico",
+
 
 
       "tournaments_subtitle": "Compete in 1v1 tournaments and qualify for the 2v2 grand final",
@@ -612,6 +614,7 @@ const resources = {
       "country_Mexico": "México",
       "country_colombia": "Colombia",
       "country_japon": "Japón",
+      "country_uruguay": "Uruguay",
 
       // GameModeSelector
       "roadmap": "HOJA DE RUTA",
@@ -740,6 +743,7 @@ const resources = {
       "country_nueva zelanda": "Nueva Zelanda",
       "country_méxico": "México",
       "country_mexico": "México",
+
 
 
       "tournaments_subtitle": "Competí en torneos 1vs1 y clasificá a la gran final 2vs2",
