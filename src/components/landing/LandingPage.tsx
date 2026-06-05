@@ -589,7 +589,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         .eq("match_code", matchCode)
         .maybeSingle();
 
-      let allowed = ["Argentina", "Francia", "España", "Nueva Zelanda", "Brasil", "Argelia", "México", "Colombia"];
+      let allowed = ["Argentina", "Francia", "España", "Nueva Zelanda", "Brasil", "Argelia", "México", "Colombia", "Japón"];
       if (mData && mData.tournament_id) {
         const { data: tData } = await supabase
           .from("tournaments")
@@ -1415,7 +1415,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   { id: 'Brasil', flag: '🇧🇷' },
                   { id: 'Argelia', flag: '🇩🇿' },
                   { id: 'México', flag: '🇲🇽' },
-                  { id: 'Colombia', flag: '🇨🇴' }
+                  { id: 'Colombia', flag: '🇨🇴' },
+                  { id: 'Japón', flag: '🇯🇵' }
                 ].map(team => {
                   const isChecked = selectedTeams.includes(team.id);
                   const isLimitReached = selectedTeams.length >= 4;

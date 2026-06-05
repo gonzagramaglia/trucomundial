@@ -177,6 +177,7 @@ const resources = {
       "country_México": "Mexico",
       "country_Mexico": "Mexico",
       "country_colombia": "Colombia",
+      "country_japon": "Japan",
 
       // GameModeSelector
       "roadmap": "ROADMAP",
@@ -305,6 +306,7 @@ const resources = {
       "country_nueva zelanda": "New Zealand",
       "country_méxico": "Mexico",
       "country_mexico": "Mexico",
+
 
       "tournaments_subtitle": "Compete in 1v1 tournaments and qualify for the 2v2 grand final",
       "t1_name": "COPA MUCHO MOVIMIENTO (1v1)",
@@ -609,6 +611,7 @@ const resources = {
       "country_México": "México",
       "country_Mexico": "México",
       "country_colombia": "Colombia",
+      "country_japon": "Japón",
 
       // GameModeSelector
       "roadmap": "HOJA DE RUTA",
@@ -737,6 +740,7 @@ const resources = {
       "country_nueva zelanda": "Nueva Zelanda",
       "country_méxico": "México",
       "country_mexico": "México",
+
 
       "tournaments_subtitle": "Competí en torneos 1vs1 y clasificá a la gran final 2vs2",
       "t1_name": "COPA MUCHO MOVIMIENTO (1v1)",
