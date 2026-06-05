@@ -1127,7 +1127,7 @@ const TournamentEventPage: React.FC<Props> = ({ user, handleAuth, onBack, onPlay
             left: 0,
             right: 0,
             bottom: 0,
-            background: "rgba(0, 0, 0, 0.8)",
+            background: "rgba(0, 0, 0, 0.6)",
             backdropFilter: "blur(4px)",
             display: "flex",
             alignItems: "center",
@@ -1143,7 +1143,7 @@ const TournamentEventPage: React.FC<Props> = ({ user, handleAuth, onBack, onPlay
             exit={{ scale: 0.9, opacity: 0 }}
             onClick={(e) => e.stopPropagation()}
             style={{
-              background: "rgba(31, 41, 55, 0.7)",
+              background: "rgba(31, 41, 55, 0.4)",
               backdropFilter: "blur(12px)",
               padding: "2rem",
               borderRadius: "1rem",
@@ -1154,7 +1154,7 @@ const TournamentEventPage: React.FC<Props> = ({ user, handleAuth, onBack, onPlay
             }}
           >
             <h3 style={{ color: "#fff", fontSize: "1.25rem", fontWeight: 800, marginBottom: "1rem" }}>
-              {t("unenroll_tournament")}?
+              {t("unenroll_tournament")}
             </h3>
             <p style={{ color: "rgba(255,255,255,0.7)", fontSize: "0.95rem", marginBottom: "1.5rem" }}>
               {t("about_to_unenroll")} <strong>{tournament?.name}</strong>. {t("action_will_free_slot")}
@@ -1201,7 +1201,7 @@ const TournamentEventPage: React.FC<Props> = ({ user, handleAuth, onBack, onPlay
                 }}
               >
                 <LogOut size={16} strokeWidth={2.5} style={{ transform: "scaleX(-1)" }} />
-                {unenrolling ? "..." : t("unenroll_button")}
+                {unenrolling ? "..." : t("unenroll_confirm_button")}
               </button>
             </div>
           </motion.div>
