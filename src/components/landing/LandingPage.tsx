@@ -589,7 +589,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         .eq("match_code", matchCode)
         .maybeSingle();
 
-      let allowed = ["Argentina", "Francia", "España", "Nueva Zelanda", "Brasil", "Argelia", "México", "Colombia", "Japón", "Uruguay"];
+      let allowed = ["Argentina", "Francia", "España", "Nueva Zelanda", "Brasil", "Argelia", "México", "Colombia", "Japón", "Uruguay", "Portugal", "Ecuador"];
       if (mData && mData.tournament_id) {
         const { data: tData } = await supabase
           .from("tournaments")
@@ -1290,7 +1290,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             style={{
               position: "fixed",
               inset: 0,
-              background: "rgba(0, 0, 0, 0.85)",
+              background: "rgba(0, 0, 0, 0.65)",
               backdropFilter: "blur(10px)",
               display: "flex",
               alignItems: "center",
@@ -1385,7 +1385,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             style={{
               position: "fixed",
               inset: 0,
-              background: "rgba(0, 0, 0, 0.85)",
+              background: "rgba(0, 0, 0, 0.65)",
               backdropFilter: "blur(10px)",
               display: "flex",
               alignItems: "center",
@@ -1400,13 +1400,16 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               exit={{ scale: 0.9, y: 20 }}
               className="team-selection-card"
             >
-              <h2 className="text-display team-selection-title">
+              <h2 className="text-display team-selection-title" style={{ marginBottom: "0.5rem" }}>
                 {t("deck_selection_title_line1")}
                 <br />
                 <span style={{ color: "#00f2ff" }}>{t("deck_selection_title_line2")}</span>
               </h2>
+              <p style={{ color: "rgba(255,255,255,0.6)", fontSize: "1.05rem", marginBottom: "2rem", fontWeight: 500 }}>
+                {t("deck_selection_subtitle")}
+              </p>
 
-              <div className="team-selection-list">
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.6rem', justifyContent: 'center', marginBottom: '1.5rem', marginTop: '1rem' }}>
                 {[
                   { id: 'Argentina', flag: '🇦🇷' },
                   { id: 'Francia', flag: '🇫🇷' },
@@ -1417,14 +1420,18 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   { id: 'México', flag: '🇲🇽' },
                   { id: 'Colombia', flag: '🇨🇴' },
                   { id: 'Japón', flag: '🇯🇵' },
-                  { id: 'Uruguay', flag: '🇺🇾' }
+                  { id: 'Uruguay', flag: '🇺🇾' },
+                  { id: 'Portugal', flag: '🇵🇹' },
+                  { id: 'Ecuador', flag: '🇪🇨' }
                 ].map(team => {
                   const isChecked = selectedTeams.includes(team.id);
                   const isLimitReached = selectedTeams.length >= 4;
                   const isDisabled = !isChecked && isLimitReached;
+                  
                   return (
-                    <div
+                    <button
                       key={team.id}
+                      type="button"
                       onClick={() => {
                         if (isDisabled) return;
                         setSelectedTeams(prev =>
@@ -1434,39 +1441,26 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                         );
                       }}
                       style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        padding: '0.75rem 1.25rem',
-                        background: isChecked ? 'rgba(0, 242, 255, 0.1)' : 'rgba(255,255,255,0.03)',
-                        border: isChecked ? '1.5px solid #00f2ff' : '1px solid rgba(255,255,255,0.1)',
-                        borderRadius: '1.25rem',
-                        cursor: isDisabled ? 'not-allowed' : 'pointer',
-                        transition: 'all 0.2s',
-                        boxShadow: isChecked ? '0 0 10px rgba(0, 242, 255, 0.15)' : 'none',
-                        opacity: isDisabled ? 0.45 : 1
+                        background: isChecked ? "#00f2ff" : "rgba(255,255,255,0.1)",
+                        border: "1px solid",
+                        borderColor: isChecked ? "#00f2ff" : "rgba(255,255,255,0.2)",
+                        borderRadius: "2rem",
+                        padding: "0.5rem 1rem",
+                        color: isChecked ? "#000" : "white",
+                        cursor: isDisabled ? "not-allowed" : "pointer",
+                        transition: "all 0.2s ease",
+                        fontSize: "0.9rem",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.5rem",
+                        opacity: isDisabled ? 0.45 : 1,
+                        fontWeight: 800,
+                        boxShadow: isChecked ? '0 0 15px rgba(0, 242, 255, 0.4)' : 'none'
                       }}
                     >
-                      <span style={{ fontSize: '1rem', fontWeight: 800, color: '#fff', display: 'inline-flex', alignItems: 'center' }}>
-                        <span style={{ marginRight: '0.65rem' }}>{team.flag}</span>
-                        {t("country_" + team.id.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase())}
-                      </span>
-                      <div style={{
-                        width: '20px',
-                        height: '20px',
-                        borderRadius: '6px',
-                        border: isChecked ? 'none' : '2px solid rgba(255,255,255,0.3)',
-                        background: isChecked ? '#00f2ff' : 'transparent',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        color: '#000',
-                        fontSize: '0.75rem',
-                        fontWeight: 900
-                      }}>
-                        {isChecked && '✓'}
-                      </div>
-                    </div>
+                      <span style={{ fontSize: "1.2rem" }}>{team.flag}</span>
+                      <span>{t("country_" + team.id.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase())}</span>
+                    </button>
                   );
                 })}
               </div>
@@ -1538,7 +1532,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             style={{
               position: "fixed",
               inset: 0,
-              background: "rgba(0, 0, 0, 0.85)",
+              background: "rgba(0, 0, 0, 0.65)",
               backdropFilter: "blur(10px)",
               display: "flex",
               alignItems: "center",

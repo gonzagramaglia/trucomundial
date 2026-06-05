@@ -264,7 +264,7 @@ export function TwitchApp() {
                 </div>
 
                 <div style={{ marginBottom: "1.5rem", textAlign: "left" }}>
-                  <label style={{ display: "block", marginBottom: "0.5rem", fontSize: "0.9rem", color: "#ccc" }}>Mazo ({selectedTeams.length}/2+)</label>
+                  <label style={{ display: "block", marginBottom: "0.5rem", fontSize: "0.9rem", color: "#ccc" }}>Mazo (Elegí de 2 a 4 selecciones)</label>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
                     {[
                       { id: 'Argentina', flag: '🇦🇷' },
@@ -276,6 +276,8 @@ export function TwitchApp() {
                       { id: 'Colombia', flag: '🇨🇴' },
                       { id: 'Japón', flag: '🇯🇵' },
                       { id: 'Uruguay', flag: '🇺🇾' },
+                      { id: 'Portugal', flag: '🇵🇹' },
+                      { id: 'Ecuador', flag: '🇪🇨' },
                       { id: 'Nueva Zelanda', flag: '🇳🇿' }
                     ].map(team => {
                       const isSelected = selectedTeams.includes(team.id);

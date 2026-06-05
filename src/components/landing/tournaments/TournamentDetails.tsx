@@ -14,6 +14,8 @@ const FLAG_MAP: Record<string, string> = {
   "Colombia": "🇨🇴",
   "Japón": "🇯🇵",
   "Uruguay": "🇺🇾",
+  "Portugal": "🇵🇹",
+  "Ecuador": "🇪🇨",
 };
 
 interface Props {

@@ -179,6 +179,8 @@ const resources = {
       "country_colombia": "Colombia",
       "country_japon": "Japan",
       "country_uruguay": "Uruguay",
+      "country_portugal": "Portugal",
+      "country_ecuador": "Ecuador",
 
       // GameModeSelector
       "roadmap": "ROADMAP",
@@ -414,6 +416,7 @@ const resources = {
       "confirm_delete_tournament": "Are you sure you want to delete this tournament? This action cannot be undone.",
       "deck_selection_title_line1": "WHICH TEAMS",
       "deck_selection_title_line2": "MAKE UP THE DECK?",
+      "deck_selection_subtitle": "Choose 2 to 4 teams",
       "accept": "ACCEPT",
       "play": "PLAY",
       "filter_all": "ALL",
@@ -615,6 +618,8 @@ const resources = {
       "country_colombia": "Colombia",
       "country_japon": "Japón",
       "country_uruguay": "Uruguay",
+      "country_portugal": "Portugal",
+      "country_ecuador": "Ecuador",
 
       // GameModeSelector
       "roadmap": "HOJA DE RUTA",
@@ -850,6 +855,7 @@ const resources = {
       "confirm_delete_tournament": "¿Estás seguro de que querés eliminar este torneo? Esta acción no se puede deshacer.",
       "deck_selection_title_line1": "¿QUÉ SELECCIONES",
       "deck_selection_title_line2": "FORMARÁN EL MAZO?",
+      "deck_selection_subtitle": "Elegí de 2 a 4 selecciones",
       "accept": "ACEPTAR",
       "play": "JUGAR",
       "filter_all": "TODOS",

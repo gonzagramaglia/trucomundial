@@ -333,11 +333,19 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
   const handleDeleteTicket = async (ticketId: string) => {
     if (!confirm("¿Estás seguro de eliminar este ticket permanentemente?")) return;
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("tickets")
         .delete()
-        .eq("id", ticketId);
+        .eq("id", ticketId)
+        .select();
+        
       if (error) throw error;
+      
+      // Si RLS bloquea silenciosamente el borrado, data viene vacío
+      if (!data || data.length === 0) {
+        throw new Error("Permiso denegado: falta la política (policy) de DELETE en la tabla 'tickets' de Supabase.");
+      }
+      
       setTickets((prev) => prev.filter((t) => t.id !== ticketId));
     } catch (err: any) {
       alert("Error al eliminar ticket: " + err.message);

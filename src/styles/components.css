@@ -192,7 +192,7 @@
 
 /* Team Selection Modal Styles */
 .team-selection-card {
-  background: rgba(15, 10, 25, 0.7);
+  background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.08);
   padding: 3rem;
