@@ -84,7 +84,7 @@ export function useTrucoGame(sessionId: string | undefined, onSync?: (data: any)
     core.clearRoundData(); // Clear field immediately
     
     // Generate data immediately to return it for sync
-    const data = core.generateRoundData();
+    const data = core.generateRoundData(undefined, undefined, selectedTeams);
     
     // In multiplayer, we wait for the "ready" handshake from the guest.
     // In local mode, we start automatically after 2s.

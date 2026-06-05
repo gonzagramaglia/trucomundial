@@ -54,6 +54,11 @@ export const useTrucoState = () => {
     playerHandRef.current = playerHand;
   }, [playerHand]);
 
+  const activeCountriesRef = useRef<string[]>(activeCountries);
+  useEffect(() => {
+    activeCountriesRef.current = activeCountries;
+  }, [activeCountries]);
+
   return {
     gameState, setGameState,
     gameMode, setGameMode,
@@ -87,7 +92,7 @@ export const useTrucoState = () => {
     cpuOpponent2HandCount, setCpuOpponent2HandCount,
     cpuHandRef, cpuPartnerHandRef, cpuOpponent2HandRef, playerHandRef,
     lastProcessedHandRef, resetLockRef,
-    activeCountries, setActiveCountries,
+    activeCountries, setActiveCountries, activeCountriesRef,
     matchLog, setMatchLog
   };
 };

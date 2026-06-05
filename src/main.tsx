@@ -4,8 +4,12 @@ import './index.css'
 import './lib/i18n'
 import App from './App.tsx'
 
+import { TwitchApp } from './components/twitch/TwitchApp.tsx'
+
+const isTwitch = window.location.pathname === '/twitch'
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    {isTwitch ? <TwitchApp /> : <App />}
   </StrictMode>,
 )

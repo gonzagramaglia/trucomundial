@@ -11,7 +11,7 @@ export const useTrucoLogic = (state: any) => {
     setPlayerHand, setCpuHandCount, setPlayedCards, setHandWinningCardIds, setRoundWinningCardId,
     setActiveCall, setScorePopups, setPlayerFolded,
     playerHandRef, cpuHandRef, starterIdx, gameMode, lastProcessedHandRef, resetLockRef, setMatchLog,
-    activeCountries
+    activeCountriesRef
   } = state;
 
   const triggerCall = useCallback((text: string, color: string = "var(--color-primary)") => {
@@ -30,13 +30,14 @@ export const useTrucoLogic = (state: any) => {
     setTimeout(() => setScorePopups((prev: any) => prev.filter((p: any) => p.id !== id)), 3000);
   }, [setScore, setScorePopups]);
 
-  const generateRoundData = useCallback((remoteHands?: { player: Card[], cpu: Card[] }, forcedStarter?: number) => {
+  const generateRoundData = useCallback((remoteHands?: { player: Card[], cpu: Card[] }, forcedStarter?: number, overrideCountries?: string[]) => {
     let pHand, cHand;
     if (remoteHands) {
       pHand = remoteHands.player;
       cHand = remoteHands.cpu;
     } else {
-      const filteredCards = CARDS.filter(c => activeCountries.includes(c.country));
+      const countriesToUse = overrideCountries || activeCountriesRef.current;
+      const filteredCards = CARDS.filter(c => countriesToUse.includes(c.country));
       const deck = [...filteredCards].sort(() => Math.random() - 0.5);
       
       pHand = deck.slice(0, 3);
@@ -44,7 +45,7 @@ export const useTrucoLogic = (state: any) => {
     }
     const nextStarter = forcedStarter !== undefined ? forcedStarter : (starterIdx + 1) % (gameMode === "2v2" ? 4 : 2);
     return { playerHand: pHand, cpuHand: cHand, starter: nextStarter };
-  }, [gameMode, starterIdx, activeCountries]);
+  }, [gameMode, starterIdx, activeCountriesRef]);
 
   const applyRoundData = useCallback((data: { playerHand: Card[], cpuHand: Card[], starter: number }) => {
     setIsRoundEnding(false);
@@ -69,11 +70,11 @@ export const useTrucoLogic = (state: any) => {
     setTimeout(() => { resetLockRef.current = false; }, 800);
   }, [gameMode, setTrucoState, setEnvidoState, setPendingAction, setHandWinners, setPlayedCards, setHandWinningCardIds, setRoundWinningCardId, setSuspendedTruco, setPlayerHand, setCpuHandCount, setStarterIdx, setDealerIdx, setIsRoundEnding, setIsCooldown, setPlayerFolded, cpuHandRef, lastProcessedHandRef, resetLockRef]);
 
-  const resetRound = useCallback((remoteHands?: { player: Card[], cpu: Card[] }, forcedStarter?: number) => {
+  const resetRound = useCallback((remoteHands?: { player: Card[], cpu: Card[] }, forcedStarter?: number, overrideCountries?: string[]) => {
     if (resetLockRef.current) return;
     if (state.score.player >= state.maxPoints || state.score.cpu >= state.maxPoints) return;
     resetLockRef.current = true;
-    const data = generateRoundData(remoteHands, forcedStarter);
+    const data = generateRoundData(remoteHands, forcedStarter, overrideCountries);
     applyRoundData(data);
     return data;
   }, [generateRoundData, applyRoundData, resetLockRef]);
