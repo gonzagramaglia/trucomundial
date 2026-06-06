@@ -354,12 +354,11 @@ export function TwitchApp() {
               borderRadius: "1rem",
               boxShadow: "0 0 30px rgba(145, 70, 255, 0.3)",
               border: "1px solid #9146FF",
-              maxWidth: "450px",
+              maxWidth: "550px",
               width: "100%",
               textAlign: "center"
             }}>
-              <h2 style={{ color: "#9146FF", marginBottom: "1rem" }}>Twitch Plays Truco Mundial</h2>
-              <p style={{ marginBottom: "2rem", opacity: 0.8 }}>Ingresa el nombre del canal de Twitch para conectar el chat.</p>
+              <h2 style={{ color: "#9146FF", marginBottom: "2rem" }}>Twitch Plays Truco Mundial</h2>
               <form onSubmit={startGame}>
                 <div style={{ marginBottom: "1rem", textAlign: "left" }}>
                   <label style={{ display: "block", marginBottom: "0.5rem", fontSize: "0.9rem", color: "#ccc" }}>Canal de Twitch</label>
@@ -438,7 +437,7 @@ export function TwitchApp() {
                         fontSize: "0.9rem"
                       }}
                     >
-                      vs CPU
+                      Chat vs CPU
                     </button>
                     <button
                       type="button"
@@ -455,7 +454,7 @@ export function TwitchApp() {
                         fontSize: "0.9rem"
                       }}
                     >
-                      vs Streamer
+                      Chat vs Streamer <span style={{ opacity: 0.6, fontSize: "0.75rem" }}>(beta)</span>
                     </button>
                   </div>
                 </div>
@@ -578,7 +577,7 @@ export function TwitchApp() {
           ? (activeUser === 'Streamer' ? 'Estás jugando esta ronda' : `${activeUser} está jugando esta ronda`) 
           : `Escribí !jugar en el chat para jugar la ronda`}
         
-        {activeUser !== 'Streamer' && (
+        {activeUser !== 'Streamer' && opponentMode !== 'streamer' && (
           <button
             onClick={() => forceActiveUser('Streamer')}
             style={{
@@ -597,7 +596,13 @@ export function TwitchApp() {
           </button>
         )}
       </div>
-      <TrucoGameView
+      <div className={isWaiting ? "hide-game-actions" : ""}>
+        <style>{`
+          .hide-game-actions .game-actions {
+            display: none !important;
+          }
+        `}</style>
+        <TrucoGameView
         {...core}
         user={null}
         roomCode={roomCode}
@@ -618,6 +623,7 @@ export function TwitchApp() {
           setIsConfigured(false);
         }}
       />
+      </div>
       <div 
         className="twitch-desktop-ui"
         style={{
@@ -654,8 +660,8 @@ export function TwitchApp() {
             style={{
               position: "fixed",
               inset: 0,
-              background: "rgba(0, 0, 0, 0.8)",
-              backdropFilter: "blur(10px)",
+              background: "rgba(0, 0, 0, 0.4)",
+              backdropFilter: "blur(5px)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -668,7 +674,7 @@ export function TwitchApp() {
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.95, y: -20 }}
               style={{
-                background: "rgba(18, 12, 28, 0.95)",
+                background: "rgba(18, 12, 28, 0.85)",
                 border: "1px solid rgba(168, 85, 247, 0.3)",
                 borderRadius: "1.5rem",
                 padding: "2.5rem",
@@ -698,20 +704,9 @@ export function TwitchApp() {
                 {roomCode}
               </div>
               
-              <p style={{ fontSize: "0.9rem", color: "#a855f7", marginBottom: "2rem" }} className="animate-pulse">
+              <p style={{ fontSize: "0.9rem", color: "#eab308", marginBottom: "2rem" }} className="animate-pulse">
                 Esperando a que te unas...
               </p>
-
-              <button
-                onClick={() => {
-                  setIsWaiting(false);
-                  setRoomCode("");
-                }}
-                className="btn-urban secondary"
-                style={{ width: "100%", padding: "1rem", borderRadius: "0.8rem", border: "none" }}
-              >
-                Cancelar
-              </button>
             </motion.div>
           </motion.div>
         )}
