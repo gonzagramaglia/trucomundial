@@ -186,6 +186,7 @@ const resources = {
       "country_usa": "USA",
       "country_canada": "Canada",
       "country_paises bajos": "Netherlands",
+      "country_austria": "Austria",
 
       // GameModeSelector
       "roadmap": "ROADMAP",
@@ -630,6 +631,7 @@ const resources = {
       "country_usa": "USA",
       "country_canada": "Canadá",
       "country_paises bajos": "Países Bajos",
+      "country_austria": "Austria",
 
       // GameModeSelector
       "roadmap": "HOJA DE RUTA",

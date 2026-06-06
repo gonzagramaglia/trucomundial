@@ -480,6 +480,7 @@ export function TwitchApp() {
                       { id: 'USA', flag: '🇺🇸', code: 'USA' },
                       { id: 'Canadá', flag: '🇨🇦', code: 'CAN' },
                       { id: 'Países Bajos', flag: '🇳🇱', code: 'NED' },
+                      { id: 'Austria', flag: '🇦🇹', code: 'AUT' },
                       { id: 'Nueva Zelanda', flag: '🇳🇿', code: 'NZL' }
                     ].map(team => {
                       const isSelected = selectedTeams.includes(team.id);

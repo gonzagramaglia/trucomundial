@@ -603,7 +603,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         .eq("match_code", matchCode)
         .maybeSingle();
 
-      let allowed = ["Argentina", "Francia", "España", "Nueva Zelanda", "Brasil", "Argelia", "México", "Colombia", "Japón", "Uruguay", "Portugal", "Ecuador", "Paraguay", "Panamá", "USA", "Canadá", "Países Bajos"];
+      let allowed = ["Argentina", "Francia", "España", "Nueva Zelanda", "Brasil", "Argelia", "México", "Colombia", "Japón", "Uruguay", "Portugal", "Ecuador", "Paraguay", "Panamá", "USA", "Canadá", "Países Bajos", "Austria"];
       if (mData && mData.tournament_id) {
         const { data: tData } = await supabase
           .from("tournaments")
@@ -1441,6 +1441,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   { id: 'USA', flag: '🇺🇸', code: 'USA' },
                   { id: 'Canadá', flag: '🇨🇦', code: 'CAN' },
                   { id: 'Países Bajos', flag: '🇳🇱', code: 'NED' },
+                  { id: 'Austria', flag: '🇦🇹', code: 'AUT' },
                   { id: 'Nueva Zelanda', flag: '🇳🇿', code: 'NZL' }
                 ].map(team => {
                   const isChecked = selectedTeams.includes(team.id);
