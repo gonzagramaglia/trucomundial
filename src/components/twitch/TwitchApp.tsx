@@ -1,12 +1,17 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Home, Music } from "lucide-react";
 import { useTrucoGame } from "../../hooks/useTrucoGame";
 import { TrucoGameView } from "../game/layout/TrucoGameView";
 import { useTwitchChat } from "../../hooks/useTwitchChat";
+import { supabase } from "../../lib/supabase";
+import { useMatchmaking } from "../../hooks/useMatchmaking";
+import { motion, AnimatePresence } from "framer-motion";
+import type { PlayerRole } from "../../lib/truco/types";
 
 export function TwitchApp() {
   const [channel, setChannel] = useState<string>("");
   const [points, setPoints] = useState<number>(30);
+  const [opponentMode, setOpponentMode] = useState<"cpu" | "streamer">("cpu");
   const [selectedTeams, setSelectedTeams] = useState<string[]>(() => {
     const saved = localStorage.getItem('truco_selected_teams_twitch');
     if (saved) {
@@ -25,6 +30,9 @@ export function TwitchApp() {
   const [isConfigured, setIsConfigured] = useState(false);
   const [showExitModal, setShowExitModal] = useState(false);
   const [sessionId] = useState(() => `twitch_${Math.random().toString(36).substr(2, 9)}`);
+  const [roomCode, setRoomCode] = useState<string | null>(null);
+  const [isWaiting, setIsWaiting] = useState(false);
+  const [rivalData, setRivalData] = useState<any>(null);
 
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   useEffect(() => {
@@ -33,16 +41,85 @@ export function TwitchApp() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const core = useTrucoGame(sessionId);
+  const syncRef = useRef<((data: any) => void) | null>(null);
+  const stableHandleSync = useCallback((data: any) => {
+    if (syncRef.current) syncRef.current(data);
+  }, []);
+
+  const core = useTrucoGame(sessionId, stableHandleSync);
   const { activeUser, clearActiveUser, forceActiveUser, lastCommand, connectionStatus } = useTwitchChat(isConfigured ? channel : null);
 
   // Restart activeUser when round resets
   useEffect(() => {
-    // A new hand has started if there are 3 cards and no cards are played
     if (core.playerHand.length === 3 && core.playedCards.length === 0) {
       clearActiveUser();
     }
   }, [core.playerHand, core.playedCards, clearActiveUser]);
+
+  const { broadcastMove } = useMatchmaking({
+    sessionId,
+    user: null,
+    gameMode: core.gameMode,
+    rivalId: core.rivalId,
+    isHost: true,
+    matchId: roomCode,
+    gameState: core.gameState,
+    playerHand: core.playerHand,
+    playedCards: core.playedCards,
+    starterIdx: core.starterIdx,
+    cpuHandRef: core.cpuHandRef,
+    isRoundEnding: core.isRoundEnding,
+    isGameStarting: core.isGameStarting,
+    setGameState: core.setGameState,
+    setRivalName: core.setRivalName,
+    resetRound: core.resetRound,
+    playCardRemote: core.playCardRemote,
+    wrappedHandleCall: (t: any, l: number, c: PlayerRole, r?: boolean) => wrappedHandleCall(t, l, c, r),
+    wrappedHandleResponse: (w: boolean, r?: boolean) => wrappedHandleResponse(w, r),
+    handleMazo: core.handleMazo,
+    setScore: core.setScore,
+    score: core.score,
+    setIsGameStarting: core.setIsGameStarting,
+    setShowCountdown: core.setShowCountdown,
+    setMaxPoints: core.setMaxPoints,
+    setIsHost: core.setIsHost,
+    setMyIndex: core.setMyIndex,
+    setPlayerHand: core.setPlayerHand,
+    setPlayedCards: core.setPlayedCards,
+    setStarterIdx: core.setStarterIdx,
+    setHandWinners: core.setHandWinners,
+    setTrucoState: core.setTrucoState,
+    setEnvidoState: core.setEnvidoState,
+    setCpuHandCount: core.setCpuHandCount,
+  } as any);
+
+  const wrappedPlayCard = (c: any, remote?: boolean) => {
+    core.playCard(c);
+    if (core.gameMode === "multiplayer" && !remote) {
+      broadcastMove({ type: "play", cardId: c.id });
+    }
+  };
+
+  const wrappedHandleCall = (t: any, l: number, c: PlayerRole, remote?: boolean) => {
+    core.handleCall(t, l, c);
+    if (core.gameMode === "multiplayer" && !remote) {
+      broadcastMove({ type: "call", callType: t, level: l, caller: c });
+    }
+  };
+
+  const wrappedHandleResponse = (w: boolean, remote?: boolean) => {
+    core.handleResponse(w);
+    if (core.gameMode === "multiplayer" && !remote) {
+      broadcastMove({ type: w ? "accept" : "reject" });
+    }
+  };
+
+  const wrappedHandleMazo = (remote?: boolean) => {
+    core.handleMazo();
+    if (core.gameMode === "multiplayer" && !remote) {
+      broadcastMove({ type: "mazo" });
+    }
+  };
 
   // Execute commands from twitch
   useEffect(() => {
@@ -55,40 +132,40 @@ export function TwitchApp() {
     const timer = setTimeout(() => {
       switch (command) {
         case "carta_1":
-          if (core.playerHand[0]) core.playCard(core.playerHand[0]);
+          if (core.playerHand[0]) wrappedPlayCard(core.playerHand[0]);
           break;
         case "carta_2":
-          if (core.playerHand[1]) core.playCard(core.playerHand[1]);
+          if (core.playerHand[1]) wrappedPlayCard(core.playerHand[1]);
           break;
         case "carta_3":
-          if (core.playerHand[2]) core.playCard(core.playerHand[2]);
+          if (core.playerHand[2]) wrappedPlayCard(core.playerHand[2]);
           break;
         case "truco":
-          core.handleCall("truco", 1, "player");
+          wrappedHandleCall("truco", 1, "player");
           break;
         case "retruco":
-          core.handleCall("truco", 2, "player");
+          wrappedHandleCall("truco", 2, "player");
           break;
         case "vale_cuatro":
-          core.handleCall("truco", 3, "player");
+          wrappedHandleCall("truco", 3, "player");
           break;
         case "envido":
-          core.handleCall("envido", 1, "player");
+          wrappedHandleCall("envido", 1, "player");
           break;
         case "real_envido":
-          core.handleCall("envido", 2, "player");
+          wrappedHandleCall("envido", 2, "player");
           break;
         case "falta_envido":
-          core.handleCall("envido", 3, "player");
+          wrappedHandleCall("envido", 3, "player");
           break;
         case "quiero":
-          core.handleResponse(true);
+          wrappedHandleResponse(true);
           break;
         case "no_quiero":
-          core.handleResponse(false);
+          wrappedHandleResponse(false);
           break;
         case "me_voy":
-          core.handleMazo();
+          wrappedHandleMazo();
           break;
       }
     }, 100);
@@ -96,16 +173,82 @@ export function TwitchApp() {
     return () => clearTimeout(timer);
   }, [lastCommand]); // activeUser could be safely ignored here as lastCommand is only generated for active user
 
-  const startGame = (e: React.FormEvent) => {
+  const startGame = async (e: React.FormEvent) => {
     e.preventDefault();
     if (channel.trim() === "") return;
     if (selectedTeams.length < 2) return;
     setIsConfigured(true);
     
-    // Local game vs CPU
-    core.startGame("1v1", "CPU", "", points, selectedTeams);
-    core.setGameState("playing");
+    if (opponentMode === "streamer") {
+      const code = Math.random().toString(36).substring(2, 6).toUpperCase();
+      setRoomCode(code);
+      setIsWaiting(true);
+
+      const newRoomInfo = {
+        creatorId: sessionId,
+        creatorName: "Twitch Host",
+        points: points,
+      };
+
+      // Register room in table
+      await supabase.from("game_sync").upsert({
+        match_id: code,
+        last_move: {
+          type: "room_state",
+          status: "waiting",
+          roomInfo: newRoomInfo,
+        },
+        updated_at: new Date().toISOString(),
+      });
+    } else {
+      // Local game vs CPU
+      core.startGame("1v1", "CPU", "", points, selectedTeams);
+      core.setGameState("playing");
+    }
   };
+
+  useEffect(() => {
+    if (!isWaiting || !roomCode) return;
+
+    // Listen for the Streamer (Guest) joining
+    const channelListener = supabase
+      .channel(`matchmaking_${roomCode}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "game_sync",
+          filter: `match_id=eq.${roomCode}`,
+        },
+        (payload) => {
+          const state = payload.new.last_move;
+          if (state?.status === "matched" && !rivalData) {
+            console.log("Streamer joined:", state.guestName);
+            setRivalData({ name: state.guestName, id: state.guestId });
+            
+            setTimeout(() => {
+              setIsWaiting(false);
+              core.setGameMode("multiplayer");
+              core.setRivalId(state.guestId || "");
+              core.setRivalName(state.guestName || "Streamer");
+              core.startGame("multiplayer", state.guestName || "Streamer", state.guestId || "", points, selectedTeams);
+              core.setIsGameStarting(true);
+              core.setShowCountdown(true);
+              setTimeout(() => {
+                core.setIsGameStarting(false);
+                core.setShowCountdown(false);
+              }, 2500);
+            }, 1000);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      channelListener.unsubscribe();
+    };
+  }, [isWaiting, roomCode, rivalData, points, selectedTeams, core]);
 
   if (!isConfigured) {
     return (
@@ -277,6 +420,47 @@ export function TwitchApp() {
                   </div>
                 </div>
 
+                <div style={{ marginBottom: "1rem", textAlign: "left" }}>
+                  <label style={{ display: "block", marginBottom: "0.5rem", fontSize: "0.9rem", color: "#ccc" }}>Modalidad</label>
+                  <div style={{ display: "flex", gap: "0.5rem" }}>
+                    <button
+                      type="button"
+                      onClick={() => setOpponentMode("cpu")}
+                      style={{
+                        flex: 1,
+                        padding: "0.8rem",
+                        borderRadius: "0.5rem",
+                        border: opponentMode === "cpu" ? "1px solid #9146FF" : "1px solid rgba(255,255,255,0.2)",
+                        background: opponentMode === "cpu" ? "rgba(145, 70, 255, 0.2)" : "rgba(0,0,0,0.5)",
+                        color: "white",
+                        cursor: "pointer",
+                        transition: "all 0.2s",
+                        fontSize: "0.9rem"
+                      }}
+                    >
+                      vs CPU
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setOpponentMode("streamer")}
+                      style={{
+                        flex: 1,
+                        padding: "0.8rem",
+                        borderRadius: "0.5rem",
+                        border: opponentMode === "streamer" ? "1px solid #9146FF" : "1px solid rgba(255,255,255,0.2)",
+                        background: opponentMode === "streamer" ? "rgba(145, 70, 255, 0.2)" : "rgba(0,0,0,0.5)",
+                        color: "white",
+                        cursor: "pointer",
+                        transition: "all 0.2s",
+                        fontSize: "0.9rem"
+                      }}
+                    >
+                      vs Streamer
+                    </button>
+                  </div>
+                </div>
+
+
                 <div style={{ marginBottom: "1.5rem", textAlign: "left" }}>
                   <label style={{ display: "block", marginBottom: "0.5rem", fontSize: "0.9rem", color: "#ccc" }}>Mazo (Elegí de 2 a 4 selecciones)</label>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
@@ -416,18 +600,18 @@ export function TwitchApp() {
       <TrucoGameView
         {...core}
         user={null}
-        roomCode={null}
-        rivalName="CPU"
+        roomCode={roomCode}
+        rivalName={opponentMode === "cpu" ? "CPU" : rivalData?.name || "Streamer"}
         showExitModal={showExitModal}
         onExitRequest={() => setShowExitModal(true)}
         onRestartGame={() => {
            core.handleRestartGame();
-           core.startGame("1v1", "CPU", "", points, selectedTeams);
+           core.startGame(core.gameMode, opponentMode === "cpu" ? "CPU" : "Streamer", "", points, selectedTeams);
         }}
-        onPlayCard={core.playCard}
-        onHandleCall={core.handleCall}
-        onHandleResponse={core.handleResponse}
-        onHandleMazo={core.handleMazo}
+        onPlayCard={wrappedPlayCard}
+        onHandleCall={wrappedHandleCall}
+        onHandleResponse={wrappedHandleResponse}
+        onHandleMazo={wrappedHandleMazo}
         onCloseExit={() => setShowExitModal(false)}
         onConfirmExit={() => {
           setShowExitModal(false);
@@ -456,10 +640,82 @@ export function TwitchApp() {
           <li><b>!carta 1/2/3</b> - Jugar carta</li>
           <li><b>!truco</b> / <b>!retruco</b> / <b>!valecuatro</b></li>
           <li><b>!envido</b> / <b>!realenvido</b> / <b>!faltaenvido</b></li>
-          <li><b>!quiero</b> / <b>!no quiero</b></li>
+          <li><b>!quiero</b> / <b>!noquiero</b></li>
           <li><b>!mazo</b> - Irse al mazo</li>
         </ul>
       </div>
+      {/* Waiting Room Modal for Streamer mode */}
+      <AnimatePresence>
+        {isWaiting && roomCode && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              position: "fixed",
+              inset: 0,
+              background: "rgba(0, 0, 0, 0.8)",
+              backdropFilter: "blur(10px)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 50,
+              padding: "1rem"
+            }}
+          >
+            <motion.div
+              initial={{ scale: 0.95, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.95, y: -20 }}
+              style={{
+                background: "rgba(18, 12, 28, 0.95)",
+                border: "1px solid rgba(168, 85, 247, 0.3)",
+                borderRadius: "1.5rem",
+                padding: "2.5rem",
+                maxWidth: "400px",
+                width: "100%",
+                textAlign: "center",
+                boxShadow: "0 20px 40px rgba(0,0,0,0.5)"
+              }}
+            >
+              <h3 style={{ fontSize: "1.5rem", color: "#a855f7", marginBottom: "1rem" }}>
+                Sala Creada
+              </h3>
+              <p style={{ opacity: 0.8, marginBottom: "2rem" }}>
+                Ingresa a la pantalla principal desde tu celular o pc, toca en <strong>Jugar Online</strong> e ingresá este código para jugar contra el chat:
+              </p>
+              <div style={{
+                fontSize: "3rem",
+                fontWeight: 900,
+                letterSpacing: "0.2em",
+                color: "white",
+                background: "rgba(255,255,255,0.05)",
+                padding: "1rem",
+                borderRadius: "0.5rem",
+                border: "1px solid rgba(255,255,255,0.1)",
+                marginBottom: "2rem"
+              }}>
+                {roomCode}
+              </div>
+              
+              <p style={{ fontSize: "0.9rem", color: "#a855f7", marginBottom: "2rem" }} className="animate-pulse">
+                Esperando a que te unas...
+              </p>
+
+              <button
+                onClick={() => {
+                  setIsWaiting(false);
+                  setRoomCode("");
+                }}
+                className="btn-urban secondary"
+                style={{ width: "100%", padding: "1rem", borderRadius: "0.8rem", border: "none" }}
+              >
+                Cancelar
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
