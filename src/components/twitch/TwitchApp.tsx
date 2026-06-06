@@ -298,7 +298,7 @@ export function TwitchApp() {
       {/* Music Button */}
       {!isConfigured && (
         <a
-          href="https://youtu.be/vrY1THC_NQE"
+          href="https://youtu.be/228FtMaq8uY"
           target="_blank"
           rel="noopener noreferrer"
           className="btn-hover-dark"
@@ -481,6 +481,7 @@ export function TwitchApp() {
                       { id: 'Canadá', flag: '🇨🇦', code: 'CAN' },
                       { id: 'Países Bajos', flag: '🇳🇱', code: 'NED' },
                       { id: 'Austria', flag: '🇦🇹', code: 'AUT' },
+                      { id: 'Corea del Sur', flag: '🇰🇷', code: 'KOR' },
                       { id: 'Nueva Zelanda', flag: '🇳🇿', code: 'NZL' }
                     ].map(team => {
                       const isSelected = selectedTeams.includes(team.id);

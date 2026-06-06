@@ -603,7 +603,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         .eq("match_code", matchCode)
         .maybeSingle();
 
-      let allowed = ["Argentina", "Francia", "España", "Nueva Zelanda", "Brasil", "Argelia", "México", "Colombia", "Japón", "Uruguay", "Portugal", "Ecuador", "Paraguay", "Panamá", "USA", "Canadá", "Países Bajos", "Austria"];
+      let allowed = ["Argentina", "Francia", "España", "Nueva Zelanda", "Brasil", "Argelia", "México", "Colombia", "Japón", "Uruguay", "Portugal", "Ecuador", "Paraguay", "Panamá", "USA", "Canadá", "Países Bajos", "Austria", "Corea del Sur"];
       if (mData && mData.tournament_id) {
         const { data: tData } = await supabase
           .from("tournaments")
@@ -1073,7 +1073,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       >
         {/* Music Button */}
         <a
-          href="https://youtu.be/vrY1THC_NQE"
+          href="https://youtu.be/228FtMaq8uY"
           target="_blank"
           rel="noopener noreferrer"
           className="btn-hover-dark"
@@ -1442,6 +1442,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   { id: 'Canadá', flag: '🇨🇦', code: 'CAN' },
                   { id: 'Países Bajos', flag: '🇳🇱', code: 'NED' },
                   { id: 'Austria', flag: '🇦🇹', code: 'AUT' },
+                  { id: 'Corea del Sur', flag: '🇰🇷', code: 'KOR' },
                   { id: 'Nueva Zelanda', flag: '🇳🇿', code: 'NZL' }
                 ].map(team => {
                   const isChecked = selectedTeams.includes(team.id);

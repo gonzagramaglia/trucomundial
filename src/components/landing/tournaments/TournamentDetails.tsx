@@ -21,7 +21,8 @@ const FLAG_MAP: Record<string, string> = {
   "USA": "🇺🇸",
   "Canadá": "🇨🇦",
   "Países Bajos": "🇳🇱",
-  "Austria": "🇦🇹"
+  "Austria": "🇦🇹",
+  "Corea del Sur": "🇰🇷"
 };
 
 interface Props {

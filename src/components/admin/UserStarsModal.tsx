@@ -29,7 +29,8 @@ const flagMap: Record<string, string> = {
   'USA': '🇺🇸',
   'Canadá': '🇨🇦',
   'Países Bajos': '🇳🇱',
-  'Austria': '🇦🇹'
+  'Austria': '🇦🇹',
+  'Corea del Sur': '🇰🇷'
 };
 
 export const UserStarsModal: React.FC<UserStarsModalProps> = ({
