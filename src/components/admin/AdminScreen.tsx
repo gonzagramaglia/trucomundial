@@ -123,10 +123,16 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
     setLoading(true);
 
     try {
-      // 1. Fetch Profiles (Everyone who logged in at least once)
-      const { data: profilesData, error: profilesError } = await supabase
-        .from("profiles")
-        .select("*");
+      // 1. Fetch Profiles via RPC (to get emails and auth data safely)
+      let { data: profilesData, error: profilesError } = await supabase
+        .rpc("get_admin_users_data");
+
+      if (profilesError) {
+        console.warn("RPC get_admin_users_data failed (did you run the SQL script?), falling back to profiles table:", profilesError);
+        const fallback = await supabase.from("profiles").select("*");
+        profilesData = fallback.data;
+        profilesError = fallback.error;
+      }
 
       if (profilesError) {
         console.error("Error fetching profiles:", profilesError);

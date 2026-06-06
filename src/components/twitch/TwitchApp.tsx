@@ -242,7 +242,7 @@ export function TwitchApp() {
               setTimeout(() => {
                 core.setIsGameStarting(false);
                 core.setShowCountdown(false);
-              }, 3000);
+              }, 4500);
             }, 1000);
           }
         }

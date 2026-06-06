@@ -278,7 +278,7 @@ function App() {
           setTimeout(() => {
             core.setIsGameStarting(false);
             core.setShowCountdown(false);
-          }, 3000);
+          }, 4500);
         }
       } else {
         // Guest MUST set "playing" to see the board, but doesn't startGame()

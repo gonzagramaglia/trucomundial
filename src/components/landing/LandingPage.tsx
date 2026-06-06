@@ -960,55 +960,62 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         overflowX: "hidden",
       }}
     >
-      {/* Profile / Language Switch - Top Left */}
+      {/* Profile / Music - Top Left */}
       <div style={{ position: "absolute", top: "1.5rem", left: "1.5rem", display: "flex", gap: "0.5rem", zIndex: 1000 }}>
-        <button
-          onClick={() => {
-            if (user) {
+        {user ? (
+          <button
+            onClick={() => {
               const isEn = window.location.pathname.startsWith("/en");
               const target = isEn ? "/en/perfil" : "/perfil";
               if (window.location.pathname !== target) {
                 window.history.pushState({}, "", target);
                 window.dispatchEvent(new PopStateEvent("popstate"));
               }
-            } else {
-              const isEn = window.location.pathname.startsWith("/en");
-              const newLang = isEn ? "es" : "en";
-              localStorage.setItem("lang", newLang);
-              window.location.href = newLang === "en" ? "/en" : "/";
-            }
-          }}
-          className="btn-hover-dark"
-          style={{
-            background: "rgba(255, 255, 255, 0.1)",
-            border: "1px solid rgba(255, 255, 255, 0.2)",
-            color: "white",
-            height: "40px",
-            width: "40px",
-            borderRadius: "50%",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            backdropFilter: "blur(12px)",
-            transition: "none",
-          }}
-          title={user ? t("profile") : "Música / Music"}
-        >
-          {user ? (
+            }}
+            className="btn-hover-dark"
+            style={{
+              background: "rgba(255, 255, 255, 0.1)",
+              border: "1px solid rgba(255, 255, 255, 0.2)",
+              color: "white",
+              height: "40px",
+              width: "40px",
+              borderRadius: "50%",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              backdropFilter: "blur(12px)",
+              transition: "none",
+            }}
+            title={t("profile")}
+          >
             <User size={20} style={{ color: "#ffffff" }} />
-          ) : (
-            <a
-              href="https://youtu.be/228FtMaq8uY"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ color: "#ffffff", display: "flex", alignItems: "center", justifyContent: "center" }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <Music size={20} />
-            </a>
-          )}
-        </button>
+          </button>
+        ) : (
+          <a
+            href="https://youtu.be/228FtMaq8uY"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-hover-dark"
+            style={{
+              background: "rgba(255, 255, 255, 0.1)",
+              border: "1px solid rgba(255, 255, 255, 0.2)",
+              color: "white",
+              height: "40px",
+              width: "40px",
+              borderRadius: "50%",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              backdropFilter: "blur(12px)",
+              transition: "none",
+            }}
+            title="Música"
+          >
+            <Music size={20} />
+          </a>
+        )}
 
         {isApprovedCreator && (
           <button

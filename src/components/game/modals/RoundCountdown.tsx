@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslation } from 'react-i18next';
+import { audioManager } from '../../../lib/audio';
 
 interface RoundCountdownProps {
   isActive: boolean;
@@ -21,10 +22,16 @@ export const RoundCountdown: React.FC<RoundCountdownProps> = ({ isActive, isGame
   }
 
   useEffect(() => {
+    if (isActive && isGameStarting && count > 0 && count <= 3) {
+      audioManager.play(`countdown-${count}`);
+    }
+  }, [isActive, isGameStarting, count]);
+
+  useEffect(() => {
     if (isActive) {
       const timer = setInterval(() => {
         setCount((prev) => (prev > 0 ? prev - 1 : prev));
-      }, 1000);
+      }, 1500);
       return () => clearInterval(timer);
     }
   }, [isActive]);

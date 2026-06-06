@@ -646,7 +646,7 @@ const resources = {
       "sort_by": "Ordenar por",
       "most_voted": "Más Votados",
       "least_voted": "Menos Votados",
-      "ranking_subtitle": "Distribuí estrellas entre tus cartas favoritas del Ranking Global de votos",
+      "ranking_subtitle": "Distribuí votos/estrellas entre tus cartas favoritas del Ranking Global",
       "refresh_ranking": "Actualizar Jerarquía",
       "your_votes_distributed": "Tus Votos Distribuidos",
       "votes_label": "Votos",

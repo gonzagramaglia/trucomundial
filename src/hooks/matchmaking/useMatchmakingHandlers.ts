@@ -51,7 +51,7 @@ export const useMatchmakingHandlers = (
       setTimeout(() => {
         setIsGameStarting(false);
         setShowCountdown(false);
-      }, 3000);
+      }, 4500);
     }
     else if (move.type === 'nextRound' && !isHost) {
       hasStartedRef.current = true;

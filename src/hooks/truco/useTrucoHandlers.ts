@@ -2,6 +2,7 @@ import { useCallback, useRef, useEffect } from "react";
 import type { Card } from "../../data/cards";
 import type { PlayerRole } from "../../lib/truco/types";
 import i18n from "../../lib/i18n";
+import { audioManager } from "../../lib/audio";
 
 export const useTrucoHandlers = (state: any, logic: any) => {
   const {
@@ -22,6 +23,7 @@ export const useTrucoHandlers = (state: any, logic: any) => {
       
     const reason = remote ? "Se fue al mazo" : "Te fuiste al mazo";
     triggerCall(reason, "#ffffff");
+    audioManager.playAlMazo(remote ? "cpu" : "player");
     
     const logMessage = remote ? "El Rival se fue al mazo." : "Te fuiste al mazo.";
     setMatchLog((prev: string[]) => [...prev, `${logMessage} ${remote ? 'Ganaste' : 'Perdiste'} ${pts} puntos.`]);
@@ -54,13 +56,17 @@ export const useTrucoHandlers = (state: any, logic: any) => {
 
   const handleCall = useCallback((type: "truco" | "envido", level: number, caller: PlayerRole) => {
     let text = "";
+    let rawCallForAudio = "";
     if (type === "truco") {
+      rawCallForAudio = level === 1 ? "truco" : (level === 2 ? "re truco" : "vale cuatro");
       text = level === 1 ? i18n.t("call_truco") : (level === 2 ? i18n.t("call_retruco") : i18n.t("call_vale_4"));
     } else {
-      if (level === 3) text = i18n.t("call_real_envido");
-      else if (level === 4) text = i18n.t("call_falta_envido");
-      else text = i18n.t("call_envido");
+      if (level === 3) { rawCallForAudio = "real envido"; text = i18n.t("call_real_envido"); }
+      else if (level === 4) { rawCallForAudio = "falta envido"; text = i18n.t("call_falta_envido"); }
+      else { rawCallForAudio = "envido"; text = i18n.t("call_envido"); }
     }
+
+    audioManager.playCall(rawCallForAudio, caller);
 
     const speaker = (caller === "player" || caller === "partner") ? "Vos" : "El Rival";
     setMatchLog((prev: string[]) => [...prev, `${speaker} cantó ${text}`]);
@@ -100,6 +106,7 @@ export const useTrucoHandlers = (state: any, logic: any) => {
     const isEnvidoResp = pendingAction && pendingAction.type === "envido";
     const color = remote ? "#F77502" : (isEnvidoResp ? "#00f2ff" : "var(--color-accent)");
     triggerCall(accept ? i18n.t("call_quiero") : i18n.t("call_no_quiero"), color);
+    audioManager.playResponse(accept, remote ? "cpu" : "player");
 
     setMatchLog((prev: string[]) => [...prev, `${responderName} respondió: ${accept ? 'QUIERO' : 'NO QUIERO'}`]);
 

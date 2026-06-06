@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X } from 'lucide-react';
+import { X, BookOpen } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { InstructionsPanel } from '../game/layout/InstructionsPanel';
 
@@ -24,7 +24,7 @@ export const RulesModal: React.FC<RulesModalProps> = ({ isOpen, onClose, maxPoin
           style={{
             position: "fixed",
             inset: 0,
-            background: "rgba(0, 0, 0, 0.65)",
+            background: "rgba(0, 0, 0, 0.45)",
             backdropFilter: "blur(12px)",
             zIndex: 3000,
             display: "flex",
@@ -58,15 +58,19 @@ export const RulesModal: React.FC<RulesModalProps> = ({ isOpen, onClose, maxPoin
               alignItems: "center",
               marginBottom: "1.25rem"
             }}>
-              <h2 style={{
-                color: "#ffffff",
-                fontSize: "1.5rem",
-                margin: 0,
-                fontFamily: "var(--font-display)",
-                textTransform: "uppercase"
-              }}>
-                {t("rules")}
-              </h2>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                <BookOpen size={24} style={{ color: "#00f2ff", filter: "drop-shadow(0 0 6px rgba(0, 242, 255, 0.3))" }} />
+                <h2 style={{
+                  color: "#ffffff",
+                  fontSize: "1.5rem",
+                  margin: 0,
+                  fontFamily: "var(--font-display)",
+                  textTransform: "uppercase",
+                  textShadow: "0 0 8px rgba(255, 255, 255, 0.15)"
+                }}>
+                  {t("rules")}
+                </h2>
+              </div>
               <button
                 onClick={onClose}
                 style={{
