@@ -61,7 +61,7 @@ export const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
         reset({
           ...tournament,
           prize: normalizeTournamentPrizes(tournament.prize),
-          allowed_teams: tournament.allowed_teams || ["Argentina", "Francia", "España", "Nueva Zelanda", "Brasil", "Argelia", "México", "Colombia", "Japón", "Uruguay", "Portugal", "Ecuador", "Paraguay"],
+          allowed_teams: tournament.allowed_teams || ["Argentina", "Francia", "España", "Nueva Zelanda", "Brasil", "Argelia", "México", "Colombia", "Japón", "Uruguay", "Portugal", "Ecuador", "Paraguay", "Panamá", "USA"],
         });
       } else {
         const now = new Date();
@@ -83,7 +83,7 @@ export const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
           visibility: "public",
           code_type: "single",
           codes: [],
-          allowed_teams: ["Argentina", "Francia", "España", "Nueva Zelanda", "Brasil", "Argelia", "México", "Colombia", "Japón", "Uruguay", "Portugal", "Ecuador", "Paraguay", "Panamá"],
+          allowed_teams: ["Argentina", "Francia", "España", "Nueva Zelanda", "Brasil", "Argelia", "México", "Colombia", "Japón", "Uruguay", "Portugal", "Ecuador", "Paraguay", "Panamá", "USA"],
         });
       }
     }
@@ -643,7 +643,8 @@ export const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
                   { id: 'Portugal', flag: '🇵🇹' },
                   { id: 'Ecuador', flag: '🇪🇨' },
                   { id: 'Paraguay', flag: '🇵🇾' },
-                  { id: 'Panamá', flag: '🇵🇦' }
+                  { id: 'Panamá', flag: '🇵🇦' },
+                  { id: 'USA', flag: '🇺🇸' }
                 ].map((team) => {
                   const allowedTeams = formData.allowed_teams || [];
                   const isChecked = allowedTeams.includes(team.id);

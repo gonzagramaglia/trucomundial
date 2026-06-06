@@ -603,7 +603,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         .eq("match_code", matchCode)
         .maybeSingle();
 
-      let allowed = ["Argentina", "Francia", "España", "Nueva Zelanda", "Brasil", "Argelia", "México", "Colombia", "Japón", "Uruguay", "Portugal", "Ecuador", "Paraguay", "Panamá"];
+      let allowed = ["Argentina", "Francia", "España", "Nueva Zelanda", "Brasil", "Argelia", "México", "Colombia", "Japón", "Uruguay", "Portugal", "Ecuador", "Paraguay", "Panamá", "USA"];
       if (mData && mData.tournament_id) {
         const { data: tData } = await supabase
           .from("tournaments")
@@ -1073,7 +1073,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       >
         {/* Music Button */}
         <a
-          href="https://youtu.be/sBB0bQB4Sms"
+          href="https://youtu.be/vrY1THC_NQE"
           target="_blank"
           rel="noopener noreferrer"
           className="btn-hover-dark"
@@ -1438,7 +1438,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   { id: 'Portugal', flag: '🇵🇹' },
                   { id: 'Ecuador', flag: '🇪🇨' },
                   { id: 'Paraguay', flag: '🇵🇾' },
-                  { id: 'Panamá', flag: '🇵🇦' }
+                  { id: 'Panamá', flag: '🇵🇦' },
+                  { id: 'USA', flag: '🇺🇸' }
                 ].map(team => {
                   const isChecked = selectedTeams.includes(team.id);
                   const isLimitReached = selectedTeams.length >= 4;

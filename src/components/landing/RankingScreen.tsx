@@ -819,6 +819,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
               { id: 'Ecuador', label: 'country_ecuador', flag: '🇪🇨' },
               { id: 'Paraguay', label: 'country_paraguay', flag: '🇵🇾' },
               { id: 'Panamá', label: 'country_panama', flag: '🇵🇦' },
+              { id: 'USA', label: 'country_usa', flag: '🇺🇸' },
               { id: 'Nueva Zelanda', label: 'country_nueva zelanda', flag: '🇳🇿' },
             ].map((country) => (
               <button
