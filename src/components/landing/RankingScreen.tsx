@@ -806,22 +806,23 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
             </button>
 
             {[
-              { id: 'Argelia', label: 'country_argelia', flag: '🇩🇿' },
-              { id: 'Argentina', label: 'country_argentina', flag: '🇦🇷' },
-              { id: 'Brasil', label: 'country_brasil', flag: '🇧🇷' },
-              { id: 'España', label: 'country_espana', flag: '🇪🇸' },
-              { id: 'Francia', label: 'country_francia', flag: '🇫🇷' },
-              { id: 'México', label: 'country_mexico', flag: '🇲🇽' },
-              { id: 'Colombia', label: 'country_colombia', flag: '🇨🇴' },
-              { id: 'Japón', label: 'country_japon', flag: '🇯🇵' },
-              { id: 'Uruguay', label: 'country_uruguay', flag: '🇺🇾' },
-              { id: 'Portugal', label: 'country_portugal', flag: '🇵🇹' },
-              { id: 'Ecuador', label: 'country_ecuador', flag: '🇪🇨' },
-              { id: 'Paraguay', label: 'country_paraguay', flag: '🇵🇾' },
-              { id: 'Panamá', label: 'country_panama', flag: '🇵🇦' },
-              { id: 'USA', label: 'country_usa', flag: '🇺🇸' },
-              { id: 'Canadá', label: 'country_canada', flag: '🇨🇦' },
-              { id: 'Nueva Zelanda', label: 'country_nueva zelanda', flag: '🇳🇿' },
+              { id: 'Argelia', code: 'ALG', flag: '🇩🇿' },
+              { id: 'Argentina', code: 'ARG', flag: '🇦🇷' },
+              { id: 'Brasil', code: 'BRA', flag: '🇧🇷' },
+              { id: 'España', code: 'ESP', flag: '🇪🇸' },
+              { id: 'Francia', code: 'FRA', flag: '🇫🇷' },
+              { id: 'México', code: 'MEX', flag: '🇲🇽' },
+              { id: 'Colombia', code: 'COL', flag: '🇨🇴' },
+              { id: 'Japón', code: 'JPN', flag: '🇯🇵' },
+              { id: 'Uruguay', code: 'URU', flag: '🇺🇾' },
+              { id: 'Portugal', code: 'POR', flag: '🇵🇹' },
+              { id: 'Ecuador', code: 'ECU', flag: '🇪🇨' },
+              { id: 'Paraguay', code: 'PAR', flag: '🇵🇾' },
+              { id: 'Panamá', code: 'PAN', flag: '🇵🇦' },
+              { id: 'USA', code: 'USA', flag: '🇺🇸' },
+              { id: 'Canadá', code: 'CAN', flag: '🇨🇦' },
+              { id: 'Países Bajos', code: 'NED', flag: '🇳🇱' },
+              { id: 'Nueva Zelanda', code: 'NZL', flag: '🇳🇿' },
             ].map((country) => (
               <button
                 key={country.id}
@@ -843,7 +844,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
                   whiteSpace: 'nowrap'
                 }}
               >
-                <span style={{ marginRight: '0.4rem' }}>{country.flag}</span> {t(country.label)}
+                <span style={{ marginRight: '0.4rem' }}>{country.flag}</span> {country.code}
               </button>
             ))}
           </div>

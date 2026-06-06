@@ -61,7 +61,7 @@ export const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
         reset({
           ...tournament,
           prize: normalizeTournamentPrizes(tournament.prize),
-          allowed_teams: tournament.allowed_teams || ["Argentina", "Francia", "España", "Nueva Zelanda", "Brasil", "Argelia", "México", "Colombia", "Japón", "Uruguay", "Portugal", "Ecuador", "Paraguay", "Panamá", "USA", "Canadá"],
+          allowed_teams: tournament.allowed_teams || ["Argentina", "Francia", "España", "Nueva Zelanda", "Brasil", "Argelia", "México", "Colombia", "Japón", "Uruguay", "Portugal", "Ecuador", "Paraguay", "Panamá", "USA", "Canadá", "Países Bajos"],
         });
       } else {
         const now = new Date();
@@ -83,7 +83,7 @@ export const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
           visibility: "public",
           code_type: "single",
           codes: [],
-          allowed_teams: ["Argentina", "Francia", "España", "Nueva Zelanda", "Brasil", "Argelia", "México", "Colombia", "Japón", "Uruguay", "Portugal", "Ecuador", "Paraguay", "Panamá", "USA", "Canadá"],
+          allowed_teams: ["Argentina", "Francia", "España", "Nueva Zelanda", "Brasil", "Argelia", "México", "Colombia", "Japón", "Uruguay", "Portugal", "Ecuador", "Paraguay", "Panamá", "USA", "Canadá", "Países Bajos"],
         });
       }
     }
@@ -630,23 +630,23 @@ export const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
                 }}
               >
                 {[
-                  { id: 'Argentina', flag: '🇦🇷' },
-                  { id: 'Francia', flag: '🇫🇷' },
-                  { id: 'España', flag: '🇪🇸' },
-                  { id: 'Nueva Zelanda', flag: '🇳🇿' },
-                  { id: 'Brasil', flag: '🇧🇷' },
-                  { id: 'Argelia', flag: '🇩🇿' },
-                  { id: 'México', flag: '🇲🇽' },
-                  { id: 'Colombia', flag: '🇨🇴' },
-                  { id: 'Japón', flag: '🇯🇵' },
-                  { id: 'Uruguay', flag: '🇺🇾' },
-                  { id: 'Portugal', flag: '🇵🇹' },
-                  { id: 'Ecuador', flag: '🇪🇨' },
-                  { id: 'Paraguay', flag: '🇵🇾' },
-                  { id: 'Panamá', flag: '🇵🇦' },
-                  { id: 'USA', flag: '🇺🇸' },
-                  { id: 'Canadá', flag: '🇨🇦' },
-                  { id: 'Nueva Zelanda', flag: '🇳🇿' }
+                  { id: 'Argentina', flag: '🇦🇷', code: 'ARG' },
+                  { id: 'Francia', flag: '🇫🇷', code: 'FRA' },
+                  { id: 'España', flag: '🇪🇸', code: 'ESP' },
+                  { id: 'Brasil', flag: '🇧🇷', code: 'BRA' },
+                  { id: 'Argelia', flag: '🇩🇿', code: 'ALG' },
+                  { id: 'México', flag: '🇲🇽', code: 'MEX' },
+                  { id: 'Colombia', flag: '🇨🇴', code: 'COL' },
+                  { id: 'Japón', flag: '🇯🇵', code: 'JPN' },
+                  { id: 'Uruguay', flag: '🇺🇾', code: 'URU' },
+                  { id: 'Portugal', flag: '🇵🇹', code: 'POR' },
+                  { id: 'Ecuador', flag: '🇪🇨', code: 'ECU' },
+                  { id: 'Paraguay', flag: '🇵🇾', code: 'PAR' },
+                  { id: 'Panamá', flag: '🇵🇦', code: 'PAN' },
+                  { id: 'USA', flag: '🇺🇸', code: 'USA' },
+                  { id: 'Canadá', flag: '🇨🇦', code: 'CAN' },
+                  { id: 'Países Bajos', flag: '🇳🇱', code: 'NED' },
+                  { id: 'Nueva Zelanda', flag: '🇳🇿', code: 'NZL' }
                 ].map((team) => {
                   const allowedTeams = formData.allowed_teams || [];
                   const isChecked = allowedTeams.includes(team.id);
@@ -683,7 +683,7 @@ export const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
                       }}
                     >
                       <span>{team.flag}</span>
-                      <span>{team.id}</span>
+                      <span>{team.code}</span>
                       {isChecked && <span style={{ color: "#ff7800", marginLeft: "0.25rem" }}>✓</span>}
                     </button>
                   );

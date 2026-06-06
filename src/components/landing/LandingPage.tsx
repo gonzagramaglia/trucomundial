@@ -603,7 +603,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         .eq("match_code", matchCode)
         .maybeSingle();
 
-      let allowed = ["Argentina", "Francia", "España", "Nueva Zelanda", "Brasil", "Argelia", "México", "Colombia", "Japón", "Uruguay", "Portugal", "Ecuador", "Paraguay", "Panamá", "USA", "Canadá"];
+      let allowed = ["Argentina", "Francia", "España", "Nueva Zelanda", "Brasil", "Argelia", "México", "Colombia", "Japón", "Uruguay", "Portugal", "Ecuador", "Paraguay", "Panamá", "USA", "Canadá", "Países Bajos"];
       if (mData && mData.tournament_id) {
         const { data: tData } = await supabase
           .from("tournaments")
@@ -1425,23 +1425,23 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.6rem', justifyContent: 'center', marginBottom: '1.5rem', marginTop: '1rem' }}>
                 {[
-                  { id: 'Argentina', flag: '🇦🇷' },
-                  { id: 'Francia', flag: '🇫🇷' },
-                  { id: 'España', flag: '🇪🇸' },
-                  { id: 'Nueva Zelanda', flag: '🇳🇿' },
-                  { id: 'Brasil', flag: '🇧🇷' },
-                  { id: 'Argelia', flag: '🇩🇿' },
-                  { id: 'México', flag: '🇲🇽' },
-                  { id: 'Colombia', flag: '🇨🇴' },
-                  { id: 'Japón', flag: '🇯🇵' },
-                  { id: 'Uruguay', flag: '🇺🇾' },
-                  { id: 'Portugal', flag: '🇵🇹' },
-                  { id: 'Ecuador', flag: '🇪🇨' },
-                  { id: 'Paraguay', flag: '🇵🇾' },
-                  { id: 'Panamá', flag: '🇵🇦' },
-                  { id: 'USA', flag: '🇺🇸' },
-                  { id: 'Canadá', flag: '🇨🇦' },
-                  { id: 'Nueva Zelanda', flag: '🇳🇿' }
+                  { id: 'Argentina', flag: '🇦🇷', code: 'ARG' },
+                  { id: 'Francia', flag: '🇫🇷', code: 'FRA' },
+                  { id: 'España', flag: '🇪🇸', code: 'ESP' },
+                  { id: 'Brasil', flag: '🇧🇷', code: 'BRA' },
+                  { id: 'Argelia', flag: '🇩🇿', code: 'ALG' },
+                  { id: 'México', flag: '🇲🇽', code: 'MEX' },
+                  { id: 'Colombia', flag: '🇨🇴', code: 'COL' },
+                  { id: 'Japón', flag: '🇯🇵', code: 'JPN' },
+                  { id: 'Uruguay', flag: '🇺🇾', code: 'URU' },
+                  { id: 'Portugal', flag: '🇵🇹', code: 'POR' },
+                  { id: 'Ecuador', flag: '🇪🇨', code: 'ECU' },
+                  { id: 'Paraguay', flag: '🇵🇾', code: 'PAR' },
+                  { id: 'Panamá', flag: '🇵🇦', code: 'PAN' },
+                  { id: 'USA', flag: '🇺🇸', code: 'USA' },
+                  { id: 'Canadá', flag: '🇨🇦', code: 'CAN' },
+                  { id: 'Países Bajos', flag: '🇳🇱', code: 'NED' },
+                  { id: 'Nueva Zelanda', flag: '🇳🇿', code: 'NZL' }
                 ].map(team => {
                   const isChecked = selectedTeams.includes(team.id);
                   const isLimitReached = selectedTeams.length >= 4;
@@ -1478,7 +1478,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                       }}
                     >
                       <span style={{ fontSize: "1.2rem" }}>{team.flag}</span>
-                      <span>{t("country_" + team.id.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase())}</span>
+                      <span>{team.code}</span>
                     </button>
                   );
                 })}

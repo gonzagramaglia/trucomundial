@@ -185,6 +185,7 @@ const resources = {
       "country_panama": "Panama",
       "country_usa": "USA",
       "country_canada": "Canada",
+      "country_paises bajos": "Netherlands",
 
       // GameModeSelector
       "roadmap": "ROADMAP",
@@ -628,6 +629,7 @@ const resources = {
       "country_panama": "Panamá",
       "country_usa": "USA",
       "country_canada": "Canadá",
+      "country_paises bajos": "Países Bajos",
 
       // GameModeSelector
       "roadmap": "HOJA DE RUTA",
