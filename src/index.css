@@ -13,3 +13,14 @@
 * {
   -webkit-tap-highlight-color: transparent;
 }
+
+@media (max-width: 768px) {
+  .ranking-sort-container {
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+  .ranking-sort-inner,
+  .ranking-sort-container select {
+    width: 100%;
+  }
+}

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Home, Music } from "lucide-react";
+import { Home, BookOpen } from "lucide-react";
 import { useTrucoGame } from "../../hooks/useTrucoGame";
 import { TrucoGameView } from "../game/layout/TrucoGameView";
 import { useTwitchChat } from "../../hooks/useTwitchChat";
@@ -7,8 +7,11 @@ import { supabase } from "../../lib/supabase";
 import { useMatchmaking } from "../../hooks/useMatchmaking";
 import { motion, AnimatePresence } from "framer-motion";
 import type { PlayerRole } from "../../lib/truco/types";
+import { RulesModal } from "../shared/RulesModal";
+import { useTranslation } from "react-i18next";
 
 export function TwitchApp() {
+  const { t } = useTranslation();
   const [channel, setChannel] = useState<string>("");
   const [points, setPoints] = useState<number>(30);
   const [opponentMode, setOpponentMode] = useState<"cpu" | "streamer">("cpu");
@@ -22,6 +25,7 @@ export function TwitchApp() {
     }
     return ["Argentina", "Francia", "España", "Nueva Zelanda"];
   });
+  const [showRules, setShowRules] = useState(false);
 
   useEffect(() => {
     localStorage.setItem('truco_selected_teams_twitch', JSON.stringify(selectedTeams));
@@ -295,12 +299,10 @@ export function TwitchApp() {
         </button>
       )}
 
-      {/* Music Button */}
+      {/* Rules Button */}
       {!isConfigured && (
-        <a
-          href="https://youtu.be/228FtMaq8uY"
-          target="_blank"
-          rel="noopener noreferrer"
+        <button
+          onClick={() => setShowRules(true)}
           className="btn-hover-dark"
           style={{
             position: "fixed",
@@ -321,10 +323,10 @@ export function TwitchApp() {
             textDecoration: "none",
             zIndex: 2000,
           }}
-          title="Música"
+          title={t("rules")}
         >
-          <Music size={20} />
-        </a>
+          <BookOpen size={20} />
+        </button>
       )}
 
         {!isConfigured ? (
@@ -628,6 +630,7 @@ export function TwitchApp() {
           setShowExitModal(false);
           setIsConfigured(false);
         }}
+        activeCountries={core.activeCountries}
       />
       </div>
       <div 
@@ -717,6 +720,7 @@ export function TwitchApp() {
           </motion.div>
         )}
       </AnimatePresence>
+      <RulesModal isOpen={showRules} onClose={() => setShowRules(false)} />
     </div>
   );
 }

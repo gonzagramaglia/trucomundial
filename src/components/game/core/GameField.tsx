@@ -26,6 +26,7 @@ interface GameFieldProps {
   isMazoDisabled?: boolean;
   envHighlightIds?: Set<string>;
   isCooldown?: boolean;
+  roundResult?: "win" | "loss" | null;
 }
 
 export const GameField: React.FC<GameFieldProps> = ({
@@ -42,7 +43,8 @@ export const GameField: React.FC<GameFieldProps> = ({
   onHandleMazo,
   isMazoDisabled = false,
   envHighlightIds,
-  isCooldown = false
+  isCooldown = false,
+  roundResult
 }) => {
   const { t } = useTranslation();
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -185,7 +187,7 @@ export const GameField: React.FC<GameFieldProps> = ({
             className="btn-hover-dark"
             style={{
               position: 'absolute',
-              top: isMobile ? '68px' : '100px',
+              top: isMobile ? '76px' : '100px',
               left: '50%',
               transform: 'translateX(-50%)',
               width: isMobile ? '70px' : '100px',
@@ -218,10 +220,10 @@ export const GameField: React.FC<GameFieldProps> = ({
       </motion.div>
 
       <CallOverlay activeCall={activeCall} gameState={gameState} />
-      <RoundCountdown isActive={isRoundEnding || isGameStarting} isGameStarting={isGameStarting} />
+      <RoundCountdown isActive={isRoundEnding || isGameStarting} isGameStarting={isGameStarting} roundResult={roundResult} />
 
       <AnimatePresence>
-        {isCooldown && handWinners.length === 1 && handWinners[0] === "draw" && (
+        {isCooldown && handWinners.length === 1 && handWinners[0] === "draw" && playedCards.length === (gameMode === "2v2" ? 4 : 2) && (
           <motion.div
             initial={{ scale: 0.5, opacity: 0, x: "-50%", y: "-50%" }}
             animate={{ 

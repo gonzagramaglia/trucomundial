@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 interface RoundCountdownProps {
   isActive: boolean;
   isGameStarting?: boolean;
+  roundResult?: "win" | "loss" | null;
 }
 
 export const RoundCountdown: React.FC<RoundCountdownProps> = ({ isActive, isGameStarting }) => {
@@ -52,6 +53,7 @@ export const RoundCountdown: React.FC<RoundCountdownProps> = ({ isActive, isGame
                 gap: '1.5rem'
               }}
             >
+
               <div
                 className="text-display"
                 style={{

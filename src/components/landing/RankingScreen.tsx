@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Save, Plus, Minus, Search, Trophy, Lock, RefreshCw, Check, Home } from 'lucide-react';
+import { Save, Plus, Minus, Search, Trophy, Lock, RefreshCw, Check, Home, Star, Calendar } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { CARDS } from '../../data/cards';
 import { Sticker } from '../shared/Sticker';
@@ -543,7 +543,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
               textAlign: 'center'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Trophy size={24} style={{ color: '#ffdf00', filter: 'drop-shadow(0 0 6px rgba(255, 223, 0, 0.25))' }} />
+                <Star size={24} fill="#ffdf00" style={{ color: '#ffdf00', filter: 'drop-shadow(0 0 6px rgba(255, 223, 0, 0.25))' }} />
                 <h2 className="text-display" style={{
                   fontSize: '1.4rem',
                   margin: 0,
@@ -564,7 +564,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
             {/* Desktop Centered Header Layout */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', textAlign: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                <Trophy size={36} style={{ color: '#ffdf00', filter: 'drop-shadow(0 0 10px rgba(255, 223, 0, 0.3))' }} />
+                <Star size={36} fill="#ffdf00" style={{ color: '#ffdf00', filter: 'drop-shadow(0 0 10px rgba(255, 223, 0, 0.3))' }} />
                 <h2 className="text-display" style={{
                   fontSize: '2.2rem',
                   margin: 0,
@@ -583,6 +583,43 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
         )}
       </div>
 
+      {/* INFO BOX */}
+      <div style={{
+        background: 'rgba(0, 242, 255, 0.1)',
+        border: '1px solid rgba(0, 242, 255, 0.3)',
+        borderRadius: '12px',
+        padding: '1rem',
+        display: 'flex',
+        alignItems: 'flex-start',
+        gap: '1rem',
+        marginBottom: '2rem',
+        width: '100%',
+        boxSizing: 'border-box'
+      }}>
+        <div style={{
+          background: 'rgba(0, 242, 255, 0.2)',
+          borderRadius: '50%',
+          width: '36px',
+          height: '36px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexShrink: 0
+        }}>
+          <Calendar size={20} color="#00f2ff" />
+        </div>
+        <p 
+          style={{
+            margin: 0,
+            fontSize: '0.85rem',
+            color: 'rgba(255,255,255,0.9)',
+            lineHeight: 1.4,
+            textAlign: 'left'
+          }}
+          dangerouslySetInnerHTML={{ __html: t('ranking_fixture_info') }}
+        />
+      </div>
+
       {/* VOTING CONTROL BLOCK (STICKY HUD) */}
       <AnimatePresence mode="wait">
         {user ? (
@@ -594,7 +631,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
               top: '1rem',
               zIndex: 100,
               background: 'rgba(15, 10, 25, 0.9)',
-              border: unsaved ? '2px solid rgba(255, 184, 0, 0.45)' : '2px solid rgba(168, 85, 247, 0.25)',
+              border: unsaved ? '2px solid rgba(255, 184, 0, 0.45)' : (availableVotes === 0 ? '2px solid rgba(16, 185, 129, 0.45)' : '2px solid rgba(168, 85, 247, 0.25)'),
               borderRadius: '2rem',
               padding: '1.25rem 2rem',
               marginBottom: '2rem',
@@ -603,17 +640,17 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
               alignItems: 'center',
               justifyContent: 'space-between',
               gap: '1.5rem',
-              boxShadow: unsaved ? '0 10px 30px rgba(255, 184, 0, 0.05), inset 0 0 20px rgba(255, 184, 0, 0.05)' : '0 10px 30px rgba(168, 85, 247, 0.05), inset 0 0 20px rgba(168, 85, 247, 0.05)',
+              boxShadow: unsaved ? '0 10px 30px rgba(255, 184, 0, 0.05), inset 0 0 20px rgba(255, 184, 0, 0.05)' : (availableVotes === 0 ? '0 10px 30px rgba(16, 185, 129, 0.05), inset 0 0 20px rgba(16, 185, 129, 0.05)' : '0 10px 30px rgba(168, 85, 247, 0.05), inset 0 0 20px rgba(168, 85, 247, 0.05)'),
               backdropFilter: 'blur(16px)'
             }}
           >
             <div style={{ flex: '1 1 300px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.9rem', fontWeight: 800 }}>
-                <span style={{ color: unsaved ? '#ffb800' : '#a855f7', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <span style={{ color: unsaved ? '#ffb800' : (availableVotes === 0 ? '#10b981' : '#a855f7'), display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <Trophy size={18} />
                   {t('your_votes_distributed')}
                 </span>
-                <span style={{ color: availableVotes === 0 ? '#10b981' : '#fff' }}>
+                <span style={{ color: unsaved ? '#ffb800' : (availableVotes === 0 ? '#10b981' : '#fff') }}>
                   {totalMyVotes} / 100 {t('votes_label')}
                 </span>
               </div>
@@ -649,7 +686,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
                 disabled={saving || saveSuccess}
                 className="btn-hover-dark"
                 style={{
-                  background: saveSuccess ? '#10b981' : (unsaved ? '#ffb800' : '#a855f7'),
+                  background: saveSuccess ? '#10b981' : (unsaved ? '#ffb800' : (availableVotes === 0 ? '#10b981' : '#a855f7')),
                   border: 'none',
                   color: '#fff',
                   height: '48px',
@@ -694,9 +731,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
                 <Lock size={18} />
                 {t('login_to_vote_title')}
               </h3>
-              <p style={{ margin: 0, fontSize: '0.8rem', opacity: 0.7, lineHeight: 1.4 }}>
-                {t('login_to_vote_desc')}
-              </p>
+              <p style={{ margin: 0, fontSize: '0.8rem', opacity: 0.7, lineHeight: 1.4 }} dangerouslySetInnerHTML={{ __html: t('login_to_vote_desc') }} />
             </div>
 
             <button
@@ -715,7 +750,8 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
                 alignItems: 'center',
                 gap: '0.6rem',
                 cursor: 'pointer',
-                boxShadow: '4px 4px 0px #000'
+                boxShadow: '4px 4px 0px #000',
+                marginTop: isMobile ? '-0.5rem' : 0,
               }}
             >
               <svg width="18" height="18" viewBox="0 0 24 24" style={{ fill: 'currentColor' }}>
@@ -765,7 +801,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
               transition: 'all 0.2s ease',
               boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)'
             }}
-            onFocus={e => e.target.style.borderColor = 'rgba(0, 242, 255, 0.5)'}
+            onFocus={e => e.target.style.borderColor = 'rgba(168, 85, 247, 0.5)'}
             onBlur={e => e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)'}
           />
         </div>
@@ -791,14 +827,14 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
                 justifyContent: 'center',
                 boxSizing: 'border-box',
                 borderRadius: '1.1rem',
-                background: selectedCountries.length === 0 ? 'rgba(0, 242, 255, 0.2)' : 'rgba(255, 255, 255, 0.05)',
-                border: selectedCountries.length === 0 ? '1.5px solid #00f2ff' : '1px solid rgba(255, 255, 255, 0.1)',
+                background: selectedCountries.length === 0 ? 'rgba(168, 85, 247, 0.2)' : 'rgba(255, 255, 255, 0.05)',
+                border: selectedCountries.length === 0 ? '1.5px solid #a855f7' : '1px solid rgba(255, 255, 255, 0.1)',
                 color: '#fff',
                 fontSize: '0.85rem',
                 fontWeight: 700,
                 cursor: 'pointer',
                 transition: 'all 0.2s ease',
-                boxShadow: selectedCountries.length === 0 ? '0 0 10px rgba(0, 242, 255, 0.2)' : 'none',
+                boxShadow: selectedCountries.length === 0 ? '0 0 10px rgba(168, 85, 247, 0.2)' : 'none',
                 whiteSpace: 'nowrap'
               }}
             >
@@ -838,12 +874,13 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
                   justifyContent: 'center',
                   boxSizing: 'border-box',
                   borderRadius: '1.1rem',
-                  background: selectedCountries.includes(country.id) ? 'rgba(0, 242, 255, 0.2)' : 'rgba(255, 255, 255, 0.05)',
-                  border: selectedCountries.includes(country.id) ? '1.5px solid #00f2ff' : '1px solid rgba(255, 255, 255, 0.1)',
+                  background: selectedCountries.includes(country.id) ? 'rgba(168, 85, 247, 0.2)' : 'rgba(255, 255, 255, 0.05)',
+                  border: selectedCountries.includes(country.id) ? '1.5px solid #a855f7' : '1px solid rgba(255, 255, 255, 0.1)',
                   color: selectedCountries.includes(country.id) ? '#fff' : 'rgba(255, 255, 255, 0.6)',
                   fontWeight: selectedCountries.includes(country.id) ? 'bold' : 'normal',
-                  boxShadow: selectedCountries.includes(country.id) ? '0 0 10px rgba(0, 242, 255, 0.2)' : 'none',
-                  whiteSpace: 'nowrap'
+                  boxShadow: selectedCountries.includes(country.id) ? '0 0 10px rgba(168, 85, 247, 0.2)' : 'none',
+                  whiteSpace: 'nowrap',
+                  cursor: 'pointer'
                 }}
               >
                 <span style={{ marginRight: '0.4rem' }}>{country.flag}</span> {country.code}
@@ -852,9 +889,9 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
           </div>
 
           {/* Sort Selector */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <span style={{ fontSize: '0.85rem', opacity: 0.6 }}>{t('sort_by', 'Ordenar por')}:</span>
-            <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
+          <div className="ranking-sort-container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '0.3rem' }}>
+            <span style={{ fontSize: '0.8rem', opacity: 0.6, marginLeft: '0.5rem' }}>{t('sort_by', 'Ordenar por')}:</span>
+            <div className="ranking-sort-inner" style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
               <select
                 value={sortBy}
                 onChange={e => setSortBy(e.target.value as any)}

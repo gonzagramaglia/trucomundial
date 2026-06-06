@@ -374,6 +374,7 @@ function App() {
               onHandleMazo={wrappedHandleMazo}
               onCloseExit={() => setShowExitModal(false)}
               onConfirmExit={handleConfirmExit}
+              activeCountries={core.activeCountries}
             />
           </>
         )}

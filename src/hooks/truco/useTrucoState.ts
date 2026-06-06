@@ -24,6 +24,7 @@ export const useTrucoState = () => {
   const [isCooldown, setIsCooldown] = useState(false);
   const [isGameStarting, setIsGameStarting] = useState(false);
   const [showCountdown, setShowCountdown] = useState(false);
+  const [roundResult, setRoundResult] = useState<"win" | "loss" | null>(null);
   
   const [activeCall, setActiveCall] = useState<{ text: string, id: number, color: string } | null>(null);
   const [winnerModal, setWinnerModal] = useState<null | "player" | "cpu">(null);
@@ -78,6 +79,7 @@ export const useTrucoState = () => {
     isCooldown, setIsCooldown,
     isGameStarting, setIsGameStarting,
     showCountdown, setShowCountdown,
+    roundResult, setRoundResult,
     activeCall, setActiveCall,
     winnerModal, setWinnerModal,
     scorePopups, setScorePopups,

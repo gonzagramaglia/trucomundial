@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Home, Calendar, Trophy, Globe, Search } from 'lucide-react';
+import { Home, Calendar, Trophy, Globe, Search, Star } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { TwitchButton } from '../shared/TwitchButton';
 import { fixtureMatches } from '../../lib/fixtureData';
@@ -192,35 +192,63 @@ export const FixtureScreen: React.FC<FixtureScreenProps> = ({ onBack }) => {
           </div>
         )}
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-          <Calendar size={isMobile ? 28 : 36} style={{ color: '#00f2ff', filter: 'drop-shadow(0 0 10px rgba(0, 242, 255, 0.4))' }} />
-          <h2 className="text-display" style={{
-            fontSize: isMobile ? '1.8rem' : '2.5rem',
-            margin: 0,
-            letterSpacing: '0.02em',
-            color: '#ffffff',
-            textShadow: '0 0 15px rgba(255, 255, 255, 0.2)'
-          }}>
-            {t('world_cup_fixture')}
-          </h2>
-        </div>
-        <p style={{
-          color: 'rgba(255, 255, 255, 0.6)',
-          fontSize: isMobile ? '0.9rem' : '1.1rem',
-          textAlign: 'center',
-          maxWidth: '600px',
-          marginTop: '0.75rem',
-          marginBottom: 0
-        }}>
-          {t('fixture_desc')}
-        </p>
+        {isMobile ? (
+          <>
+            {/* Mobile Centered Header Layout */}
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '0.25rem',
+              justifyContent: 'center',
+              textAlign: 'center'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Calendar size={24} style={{ color: '#00f2ff', filter: 'drop-shadow(0 0 6px rgba(0, 242, 255, 0.25))' }} />
+                <h2 className="text-display" style={{
+                  fontSize: '1.4rem',
+                  margin: 0,
+                  letterSpacing: '0.05em',
+                  color: '#00f2ff',
+                  textShadow: '0 0 8px rgba(0, 242, 255, 0.15)'
+                }}>
+                  {t('world_cup_fixture').toUpperCase()}
+                </h2>
+              </div>
+              <p style={{ fontSize: '0.75rem', opacity: 0.6, margin: '4px 0 0 0' }}>
+                {t('fixture_desc')}
+              </p>
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Desktop Centered Header Layout */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', textAlign: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <Calendar size={36} style={{ color: '#00f2ff', filter: 'drop-shadow(0 0 10px rgba(0, 242, 255, 0.3))' }} />
+                <h2 className="text-display" style={{
+                  fontSize: '2.2rem',
+                  margin: 0,
+                  letterSpacing: '0.05em',
+                  color: '#00f2ff',
+                  textShadow: '0 0 15px rgba(0, 242, 255, 0.2)'
+                }}>
+                  {t('world_cup_fixture').toUpperCase()}
+                </h2>
+              </div>
+              <p style={{ fontSize: '0.95rem', opacity: 0.65, margin: '4px 0 0 0', fontWeight: 600 }}>
+                {t('fixture_desc')}
+              </p>
+            </div>
+          </>
+        )}
 
         <div style={{
-          background: 'rgba(255, 215, 0, 0.1)',
-          border: '1px solid rgba(255, 215, 0, 0.3)',
+          background: 'rgba(168, 85, 247, 0.1)',
+          border: '1px solid rgba(168, 85, 247, 0.3)',
           borderRadius: '1rem',
           padding: '1rem',
-          marginTop: '1.5rem',
+          marginTop: '2rem',
           display: 'flex',
           alignItems: 'center',
           gap: '1rem',
@@ -228,7 +256,7 @@ export const FixtureScreen: React.FC<FixtureScreenProps> = ({ onBack }) => {
           boxSizing: 'border-box'
         }}>
           <div style={{
-            background: 'rgba(255, 215, 0, 0.2)',
+            background: 'rgba(168, 85, 247, 0.2)',
             borderRadius: '50%',
             width: '40px',
             height: '40px',
@@ -237,7 +265,7 @@ export const FixtureScreen: React.FC<FixtureScreenProps> = ({ onBack }) => {
             justifyContent: 'center',
             flexShrink: 0
           }}>
-            <Trophy size={20} color="#ffd700" />
+            <Star size={20} color="#a855f7" />
           </div>
           <p 
             style={{

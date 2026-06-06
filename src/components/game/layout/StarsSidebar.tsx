@@ -2,8 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { BarChart3 } from 'lucide-react';
 import { CARDS } from '../../../data/cards';
 import { useTranslation } from 'react-i18next';
-import { supabase } from '../../../lib/supabase';
-import { subscribeToVotes, votesRegistry } from '../../../lib/votesStore';
+import { subscribeToVotes, votesRegistry, getCardVotes } from '../../../lib/votesStore';
 import { useBaseStars } from '../../../hooks/useBaseStars';
 
 const BASE_PLAYERS = CARDS.map(card => ({
@@ -19,11 +18,14 @@ const BASE_PLAYERS = CARDS.map(card => ({
 }));
 
 
-export const StarsSidebar = () => {
+interface StarsSidebarProps {
+  allowedTeams?: string[];
+}
+
+export const StarsSidebar: React.FC<StarsSidebarProps> = ({ allowedTeams }) => {
   const { t } = useTranslation();
   const [search, setSearch] = useState('');
-  const [loading, setLoading] = useState(true);
-  const [dbVotesData, setDbVotesData] = useState<any[]>([]);
+  const loading = false;
   const [aggregateVotes, setAggregateVotes] = useState<Record<string, number>>(votesRegistry);
   const baseStarsByCountry = useBaseStars();
 
@@ -32,49 +34,21 @@ export const StarsSidebar = () => {
       setAggregateVotes({ ...votesRegistry });
     });
     
-    const fetchGlobalVotes = async () => {
-      setLoading(true);
-      try {
-        const { data, error } = await supabase
-          .from('game_sync')
-          .select('match_id, last_move')
-          .like('match_id', 'user_votes_%');
-
-        if (error) {
-          console.error('Error fetching votes in sidebar:', error);
-        } else if (data) {
-          setDbVotesData(data);
-        }
-      } catch (err) {
-        console.error('Unexpected error fetching votes in sidebar:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchGlobalVotes();
     return () => unsub();
   }, []);
 
   const sorted = useMemo(() => {
-    const remoteVotes: Record<string, number> = {};
-    dbVotesData.forEach(item => {
-      const recordVotes = item.last_move?.votes;
-      if (recordVotes && typeof recordVotes === 'object') {
-        Object.entries(recordVotes).forEach(([cardId, count]) => {
-          if (typeof count === 'number') {
-            remoteVotes[cardId] = (remoteVotes[cardId] ?? 0) + count;
-          }
-        });
-      }
-    });
+    let players = [...BASE_PLAYERS];
+    if (allowedTeams && allowedTeams.length > 0) {
+      players = players.filter(p => allowedTeams.includes(p.country));
+    }
 
-    return [...BASE_PLAYERS]
+    return players
       .map(p => {
         const baseStars = baseStarsByCountry[p.country] || 0;
         return {
           ...p,
-          totalVotes: p.stars + baseStars + (aggregateVotes[p.id] ?? 0) + (remoteVotes[p.id] ?? 0)
+          totalVotes: p.stars + baseStars + getCardVotes(p.id)
         };
       })
       .sort((a, b) => {
@@ -83,7 +57,7 @@ export const StarsSidebar = () => {
         }
         return a.randomOffset - b.randomOffset;
       });
-  }, [dbVotesData, aggregateVotes, baseStarsByCountry]);
+  }, [aggregateVotes, baseStarsByCountry, allowedTeams]);
 
   const ranksMap = new Map<string, number>();
   let currentRank = 1;
@@ -117,7 +91,7 @@ export const StarsSidebar = () => {
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', flex: 1, minHeight: 0 }}>
       <div style={{ flexShrink: 0 }}>
         <h3 className="text-display" style={{ color: 'var(--color-accent)', fontSize: '0.9rem', marginBottom: '0.75rem', letterSpacing: '0.05em' }}>
-          {t("card_ranking")}
+          {t("card_ranking_deck")}
         </h3>
 
         {/* Search */}

@@ -544,20 +544,20 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9 }}
             style={{
-              background: "rgba(255, 255, 255, 0.03)",
-              border: "1.5px dashed rgba(168, 85, 247, 0.3)",
-              borderRadius: "1.75rem",
-              padding: "1.5rem",
-              marginBottom: "3.5rem",
-              display: "flex",
-              flexDirection: isMobile ? "column" : "row",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: "1.5rem",
-              boxShadow: "0 8px 32px rgba(0,0,0,0.1)",
+              background: 'rgba(145, 70, 255, 0.05)',
+              border: '2px dashed rgba(145, 70, 255, 0.45)',
+              borderRadius: '2rem',
+              padding: '1.5rem 2rem',
+              marginBottom: '3.5rem',
+              display: 'flex',
+              flexWrap: 'wrap',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              gap: '1.5rem',
+              backdropFilter: 'blur(16px)'
             }}
           >
-            <div style={{ flex: 1, textAlign: isMobile ? "center" : "left" }}>
+            <div style={{ flex: '1 1 300px' }}>
               <h3
                 style={{
                   margin: "0 0 0.5rem 0",
@@ -602,6 +602,7 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({
                 cursor: "pointer",
                 boxShadow: "4px 4px 0px #000",
                 whiteSpace: "nowrap",
+                marginTop: isMobile ? "-0.5rem" : 0,
               }}
             >
               <svg
@@ -900,55 +901,55 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({
                 }}
               >
                 {/* Status Indicator */}
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "-15px",
-                    left: "24px",
-                    background:
-                      isRegistered
-                        ? "#092218"
-                        : tournament.status === "open"
-                          ? "#130924"
-                          : tournament.status === "active"
-                            ? "#1c0d02"
-                            : "#1a1a1a",
-                    border: `1.5px solid ${
-                      isRegistered
-                        ? "#10b981"
-                        : tournament.status === "open"
-                          ? "#a855f7"
-                          : tournament.status === "active"
-                            ? "#ff7800"
-                            : "rgba(255,255,255,0.2)"
-                    }`,
-                    color:
-                      isRegistered
-                        ? "#10b981"
-                        : tournament.status === "open"
-                          ? "#a855f7"
-                          : tournament.status === "active"
-                            ? "#ff7800"
-                            : "rgba(255,255,255,0.5)",
-                    borderRadius: "1rem",
-                    padding: "4px 14px",
-                    fontSize: "0.7rem",
-                    fontWeight: 900,
-                    textTransform: "uppercase",
-                    zIndex: 10,
-                  }}
-                >
-                  {tournament.status === "open"
-                    ? tournament.code_type === "single"
-                      ? t("status_open_single")
-                      : t("status_open_unique")
-                    : tournament.status === "active"
-                      ? t("status_active")
-                      : t("status_finished")}
+                <div style={{ marginBottom: '0.75rem' }}>
+                  <span
+                    style={{
+                      display: "inline-block",
+                      background:
+                        isRegistered
+                          ? "rgba(16, 185, 129, 0.15)"
+                          : tournament.status === "open"
+                            ? "rgba(145, 70, 255, 0.2)"
+                            : tournament.status === "active"
+                              ? "rgba(255, 120, 0, 0.2)"
+                              : "rgba(255,255,255,0.1)",
+                      border: `1.5px solid ${
+                        isRegistered
+                          ? "#10b981"
+                          : tournament.status === "open"
+                            ? "#a855f7"
+                            : tournament.status === "active"
+                              ? "#ff7800"
+                              : "rgba(255,255,255,0.2)"
+                      }`,
+                      color:
+                        isRegistered
+                          ? "#10b981"
+                          : tournament.status === "open"
+                            ? "#a855f7"
+                            : tournament.status === "active"
+                              ? "#ff7800"
+                              : "rgba(255,255,255,0.5)",
+                      borderRadius: "0.6rem",
+                      padding: "3px 12px",
+                      fontSize: "0.65rem",
+                      fontWeight: 900,
+                      textTransform: "uppercase",
+                      letterSpacing: "0.05em",
+                    }}
+                  >
+                    {tournament.status === "open"
+                      ? tournament.code_type === "single"
+                        ? t("status_open_single")
+                        : t("status_open_unique")
+                      : tournament.status === "active"
+                        ? t("status_active")
+                        : t("status_finished")}
+                  </span>
                 </div>
 
                 {/* Main Content */}
-                <div style={{ marginTop: "0.5rem", marginBottom: "1.5rem" }}>
+                <div style={{ marginBottom: "1.5rem" }}>
                   <h3
                     className="text-display"
                     style={{

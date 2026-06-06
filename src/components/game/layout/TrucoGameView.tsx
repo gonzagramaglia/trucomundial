@@ -51,6 +51,8 @@ interface TrucoGameViewProps {
   onCloseExit: () => void;
   onConfirmExit: () => void;
   playerFolded: boolean;
+  activeCountries?: string[];
+  roundResult?: "win" | "loss" | null;
   setIsPaused?: (paused: boolean) => void;
 }
 
@@ -59,9 +61,9 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
   score, activeCall, trucoState, envidoState, pendingAction, handWinners, handWinningCardIds,
   scorePopups, winnerModal, rivalName, isBusy, isRoundEnding, whoseTurn, maxPoints,
   showCountdown, isCooldown, roundWinningCardId, cpuPartnerHandRef, showExitModal,
-  roomCode, isRivalConnected = true, isSelfConnected = true,
   onExitRequest, onRestartGame, onPlayCard, onHandleCall, onHandleResponse, onHandleMazo,
-  onCloseExit, onConfirmExit, playerFolded, setIsPaused
+  onCloseExit, onConfirmExit, playerFolded, setIsPaused, roomCode, isRivalConnected = true, isSelfConnected = true,
+  activeCountries, roundResult
 }) => {
   const { t } = useTranslation();
   const [showMobileHelp, setShowMobileHelp] = useState(false);
@@ -247,6 +249,7 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
           isMazoDisabled={!(whoseTurn === "player" || whoseTurn === "partner") || isBusy || pendingAction !== null}
           envHighlightIds={envHighlightIds}
           isCooldown={isCooldown}
+          roundResult={roundResult}
         />
 
         <GameBottomBar
@@ -442,7 +445,7 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
                     background: rgba(255, 255, 255, 0.4);
                   }
                 `}</style>
-                {helpTab === 'rules' ? <InstructionsPanel maxPoints={maxPoints} /> : <StarsSidebar />}
+                {helpTab === 'rules' ? <InstructionsPanel maxPoints={maxPoints} /> : <StarsSidebar allowedTeams={activeCountries} />}
               </div>
             </motion.div>
           </motion.div>

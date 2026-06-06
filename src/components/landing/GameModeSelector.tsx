@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from '../ui/Button';
-import { User, Globe, Trophy, BarChart3, Lock, Calendar } from 'lucide-react';
+import { User, Globe, Trophy, Star, Lock, Calendar } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { GameMode } from '../../lib/truco/types';
 
@@ -95,7 +95,7 @@ export const GameModeSelector: React.FC<GameModeSelectorProps> = ({ selectedMode
             gap: "0.5rem",
           }}
         >
-          <BarChart3 size={20} />
+          <Star size={20} fill="currentColor" />
           {t("vote")}
         </Button>
       </div>

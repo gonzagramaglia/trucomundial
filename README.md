@@ -1,6 +1,7 @@
-# Truco Mundial 🏆
+# Truco Mundial 🏆 (BETA)
 
-**Truco Mundial** is the evolution of Argentine Truco. A game where the wit of Truco meets the passion of World Cup stickers.
+**Truco Mundial** is the evolution of Argentine Truco. A game where the wit of Truco meets the passion of World Cup stickers. 
+*Note: The project is currently in its Beta phase, undergoing continuous updates, new features, and polish.*
 
 ## 🚀 Concept
 A fresh take on the classic card game featuring custom-designed stickers of football players (inspired by World Cup albums, but not using real/official stickers). Each player has a power level that respects the traditional hierarchy of Argentine Truco (e.g., Messi is the Ace of Swords, CR7 is the Ace of Clubs, etc.).
@@ -14,10 +15,13 @@ The game includes the complete Truco experience, featuring **Truco**, **Retruco*
 - **Local Play**: Play locally against the CPU.
 - **Custom Matches**: Choose between short (15 points) or long (30 points) matches.
 - **Google Authentication**: Quick and easy login via Supabase for multiplayer access.
-- **Streamer & Rapper Tournaments**: An elegant dedicated screen showing custom 1vs1 qualifying tournaments hosted by community streamers and rappers (Mucho Movimiento, Barbaroja, Dybbuk) for the Mucho Movimiento 2vs2 global finals.
-- **Interactive Roadmap**: A gorgeous vertical timeline detailing upcoming project milestones (Lanzamiento v1.0, Streamer Tournaments, Multi 2v2, Custom decks, etc.).
-- **Card Rankings**: An interactive voting system for the community to rank the best cards, featuring a protective unsaved changes validation modal when returning to the landing screen.
-- **Dynamic SPA Routing & SEO**: Zero-dependency URL mapping and client-side history navigation support for `/torneos`, `/ranking`, and `/ruta` paths with real-time dynamic SEO title and Open Graph metadata updates.
+- **Bilingual Experience (i18n)**: Full support for both English and Spanish throughout the entire application.
+- **Twitch Integration**: Interactive chat overlay and features specifically designed for streamers, engaging audiences directly from the broadcast.
+- **World Cup Fixture Integration**: An interactive visual fixture of the 2026 World Cup, showing upcoming games, results, and tying game outcomes to card buffs and power levels.
+- **Interactive Card Voting (`/votar`)**: An interactive voting system for the community to rank the best cards. Authenticated users can distribute daily votes to bump up their favorite players' stars.
+- **Streamer & Rapper Tournaments**: An elegant dedicated screen showing custom 1vs1 qualifying tournaments hosted by community streamers and rappers.
+- **Interactive Roadmap**: A gorgeous vertical timeline detailing upcoming project milestones.
+- **Dynamic SPA Routing & SEO**: Zero-dependency URL mapping and client-side history navigation support for `/torneos`, `/votar`, `/ruta`, and `/fixture` paths with real-time dynamic SEO title and Open Graph metadata updates.
 
 ## 🛠️ Tech Stack
 - **Frontend**: React + Vite (TypeScript)

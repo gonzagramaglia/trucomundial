@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import { Home, User, Music, Globe, ArrowLeft, Trophy, ShieldAlert } from "lucide-react";
+import { Home, User, Music, ArrowLeft, Trophy, ShieldAlert, BookOpen } from "lucide-react";
 import { supabase } from "../../lib/supabase";
 import { LandingHeader } from "./LandingHeader";
 import { GameModeSelector } from "./GameModeSelector";
@@ -16,6 +16,7 @@ import { ProfileScreen } from "./ProfileScreen";
 import { AdminScreen } from "../admin/AdminScreen";
 import { CreatorScreen } from "../admin/CreatorScreen";
 import { CreatorsApplicationScreen } from "./CreatorsApplicationScreen";
+import { RulesModal } from "../shared/RulesModal";
 import { TwitchButton } from '../shared/TwitchButton';
 import { setTournamentVotesSnapshot } from "../../lib/votesStore";
 
@@ -63,6 +64,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     }
     return ["Argentina", "Francia", "España", "Nueva Zelanda"];
   });
+  const [showRules, setShowRules] = useState(false);
 
   useEffect(() => {
     localStorage.setItem('truco_selected_teams', JSON.stringify(selectedTeams));
@@ -991,12 +993,20 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             backdropFilter: "blur(12px)",
             transition: "none",
           }}
-          title={user ? t("profile") : "Cambiar Idioma / Change Language"}
+          title={user ? t("profile") : "Música / Music"}
         >
           {user ? (
             <User size={20} style={{ color: "#ffffff" }} />
           ) : (
-            <Globe size={20} style={{ color: "#ffffff" }} />
+            <a
+              href="https://youtu.be/228FtMaq8uY"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: "#ffffff", display: "flex", alignItems: "center", justifyContent: "center" }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Music size={20} />
+            </a>
           )}
         </button>
 
@@ -1071,11 +1081,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           zIndex: 1000,
         }}
       >
-        {/* Music Button */}
-        <a
-          href="https://youtu.be/228FtMaq8uY"
-          target="_blank"
-          rel="noopener noreferrer"
+        {/* Rules Button */}
+        <button
+          onClick={() => setShowRules(true)}
           className="btn-hover-dark"
           style={{
             background: "rgba(255, 255, 255, 0.1)",
@@ -1089,12 +1097,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             alignItems: "center",
             justifyContent: "center",
             backdropFilter: "blur(12px)",
-            textDecoration: "none",
+            transition: "none",
           }}
-          title="Music"
+          title={t("rules")}
         >
-          <Music size={20} />
-        </a>
+          <BookOpen size={20} />
+        </button>
 
         {/* Instagram Button (Hidden for now) */}
         {/*
@@ -1849,6 +1857,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </motion.div>
         )}
       </AnimatePresence>
+      <RulesModal isOpen={showRules} onClose={() => setShowRules(false)} />
     </div>
   );
 };

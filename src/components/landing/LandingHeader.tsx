@@ -40,10 +40,23 @@ export const LandingHeader: React.FC<LandingHeaderProps> = ({ user }) => {
 
       {/* Title + Pill (Right Column) */}
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '0.75rem', marginBottom: '0.5rem' }}>
-        <h1 className="text-display" style={{ fontSize: 'clamp(2.5rem, 8vw, 4rem)', lineHeight: 1.0, color: '#fff', margin: 0 }}>
-          {t("title").split(' ')[0]}<br />
-          {t("title").split(' ')[1]}
-        </h1>
+        <div style={{ display: 'flex', alignItems: 'flex-start' }}>
+          <h1 className="text-display" style={{ fontSize: 'clamp(2.5rem, 8vw, 4rem)', lineHeight: 1.0, color: '#fff', margin: 0 }}>
+            {t("title").split(' ')[0]}<br />
+            {t("title").split(' ')[1]}
+          </h1>
+          <span style={{
+            background: '#f97316',
+            color: '#fff',
+            fontSize: '0.8rem',
+            fontWeight: 900,
+            padding: '0.2rem 0.5rem',
+            borderRadius: '0.5rem',
+            letterSpacing: '0.1em',
+            marginTop: '0.75rem',
+            marginLeft: '-2.5rem'
+          }}>BETA</span>
+        </div>
 
         {user && (
           <div style={{ 

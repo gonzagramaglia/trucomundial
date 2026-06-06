@@ -12,22 +12,24 @@ export const useTrucoHandlers = (state: any, logic: any) => {
 
   const handleMazo = useCallback((remote: boolean = false) => {
     const win = remote ? "player" : "cpu";
-    const actor = remote ? "El Rival" : "Vos";
     if (!remote) {
       setPlayerFolded(true);
     }
-    triggerCall(i18n.t("me_voy_al_mazo"), "#ffffff");
+    
     const pts = trucoState.status === "accepted"
       ? (trucoState.level + 1)
       : (trucoState.level + 1 + (envidoState.status === "none" || envidoState.status === "pending" ? 1 : 0));
-    
-    setMatchLog((prev: string[]) => [...prev, `${actor} se fue al mazo. ${remote ? 'Ganaste' : 'Perdiste'} ${pts} puntos.`]);
-
+      
     const reason = remote ? "Se fue al mazo" : "Te fuiste al mazo";
+    triggerCall(reason, "#ffffff");
+    
+    const logMessage = remote ? "El Rival se fue al mazo." : "Te fuiste al mazo.";
+    setMatchLog((prev: string[]) => [...prev, `${logMessage} ${remote ? 'Ganaste' : 'Perdiste'} ${pts} puntos.`]);
+
     addPoints(win, pts, reason);
     setIsRoundEnding(true);
     if (gameMode !== "multiplayer" || isHost) {
-      setTimeout(() => resetRound(), 3500);
+      setTimeout(() => resetRound(), 4500);
     }
   }, [trucoState.level, envidoState.status, triggerCall, addPoints, setIsRoundEnding, resetRound, isHost, gameMode, setPlayerFolded, setMatchLog]);
 
@@ -129,7 +131,7 @@ export const useTrucoHandlers = (state: any, logic: any) => {
       if (pendingAction.type === "truco") {
         setIsRoundEnding(true);
         if (gameMode !== "multiplayer") {
-          setTimeout(() => resetRound(), 3500);
+          setTimeout(() => resetRound(), 4500);
         }
       }
       else {
