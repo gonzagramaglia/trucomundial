@@ -278,7 +278,7 @@ function App() {
           setTimeout(() => {
             core.setIsGameStarting(false);
             core.setShowCountdown(false);
-          }, 2500);
+          }, 3000);
         }
       } else {
         // Guest MUST set "playing" to see the board, but doesn't startGame()
@@ -292,7 +292,7 @@ function App() {
         setTimeout(() => {
           core.setIsGameStarting(false);
           core.setShowCountdown(false);
-        }, 2500);
+        }, 3000);
       }
     } else {
       // Local modes

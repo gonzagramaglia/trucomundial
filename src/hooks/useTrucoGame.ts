@@ -94,7 +94,7 @@ export function useTrucoGame(sessionId: string | undefined, onSync?: (data: any)
         core.setIsGameStarting(false);
         core.setShowCountdown(false);
       }
-    }, 2000);
+    }, 3000);
 
     if (onSync && data) onSync(data);
     return data;

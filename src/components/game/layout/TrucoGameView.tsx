@@ -35,6 +35,7 @@ interface TrucoGameViewProps {
   whoseTurn: PlayerRole | null;
   maxPoints: number;
   showCountdown: boolean;
+  isGameStarting?: boolean;
   isCooldown: boolean;
   roundWinningCardId: string | null;
   cpuPartnerHandRef: any;
@@ -60,7 +61,7 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
   user, gameMode, gameState, playerHand, playedCards, cpuHandCount, cpuPartnerHandCount,
   score, activeCall, trucoState, envidoState, pendingAction, handWinners, handWinningCardIds,
   scorePopups, winnerModal, rivalName, isBusy, isRoundEnding, whoseTurn, maxPoints,
-  showCountdown, isCooldown, roundWinningCardId, cpuPartnerHandRef, showExitModal,
+  showCountdown, isGameStarting, isCooldown, roundWinningCardId, cpuPartnerHandRef, showExitModal,
   onExitRequest, onRestartGame, onPlayCard, onHandleCall, onHandleResponse, onHandleMazo,
   onCloseExit, onConfirmExit, playerFolded, setIsPaused, roomCode, isRivalConnected = true, isSelfConnected = true,
   activeCountries, roundResult
@@ -243,7 +244,7 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
           activeCall={activeCall}
           gameState={gameState}
           isRoundEnding={isRoundEnding}
-          isGameStarting={showCountdown}
+          isGameStarting={isGameStarting || false}
           whoseTurn={whoseTurn}
           onHandleMazo={onHandleMazo}
           isMazoDisabled={!(whoseTurn === "player" || whoseTurn === "partner") || isBusy || pendingAction !== null}
@@ -291,16 +292,17 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
         onClick={() => setShowMobileHelp(true)}
         className="mobile-help-btn"
         style={{
-          background: "rgba(168, 85, 247, 0.15)",
+          background: "rgba(249, 115, 22, 0.15)",
           backdropFilter: "blur(12px)",
           height: "40px",
           borderRadius: "1rem",
           padding: "0 1rem",
+          display: "none",
           alignItems: "center",
           justifyContent: "center",
           color: "white",
-          border: "1px solid rgba(168, 85, 247, 0.4)",
-          boxShadow: "0 0 15px rgba(168, 85, 247, 0.4), inset 0 0 8px rgba(168, 85, 247, 0.2)",
+          border: "1px solid rgba(249, 115, 22, 0.4)",
+          boxShadow: "0 0 15px rgba(249, 115, 22, 0.4), inset 0 0 8px rgba(249, 115, 22, 0.2)",
           cursor: "pointer"
         }}
       >

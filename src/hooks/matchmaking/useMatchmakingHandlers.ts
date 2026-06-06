@@ -51,7 +51,7 @@ export const useMatchmakingHandlers = (
       setTimeout(() => {
         setIsGameStarting(false);
         setShowCountdown(false);
-      }, 2000);
+      }, 3000);
     }
     else if (move.type === 'nextRound' && !isHost) {
       hasStartedRef.current = true;
@@ -67,7 +67,7 @@ export const useMatchmakingHandlers = (
       setTimeout(() => {
         setIsGameStarting(false);
         setShowCountdown(false);
-      }, 2000);
+      }, 3000);
     }
     else if (move.type === 'playCard') playCardRemote(move.card, "cpu");
     else if (move.type === 'call') wrappedHandleCall(move.callType, move.level, "cpu", true);

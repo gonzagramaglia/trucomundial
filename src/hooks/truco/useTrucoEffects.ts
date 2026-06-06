@@ -137,7 +137,6 @@ export const useTrucoEffects = (state: any, logic: any) => {
             const winnerStr = roundWinner === "player" ? "Vos" : "El Rival";
             state.setMatchLog((prev: string[]) => [...prev, `★ Fin de la ronda. Gana ${winnerStr} por ${points} puntos.`]);
 
-            clearRoundData();
             if (winningCard) setRoundWinningCardId(winningCard.id);
             
             if (gameMode !== "multiplayer" || isHost) {

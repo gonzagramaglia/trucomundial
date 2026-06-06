@@ -204,13 +204,13 @@ export const FixtureScreen: React.FC<FixtureScreenProps> = ({ onBack }) => {
               textAlign: 'center'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Calendar size={24} style={{ color: '#00f2ff', filter: 'drop-shadow(0 0 6px rgba(0, 242, 255, 0.25))' }} />
+                <Calendar size={24} style={{ color: '#ffffff', filter: 'drop-shadow(0 0 6px rgba(255, 255, 255, 0.25))' }} />
                 <h2 className="text-display" style={{
                   fontSize: '1.4rem',
                   margin: 0,
                   letterSpacing: '0.05em',
-                  color: '#00f2ff',
-                  textShadow: '0 0 8px rgba(0, 242, 255, 0.15)'
+                  color: '#ffffff',
+                  textShadow: '0 0 8px rgba(255, 255, 255, 0.15)'
                 }}>
                   {t('world_cup_fixture').toUpperCase()}
                 </h2>
@@ -225,13 +225,13 @@ export const FixtureScreen: React.FC<FixtureScreenProps> = ({ onBack }) => {
             {/* Desktop Centered Header Layout */}
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', textAlign: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                <Calendar size={36} style={{ color: '#00f2ff', filter: 'drop-shadow(0 0 10px rgba(0, 242, 255, 0.3))' }} />
+                <Calendar size={36} style={{ color: '#ffffff', filter: 'drop-shadow(0 0 10px rgba(255, 255, 255, 0.3))' }} />
                 <h2 className="text-display" style={{
                   fontSize: '2.2rem',
                   margin: 0,
                   letterSpacing: '0.05em',
-                  color: '#00f2ff',
-                  textShadow: '0 0 15px rgba(0, 242, 255, 0.2)'
+                  color: '#ffffff',
+                  textShadow: '0 0 15px rgba(255, 255, 255, 0.2)'
                 }}>
                   {t('world_cup_fixture').toUpperCase()}
                 </h2>
@@ -244,8 +244,8 @@ export const FixtureScreen: React.FC<FixtureScreenProps> = ({ onBack }) => {
         )}
 
         <div style={{
-          background: 'rgba(168, 85, 247, 0.1)',
-          border: '1px solid rgba(168, 85, 247, 0.3)',
+          background: 'rgba(255, 223, 0, 0.1)',
+          border: '1px solid rgba(255, 223, 0, 0.3)',
           borderRadius: '1rem',
           padding: '1rem',
           marginTop: '2rem',
@@ -256,7 +256,7 @@ export const FixtureScreen: React.FC<FixtureScreenProps> = ({ onBack }) => {
           boxSizing: 'border-box'
         }}>
           <div style={{
-            background: 'rgba(168, 85, 247, 0.2)',
+            background: 'rgba(255, 223, 0, 0.2)',
             borderRadius: '50%',
             width: '40px',
             height: '40px',
@@ -265,7 +265,7 @@ export const FixtureScreen: React.FC<FixtureScreenProps> = ({ onBack }) => {
             justifyContent: 'center',
             flexShrink: 0
           }}>
-            <Star size={20} color="#a855f7" />
+            <Star size={20} color="#ffdf00" />
           </div>
           <p 
             style={{

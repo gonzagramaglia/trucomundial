@@ -1232,7 +1232,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             fontSize: "0.95rem",
             textTransform: "uppercase",
             maxWidth: "600px",
-            margin: "0 0 2rem 0",
+            margin: "0 0 1.5rem 0",
             fontWeight: 700,
             opacity: 1,
             textAlign: "center",
@@ -1427,11 +1427,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 <br />
                 <span style={{ color: "#00f2ff" }}>{t("deck_selection_title_line2")}</span>
               </h2>
-              <p style={{ color: "rgba(255,255,255,0.6)", fontSize: "1.05rem", marginBottom: "2rem", fontWeight: 500 }}>
+              <p style={{ color: "rgba(255,255,255,0.6)", fontSize: "1.05rem", marginBottom: "1rem", fontWeight: 500 }}>
                 {t("deck_selection_subtitle")}
               </p>
 
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.6rem', justifyContent: 'center', marginBottom: '1.5rem', marginTop: '1rem' }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.6rem', justifyContent: 'center', marginBottom: '1.5rem', marginTop: '0.5rem' }}>
                 {[
                   { id: 'Argentina', flag: '🇦🇷', code: 'ARG' },
                   { id: 'Francia', flag: '🇫🇷', code: 'FRA' },
@@ -1516,7 +1516,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     cursor: selectedTeams.length < 2 ? "default" : "pointer"
                   }}
                 >
-                  {t("play")}
+                  {t("play_now")}
                 </button>
 
                 <button

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from '../ui/Button';
-import { User, Globe, Trophy, Star, Lock, Calendar } from 'lucide-react';
+import { User, Globe, Star, Lock, Calendar } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { GameMode } from '../../lib/truco/types';
 
@@ -43,12 +43,12 @@ export const GameModeSelector: React.FC<GameModeSelectorProps> = ({ selectedMode
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "1rem", marginBottom: "2rem", width: "100%", maxWidth: "550px" }}>
-      {/* Primary Option: Online */}
       <Button
         onClick={() => onSelect("multiplayer")}
         className="btn-hover-dark"
         style={{
           ...getButtonStyle("multiplayer", "#00f2ff"),
+          color: "#000",
           width: "100%",
           gap: "0.75rem",
         }}
@@ -57,28 +57,14 @@ export const GameModeSelector: React.FC<GameModeSelectorProps> = ({ selectedMode
         {t("play_online")}
       </Button>
 
-      {/* Tournaments Option — right below Online, white, "próximamente" */}
-      <Button
-        onClick={() => onSelect("tournament" as any)}
-        className="btn-hover-dark"
-        style={{
-          ...getButtonStyle("multiplayer", "#ffffff"),
-          color: "#000",
-          width: "100%",
-          gap: "0.75rem",
-        }}
-      >
-        <Trophy size={22} />
-        {t("tournaments")} <span style={{ opacity: 0.45 }}>({t("coming_soon")})</span>
-      </Button>
-
-      {/* Secondary Options: Local Modes */}
-      <div className="game-mode-secondary-row" style={{ display: "flex", gap: "1rem", width: "100%" }}>
+      {/* Secondary buttons: VS CPU + Mejorar Cartas stacked */}
+      <div style={{ display: "flex", flexDirection: "column", gap: "1rem", width: "100%" }}>
         <Button
           onClick={() => onSelect("1v1")}
           className="btn-hover-dark"
           style={{
-            ...getButtonStyle("1v1", "#ffdf00"),
+            ...getButtonStyle("1v1", "#ffffff"),
+            color: "#000",
             width: "100%",
             gap: "0.5rem",
           }}
@@ -90,7 +76,8 @@ export const GameModeSelector: React.FC<GameModeSelectorProps> = ({ selectedMode
           onClick={() => onSelect("ranking" as any)}
           className="btn-hover-dark"
           style={{
-            ...getButtonStyle("2v2", "#a855f7"),
+            ...getButtonStyle("2v2", "#ffdf00"),
+            color: "#000",
             width: "100%",
             gap: "0.5rem",
           }}
@@ -99,6 +86,24 @@ export const GameModeSelector: React.FC<GameModeSelectorProps> = ({ selectedMode
           {t("vote")}
         </Button>
       </div>
+
+      {/* Tournaments — below the secondary row, above Fixture 
+      <Button
+        onClick={() => onSelect("tournament" as any)}
+        className="btn-hover-dark"
+        style={{
+          ...getButtonStyle("multiplayer", "rgba(255, 255, 255, 0.08)"),
+          color: "#fff",
+          border: "1px solid rgba(255, 255, 255, 0.15)",
+          width: "100%",
+          gap: "0.75rem",
+          boxShadow: "4px 4px 0px #000",
+        }}
+      >
+        <Trophy size={22} />
+        {t("tournaments")} <span style={{ opacity: 0.45 }}>({t("coming_soon")})</span>
+      </Button>
+      */}
 
       {/* Roadmap Option */}
       <Button
