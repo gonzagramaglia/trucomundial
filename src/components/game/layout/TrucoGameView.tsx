@@ -57,6 +57,7 @@ interface TrucoGameViewProps {
   roundResult?: "win" | "loss" | null;
   setIsPaused?: (paused: boolean) => void;
   hideRulesButton?: boolean;
+  onRulesClick?: () => void;
 }
 
 export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
@@ -195,7 +196,7 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
         gap: "0.25rem",
         width: "100%",
         maxWidth: gameMode === "2v2" ? "1200px" : "860px",
-        marginTop: isMobile ? "3rem" : "2rem"
+        marginTop: isMobile ? "4.5rem" : "2rem"
       }}>
         <CPUHands
           gameMode={gameMode}
@@ -269,6 +270,8 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
           envHighlightIds={envHighlightIds}
           isCooldown={isCooldown}
           roundResult={roundResult}
+          onRulesClick={() => setShowMobileHelp(true)}
+          hideRulesButton={hideRulesButton}
         />
 
         <GameBottomBar
@@ -318,30 +321,6 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
           gap: "0.5rem"
         }}
       >
-        {!hideRulesButton && (
-          <button
-            onClick={() => setShowMobileHelp(true)}
-            className="mobile-help-btn"
-            style={{
-              background: "rgba(249, 115, 22, 0.15)",
-              backdropFilter: "blur(12px)",
-              height: "40px",
-              borderRadius: "1rem",
-              padding: "0 1rem",
-              display: "none",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "white",
-              border: "1px solid rgba(249, 115, 22, 0.4)",
-              boxShadow: "0 0 15px rgba(249, 115, 22, 0.4), inset 0 0 8px rgba(249, 115, 22, 0.2)",
-              cursor: "pointer",
-              position: "static" // Overriding the CSS class fixed position
-            }}
-          >
-            <BookOpen size={16} color="#f97316" />
-            <span className="rules-label" style={{ fontWeight: 900, fontSize: "0.75rem", letterSpacing: "0.05em", fontStyle: "normal", textTransform: "uppercase" }}>{t("rules")}</span>
-          </button>
-        )}
 
         <VolumeControl expandDirection="down" />
       </div>
@@ -378,7 +357,7 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
                 padding: "2rem",
                 width: "100%",
                 maxWidth: isMobile ? "500px" : isTablet ? "660px" : "500px",
-                maxHeight: "85vh",
+                maxHeight: "60vh",
                 display: "flex",
                 flexDirection: "column",
                 position: "relative"

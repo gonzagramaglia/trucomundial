@@ -55,7 +55,7 @@
 
 @media (max-width: 1024px), (max-height: 700px) {
   .game-scoreboard-wrapper {
-    top: 3.5rem;
+    top: 5rem;
     left: 50%;
     right: auto;
     width: 100%;
@@ -181,7 +181,7 @@
   .turn-pill-sticky {
     position: relative;
     top: auto;
-    margin-top: 0.5rem;
+    margin-top: 1.25rem;
     margin-bottom: 0.5rem;
     z-index: 200;
   }

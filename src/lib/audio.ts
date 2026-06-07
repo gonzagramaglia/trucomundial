@@ -113,6 +113,19 @@ class AudioManager {
       audio.volume = this.volume * 0.23; // Scale max volume to 30%
       this.currentTheme = audio;
 
+      if (typeof window !== 'undefined') {
+        const savedTime = sessionStorage.getItem('truco-theme-time');
+        if (savedTime && audio.currentTime === 0) {
+          const parsedTime = parseFloat(savedTime);
+          if (!isNaN(parsedTime) && isFinite(parsedTime)) {
+            audio.currentTime = parsedTime;
+          }
+        }
+        audio.ontimeupdate = () => {
+          sessionStorage.setItem('truco-theme-time', audio.currentTime.toString());
+        };
+      }
+
       const playPromise = audio.play();
       if (playPromise !== undefined) {
         playPromise.catch(e => {

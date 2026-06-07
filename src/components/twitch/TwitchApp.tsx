@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Home, BookOpen } from "lucide-react";
+import { VolumeControl } from "../shared/VolumeControl";
+import { audioManager } from "../../lib/audio";
 import { useTrucoGame } from "../../hooks/useTrucoGame";
 import { TrucoGameView } from "../game/layout/TrucoGameView";
 import { useTwitchChat } from "../../hooks/useTwitchChat";
@@ -59,6 +61,10 @@ export function TwitchApp() {
       clearActiveUser();
     }
   }, [core.playerHand, core.playedCards, clearActiveUser]);
+
+  useEffect(() => {
+    audioManager.playTheme();
+  }, []);
 
   const { broadcastMove } = useMatchmaking({
     sessionId,
@@ -299,34 +305,32 @@ export function TwitchApp() {
           </button>
         )}
 
-        {/* Rules Button */}
+        {/* Top Right Controls */}
         {!isConfigured && (
-          <button
-            onClick={() => setShowRules(true)}
-            className="btn-hover-dark"
-            style={{
-              position: "fixed",
-              top: "1.5rem",
-              right: "1.5rem",
-              background: "rgba(255, 255, 255, 0.1)",
-              border: "1px solid rgba(255, 255, 255, 0.2)",
-              color: "white",
-              height: "40px",
-              width: "40px",
-              borderRadius: "50%",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-
-              backdropFilter: "blur(12px)",
-              textDecoration: "none",
-              zIndex: 2000,
-            }}
-            title={t("rules")}
-          >
-            <BookOpen size={20} />
-          </button>
+          <div style={{ position: "fixed", top: "1.5rem", right: "1.5rem", zIndex: 2000, display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+            <button
+              onClick={() => setShowRules(true)}
+              className="btn-hover-dark"
+              style={{
+                background: "rgba(255, 255, 255, 0.1)",
+                border: "1px solid rgba(255, 255, 255, 0.2)",
+                color: "white",
+                height: "40px",
+                width: "40px",
+                borderRadius: "50%",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                backdropFilter: "blur(12px)",
+                transition: "none",
+              }}
+              title={t("rules")}
+            >
+              <BookOpen size={20} />
+            </button>
+            <VolumeControl expandDirection="down" />
+          </div>
         )}
 
         {!isConfigured ? (
@@ -556,6 +560,7 @@ export function TwitchApp() {
             </div>
           )
         ) : null}
+        <RulesModal isOpen={showRules} onClose={() => setShowRules(false)} />
       </div>
     );
   }
@@ -642,8 +647,8 @@ export function TwitchApp() {
             setShowExitModal(false);
             setIsConfigured(false);
           }}
+          onRulesClick={() => setShowRules(true)}
           activeCountries={core.activeCountries}
-          hideRulesButton={true}
         />
       </div>
       <div

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Volume2, VolumeX } from 'lucide-react';
+import { BookOpen } from 'lucide-react';
 import type { PlayedCard as PlayedCardType, GameMode, PlayerRole } from '../../../lib/truco/types';
 import { FieldSlots } from './FieldSlots';
 import { PlayedCard } from './PlayedCard';
@@ -29,6 +29,8 @@ interface GameFieldProps {
   envHighlightIds?: Set<string>;
   isCooldown?: boolean;
   roundResult?: "win" | "loss" | null;
+  onRulesClick?: () => void;
+  hideRulesButton?: boolean;
 }
 
 export const GameField: React.FC<GameFieldProps> = ({
@@ -44,15 +46,16 @@ export const GameField: React.FC<GameFieldProps> = ({
   whoseTurn,
   onHandleMazo,
   isMazoDisabled = false,
-  envHighlightIds,
+  envHighlightIds = new Set(),
   isCooldown = false,
-  roundResult
+  roundResult,
+  onRulesClick,
+  hideRulesButton = false
 }) => {
   const { t } = useTranslation();
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' && window.innerWidth < 768);
   const [isCardDragging, setIsCardDragging] = useState(false);
   const [deckPosition, setDeckPosition] = useState<"left" | "right">("right");
-  const [isMuted, setIsMuted] = useState(audioManager.getIsMuted());
 
   useEffect(() => {
     if (playedCards.length === 0 && whoseTurn) {
@@ -229,13 +232,14 @@ export const GameField: React.FC<GameFieldProps> = ({
         )}
       </motion.div>
 
-      {/* Audio Mute Toggle - Mirrors the deck position but slightly closer to the center */}
-      <motion.div
-        animate={{
-          left: deckPosition === "right" ? (isMobile ? "20px" : "40px") : (isMobile ? "calc(100% - 20px - 45px)" : "calc(100% - 40px - 65px)"),
-          opacity: isGameStarting ? 0 : 0.8,
-          scale: isGameStarting ? 0.5 : 1
-        }}
+      {/* Rules Button - Mirrors the deck position but slightly closer to the center */}
+      {!hideRulesButton && (
+        <motion.div
+          animate={{
+            left: deckPosition === "right" ? (isMobile ? "20px" : "40px") : (isMobile ? "calc(100% - 20px - 45px)" : "calc(100% - 40px - 65px)"),
+            opacity: isGameStarting ? 0 : 0.8,
+            scale: isGameStarting ? 0.5 : 1
+          }}
         transition={{ type: "spring", stiffness: 120, damping: 14 }}
         style={{
           position: 'absolute',
@@ -252,29 +256,33 @@ export const GameField: React.FC<GameFieldProps> = ({
         }}
       >
         <button
-          onClick={() => {
-            const newMuted = audioManager.toggleMute();
-            setIsMuted(newMuted);
-          }}
-          title={isMuted ? "Activar sonido" : "Silenciar"}
+          onClick={onRulesClick}
+          title={t("rules")}
           className="btn-hover-dark"
           style={{
             background: "rgba(255, 255, 255, 0.1)",
             border: "1px solid rgba(255, 255, 255, 0.2)",
             color: "#fff",
-            borderRadius: "50%",
-            width: isMobile ? "40px" : "48px",
-            height: isMobile ? "40px" : "48px",
+            borderRadius: isMobile ? "50%" : "2rem",
+            width: isMobile ? "40px" : "auto",
+            height: isMobile ? "40px" : "40px",
+            padding: isMobile ? "0" : "0 1rem",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
+            gap: "0.5rem",
             cursor: "pointer",
-            boxShadow: "2px 2px 0px #000"
+            boxShadow: "2px 2px 0px #000",
+            fontWeight: 800,
+            textTransform: "uppercase",
+            fontSize: "0.8rem",
           }}
         >
-          {isMuted ? <VolumeX size={isMobile ? 18 : 22} /> : <Volume2 size={isMobile ? 18 : 22} />}
+          <BookOpen size={18} />
+          {!isMobile && <span>{t("rules")}</span>}
         </button>
       </motion.div>
+      )}
 
       <CallOverlay activeCall={activeCall} gameState={gameState} />
       <RoundCountdown isActive={isRoundEnding || isGameStarting} isGameStarting={isGameStarting} />

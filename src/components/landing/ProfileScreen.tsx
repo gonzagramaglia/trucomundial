@@ -36,7 +36,10 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, handleAuth, 
   const [history, setHistory] = useState<MatchSummary[]>([]);
   const [selectedMatch, setSelectedMatch] = useState<MatchSummary | null>(null);
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
-  
+  useEffect(() => {
+    audioManager.playTheme();
+  }, []);
+
   // Name edit states
   const [editingName, setEditingName] = useState(false);
   const [newName, setNewName] = useState(user?.user_metadata?.custom_username || user?.email?.split('@')[0] || '');
