@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Sticker } from '../../shared/Sticker';
+import { useIsTopCard } from "../../../lib/votesStore";
 import type { PlayedCard as PlayedCardType } from '../../../lib/truco/types';
 
 interface PlayedCardProps {
@@ -34,6 +35,8 @@ export const PlayedCard: React.FC<PlayedCardProps> = ({
   isOrangeBorder = false,
   envColor = "#fff"
 }) => {
+  const isTop = useIsTopCard(card.id);
+
   return (
     <motion.div
       layoutId={card.id}
@@ -51,7 +54,7 @@ export const PlayedCard: React.FC<PlayedCardProps> = ({
                 "0 0 20px rgba(255,255,255,0.4)", 
                 "0 0 10px rgba(255,255,255,0.2)"
               ]
-            : (card.id.startsWith("messi") || card.id.startsWith("mbappe"))
+            : isTop
               ? "0 0 25px rgba(168, 85, 247, 0.9)"
               : "0 10px 20px rgba(0,0,0,0.5)"
       }}

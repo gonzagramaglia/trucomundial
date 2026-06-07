@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import type { Card } from "../../data/cards";
 import { StickerBadge } from "./StickerBadge";
 import { StickerInfo } from "./StickerInfo";
-import { useCardVotes } from "../../lib/votesStore";
+import { useCardVotes, useIsTopCard } from "../../lib/votesStore";
 
 interface StickerProps {
   card: Card;
@@ -32,6 +32,7 @@ export const Sticker: React.FC<StickerProps> = ({
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const votes = useCardVotes(card.id);
+  const isTop = useIsTopCard(card.id);
 
   const handleClick = () => {
     if (!disabled && onClick) onClick();
@@ -69,8 +70,8 @@ export const Sticker: React.FC<StickerProps> = ({
       style={{
         cursor: disabled ? "default" : "pointer",
         opacity: disabled ? 0.6 : 1,
-        borderColor: winnerMode ? "#ffdf00" : isOrangeBorder ? "#ff8c00" : (card.id.startsWith("messi") || card.id.startsWith("mbappe") ? "#a855f7" : "#fff"),
-        boxShadow: winnerMode ? "0 0 20px rgba(255, 223, 0, 0.4)" : isOrangeBorder ? "0 0 20px rgba(255, 140, 0, 0.4)" : (card.id.startsWith("messi") || card.id.startsWith("mbappe") ? "0 0 25px rgba(168, 85, 247, 0.9)" : undefined),
+        borderColor: winnerMode ? "#ffdf00" : isOrangeBorder ? "#ff8c00" : (isTop ? "#a855f7" : "#fff"),
+        boxShadow: winnerMode ? "0 0 20px rgba(255, 223, 0, 0.4)" : isOrangeBorder ? "0 0 20px rgba(255, 140, 0, 0.4)" : (isTop ? "0 0 25px rgba(168, 85, 247, 0.9)" : undefined),
       }}
     >
       <div className="sticker-glitter"></div>

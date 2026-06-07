@@ -1516,7 +1516,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     
                     {/* Unpinned Teams (Scrollable) */}
                     <div 
-                      className="yellow-scrollbar"
+                      className="white-scrollbar"
                       style={{ 
                         display: 'flex', 
                         flexWrap: 'wrap', 
