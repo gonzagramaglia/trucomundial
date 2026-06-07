@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Save, Plus, Minus, Search, Trophy, Lock, RefreshCw, Check, Home, Star, Calendar } from 'lucide-react';
+import { Save, Plus, Minus, Search, Trophy, Lock, Check, Home, Star, Calendar, Video } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { CARDS } from '../../data/cards';
 import { Sticker } from '../shared/Sticker';
@@ -8,6 +8,8 @@ import { supabase } from '../../lib/supabase';
 import { TwitchButton } from '../shared/TwitchButton';
 import { updateVotesRegistry } from '../../lib/votesStore';
 import { useBaseStars } from '../../hooks/useBaseStars';
+import { audioManager } from "../../lib/audio";
+import { VolumeControl } from "../shared/VolumeControl";
 
 
 interface RankingScreenProps {
@@ -59,6 +61,10 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
   const baseStarsByCountry = useBaseStars();
   const isAdmin = user?.email && ["gonzagramaglia@gmail.com", "ciberportero@gmail.com"].includes(user.email);
   const [showMaxVotesModal, setShowMaxVotesModal] = useState(false);
+
+  useEffect(() => {
+    audioManager.playTheme();
+  }, []);
 
   useEffect(() => {
     const handleResize = () => {
@@ -450,40 +456,13 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
             <span>{t("home")}</span>
           </button>
 
-          {/* Fixed Refresh Button (Desktop Right Corner) */}
-          <button
-            onClick={fetchGlobalVotes}
-            disabled={loading}
-            className="btn-hover-dark profile-nav-btn"
-            style={{
-              position: "fixed",
-              top: "1.5rem",
-              right: "1.5rem",
-              background: "rgba(255, 255, 255, 0.1)",
-              backdropFilter: "blur(12px)",
-              zIndex: 2000,
-              height: "40px",
-              borderRadius: "1rem",
-              padding: "0 1.25rem",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "0.5rem",
-              color: "white",
-              border: "1px solid rgba(255, 255, 255, 0.2)",
-              boxShadow: "none",
-              fontWeight: 900,
-              fontSize: "0.75rem",
-              letterSpacing: "0.05em",
-              textTransform: "uppercase",
-              cursor: "pointer",
-              opacity: loading ? 0.5 : 1
-            }}
-            title={t('refresh_ranking')}
-          >
-            <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
-            <span>{t("sync")}</span>
-          </button>
+          {/* Mute Button (Desktop Right Corner) */}
+          <div style={{ position: "fixed", top: "1.5rem", right: "1.5rem", zIndex: 2000, display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+            <a href="https://youtu.be/228FtMaq8uY" target="_blank" rel="noopener noreferrer" onClick={() => audioManager.setVolume(0)} className="btn-hover-dark mobile-hide" style={{ background: 'rgba(255, 255, 255, 0.1)', border: '1px solid rgba(255, 255, 255, 0.2)', color: 'white', height: '40px', width: '40px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(12px)', transition: 'none' }} title="Video">
+              <Video size={20} />
+            </a>
+            <VolumeControl expandDirection="down" />
+          </div>
         </>
       )}
 
@@ -531,31 +510,12 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
                 {t("home")}
               </button>
 
-              <button
-                onClick={fetchGlobalVotes}
-                disabled={loading}
-                className="btn-hover-dark"
-                style={{
-                  background: 'rgba(255, 255, 255, 0.08)',
-                  border: '1px solid rgba(255, 255, 255, 0.15)',
-                  color: 'white',
-                  height: '36px',
-                  borderRadius: '0.75rem',
-                  padding: '0 0.85rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.4rem',
-                  fontSize: '0.8rem',
-                  fontWeight: 800,
-                  cursor: 'pointer',
-                  boxShadow: '3px 3px 0px #000',
-                  opacity: loading ? 0.5 : 1
-                }}
-                title={t('refresh_ranking')}
-              >
-                <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
-                <span>{t("sync")}</span>
-              </button>
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                <a href="https://youtu.be/228FtMaq8uY" target="_blank" rel="noopener noreferrer" onClick={() => audioManager.setVolume(0)} className="btn-hover-dark mobile-hide" style={{ background: 'rgba(255, 255, 255, 0.1)', border: '1px solid rgba(255, 255, 255, 0.2)', color: 'white', height: '36px', width: '36px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(12px)', transition: 'none', boxShadow: '3px 3px 0px #000' }} title="Video">
+                  <Video size={16} />
+                </a>
+                <VolumeControl size={36} expandDirection="down" style={{ boxShadow: '3px 3px 0px #000' }} />
+              </div>
             </div>
 
             <div style={{

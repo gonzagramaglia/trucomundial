@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import { Home, User, Music, ArrowLeft, Trophy, ShieldAlert, BookOpen } from "lucide-react";
+import { Home, User, Video, ArrowLeft, Trophy, ShieldAlert, BookOpen } from "lucide-react";
 import { supabase } from "../../lib/supabase";
+import { audioManager } from "../../lib/audio";
+import { VolumeControl } from "../shared/VolumeControl";
 import { LandingHeader } from "./LandingHeader";
 import { GameModeSelector } from "./GameModeSelector";
 import { PointSelector } from "./PointSelector";
@@ -101,6 +103,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       (window.location.pathname === "/fixture" ||
         window.location.pathname === "/en/fixture"),
   );
+
+  useEffect(() => {
+    // Only play theme if not in voting or fixture, which handle it themselves,
+    // actually LandingPage mounts first, so it can just play it. 
+    // audioManager will not restart if already playing.
+    audioManager.playTheme();
+  }, []);
+
   const [showProfile, setShowProfile] = useState(
     () =>
       typeof window !== "undefined" &&
@@ -851,6 +861,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         }}
       >
         <FixtureScreen
+          user={user}
           onBack={() => {
             setShowFixture(false);
             if (typeof window !== "undefined") {
@@ -992,10 +1003,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             <User size={20} style={{ color: "#ffffff" }} />
           </button>
         ) : (
-          <a
-            href="https://youtu.be/228FtMaq8uY"
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
+            onClick={() => setShowRules(true)}
             className="btn-hover-dark"
             style={{
               background: "rgba(255, 255, 255, 0.1)",
@@ -1011,10 +1020,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               backdropFilter: "blur(12px)",
               transition: "none",
             }}
-            title="Música"
+            title={t("rules")}
           >
-            <Music size={20} />
-          </a>
+            <BookOpen size={20} />
+          </button>
         )}
 
         {isApprovedCreator && (
@@ -1088,28 +1097,34 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           zIndex: 1000,
         }}
       >
-        {/* Rules Button */}
-        <button
-          onClick={() => setShowRules(true)}
-          className="btn-hover-dark"
-          style={{
-            background: "rgba(255, 255, 255, 0.1)",
-            border: "1px solid rgba(255, 255, 255, 0.2)",
-            color: "white",
-            height: "40px",
-            width: "40px",
-            borderRadius: "50%",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            backdropFilter: "blur(12px)",
-            transition: "none",
-          }}
-          title={t("rules")}
-        >
-          <BookOpen size={20} />
-        </button>
+        <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
+          <a
+            href="https://youtu.be/228FtMaq8uY"
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => audioManager.setVolume(0)}
+            className="btn-hover-dark mobile-hide"
+            style={{
+              background: "rgba(255, 255, 255, 0.1)",
+              border: "1px solid rgba(255, 255, 255, 0.2)",
+              color: "white",
+              height: "40px",
+              width: "40px",
+              borderRadius: "50%",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              backdropFilter: "blur(12px)",
+              transition: "none",
+            }}
+            title="Video"
+          >
+            <Video size={20} />
+          </a>
+          {/* Mute Button */}
+          <VolumeControl expandDirection="down" />
+        </div>
 
         {/* Instagram Button (Hidden for now) */}
         {/*

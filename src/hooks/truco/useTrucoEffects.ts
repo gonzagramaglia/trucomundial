@@ -143,9 +143,14 @@ export const useTrucoEffects = (state: any, logic: any) => {
         // Delay the transition by 1 second so the player has time to see the winner/loser highlights on the table
         setTimeout(() => {
           if (roundWinner) {
-            setShowCountdown(true);
-            
             const points = trucoState.level + 1;
+            const willGameEnd = (score.player + (roundWinner === "player" ? points : 0)) >= maxPoints || 
+                                (score.cpu + (roundWinner === "cpu" ? points : 0)) >= maxPoints;
+                                
+            if (!willGameEnd) {
+              setShowCountdown(true);
+            }
+            
             const winnerStr = roundWinner === "player" ? "Vos" : "El Rival";
             state.setMatchLog((prev: string[]) => [...prev, `★ Fin de la ronda. Gana ${winnerStr} por ${points} puntos.`]);
             
@@ -155,11 +160,15 @@ export const useTrucoEffects = (state: any, logic: any) => {
               addPoints(roundWinner, points, reason);
             }
 
-            // Clear visual countdown message shortly after (4s)
-            setTimeout(() => {
-              setShowCountdown(false);
+            if (!willGameEnd) {
+              // Clear visual countdown message shortly after (4s)
+              setTimeout(() => {
+                setShowCountdown(false);
+                state.setRoundResult(null);
+              }, 4000);
+            } else {
               state.setRoundResult(null);
-            }, 4000);
+            }
           } else {
             setIsCooldown(false);
           }

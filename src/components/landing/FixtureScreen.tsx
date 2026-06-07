@@ -1,24 +1,31 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Home, Calendar, Trophy, Globe, Search, Star } from 'lucide-react';
+import { Calendar, Globe, Star, Search, Home, Trophy, Video } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { TwitchButton } from '../shared/TwitchButton';
 import { fixtureMatches } from '../../lib/fixtureData';
 import type { FixtureMatch } from '../../lib/fixtureData';
 import { supabase } from '../../lib/supabase';
+import { audioManager } from '../../lib/audio';
+import { VolumeControl } from '../shared/VolumeControl';
 
 type TabType = 'groups' | 'round_16' | 'quarterfinals' | 'semifinals' | 'final';
 
 interface FixtureScreenProps {
+  user?: any;
   onBack: () => void;
 }
 
-export const FixtureScreen: React.FC<FixtureScreenProps> = ({ onBack }) => {
+export const FixtureScreen: React.FC<FixtureScreenProps> = ({ user, onBack }) => {
   const { t } = useTranslation();
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
   const [activeTab, setActiveTab] = useState<TabType>('groups');
   const [searchQuery, setSearchQuery] = useState('');
   const [liveResults, setLiveResults] = useState<Record<string, {scoreA: number, scoreB: number, status: string}>>({});
+
+  useEffect(() => {
+    audioManager.playTheme();
+  }, []);
 
   useEffect(() => {
     const fetchResults = async () => {
@@ -131,7 +138,7 @@ export const FixtureScreen: React.FC<FixtureScreenProps> = ({ onBack }) => {
       color: '#fff',
       boxSizing: 'border-box'
     }}>
-      {/* Fixed Back Button */}
+      {/* Fixed Back Button (Desktop Left Corner) */}
       {!isMobile && (
         <button
           onClick={onBack}
@@ -151,6 +158,7 @@ export const FixtureScreen: React.FC<FixtureScreenProps> = ({ onBack }) => {
             gap: "0.5rem",
             color: "white",
             border: "1px solid rgba(255, 255, 255, 0.2)",
+            boxShadow: "none",
             fontWeight: 900,
             fontSize: "0.75rem",
             letterSpacing: "0.05em",
@@ -163,6 +171,16 @@ export const FixtureScreen: React.FC<FixtureScreenProps> = ({ onBack }) => {
         </button>
       )}
 
+      {/* Mute Button (Desktop Right Corner) */}
+      {!isMobile && (
+        <div style={{ position: "fixed", top: "1.5rem", right: "1.5rem", zIndex: 2000, display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+          <a href="https://youtu.be/228FtMaq8uY" target="_blank" rel="noopener noreferrer" onClick={() => audioManager.setVolume(0)} className="btn-hover-dark mobile-hide" style={{ background: 'rgba(255, 255, 255, 0.1)', border: '1px solid rgba(255, 255, 255, 0.2)', color: 'white', height: '40px', width: '40px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(12px)', transition: 'none' }} title="Video">
+            <Video size={20} />
+          </a>
+          <VolumeControl expandDirection="down" />
+        </div>
+      )}
+
       {/* Header */}
       <div style={{
         display: 'flex',
@@ -170,10 +188,18 @@ export const FixtureScreen: React.FC<FixtureScreenProps> = ({ onBack }) => {
         alignItems: 'center',
         justifyContent: 'center',
         marginBottom: isMobile ? '1.5rem' : '2.5rem',
-        width: '100%'
+        width: '100%',
+        position: 'relative'
       }}>
         {isMobile && (
-          <div style={{ width: '100%', marginBottom: '1rem' }}>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            width: '100%',
+            gap: '0.75rem',
+            marginBottom: '1rem'
+          }}>
             <button
               onClick={onBack}
               className="btn-hover-dark"
@@ -196,6 +222,14 @@ export const FixtureScreen: React.FC<FixtureScreenProps> = ({ onBack }) => {
               <Home size={14} />
               {t("home")}
             </button>
+
+            {/* Mobile Mute Button */}
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+              <a href="https://youtu.be/228FtMaq8uY" target="_blank" rel="noopener noreferrer" onClick={() => audioManager.setVolume(0)} className="btn-hover-dark mobile-hide" style={{ background: 'rgba(255, 255, 255, 0.1)', border: '1px solid rgba(255, 255, 255, 0.2)', color: 'white', height: '36px', width: '36px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(12px)', transition: 'none', boxShadow: '3px 3px 0px #000' }} title="Video">
+                <Video size={16} />
+              </a>
+              <VolumeControl size={36} expandDirection="down" style={{ boxShadow: '3px 3px 0px #000' }} />
+            </div>
           </div>
         )}
 
@@ -384,17 +418,22 @@ export const FixtureScreen: React.FC<FixtureScreenProps> = ({ onBack }) => {
             
             {/* Match Cards */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              {dayGroup.matches.map((match) => (
+              {dayGroup.matches.map((match) => {
+                const userNationality = user?.user_metadata?.nationality;
+                const isMyTeam = userNationality && (match.teamA === userNationality || match.teamB === userNationality);
+                
+                return (
                 <div key={match.id} style={{
                   background: 'rgba(20, 20, 25, 0.8)',
-                  border: '1px solid rgba(255, 255, 255, 0.05)',
+                  border: isMyTeam ? '2px solid #00f2ff' : '1px solid rgba(255, 255, 255, 0.05)',
+                  boxShadow: isMyTeam ? '0 0 15px rgba(0, 242, 255, 0.2)' : 'none',
                   borderRadius: '1rem',
                   padding: '1.25rem 1.5rem',
                   display: 'flex',
                   flexDirection: isMobile ? 'column' : 'row',
                   gap: isMobile ? '1rem' : '2rem',
                   alignItems: isMobile ? 'flex-start' : 'center',
-                  transition: 'background 0.2s ease',
+                  transition: 'all 0.2s ease',
                   cursor: 'default'
                 }}>
                   
@@ -475,9 +514,23 @@ export const FixtureScreen: React.FC<FixtureScreenProps> = ({ onBack }) => {
                       )}
                     </div>
                   )}
-
-                </div>
-              ))}
+                    {/* Status */}
+                    {(match.status === 'finished' && match.scoreA !== undefined) ? (
+                      <div style={{
+                        marginTop: isMobile ? '1rem' : 0,
+                        padding: '0.4rem 0.75rem',
+                        background: 'rgba(255, 255, 255, 0.1)',
+                        borderRadius: '0.5rem',
+                        fontSize: '0.8rem',
+                        fontWeight: 800,
+                        color: 'rgba(255,255,255,0.8)'
+                      }}>
+                        {t('final_score')}
+                      </div>
+                    ) : null}
+                  </div>
+                );
+              })}
             </div>
           </motion.div>
         ))}

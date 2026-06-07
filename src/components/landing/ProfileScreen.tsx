@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, Calendar, Scroll, ShieldAlert, LogOut, Globe, ArrowLeft, Edit2, Check, X, Clock } from 'lucide-react';
+import { User, Calendar, Scroll, ShieldAlert, LogOut, Globe, ArrowLeft, Edit2, Check, X, Clock, Video } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { audioManager } from '../../lib/audio';
 import { supabase } from '../../lib/supabase';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ticketSchema, type TicketFormData } from '../../lib/schemas';
-import { MessageSquare, Send } from 'lucide-react';
+import { MessageSquare, Send, ChevronDown } from 'lucide-react';
+import { VolumeControl } from '../shared/VolumeControl';
 import { TwitchButton } from '../shared/TwitchButton';
+import { CARDS } from '../../data/cards';
 
 
 interface ProfileScreenProps {
@@ -39,6 +42,34 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, handleAuth, 
   const [newName, setNewName] = useState(user?.user_metadata?.custom_username || user?.email?.split('@')[0] || '');
   const [isUpdatingName, setIsUpdatingName] = useState(false);
   const [updateError, setUpdateError] = useState('');
+
+  // Nationality state
+  const [nationality, setNationality] = useState(user?.user_metadata?.nationality || '');
+  const [isUpdatingNationality, setIsUpdatingNationality] = useState(false);
+  const [isNatDropdownOpen, setIsNatDropdownOpen] = useState(false);
+
+  const handleUpdateNationality = async (newNat: string) => {
+    setNationality(newNat);
+    setIsUpdatingNationality(true);
+    try {
+      await supabase.auth.updateUser({
+        data: { nationality: newNat }
+      });
+      
+      // Sync with profiles table
+      if (user?.id) {
+        await supabase
+          .from("profiles")
+          .update({ nationality: newNat })
+          .eq("id", user.id);
+      }
+    } catch (e) {
+      console.error('Error updating nationality', e);
+    } finally {
+      setIsUpdatingNationality(false);
+      setIsNatDropdownOpen(false);
+    }
+  };
 
   // Suggestion box states
   const [isSubmittingSuggestion, setIsSubmittingSuggestion] = useState(false);
@@ -239,43 +270,13 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, handleAuth, 
             <span>{t("back")}</span>
           </button>
 
-          {/* Fixed Logout Button (Desktop Right Corner) */}
-          {user && (
-            <button
-              onClick={async () => {
-                await supabase.auth.signOut();
-                onBack(); // Go back home on sign out
-              }}
-              className="twitch-btn btn-hover-dark profile-nav-btn"
-              style={{
-                position: "fixed",
-                top: "1.5rem",
-                right: "1rem",
-                background: "rgba(239, 68, 68, 0.15)",
-                backdropFilter: "blur(12px)",
-                zIndex: 2000,
-                height: "36px",
-                borderRadius: "0.85rem",
-                padding: "0 0.85rem",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "0.4rem",
-                color: "#ef4848",
-                border: "1px solid rgba(239, 68, 68, 0.3)",
-                boxShadow: "0 4px 14px rgba(239, 68, 68, 0.08)",
-                cursor: "pointer",
-                fontWeight: 900,
-                fontSize: "0.7rem",
-                letterSpacing: "0.05em",
-                textTransform: "uppercase"
-              }}
-              title={t("logout")}
-            >
-              <LogOut size={14} style={{ transform: 'scaleX(-1)' }} />
-              <span>{t("logout")}</span>
-            </button>
-          )}
+          {/* Fixed Mute Button (Desktop Right Corner) */}
+          <div style={{ position: "fixed", top: "1.5rem", right: "1.5rem", zIndex: 2000, display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+            <a href="https://youtu.be/228FtMaq8uY" target="_blank" rel="noopener noreferrer" onClick={() => audioManager.setVolume(0)} className="btn-hover-dark mobile-hide" style={{ background: 'rgba(255, 255, 255, 0.1)', border: '1px solid rgba(255, 255, 255, 0.2)', color: 'white', height: '40px', width: '40px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(12px)', transition: 'none' }} title="Video">
+              <Video size={20} />
+            </a>
+            <VolumeControl expandDirection="down" />
+          </div>
         </>
       )}
 
@@ -324,34 +325,13 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, handleAuth, 
                 {t("back")}
               </button>
 
-              {/* Logout Button */}
-              {user && (
-                <button
-                  onClick={async () => {
-                    await supabase.auth.signOut();
-                    onBack();
-                  }}
-                  className="btn-hover-dark"
-                  style={{
-                    background: 'rgba(239, 68, 68, 0.1)',
-                    border: '1px solid rgba(239, 68, 68, 0.2)',
-                    color: '#ef4848',
-                    height: '36px',
-                    borderRadius: '0.75rem',
-                    padding: '0 0.85rem',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.4rem',
-                    fontSize: '0.8rem',
-                    fontWeight: 800,
-                    cursor: 'pointer',
-                    boxShadow: '3px 3px 0px #000',
-                  }}
-                >
-                  <LogOut size={14} style={{ transform: 'scaleX(-1)' }} />
-                  {t("logout")}
-                </button>
-              )}
+              {/* Mute Button */}
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                <a href="https://youtu.be/228FtMaq8uY" target="_blank" rel="noopener noreferrer" onClick={() => audioManager.setVolume(0)} className="btn-hover-dark mobile-hide" style={{ background: 'rgba(255, 255, 255, 0.1)', border: '1px solid rgba(255, 255, 255, 0.2)', color: 'white', height: '36px', width: '36px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(12px)', transition: 'none', boxShadow: '3px 3px 0px #000' }} title="Video">
+                  <Video size={16} />
+                </a>
+                <VolumeControl size={36} expandDirection="down" style={{ boxShadow: '3px 3px 0px #000' }} />
+              </div>
             </div>
 
             {/* Mobile Title & Subtitle */}
@@ -554,43 +534,200 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, handleAuth, 
               )}
             </div>
 
-            {/* Language Config */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
-            <div>
-              <div style={{ fontWeight: 800, fontSize: '0.95rem', color: '#fff' }}>{t('config_language')}</div>
-              <div style={{ fontSize: '0.8rem', opacity: 0.6, marginTop: '0.2rem' }}>{t('config_language_desc')}</div>
+            {/* Nationality Config */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem', paddingBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+              <div>
+                <div style={{ fontWeight: 800, fontSize: '0.95rem', color: '#fff', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  Nacionalidad
+                </div>
+                <div style={{ fontSize: '0.8rem', opacity: 0.6, marginTop: '0.2rem' }}>
+                  Selecciona tu país para resaltarlo en el fixture
+                </div>
+              </div>
+              
+              <div style={{ position: 'relative', width: '180px' }}>
+                <button
+                  onClick={() => setIsNatDropdownOpen(!isNatDropdownOpen)}
+                  disabled={isUpdatingNationality}
+                  className="btn-hover-dark"
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.08)',
+                    border: '1px solid rgba(255, 255, 255, 0.15)',
+                    color: 'white',
+                    height: '42px',
+                    width: '100%',
+                    borderRadius: '1rem',
+                    padding: '0 1rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    cursor: isUpdatingNationality ? 'not-allowed' : 'pointer',
+                    opacity: isUpdatingNationality ? 0.5 : 1,
+                    fontWeight: 800,
+                    fontSize: '0.9rem',
+                    boxShadow: '2px 2px 0px #000'
+                  }}
+                >
+                  <span style={{ color: nationality ? '#fff' : 'rgba(255,255,255,0.5)' }}>
+                    {nationality || 'Seleccionar...'}
+                  </span>
+                  <ChevronDown size={16} style={{ 
+                    transform: isNatDropdownOpen ? 'rotate(180deg)' : 'none', 
+                    transition: 'transform 0.2s ease',
+                    opacity: 0.5 
+                  }} />
+                </button>
+
+                <AnimatePresence>
+                  {isNatDropdownOpen && (
+                    <motion.div
+                      className="white-scrollbar"
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.15 }}
+                      style={{
+                        position: 'absolute',
+                        top: 'calc(100% + 0.5rem)',
+                        left: 0,
+                        right: 0,
+                        background: 'rgba(20, 20, 25, 0.95)',
+                        backdropFilter: 'blur(10px)',
+                        border: '1px solid rgba(255, 255, 255, 0.15)',
+                        borderRadius: '1rem',
+                        padding: '0.5rem',
+                        zIndex: 100,
+                        maxHeight: '250px',
+                        overflowY: 'auto',
+                        boxShadow: '0 10px 25px rgba(0,0,0,0.5)'
+                      }}
+                    >
+                      <button
+                        onClick={() => {
+                          handleUpdateNationality('');
+                          setIsNatDropdownOpen(false);
+                        }}
+                        style={{
+                          width: '100%',
+                          textAlign: 'left',
+                          padding: '0.75rem 1rem',
+                          background: !nationality ? 'rgba(255,255,255,0.1)' : 'transparent',
+                          border: 'none',
+                          color: !nationality ? '#00f2ff' : 'white',
+                          borderRadius: '0.5rem',
+                          cursor: 'pointer',
+                          fontWeight: 700,
+                          fontSize: '0.85rem'
+                        }}
+                        onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+                        onMouseOut={(e) => e.currentTarget.style.background = !nationality ? 'rgba(255,255,255,0.1)' : 'transparent'}
+                      >
+                        Ninguna
+                      </button>
+                      
+                      {Array.from(new Set(CARDS.map(c => c.country))).sort().map(c => (
+                        <button
+                          key={c}
+                          onClick={() => {
+                            handleUpdateNationality(c);
+                            setIsNatDropdownOpen(false);
+                          }}
+                          style={{
+                            width: '100%',
+                            textAlign: 'left',
+                            padding: '0.75rem 1rem',
+                            background: nationality === c ? 'rgba(255,255,255,0.1)' : 'transparent',
+                            border: 'none',
+                            color: nationality === c ? '#00f2ff' : 'white',
+                            borderRadius: '0.5rem',
+                            cursor: 'pointer',
+                            fontWeight: 700,
+                            fontSize: '0.85rem'
+                          }}
+                          onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+                          onMouseOut={(e) => e.currentTarget.style.background = nationality === c ? 'rgba(255,255,255,0.1)' : 'transparent'}
+                        >
+                          {c}
+                        </button>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             </div>
-            
-            <button
-              onClick={() => {
-                const isEn = window.location.pathname.startsWith('/en');
-                const newLang = isEn ? "es" : "en";
-                localStorage.setItem('lang', newLang);
-                window.location.href = newLang === "en" ? "/en/perfil" : "/perfil";
-              }}
-              className="btn-hover-dark"
-              style={{
-                background: 'rgba(255, 255, 255, 0.08)',
-                border: '1px solid rgba(255, 255, 255, 0.15)',
-                color: 'white',
-                height: '42px',
-                borderRadius: '1rem',
-                padding: '0 1.5rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                fontSize: '0.85rem',
-                fontWeight: 900,
-                cursor: 'pointer',
-                boxShadow: '3px 3px 0px #000',
-                transition: 'all 0.15s ease'
-              }}
-              title={t('config_change_language')}
-            >
-              <Globe size={16} />
-              {window.location.pathname.startsWith('/en') ? 'ENGLISH (EN)' : 'ESPAÑOL (ES)'}
-            </button>
-          </div>
+
+            {/* Language Config */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem', paddingBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+              <div>
+                <div style={{ fontWeight: 800, fontSize: '0.95rem', color: '#fff' }}>{t('config_language')}</div>
+                <div style={{ fontSize: '0.8rem', opacity: 0.6, marginTop: '0.2rem' }}>{t('config_language_desc')}</div>
+              </div>
+              
+              <button
+                onClick={() => {
+                  const isEn = window.location.pathname.startsWith('/en');
+                  const newLang = isEn ? "es" : "en";
+                  localStorage.setItem('lang', newLang);
+                  window.location.href = newLang === "en" ? "/en/perfil" : "/perfil";
+                }}
+                className="btn-hover-dark"
+                style={{
+                  background: 'rgba(255, 255, 255, 0.08)',
+                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                  color: 'white',
+                  height: '42px',
+                  borderRadius: '1rem',
+                  padding: '0 1.5rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  fontSize: '0.85rem',
+                  fontWeight: 900,
+                  cursor: 'pointer',
+                  boxShadow: '3px 3px 0px #000',
+                  transition: 'all 0.15s ease'
+                }}
+                title={t('config_change_language')}
+              >
+                <Globe size={16} />
+                {window.location.pathname.startsWith('/en') ? 'ENGLISH (EN)' : 'ESPAÑOL (ES)'}
+              </button>
+            </div>
+
+            {/* Logout Row */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem', paddingTop: '0.5rem' }}>
+              <div>
+                <div style={{ fontWeight: 800, fontSize: '0.95rem', color: '#ef4444' }}>Cerrar sesión</div>
+                <div style={{ fontSize: '0.8rem', opacity: 0.6, marginTop: '0.2rem' }}>Desconectate de tu cuenta actual</div>
+              </div>
+              
+              <button
+                onClick={async () => {
+                  await supabase.auth.signOut();
+                  onBack();
+                }}
+                className="btn-hover-dark"
+                style={{
+                  background: 'rgba(239, 68, 68, 0.1)',
+                  border: '1px solid rgba(239, 68, 68, 0.2)',
+                  color: '#ef4444',
+                  height: '42px',
+                  borderRadius: '1rem',
+                  padding: '0 1.5rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  fontSize: '0.85rem',
+                  fontWeight: 900,
+                  cursor: 'pointer',
+                  boxShadow: '3px 3px 0px #000',
+                  transition: 'all 0.15s ease'
+                }}
+              >
+                <LogOut size={16} style={{ transform: 'scaleX(-1)' }} />
+                {t("logout")}
+              </button>
+            </div>
           </div>
 
           {/* MATCH HISTORY LIST */}

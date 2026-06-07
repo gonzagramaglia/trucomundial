@@ -21,7 +21,7 @@ export function TwitchApp() {
       try {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length >= 2) return parsed;
-      } catch (e) {}
+      } catch (e) { }
     }
     return ["Argentina", "Francia", "España", "Nueva Zelanda"];
   });
@@ -128,10 +128,10 @@ export function TwitchApp() {
   // Execute commands from twitch
   useEffect(() => {
     if (!lastCommand || !activeUser) return;
-    
+
     // Only process if it's player's turn to play a card, or to respond
     const { command } = lastCommand;
-    
+
     // Slight delay to ensure state isn't jumping
     const timer = setTimeout(() => {
       switch (command) {
@@ -182,7 +182,7 @@ export function TwitchApp() {
     if (channel.trim() === "") return;
     if (selectedTeams.length < 2) return;
     setIsConfigured(true);
-    
+
     if (opponentMode === "streamer") {
       const code = Math.random().toString(36).substring(2, 6).toUpperCase();
       setRoomCode(code);
@@ -230,7 +230,7 @@ export function TwitchApp() {
           if (state?.status === "matched" && !rivalData) {
             console.log("Streamer joined:", state.guestName);
             setRivalData({ name: state.guestName, id: state.guestId });
-            
+
             setTimeout(() => {
               setIsWaiting(false);
               core.setGameMode("multiplayer");
@@ -266,68 +266,68 @@ export function TwitchApp() {
         backgroundSize: "cover",
         color: "white"
       }}>
-      
-      {/* Home Button */}
-      {!isConfigured && (
-        <button
-          onClick={() => window.location.href = '/'}
-          className="btn-hover-dark"
-          style={{
-            position: "fixed",
-            top: "1.5rem",
-            left: "1.5rem",
-            background: "rgba(255, 255, 255, 0.1)",
-            backdropFilter: "blur(12px)",
-            zIndex: 2000,
-            height: "40px",
-            borderRadius: "1rem",
-            padding: "0 1.25rem",
-            display: "flex",
-            alignItems: "center",
-            gap: "0.5rem",
-            color: "white",
-            border: "1px solid rgba(255, 255, 255, 0.2)",
-            fontWeight: 900,
-            fontSize: "0.75rem",
-            letterSpacing: "0.05em",
-            textTransform: "uppercase",
-            cursor: "pointer"
-          }}
-        >
-          <Home size={18} />
-          <span>INICIO</span>
-        </button>
-      )}
 
-      {/* Rules Button */}
-      {!isConfigured && (
-        <button
-          onClick={() => setShowRules(true)}
-          className="btn-hover-dark"
-          style={{
-            position: "fixed",
-            top: "1.5rem",
-            right: "1.5rem",
-            background: "rgba(255, 255, 255, 0.1)",
-            border: "1px solid rgba(255, 255, 255, 0.2)",
-            color: "white",
-            height: "40px",
-            width: "40px",
-            borderRadius: "50%",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            
-            backdropFilter: "blur(12px)",
-            textDecoration: "none",
-            zIndex: 2000,
-          }}
-          title={t("rules")}
-        >
-          <BookOpen size={20} />
-        </button>
-      )}
+        {/* Home Button */}
+        {!isConfigured && (
+          <button
+            onClick={() => window.location.href = '/'}
+            className="btn-hover-dark"
+            style={{
+              position: "fixed",
+              top: "1.5rem",
+              left: "1.5rem",
+              background: "rgba(255, 255, 255, 0.1)",
+              backdropFilter: "blur(12px)",
+              zIndex: 2000,
+              height: "40px",
+              borderRadius: "1rem",
+              padding: "0 1.25rem",
+              display: "flex",
+              alignItems: "center",
+              gap: "0.5rem",
+              color: "white",
+              border: "1px solid rgba(255, 255, 255, 0.2)",
+              fontWeight: 900,
+              fontSize: "0.75rem",
+              letterSpacing: "0.05em",
+              textTransform: "uppercase",
+              cursor: "pointer"
+            }}
+          >
+            <Home size={18} />
+            <span>INICIO</span>
+          </button>
+        )}
+
+        {/* Rules Button */}
+        {!isConfigured && (
+          <button
+            onClick={() => setShowRules(true)}
+            className="btn-hover-dark"
+            style={{
+              position: "fixed",
+              top: "1.5rem",
+              right: "1.5rem",
+              background: "rgba(255, 255, 255, 0.1)",
+              border: "1px solid rgba(255, 255, 255, 0.2)",
+              color: "white",
+              height: "40px",
+              width: "40px",
+              borderRadius: "50%",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+
+              backdropFilter: "blur(12px)",
+              textDecoration: "none",
+              zIndex: 2000,
+            }}
+            title={t("rules")}
+          >
+            <BookOpen size={20} />
+          </button>
+        )}
 
         {!isConfigured ? (
           isMobile ? (
@@ -344,8 +344,8 @@ export function TwitchApp() {
               alignItems: "center",
               gap: "1rem"
             }}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#9146FF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 2H3v16h5v4l4-4h5l4-4V2zm-10 9V7m5 4V7"/></svg>
-            <h2 style={{ color: "#9146FF", margin: 0 }}>Twitch Plays Truco Mundial</h2>
+              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#9146FF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 2H3v16h5v4l4-4h5l4-4V2zm-10 9V7m5 4V7" /></svg>
+              <h2 style={{ color: "#9146FF", margin: 0 }}>Twitch Juega Truco Mundial</h2>
               <p style={{ fontSize: "1.1rem", margin: 0 }}>Este modo está diseñado para streamers y solo funciona en pantallas grandes (PC o Tablets en horizontal).</p>
               <p style={{ margin: 0, opacity: 0.8 }}>Por favor, ingresá desde tu computadora para conectar tu canal de Twitch.</p>
             </div>
@@ -360,7 +360,10 @@ export function TwitchApp() {
               width: "100%",
               textAlign: "center"
             }}>
-              <h2 style={{ color: "#9146FF", marginBottom: "2rem" }}>Twitch Plays Truco Mundial</h2>
+              <h2 style={{ color: "#9146FF", marginBottom: "2rem", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.75rem", textTransform: "uppercase" }}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 2H3v16h5v4l4-4h5l4-4V2zm-10 9V7m5 4V7" /></svg>
+                Twitch Juega Truco Mundial
+              </h2>
               <form onSubmit={startGame}>
                 <div style={{ marginBottom: "1rem", textAlign: "left" }}>
                   <label style={{ display: "block", marginBottom: "0.5rem", fontSize: "0.9rem", color: "#ccc" }}>Canal de Twitch</label>
@@ -380,7 +383,7 @@ export function TwitchApp() {
                     }}
                   />
                 </div>
-                
+
                 <div style={{ marginBottom: "1rem", textAlign: "left" }}>
                   <label style={{ display: "block", marginBottom: "0.5rem", fontSize: "0.9rem", color: "#ccc" }}>¿A cuántos puntos va a jugarse la partida?</label>
                   <div style={{ display: "flex", gap: "0.5rem" }}>
@@ -463,7 +466,7 @@ export function TwitchApp() {
 
 
                 <div style={{ marginBottom: "1.5rem", textAlign: "left" }}>
-                  <label style={{ display: "block", marginBottom: "0.5rem", fontSize: "0.9rem", color: "#ccc" }}>Mazo (Elegí de 2 a 4 selecciones)</label>
+                  <label style={{ display: "block", marginBottom: "0.5rem", fontSize: "0.9rem", color: "#ccc" }}>Conformación del Mazo (Elegí de 2 a 4 selecciones)</label>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
                     {[
                       { id: 'Argentina', flag: '🇦🇷', code: 'ARG' },
@@ -485,7 +488,13 @@ export function TwitchApp() {
                       { id: 'Austria', flag: '🇦🇹', code: 'AUT' },
                       { id: 'Corea del Sur', flag: '🇰🇷', code: 'KOR' },
                       { id: 'Nueva Zelanda', flag: '🇳🇿', code: 'NZL' }
-                    ].map(team => {
+                    ].sort((a, b) => {
+                      const aSelected = selectedTeams.includes(a.id);
+                      const bSelected = selectedTeams.includes(b.id);
+                      if (aSelected && !bSelected) return -1;
+                      if (!aSelected && bSelected) return 1;
+                      return 0;
+                    }).map(team => {
                       const isSelected = selectedTeams.includes(team.id);
                       return (
                         <button
@@ -495,18 +504,22 @@ export function TwitchApp() {
                             if (isSelected) {
                               if (selectedTeams.length > 2) setSelectedTeams(prev => prev.filter(t => t !== team.id));
                             } else {
-                              setSelectedTeams(prev => [...prev, team.id]);
+                              if (selectedTeams.length < 4) {
+                                setSelectedTeams(prev => [...prev, team.id]);
+                              }
                             }
                           }}
                           style={{
-                            background: isSelected ? "#9146FF" : "rgba(255,255,255,0.1)",
+                            background: isSelected ? "#ffdf00" : "rgba(255,255,255,0.1)",
                             border: "1px solid",
-                            borderColor: isSelected ? "#9146FF" : "transparent",
+                            borderColor: isSelected ? "#ffdf00" : "transparent",
                             borderRadius: "2rem",
                             padding: "0.4rem 0.8rem",
-                            color: isSelected ? "white" : "rgba(255,255,255,0.7)",
-                            cursor: "pointer",
+                            color: isSelected ? "black" : "rgba(255,255,255,0.7)",
+                            cursor: (!isSelected && selectedTeams.length >= 4) ? "not-allowed" : "pointer",
+                            opacity: (!isSelected && selectedTeams.length >= 4) ? 0.5 : 1,
                             fontSize: "0.85rem",
+                            fontWeight: isSelected ? 800 : "normal",
                             transition: "all 0.2s"
                           }}
                         >
@@ -537,8 +550,7 @@ export function TwitchApp() {
                     gap: "0.5rem"
                   }}
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 2H3v16h5v4l4-4h5l4-4V2zm-10 9V7m5 4V7"/></svg>
-                  Conectar y Jugar
+                  <span style={{ textTransform: "uppercase" }}>Conectar y Jugar</span>
                 </button>
               </form>
             </div>
@@ -557,34 +569,34 @@ export function TwitchApp() {
           }
         }
       `}</style>
-      <div 
+      <div
         className="twitch-desktop-ui"
         style={{
-        position: "absolute",
-        top: "10px",
-        left: "50%",
-        transform: "translateX(-50%)",
-        background: "rgba(145, 70, 255, 0.9)",
-        padding: "0.5rem 1rem",
-        borderRadius: "2rem",
-        zIndex: 100,
-        fontWeight: "bold",
-        color: "white",
-        boxShadow: "0 4px 10px rgba(0,0,0,0.5)",
-        display: "flex",
-        alignItems: "center",
-        gap: "0.5rem"
-      }}>
+          position: "absolute",
+          top: "10px",
+          left: "50%",
+          transform: "translateX(-50%)",
+          background: "rgba(145, 70, 255, 0.9)",
+          padding: "0.5rem 1rem",
+          borderRadius: "2rem",
+          zIndex: 100,
+          fontWeight: "bold",
+          color: "white",
+          boxShadow: "0 4px 10px rgba(0,0,0,0.5)",
+          display: "flex",
+          alignItems: "center",
+          gap: "0.5rem"
+        }}>
         <div style={{
           width: "10px",
           height: "10px",
           borderRadius: "50%",
           background: connectionStatus === "connected" ? "#00ff00" : connectionStatus === "connecting" ? "#ffff00" : "#ff0000"
         }} />
-        {activeUser 
-          ? (activeUser === 'Streamer' ? 'Estás jugando esta ronda' : `${activeUser} está jugando esta ronda`) 
+        {activeUser
+          ? (activeUser === 'Streamer' ? 'Estás jugando esta ronda' : `${activeUser} está jugando esta ronda`)
           : `Escribí !jugar en el chat para jugar la ronda`}
-        
+
         {activeUser !== 'Streamer' && opponentMode !== 'streamer' && (
           <button
             onClick={() => forceActiveUser('Streamer')}
@@ -611,44 +623,45 @@ export function TwitchApp() {
           }
         `}</style>
         <TrucoGameView
-        {...core}
-        user={null}
-        roomCode={roomCode}
-        rivalName={opponentMode === "cpu" ? "CPU" : rivalData?.name || "Streamer"}
-        showExitModal={showExitModal}
-        onExitRequest={() => setShowExitModal(true)}
-        onRestartGame={() => {
-           core.handleRestartGame();
-           core.startGame(core.gameMode, opponentMode === "cpu" ? "CPU" : "Streamer", "", points, selectedTeams);
-        }}
-        onPlayCard={wrappedPlayCard}
-        onHandleCall={wrappedHandleCall}
-        onHandleResponse={wrappedHandleResponse}
-        onHandleMazo={wrappedHandleMazo}
-        onCloseExit={() => setShowExitModal(false)}
-        onConfirmExit={() => {
-          setShowExitModal(false);
-          setIsConfigured(false);
-        }}
-        activeCountries={core.activeCountries}
-      />
+          {...core}
+          user={null}
+          roomCode={roomCode}
+          rivalName={opponentMode === "cpu" ? "CPU" : rivalData?.name || "Streamer"}
+          showExitModal={showExitModal}
+          onExitRequest={() => setShowExitModal(true)}
+          onRestartGame={() => {
+            core.handleRestartGame();
+            core.startGame(core.gameMode, opponentMode === "cpu" ? "CPU" : "Streamer", "", points, selectedTeams);
+          }}
+          onPlayCard={wrappedPlayCard}
+          onHandleCall={wrappedHandleCall}
+          onHandleResponse={wrappedHandleResponse}
+          onHandleMazo={wrappedHandleMazo}
+          onCloseExit={() => setShowExitModal(false)}
+          onConfirmExit={() => {
+            setShowExitModal(false);
+            setIsConfigured(false);
+          }}
+          activeCountries={core.activeCountries}
+          hideRulesButton={true}
+        />
       </div>
-      <div 
+      <div
         className="twitch-desktop-ui"
         style={{
-        position: "fixed",
-        bottom: "20px",
-        right: "20px",
-        background: "rgba(24, 24, 27, 0.9)",
-        border: "1px solid #9146FF",
-        borderRadius: "0.5rem",
-        padding: "1rem",
-        color: "white",
-        fontSize: "0.85rem",
-        zIndex: 100,
-        boxShadow: "0 0 15px rgba(145, 70, 255, 0.3)",
-        pointerEvents: "none"
-      }}>
+          position: "fixed",
+          bottom: "20px",
+          right: "20px",
+          background: "rgba(24, 24, 27, 0.9)",
+          border: "1px solid #9146FF",
+          borderRadius: "0.5rem",
+          padding: "1rem",
+          color: "white",
+          fontSize: "0.85rem",
+          zIndex: 100,
+          boxShadow: "0 0 15px rgba(145, 70, 255, 0.3)",
+          pointerEvents: "none"
+        }}>
         <h4 style={{ margin: "0 0 0.5rem 0", color: "#9146FF" }}>Comandos del Chat</h4>
         <ul style={{ margin: 0, paddingLeft: "1.2rem", opacity: 0.9, lineHeight: "1.5" }}>
           <li><b>!jugar</b> - Reservar turno</li>
@@ -712,7 +725,7 @@ export function TwitchApp() {
               }}>
                 {roomCode}
               </div>
-              
+
               <p style={{ fontSize: "0.9rem", color: "#eab308", marginBottom: "2rem" }} className="animate-pulse">
                 Esperando a que te unas...
               </p>

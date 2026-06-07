@@ -10,6 +10,7 @@ import { GameTopBar } from "../controls/GameTopBar";
 import { GameBottomBar, getEnvHighlightIds } from "../controls/GameBottomBar";
 import { Zap, BookOpen, X, Star } from "lucide-react";
 import { useTranslation, Trans } from "react-i18next";
+import { VolumeControl } from "../../shared/VolumeControl";
 import type { GameMode, PlayerRole } from "../../../lib/truco/types";
 
 interface TrucoGameViewProps {
@@ -55,6 +56,7 @@ interface TrucoGameViewProps {
   activeCountries?: string[];
   roundResult?: "win" | "loss" | null;
   setIsPaused?: (paused: boolean) => void;
+  hideRulesButton?: boolean;
 }
 
 export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
@@ -64,7 +66,7 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
   showCountdown, isGameStarting, isCooldown, roundWinningCardId, cpuPartnerHandRef, showExitModal,
   onExitRequest, onRestartGame, onPlayCard, onHandleCall, onHandleResponse, onHandleMazo,
   onCloseExit, onConfirmExit, playerFolded, setIsPaused, roomCode, isRivalConnected = true, isSelfConnected = true,
-  activeCountries, roundResult
+  activeCountries, roundResult, hideRulesButton = false
 }) => {
   const { t } = useTranslation();
   const [showMobileHelp, setShowMobileHelp] = useState(false);
@@ -303,28 +305,46 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
         onContinue={onCloseExit}
       />
 
-      {/* Floating Rules/Ranking trigger button for mobile/tablet */}
-      <button
-        onClick={() => setShowMobileHelp(true)}
-        className="mobile-help-btn"
+      {/* Top Right Controls: Rules and Sound */}
+      <div 
+        className="game-top-right-controls"
         style={{
-          background: "rgba(249, 115, 22, 0.15)",
-          backdropFilter: "blur(12px)",
-          height: "40px",
-          borderRadius: "1rem",
-          padding: "0 1rem",
-          display: "none",
+          position: "fixed",
+          top: "1.5rem",
+          right: "1.5rem",
+          zIndex: 2000,
+          display: "flex",
           alignItems: "center",
-          justifyContent: "center",
-          color: "white",
-          border: "1px solid rgba(249, 115, 22, 0.4)",
-          boxShadow: "0 0 15px rgba(249, 115, 22, 0.4), inset 0 0 8px rgba(249, 115, 22, 0.2)",
-          cursor: "pointer"
+          gap: "0.5rem"
         }}
       >
-        <BookOpen size={16} color="#f97316" />
-        <span className="rules-label" style={{ fontWeight: 900, fontSize: "0.75rem", letterSpacing: "0.05em", fontStyle: "normal", textTransform: "uppercase" }}>{t("rules")}</span>
-      </button>
+        {!hideRulesButton && (
+          <button
+            onClick={() => setShowMobileHelp(true)}
+            className="mobile-help-btn"
+            style={{
+              background: "rgba(249, 115, 22, 0.15)",
+              backdropFilter: "blur(12px)",
+              height: "40px",
+              borderRadius: "1rem",
+              padding: "0 1rem",
+              display: "none",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "white",
+              border: "1px solid rgba(249, 115, 22, 0.4)",
+              boxShadow: "0 0 15px rgba(249, 115, 22, 0.4), inset 0 0 8px rgba(249, 115, 22, 0.2)",
+              cursor: "pointer",
+              position: "static" // Overriding the CSS class fixed position
+            }}
+          >
+            <BookOpen size={16} color="#f97316" />
+            <span className="rules-label" style={{ fontWeight: 900, fontSize: "0.75rem", letterSpacing: "0.05em", fontStyle: "normal", textTransform: "uppercase" }}>{t("rules")}</span>
+          </button>
+        )}
+
+        <VolumeControl expandDirection="down" />
+      </div>
 
       {/* Mobile/Tablet Rules & Ranking Overlay Modal */}
       <AnimatePresence>
