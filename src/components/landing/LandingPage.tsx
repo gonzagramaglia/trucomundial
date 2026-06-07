@@ -1319,7 +1319,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             style={{
               position: "fixed",
               inset: 0,
-              background: "rgba(0, 0, 0, 0.65)",
+              background: "rgba(0, 0, 0, 0.45)",
               backdropFilter: "blur(10px)",
               display: "flex",
               alignItems: "center",
@@ -1414,7 +1414,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             style={{
               position: "fixed",
               inset: 0,
-              background: "rgba(0, 0, 0, 0.65)",
+              background: "rgba(0, 0, 0, 0.45)",
               backdropFilter: "blur(10px)",
               display: "flex",
               alignItems: "center",
@@ -1438,8 +1438,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 {t("deck_selection_subtitle")}
               </p>
 
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.6rem', justifyContent: 'center', marginBottom: '1.5rem', marginTop: '0.5rem' }}>
-                {[
+              {(() => {
+                const ALL_TEAMS_LIST = [
                   { id: 'Argentina', flag: '🇦🇷', code: 'ARG' },
                   { id: 'Francia', flag: '🇫🇷', code: 'FRA' },
                   { id: 'España', flag: '🇪🇸', code: 'ESP' },
@@ -1459,7 +1459,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   { id: 'Austria', flag: '🇦🇹', code: 'AUT' },
                   { id: 'Corea del Sur', flag: '🇰🇷', code: 'KOR' },
                   { id: 'Nueva Zelanda', flag: '🇳🇿', code: 'NZL' }
-                ].map(team => {
+                ];
+                const pinnedTeams = ALL_TEAMS_LIST.filter(t => selectedTeams.includes(t.id));
+                const unpinnedTeams = ALL_TEAMS_LIST.filter(t => !selectedTeams.includes(t.id));
+
+                const renderTeamButton = (team: any) => {
                   const isChecked = selectedTeams.includes(team.id);
                   const isLimitReached = selectedTeams.length >= 4;
                   const isDisabled = !isChecked && isLimitReached;
@@ -1477,9 +1481,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                         );
                       }}
                       style={{
-                        background: isChecked ? "#00f2ff" : "rgba(255,255,255,0.1)",
+                        background: isChecked ? "#ffdf00" : "rgba(255,255,255,0.1)",
                         border: "1px solid",
-                        borderColor: isChecked ? "#00f2ff" : "rgba(255,255,255,0.2)",
+                        borderColor: isChecked ? "#ffdf00" : "rgba(255,255,255,0.2)",
                         borderRadius: "2rem",
                         padding: "0.5rem 1rem",
                         color: isChecked ? "#000" : "white",
@@ -1491,15 +1495,48 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                         gap: "0.5rem",
                         opacity: isDisabled ? 0.45 : 1,
                         fontWeight: 800,
-                        boxShadow: isChecked ? '0 0 15px rgba(0, 242, 255, 0.4)' : 'none'
+                        boxShadow: isChecked ? '0 0 15px rgba(255, 223, 0, 0.4)' : 'none',
+                        flexShrink: 0
                       }}
                     >
                       <span style={{ fontSize: "1.2rem" }}>{team.flag}</span>
                       <span>{team.code}</span>
                     </button>
                   );
-                })}
-              </div>
+                };
+
+                return (
+                  <>
+                    {/* Pinned Teams (Always Visible) */}
+                    {pinnedTeams.length > 0 && (
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.6rem', justifyContent: 'center', marginBottom: '0.8rem' }}>
+                        {pinnedTeams.map(renderTeamButton)}
+                      </div>
+                    )}
+                    
+                    {/* Unpinned Teams (Scrollable) */}
+                    <div 
+                      className="yellow-scrollbar"
+                      style={{ 
+                        display: 'flex', 
+                        flexWrap: 'wrap', 
+                        overflowY: 'auto',
+                        maxHeight: '22vh',
+                        minHeight: '120px',
+                        gap: '0.6rem', 
+                        justifyContent: 'center', 
+                        marginBottom: '1.5rem', 
+                        padding: '0.5rem',
+                        WebkitOverflowScrolling: 'touch',
+                        borderTop: pinnedTeams.length > 0 ? '1px solid rgba(255,255,255,0.1)' : 'none',
+                        paddingTop: pinnedTeams.length > 0 ? '0.8rem' : '0.5rem'
+                      }}
+                    >
+                      {unpinnedTeams.map(renderTeamButton)}
+                    </div>
+                  </>
+                );
+              })()}
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', alignItems: 'center' }}>
                 <button
@@ -1568,7 +1605,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             style={{
               position: "fixed",
               inset: 0,
-              background: "rgba(0, 0, 0, 0.65)",
+              background: "rgba(0, 0, 0, 0.45)",
               backdropFilter: "blur(10px)",
               display: "flex",
               alignItems: "center",

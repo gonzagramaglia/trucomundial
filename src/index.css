@@ -24,3 +24,33 @@
     width: 100%;
   }
 }
+
+.hide-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+
+/* Custom Yellow Scrollbar */
+.yellow-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.yellow-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+.yellow-scrollbar::-webkit-scrollbar-thumb {
+  background: #ffdf00; /* Yellow */
+  border-radius: 4px;
+}
+.yellow-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #e6c800; /* Darker Yellow on hover */
+}
+.yellow-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #ffdf00 rgba(255, 255, 255, 0.05);
+}
