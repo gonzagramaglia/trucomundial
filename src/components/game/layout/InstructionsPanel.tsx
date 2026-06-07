@@ -12,7 +12,7 @@ export const InstructionsPanel: React.FC<InstructionsPanelProps> = ({ maxPoints 
       <h3
         className="text-display"
         style={{
-          color: "#ffffff",
+          color: "#ffdf00",
           fontSize: "0.95rem",
           marginBottom: "1rem",
           letterSpacing: "0.05em",
@@ -30,15 +30,6 @@ export const InstructionsPanel: React.FC<InstructionsPanelProps> = ({ maxPoints 
         }}
       >
         <div>
-          <p
-            style={{
-              fontWeight: "bold",
-              color: "var(--color-accent)",
-              marginBottom: "0.3rem",
-            }}
-          >
-            {t("truco_title")}
-          </p>
           <p>
             {t("truco_desc_1a")}
             <strong style={{ color: "#ffdf00" }}>{t("truco_desc_1b")}</strong>

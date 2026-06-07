@@ -44,6 +44,7 @@ export const GameModals: React.FC<GameModalsProps> = ({
   React.useEffect(() => {
     if (winnerModal === "player") {
       audioManager.playSystemSound("ganaste");
+      audioManager.playSystemSound("aplausos");
     } else if (winnerModal === "cpu") {
       audioManager.playSystemSound("perdiste");
     }

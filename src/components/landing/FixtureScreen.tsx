@@ -73,6 +73,13 @@ export const FixtureScreen: React.FC<FixtureScreenProps> = ({ onBack }) => {
       );
     }
     
+    // Sort so that matches with a result (finished) go to the bottom
+    filtered.sort((a, b) => {
+      const aFinished = a.status === 'finished' ? 1 : 0;
+      const bFinished = b.status === 'finished' ? 1 : 0;
+      return aFinished - bFinished;
+    });
+
     const groups: { [date: string]: FixtureMatch[] } = {};
     filtered.forEach(match => {
       if (!groups[match.date]) {
@@ -395,8 +402,11 @@ export const FixtureScreen: React.FC<FixtureScreenProps> = ({ onBack }) => {
                   <div style={{ 
                     flex: isMobile ? 'none' : '0 0 120px', 
                     display: 'flex', 
-                    flexDirection: 'column', 
-                    gap: '0.25rem',
+                    flexDirection: isMobile ? 'row' : 'column', 
+                    gap: isMobile ? '0.75rem' : '0.25rem',
+                    alignItems: isMobile ? 'center' : 'flex-start',
+                    justifyContent: isMobile ? 'space-between' : 'flex-start',
+                    width: isMobile ? '100%' : 'auto',
                     opacity: 0.8 
                   }}>
                     <span style={{ fontSize: '1rem', fontWeight: 800 }}>{match.time}</span>

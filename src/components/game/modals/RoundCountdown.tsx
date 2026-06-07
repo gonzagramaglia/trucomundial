@@ -6,7 +6,6 @@ import { audioManager } from '../../../lib/audio';
 interface RoundCountdownProps {
   isActive: boolean;
   isGameStarting?: boolean;
-  roundResult?: "win" | "loss" | null;
 }
 
 export const RoundCountdown: React.FC<RoundCountdownProps> = ({ isActive, isGameStarting }) => {
@@ -67,13 +66,11 @@ export const RoundCountdown: React.FC<RoundCountdownProps> = ({ isActive, isGame
                       playedAudioRef.current = count;
                       audioManager.play(`countdown-${count}`);
                     }
+                  } else if (!isGameStarting) {
+                    audioManager.playSystemSound("proxima-ronda");
                   }
                 }}
-                onAnimationComplete={() => {
-                  if (!isGameStarting) {
-                    audioManager.playSystemSound('proxima-ronda');
-                  }
-                }}
+                onAnimationComplete={() => {}}
                 style={{
                   display: 'flex',
                   alignItems: 'center',

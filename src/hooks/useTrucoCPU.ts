@@ -124,7 +124,7 @@ export const useTrucoCPU = ({
         else if (whoseTurn === "partner") currentHand = cpuPartnerHandRef.current;
         else if (whoseTurn === "cpu2") currentHand = cpuOpponent2HandRef.current;
 
-        if (envidoState.status === "none" && cpuPlayedCount === 0) {
+        if (envidoState.status === "none" && cpuPlayedCount === 0 && trucoState.level === 0) {
           // Calculate actual points to decide
           const points = calculateEnvido(currentHand);
           

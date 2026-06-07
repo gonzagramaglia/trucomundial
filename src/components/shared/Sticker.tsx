@@ -11,6 +11,7 @@ interface StickerProps {
   disabled?: boolean;
   heroMode?: boolean;
   winnerMode?: boolean;
+  isOrangeBorder?: boolean;
   hideEnv?: boolean;
   hideStars?: boolean;
   envColor?: string;
@@ -23,6 +24,7 @@ export const Sticker: React.FC<StickerProps> = ({
   disabled,
   heroMode = false,
   winnerMode = false,
+  isOrangeBorder = false,
   hideEnv = false,
   hideStars = false,
   envColor = "var(--color-primary)",
@@ -60,15 +62,15 @@ export const Sticker: React.FC<StickerProps> = ({
     <motion.div
       whileHover={{ scale: 1.1, rotate: 2, zIndex: 1000 }}
       whileTap={!disabled ? { scale: 0.95 } : {}}
-      className={`sticker ${disabled ? "disabled" : ""} ${winnerMode ? "winner" : ""}`}
+      className={`sticker ${disabled ? "disabled" : ""} ${winnerMode || isOrangeBorder ? "winner" : ""}`}
       onClick={handleClick}
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
       style={{
         cursor: disabled ? "default" : "pointer",
         opacity: disabled ? 0.6 : 1,
-        borderColor: winnerMode ? "#ffdf00" : (card.id.startsWith("messi") || card.id.startsWith("mbappe") ? "#a855f7" : "#fff"),
-        boxShadow: winnerMode ? "0 0 20px rgba(255, 223, 0, 0.4)" : (card.id.startsWith("messi") || card.id.startsWith("mbappe") ? "0 0 25px rgba(168, 85, 247, 0.9)" : undefined),
+        borderColor: winnerMode ? "#ffdf00" : isOrangeBorder ? "#ff8c00" : (card.id.startsWith("messi") || card.id.startsWith("mbappe") ? "#a855f7" : "#fff"),
+        boxShadow: winnerMode ? "0 0 20px rgba(255, 223, 0, 0.4)" : isOrangeBorder ? "0 0 20px rgba(255, 140, 0, 0.4)" : (card.id.startsWith("messi") || card.id.startsWith("mbappe") ? "0 0 25px rgba(168, 85, 247, 0.9)" : undefined),
       }}
     >
       <div className="sticker-glitter"></div>

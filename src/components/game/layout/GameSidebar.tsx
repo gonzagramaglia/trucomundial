@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { StarsSidebar } from './StarsSidebar';
 import { InstructionsPanel } from './InstructionsPanel';
 import { useTranslation } from 'react-i18next';
+import { BookOpen, Star } from 'lucide-react';
 
 interface GameSidebarProps {
   maxPoints?: number;
@@ -35,9 +36,14 @@ export const GameSidebar: React.FC<GameSidebarProps> = ({ maxPoints = 30 }) => {
             fontSize: "0.7rem",
             fontWeight: 800,
             cursor: "pointer",
-            transition: "all 0.2s"
+            transition: "all 0.2s",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "0.4rem"
           }}
         >
+          <BookOpen size={14} color="currentColor" />
           {t("rules")}
         </button>
         <button
@@ -52,9 +58,14 @@ export const GameSidebar: React.FC<GameSidebarProps> = ({ maxPoints = 30 }) => {
             fontSize: "0.7rem",
             fontWeight: 800,
             cursor: "pointer",
-            transition: "all 0.2s"
+            transition: "all 0.2s",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "0.4rem"
           }}
         >
+          <Star size={14} color="currentColor" />
           {t("ranking")}
         </button>
       </div>

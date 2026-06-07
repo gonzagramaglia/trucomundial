@@ -59,7 +59,7 @@ export const RulesModal: React.FC<RulesModalProps> = ({ isOpen, onClose, maxPoin
               marginBottom: "1.25rem"
             }}>
               <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-                <BookOpen size={24} style={{ color: "#00f2ff", filter: "drop-shadow(0 0 6px rgba(0, 242, 255, 0.3))" }} />
+                <BookOpen size={24} style={{ color: "#ffffff", filter: "drop-shadow(0 0 6px rgba(255, 255, 255, 0.3))" }} />
                 <h2 style={{
                   color: "#ffffff",
                   fontSize: "1.5rem",

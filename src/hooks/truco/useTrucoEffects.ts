@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { determineWinner, getCardValue } from "../../lib/truco/engine";
 import { supabase } from "../../lib/supabase";
+import { audioManager } from "../../lib/audio";
 
 export const useTrucoEffects = (state: any, logic: any) => {
   const {
@@ -53,14 +54,18 @@ export const useTrucoEffects = (state: any, logic: any) => {
 
     if (score.player >= maxPoints) {
       console.log("[WINNER] Player Wins!");
-      setWinnerModal("player");
-      setGameState("winner");
-      saveMatchHistory("player");
+      setTimeout(() => {
+        setWinnerModal("player");
+        setGameState("winner");
+        saveMatchHistory("player");
+      }, 1500);
     } else if (score.cpu >= maxPoints) {
       console.log("[WINNER] CPU Wins!");
-      setWinnerModal("cpu");
-      setGameState("winner");
-      saveMatchHistory("cpu");
+      setTimeout(() => {
+        setWinnerModal("cpu");
+        setGameState("winner");
+        saveMatchHistory("cpu");
+      }, 1500);
     }
   }, [score.player, score.cpu, maxPoints, setWinnerModal, setGameState, gameMode, matchLog, state.rivalName]);
 
@@ -120,32 +125,35 @@ export const useTrucoEffects = (state: any, logic: any) => {
           setHandWinningCardIds((prev: string[]) => [...prev, ...tiedCardIds]);
         } else {
           winningCard = currentHandCards.find((c: any) => c.owner === handWinner);
-          if (winningCard) setHandWinningCardIds((prev: string[]) => [...prev, winningCard.id]);
+          if (winningCard) {
+            setHandWinningCardIds((prev: string[]) => [...prev, winningCard.id]);
+            audioManager.playSystemSound("sonido-de-carta-ganadora");
+          }
         }
 
         if (roundWinner) {
           triggerCall(roundWinner === "player" ? "¡Ganaste la ronda!" : "Perdiste la ronda...", roundWinner === "player" ? "#eab308" : "#f97316");
+          audioManager.playSystemSound(roundWinner === "player" ? "ganaste-la-ronda" : "perdiste-la-ronda");
+          
+          setIsRoundEnding(true);
+          state.setRoundResult(roundWinner === "player" ? "win" : "loss");
+          if (winningCard) setRoundWinningCardId(winningCard.id);
         }
 
         // Delay the transition by 1 second so the player has time to see the winner/loser highlights on the table
         setTimeout(() => {
           if (roundWinner) {
-            setIsRoundEnding(true);
             setShowCountdown(true);
             
             const points = trucoState.level + 1;
             const winnerStr = roundWinner === "player" ? "Vos" : "El Rival";
             state.setMatchLog((prev: string[]) => [...prev, `★ Fin de la ronda. Gana ${winnerStr} por ${points} puntos.`]);
-
-            if (winningCard) setRoundWinningCardId(winningCard.id);
             
             if (gameMode !== "multiplayer" || isHost) {
               const trucoLabel = points === 1 ? "la Ronda" : points === 2 ? "el Truco" : points === 3 ? "el Retruco" : "el Vale 4";
               const reason = roundWinner === "player" ? `Ganaste ${trucoLabel}` : `Ganó ${trucoLabel}`;
               addPoints(roundWinner, points, reason);
             }
-            
-            state.setRoundResult(roundWinner === "player" ? "win" : "loss");
 
             // Clear visual countdown message shortly after (4s)
             setTimeout(() => {

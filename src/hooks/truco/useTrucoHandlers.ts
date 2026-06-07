@@ -51,6 +51,7 @@ export const useTrucoHandlers = (state: any, logic: any) => {
     setMatchLog((prev: string[]) => [...prev, `Jugaste a ${card.name} (${card.country})`]);
     setPlayerHand((prev: Card[]) => prev.filter(c => c.id !== card.id));
     setPlayedCards((prev: any[]) => [...prev, { ...card, owner: "player", id: `${card.id}_${Date.now()}` }]);
+    audioManager.playSystemSound("card-placement");
     return card;
   }, [isRoundEnding, isCooldown, pendingAction, setPlayerHand, setPlayedCards, setMatchLog]);
 

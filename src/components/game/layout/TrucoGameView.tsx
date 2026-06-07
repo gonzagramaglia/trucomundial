@@ -8,7 +8,7 @@ import { CPUHands } from "../core/CPUHands";
 import { GameModals } from "../modals/GameModals";
 import { GameTopBar } from "../controls/GameTopBar";
 import { GameBottomBar, getEnvHighlightIds } from "../controls/GameBottomBar";
-import { Zap, BookOpen, X } from "lucide-react";
+import { Zap, BookOpen, X, Star } from "lucide-react";
 import { useTranslation, Trans } from "react-i18next";
 import type { GameMode, PlayerRole } from "../../../lib/truco/types";
 
@@ -205,33 +205,49 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
         {/* Turn Pill (Always centered) */}
         {(gameMode === "1v1" || gameMode === "multiplayer") && (
           <div className="turn-pill-sticky" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.25rem", marginBottom: "5px", zIndex: 100, position: "relative" }}>
-            <motion.div
-              animate={{ scale: [1, 1.05, 1], opacity: [0.8, 1, 0.8] }}
-              transition={{ duration: 2, repeat: Infinity }}
-              style={{
-                padding: "0.3rem 1rem",
-                background: (!isRivalConnected && gameMode === "multiplayer") ? "rgba(255, 60, 0, 0.2)" : ((whoseTurn === "player" && !showCountdown && !isCooldown) ? "rgba(0, 242, 255, 0.2)" : "rgba(255, 255, 255, 0.05)"),
-                border: `1px solid ${(!isRivalConnected && gameMode === "multiplayer") ? "#ff3c00" : ((whoseTurn === "player" && !showCountdown && !isCooldown) ? "#00f2ff" : "rgba(255,255,255,0.2)")}`,
-                borderRadius: "2rem",
-                color: (!isRivalConnected && gameMode === "multiplayer") ? "#ff3c00" : ((whoseTurn === "player" && !showCountdown && !isCooldown) ? "#00f2ff" : "white"),
-                fontSize: "0.6rem",
-                fontWeight: 900,
-                textTransform: "uppercase",
-                letterSpacing: "0.2em",
-              }}
-            >
-              {(!isRivalConnected && gameMode === "multiplayer")
-                ? t("waiting_reconnect", { name: rivalName.toUpperCase() })
-                : (showCountdown || isCooldown)
-                  ? "• • •"
-                  : pendingAction && (pendingAction.caller === "player" || pendingAction.caller === "partner")
-                    ? t("waiting_for", { name: rivalName.toUpperCase() })
-                    : pendingAction
-                      ? t("waiting_response")
-                      : whoseTurn === "player"
-                        ? t("your_turn")
-                        : t("waiting_for", { name: rivalName.toUpperCase() })}
-            </motion.div>
+            {(() => {
+              let turnStatus = "neutral";
+              if (!isRivalConnected && gameMode === "multiplayer") turnStatus = "disconnected";
+              else if (showCountdown || isCooldown) turnStatus = "neutral";
+              else if (pendingAction) {
+                if (pendingAction.caller === "player" || pendingAction.caller === "partner") turnStatus = "waiting";
+                else turnStatus = "active";
+              } else if (whoseTurn === "player") {
+                turnStatus = "active";
+              } else {
+                turnStatus = "waiting";
+              }
+
+              return (
+                <motion.div
+                  animate={{ scale: turnStatus === "active" ? [1, 1.05, 1] : 1 }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  style={{
+                    padding: "0.3rem 1rem",
+                    background: turnStatus === "disconnected" ? "rgba(255, 60, 0, 0.2)" : turnStatus === "active" ? "rgba(255, 255, 255, 0.15)" : turnStatus === "waiting" ? "rgba(255, 140, 0, 0.2)" : "rgba(255, 255, 255, 0.05)",
+                    border: `1px solid ${turnStatus === "disconnected" ? "#ff3c00" : turnStatus === "active" ? "#ffffff" : turnStatus === "waiting" ? "#ff8c00" : "rgba(255,255,255,0.2)"}`,
+                    borderRadius: "2rem",
+                    color: turnStatus === "disconnected" ? "#ff3c00" : turnStatus === "active" ? "#ffffff" : turnStatus === "waiting" ? "#ff8c00" : "white",
+                    fontSize: "0.6rem",
+                    fontWeight: 900,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.2em",
+                  }}
+                >
+                  {turnStatus === "disconnected"
+                    ? t("waiting_reconnect", { name: rivalName.toUpperCase() })
+                    : (showCountdown || isCooldown)
+                      ? "• • •"
+                      : pendingAction && (pendingAction.caller === "player" || pendingAction.caller === "partner")
+                        ? t("waiting_for", { name: rivalName.toUpperCase() })
+                        : pendingAction
+                          ? t("waiting_response")
+                          : whoseTurn === "player"
+                            ? t("your_turn")
+                            : t("waiting_for", { name: rivalName.toUpperCase() })}
+                </motion.div>
+              );
+            })()}
           </div>
         )}
 
@@ -306,7 +322,7 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
           cursor: "pointer"
         }}
       >
-        <BookOpen size={16} />
+        <BookOpen size={16} color="#f97316" />
         <span className="rules-label" style={{ fontWeight: 900, fontSize: "0.75rem", letterSpacing: "0.05em", fontStyle: "normal", textTransform: "uppercase" }}>{t("rules")}</span>
       </button>
 
@@ -376,9 +392,14 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
                     fontSize: "0.85rem",
                     fontWeight: 800,
                     cursor: "pointer",
-                    transition: "all 0.2s"
+                    transition: "all 0.2s",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "0.4rem"
                   }}
                 >
+                  <BookOpen size={16} color="currentColor" />
                   {t("rules")}
                 </button>
                 <button
@@ -393,9 +414,14 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
                     fontSize: "0.85rem",
                     fontWeight: 800,
                     cursor: "pointer",
-                    transition: "all 0.2s"
+                    transition: "all 0.2s",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "0.4rem"
                   }}
                 >
+                  <Star size={16} color="currentColor" />
                   {t("ranking")}
                 </button>
                 </div>

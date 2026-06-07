@@ -2,6 +2,7 @@ import React, { useCallback } from "react";
 import { useTrucoCore } from "./useTrucoCore";
 import { useTrucoCPU } from "./useTrucoCPU";
 import type { Card, PlayerRole, GameMode } from "../lib/truco/types";
+import { audioManager } from "../lib/audio";
 
 export function useTrucoGame(sessionId: string | undefined, onSync?: (data: any) => void) {
   const core = useTrucoCore(sessionId || "local");
@@ -60,6 +61,7 @@ export function useTrucoGame(sessionId: string | undefined, onSync?: (data: any)
         id: `${card.id}_cpu_${Date.now()}`,
         rotation: 0, x: 0, y: 0, instanceId: `cpu_${card.id}_${Date.now()}`
       }]);
+      audioManager.playSystemSound("card-placement");
       if (owner === "cpu") core.setCpuHandCount(prev => Math.max(0, prev - 1));
       else if (owner === "partner") core.setCpuPartnerHandCount(prev => Math.max(0, prev - 1));
       else if (owner === "cpu2") core.setCpuOpponent2HandCount(prev => Math.max(0, prev - 1));
@@ -123,6 +125,7 @@ export function useTrucoGame(sessionId: string | undefined, onSync?: (data: any)
         id: `${card.id}_rem_${Date.now()}`,
         rotation: 0, x: 0, y: 0, instanceId: `rem_${card.id}_${Date.now()}`
       }]);
+      audioManager.playSystemSound("card-placement");
       if (owner === "cpu") core.setCpuHandCount(prev => Math.max(0, prev - 1));
       else if (owner === "partner") core.setCpuPartnerHandCount(prev => Math.max(0, prev - 1));
       else if (owner === "cpu2") core.setCpuOpponent2HandCount(prev => Math.max(0, prev - 1));

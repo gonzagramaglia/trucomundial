@@ -11,6 +11,10 @@ class AudioManager {
     'countdown-3': '/audios/arrancando-en-3.mp3',
     'cpu-envido': '/audios/cpu-envido.mp3',
     'cpu-no-quiero': '/audios/cpu-no-quiero.mp3',
+    'cpu-falta-envido': '/audios/cpu-falta-envido.mp3',
+    'cpu-re-truco': '/audios/cpu-quiero-re-truco.mp3',
+    'cpu-real-envido': '/audios/cpu-quiero-real-envido.mp3',
+    'cpu-vale-cuatro': '/audios/cpu-quiero-vale-cuatro.mp3',
     'cpu-quiero-falta-envido': '/audios/cpu-quiero-falta-envido.mp3',
     'cpu-quiero-re-truco': '/audios/cpu-quiero-re-truco.mp3',
     'cpu-quiero-real-envido': '/audios/cpu-quiero-real-envido.mp3',
@@ -19,6 +23,10 @@ class AudioManager {
     'cpu-truco': '/audios/cpu-truco.mp3',
     'player-al-mazo': '/audios/player-al-mazo.mp3',
     'player-envido': '/audios/player-envido.mp3',
+    'player-falta-envido': '/audios/player-falta-envido.mp3',
+    'player-re-truco': '/audios/player-quiero-re-truco.mp3',
+    'player-real-envido': '/audios/player-quiero-real-envido.mp3',
+    'player-vale-cuatro': '/audios/player-quiero-vale-cuatro.mp3',
     'player-no-quiero': '/audios/player-no-quiero.mp3',
     'player-quiero-falta-envido': '/audios/player-quiero-falta-envido.mp3',
     'player-quiero-re-truco': '/audios/player-quiero-re-truco.mp3',
@@ -169,7 +177,7 @@ class AudioManager {
     this.play(key);
   }
 
-  public playSystemSound(key: "ganaste" | "perdiste" | "parda-la-mejor" | "proxima-ronda") {
+  public playSystemSound(key: "ganaste" | "perdiste" | "parda-la-mejor" | "proxima-ronda" | "aplausos" | "card-placement" | "ganaste-la-ronda" | "perdiste-la-ronda" | "sonido-de-carta-ganadora") {
     if (!this.soundMap[key]) {
       this.soundMap[key] = `/audios/${key}.mp3`;
     }

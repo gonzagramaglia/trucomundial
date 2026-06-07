@@ -277,7 +277,7 @@ export const GameField: React.FC<GameFieldProps> = ({
       </motion.div>
 
       <CallOverlay activeCall={activeCall} gameState={gameState} />
-      <RoundCountdown isActive={isRoundEnding || isGameStarting} isGameStarting={isGameStarting} roundResult={roundResult} />
+      <RoundCountdown isActive={isRoundEnding || isGameStarting} isGameStarting={isGameStarting} />
 
       <AnimatePresence>
         {isCooldown && handWinners.length === 1 && handWinners[0] === "draw" && playedCards.length === (gameMode === "2v2" ? 4 : 2) && (
@@ -344,6 +344,9 @@ export const GameField: React.FC<GameFieldProps> = ({
 
           const isHero = card.id === roundWinningCardId;
           const isHandWinner = handWinningCardIds.includes(card.id);
+          
+          const isYellowBorder = isHandWinner && (isPlayer || isPartner) && isRoundEnding && roundResult === "win";
+          const isOrangeBorder = isHandWinner && (isCpu || isCpu2) && isRoundEnding && roundResult === "loss";
 
           let xPos = 0;
           let yPos = 0;
@@ -382,6 +385,8 @@ export const GameField: React.FC<GameFieldProps> = ({
               yPos={yPos}
               rotate={rotate}
               isPlayer={isPlayer}
+              isYellowBorder={isYellowBorder}
+              isOrangeBorder={isOrangeBorder}
               envColor={envColor}
             />
           );
