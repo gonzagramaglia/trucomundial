@@ -32,6 +32,7 @@ const BASE_PLAYERS = CARDS.map(card => ({
 export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, onBack }) => {
   const { t } = useTranslation();
   const [search, setSearch] = useState('');
+  const [showOnlyMyVotes, setShowOnlyMyVotes] = useState(false);
   const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
   const toggleCountryFilter = (country: string) => {
     setSelectedCountries(prev => {
@@ -56,6 +57,8 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
   const lastSavedVotesRef = useRef<Record<string, number>>({});
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
   const baseStarsByCountry = useBaseStars();
+  const isAdmin = user?.email && ["gonzagramaglia@gmail.com", "ciberportero@gmail.com"].includes(user.email);
+  const [showMaxVotesModal, setShowMaxVotesModal] = useState(false);
 
   useEffect(() => {
     const handleResize = () => {
@@ -105,7 +108,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
           const myDbRecord = data.find(item => item.match_id === `user_votes_${user.id}`);
           if (myDbRecord && myDbRecord.last_move && myDbRecord.last_move.votes) {
             lastSavedVotesRef.current = myDbRecord.last_move.votes;
-            
+
             // Only overwrite myVotes if local storage was empty
             const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
             if (!stored) {
@@ -131,7 +134,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
   // Reactively aggregate and update the global votes registry whenever local myVotes or dbVotesData change
   useEffect(() => {
     const aggregate: Record<string, number> = {};
-    
+
     // 1. Add other users' votes from DB
     dbVotesData.forEach(item => {
       if (user && item.match_id === `user_votes_${user.id}`) return;
@@ -156,23 +159,10 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
   }, [myVotes, dbVotesData, user]);
 
   // Calculate current user's distributed votes
+  const maxTotalVotes = isAdmin ? 100 : 78;
   const totalMyVotes = Object.values(myVotes).reduce((sum, v) => sum + v, 0);
-  const availableVotes = 100 - totalMyVotes;
+  const availableVotes = maxTotalVotes - totalMyVotes;
 
-  // Handle adding a vote
-  const handleAddVote = (cardId: string) => {
-    if (!user) return;
-    if (availableVotes <= 0) return;
-
-    lastVotedCardIdRef.current = cardId;
-    lastVoteActionRef.current = 'add';
-    setMyVotes(prev => {
-      const current = prev[cardId] ?? 0;
-      const updated = { ...prev, [cardId]: current + 1 };
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updated));
-      return updated;
-    });
-  };
 
   // Handle subtracting a vote
   const handleSubVote = (cardId: string) => {
@@ -278,7 +268,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
       const otherVotes = aggregateOtherVotes[player.id] ?? 0;
       const myActiveVotes = myVotes[player.id] ?? 0;
       const baseStars = baseStarsByCountry[player.country] || 0;
-      const totalVotes = player.stars + baseStars + otherVotes + myActiveVotes;
+      const totalVotes = Math.min(999, player.stars + baseStars + otherVotes + myActiveVotes);
       return { id: player.id, totalVotes };
     })
     .sort((a, b) => b.totalVotes - a.totalVotes);
@@ -297,7 +287,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
       const otherVotes = aggregateOtherVotes[player.id] ?? 0;
       const myActiveVotes = myVotes[player.id] ?? 0;
       const baseStars = baseStarsByCountry[player.country] || 0;
-      const totalVotes = player.stars + baseStars + otherVotes + myActiveVotes;
+      const totalVotes = Math.min(999, player.stars + baseStars + otherVotes + myActiveVotes);
 
       return {
         ...player,
@@ -315,6 +305,35 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
       }
       return a.randomOffset - b.randomOffset;
     });
+
+  // Handle adding a vote
+  const handleAddVote = (cardId: string) => {
+    if (!user) return;
+    if (availableVotes <= 0) return;
+
+    const currentMyVotes = myVotes[cardId] ?? 0;
+
+    // Check user 3-vote limit (if not admin)
+    if (!isAdmin && currentMyVotes >= 3) {
+      setShowMaxVotesModal(true);
+      return;
+    }
+
+    // Check global 999-vote limit
+    const player = sortedPlayers.find(p => p.id === cardId);
+    if (player && player.totalVotes >= 999) {
+      return; // Cap global votes at 999
+    }
+
+    lastVotedCardIdRef.current = cardId;
+    lastVoteActionRef.current = 'add';
+    setMyVotes(prev => {
+      const current = prev[cardId] ?? 0;
+      const updated = { ...prev, [cardId]: current + 1 };
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updated));
+      return updated;
+    });
+  };
 
   const currentOrder = sortedPlayers.map(p => p.id).join(',');
 
@@ -360,6 +379,11 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
 
   // Filter players based on search query and nationality
   const filteredPlayers = sortedPlayers.filter(p => {
+    // 0. My Votes filter
+    if (showOnlyMyVotes && (myVotes[p.id] ?? 0) <= 0) {
+      return false;
+    }
+
     // 1. Nationality filter
     if (selectedCountries.length > 0 && !selectedCountries.includes(p.country)) {
       return false;
@@ -608,7 +632,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
         }}>
           <Calendar size={20} color="#00f2ff" />
         </div>
-        <p 
+        <p
           style={{
             margin: 0,
             fontSize: '0.85rem',
@@ -651,7 +675,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
                   {t('your_votes_distributed')}
                 </span>
                 <span style={{ color: unsaved ? '#ffb800' : (availableVotes === 0 ? '#10b981' : '#fff') }}>
-                  {totalMyVotes} / 100 {t('votes_label')}
+                  {totalMyVotes} / {maxTotalVotes} {t('votes_label')}
                 </span>
               </div>
 
@@ -659,14 +683,14 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
               <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px', overflow: 'hidden' }}>
                 <motion.div
                   initial={{ width: 0 }}
-                  animate={{ width: `${(totalMyVotes / 100) * 100}%` }}
+                  animate={{ width: `${(totalMyVotes / maxTotalVotes) * 100}%` }}
                   style={{
                     height: '100%',
-                    background: unsaved 
-                      ? 'linear-gradient(to right, #ffb800, #f59e0b)' 
+                    background: unsaved
+                      ? 'linear-gradient(to right, #ffb800, #f59e0b)'
                       : (availableVotes === 0 ? 'linear-gradient(to right, #10b981, #059669)' : 'linear-gradient(to right, #a855f7, #7c3aed)'),
-                    boxShadow: unsaved 
-                      ? '0 0 8px rgba(255, 184, 0, 0.8)' 
+                    boxShadow: unsaved
+                      ? '0 0 8px rgba(255, 184, 0, 0.8)'
                       : (availableVotes === 0 ? '0 0 8px rgba(16, 185, 129, 0.8)' : '0 0 8px rgba(168, 85, 247, 0.8)')
                   }}
                 />
@@ -815,10 +839,13 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
           flexWrap: 'wrap',
           width: '100%'
         }}>
-            {/* Nationality Filters (Pills) */}
+          {/* Nationality Filters (Pills) */}
           <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', flex: 1 }}>
             <button
-              onClick={() => setSelectedCountries([])}
+              onClick={() => {
+                setSelectedCountries([]);
+                setShowOnlyMyVotes(false);
+              }}
               style={{
                 height: '42px',
                 padding: '0 1.25rem',
@@ -827,18 +854,42 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
                 justifyContent: 'center',
                 boxSizing: 'border-box',
                 borderRadius: '1.1rem',
-                background: selectedCountries.length === 0 ? 'rgba(168, 85, 247, 0.2)' : 'rgba(255, 255, 255, 0.05)',
-                border: selectedCountries.length === 0 ? '1.5px solid #a855f7' : '1px solid rgba(255, 255, 255, 0.1)',
+                background: selectedCountries.length === 0 && !showOnlyMyVotes ? 'rgba(168, 85, 247, 0.2)' : 'rgba(255, 255, 255, 0.05)',
+                border: selectedCountries.length === 0 && !showOnlyMyVotes ? '1.5px solid #a855f7' : '1px solid rgba(255, 255, 255, 0.1)',
                 color: '#fff',
                 fontSize: '0.85rem',
                 fontWeight: 700,
                 cursor: 'pointer',
                 transition: 'all 0.2s ease',
-                boxShadow: selectedCountries.length === 0 ? '0 0 10px rgba(168, 85, 247, 0.2)' : 'none',
+                boxShadow: selectedCountries.length === 0 && !showOnlyMyVotes ? '0 0 10px rgba(168, 85, 247, 0.2)' : 'none',
                 whiteSpace: 'nowrap'
               }}
             >
               <span style={{ marginRight: '0.4rem' }}>🌎</span> {t('filter_all')}
+            </button>
+
+            <button
+              onClick={() => setShowOnlyMyVotes(prev => !prev)}
+              style={{
+                height: '42px',
+                padding: '0 1.25rem',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxSizing: 'border-box',
+                borderRadius: '1.1rem',
+                background: showOnlyMyVotes ? 'rgba(168, 85, 247, 0.2)' : 'rgba(255, 255, 255, 0.05)',
+                border: showOnlyMyVotes ? '1.5px solid #a855f7' : '1px solid rgba(255, 255, 255, 0.1)',
+                color: showOnlyMyVotes ? '#fff' : 'rgba(255, 255, 255, 0.6)',
+                fontSize: '0.85rem',
+                fontWeight: showOnlyMyVotes ? 'bold' : 'normal',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                boxShadow: showOnlyMyVotes ? '0 0 10px rgba(168, 85, 247, 0.2)' : 'none',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              <span style={{ marginRight: '0.4rem' }}>⭐</span> MIS VOTOS
             </button>
 
             {[
@@ -1083,6 +1134,60 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
             ))}
           </div>
         </div>
+      ) : filteredPlayers.length === 0 ? (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          style={{
+            width: '100%',
+            background: 'rgba(255, 255, 255, 0.02)',
+            border: '1px solid rgba(255, 255, 255, 0.05)',
+            borderRadius: '2rem',
+            padding: '4rem 2rem',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            textAlign: 'center',
+            backdropFilter: 'blur(10px)',
+            marginTop: '2rem'
+          }}
+        >
+          <div style={{ fontSize: '4rem', marginBottom: '1rem', opacity: 0.5 }}>
+            {showOnlyMyVotes ? '⭐' : '🔍'}
+          </div>
+          <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.5rem', fontWeight: 900, color: 'rgba(255,255,255,0.9)' }}>
+            {showOnlyMyVotes ? 'Aún no has votado' : 'No hay resultados'}
+          </h3>
+          <p style={{ margin: 0, opacity: 0.6, maxWidth: '400px', lineHeight: 1.5 }}>
+            {showOnlyMyVotes
+              ? 'No le has dado ninguna estrella a ninguna carta todavía. ¡Desactivá el filtro y empezá a votar por tus jugadores favoritos!'
+              : 'No encontramos ninguna carta que coincida con tu búsqueda o filtros actuales. Intentá buscar otra cosa.'}
+          </p>
+          {(showOnlyMyVotes || search || selectedCountries.length > 0) && (
+            <button
+              onClick={() => {
+                setShowOnlyMyVotes(false);
+                setSearch('');
+                setSelectedCountries([]);
+              }}
+              style={{
+                marginTop: '2rem',
+                background: 'rgba(168, 85, 247, 0.2)',
+                border: '1px solid #a855f7',
+                color: '#fff',
+                padding: '0.75rem 2rem',
+                borderRadius: '1rem',
+                fontWeight: 800,
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+              className="btn-hover-dark"
+            >
+              Limpiar filtros
+            </button>
+          )}
+        </motion.div>
       ) : (
         /* DYNAMIC STICKERS GRID */
         <div style={{
@@ -1190,8 +1295,8 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
                       style={{
                         background: 'transparent',
                         border: 'none',
-                        color: (player.myActiveVotes > 0 && !isOrderChanging) 
-                          ? (hasCardUnsavedChanges ? '#ffb800' : '#a855f7') 
+                        color: (player.myActiveVotes > 0 && !isOrderChanging)
+                          ? (hasCardUnsavedChanges ? '#ffb800' : '#a855f7')
                           : 'rgba(255,255,255,0.15)',
                         width: '38px',
                         height: '38px',
@@ -1212,8 +1317,8 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
                       textAlign: 'center',
                       fontWeight: 950,
                       fontSize: '1rem',
-                      color: player.myActiveVotes > 0 
-                        ? (hasCardUnsavedChanges ? '#ffb800' : '#a855f7') 
+                      color: player.myActiveVotes > 0
+                        ? (hasCardUnsavedChanges ? '#ffb800' : '#a855f7')
                         : '#ffffff'
                     }}>
                       {player.myActiveVotes}
@@ -1226,8 +1331,8 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
                       style={{
                         background: 'transparent',
                         border: 'none',
-                        color: (availableVotes > 0 && !isOrderChanging) 
-                          ? (hasCardUnsavedChanges ? '#ffb800' : '#a855f7') 
+                        color: (availableVotes > 0 && !isOrderChanging)
+                          ? (hasCardUnsavedChanges ? '#ffb800' : '#a855f7')
                           : 'rgba(255,255,255,0.15)',
                         width: '38px',
                         height: '38px',
@@ -1384,6 +1489,65 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
                   {t('no_stay')}
                 </button>
               </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* MAX VOTES PER CARD MODAL */}
+      <AnimatePresence>
+        {showMaxVotesModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            style={{
+              position: 'fixed',
+              inset: 0,
+              background: 'rgba(0, 0, 0, 0.5)',
+              backdropFilter: 'blur(5px)',
+              zIndex: 2000,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '1.5rem'
+            }}
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              style={{
+                background: 'rgba(15, 10, 25, 0.95)',
+                border: '1px solid rgba(255, 184, 0, 0.4)',
+                borderRadius: '1.5rem',
+                padding: '2rem',
+                width: '100%',
+                maxWidth: '400px',
+                textAlign: 'center',
+                boxShadow: '0 20px 40px rgba(0,0,0,0.5), inset 0 0 20px rgba(255, 184, 0, 0.05)'
+              }}
+            >
+              <h3 style={{ margin: '0 0 1rem 0', color: '#ffb800', fontSize: '1.25rem' }}>
+                Límite de votos
+              </h3>
+              <p style={{ margin: '0 0 1.5rem 0', opacity: 0.8, fontSize: '0.9rem', lineHeight: 1.5 }}>
+                No puedes asignar más de 3 estrellas a un mismo jugador. ¡Distribuye tus votos para mejorar otras cartas!
+              </p>
+              <button
+                onClick={() => setShowMaxVotesModal(false)}
+                style={{
+                  background: 'rgba(255, 255, 255, 0.1)',
+                  border: 'none',
+                  color: '#fff',
+                  padding: '0.75rem 2rem',
+                  borderRadius: '1rem',
+                  fontWeight: 800,
+                  cursor: 'pointer'
+                }}
+              >
+                Entendido
+              </button>
             </motion.div>
           </motion.div>
         )}
