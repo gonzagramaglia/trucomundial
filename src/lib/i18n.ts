@@ -524,8 +524,8 @@ const resources = {
       "call_falta_envido": "¡FALTA ENVIDO!",
       "call_quiero": "¡QUIERO!",
       "call_no_quiero": "¡NO QUIERO!",
-      "call_son_mejores": "¡{{points}} SON MEJORES!",
       "call_son_buenas": "¡SON BUENAS!",
+      "call_son_mejores": "¡{{points}} SON MEJORES!",
       "have_points_high": "¡TENGO {{points}}!",
       "have_points_low": "TENGO {{points}}",
 

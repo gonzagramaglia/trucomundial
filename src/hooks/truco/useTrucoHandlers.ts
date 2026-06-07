@@ -61,7 +61,10 @@ export const useTrucoHandlers = (state: any, logic: any) => {
       rawCallForAudio = level === 1 ? "truco" : (level === 2 ? "re truco" : "vale cuatro");
       text = level === 1 ? i18n.t("call_truco") : (level === 2 ? i18n.t("call_retruco") : i18n.t("call_vale_4"));
     } else {
-      if (level === 3) { rawCallForAudio = "real envido"; text = i18n.t("call_real_envido"); }
+      if (pendingAction && pendingAction.type === "truco") {
+        rawCallForAudio = "el envido esta primero";
+        text = i18n.t("envido_is_first");
+      } else if (level === 3) { rawCallForAudio = "real envido"; text = i18n.t("call_real_envido"); }
       else if (level === 4) { rawCallForAudio = "falta envido"; text = i18n.t("call_falta_envido"); }
       else { rawCallForAudio = "envido"; text = i18n.t("call_envido"); }
     }

@@ -26,6 +26,8 @@ class AudioManager {
     'player-quiero-vale-cuatro': '/audios/player-quiero-vale-cuatro.mp3',
     'player-quiero': '/audios/player-quiero.mp3',
     'player-truco': '/audios/player-truco.mp3',
+    'cpu-el-envido-esta-primero': '/audios/cpu-el-envido-esta-primero.mp3',
+    'player-el-envido-esta-primero': '/audios/player-el-envido-esta-primero.mp3',
   };
 
   private constructor() {
@@ -81,6 +83,16 @@ class AudioManager {
   public play(key: string) {
     if (this.isMuted) return;
 
+    // Prevent overlapping countdown sounds
+    if (key.startsWith('countdown-')) {
+      this.audioCache.forEach((audio, cacheKey) => {
+        if (cacheKey.startsWith('countdown-') && cacheKey !== key) {
+          audio.pause();
+          audio.currentTime = 0;
+        }
+      });
+    }
+
     const audio = this.getAudioElement(key);
     if (audio) {
       // If it's already playing, reset to start so it plays again immediately
@@ -122,10 +134,46 @@ class AudioManager {
 
   public playAlMazo(rawCaller: PlayerRole | 'rival') {
     let caller = (rawCaller === 'partner' || rawCaller === 'player') ? 'player' : 'cpu';
-    const key = `${caller}-al-mazo`;
-    if (this.soundMap[key]) {
-      this.play(key);
+    const key = caller === 'cpu' ? 'cpu-me-voy-al-mazo' : 'player-al-mazo';
+    if (!this.soundMap[key]) {
+      this.soundMap[key] = `/audios/${key}.mp3`;
     }
+    this.play(key);
+  }
+
+  public playTengo(points: number, rawCaller: PlayerRole | 'rival') {
+    let caller = (rawCaller === 'partner' || rawCaller === 'player') ? 'player' : 'cpu';
+    const key = `${caller}-tengo-${points}`;
+    if (!this.soundMap[key]) {
+      this.soundMap[key] = `/audios/${key}.mp3`;
+    }
+    this.play(key);
+  }
+
+  public playSonBuenas(rawCaller: PlayerRole | 'rival') {
+    let caller = (rawCaller === 'partner' || rawCaller === 'player') ? 'player' : 'cpu';
+    const key = `${caller}-son-buenas`;
+    if (!this.soundMap[key]) {
+      this.soundMap[key] = `/audios/${key}.mp3`;
+    }
+    this.play(key);
+  }
+
+  public playSonMejores(points: number, rawCaller: PlayerRole | 'rival') {
+    let caller = (rawCaller === 'partner' || rawCaller === 'player') ? 'player' : 'cpu';
+    
+    const key = `${caller}-son-mejores-${points}`;
+    if (!this.soundMap[key]) {
+      this.soundMap[key] = `/audios/${key}.mp3`;
+    }
+    this.play(key);
+  }
+
+  public playSystemSound(key: "ganaste" | "perdiste" | "parda-la-mejor" | "proxima-ronda") {
+    if (!this.soundMap[key]) {
+      this.soundMap[key] = `/audios/${key}.mp3`;
+    }
+    this.play(key);
   }
 }
 

@@ -11,7 +11,7 @@ import { ScrollIndicator } from "./components/ui/ScrollIndicator";
 import i18n from "./lib/i18n";
 import { updateVotesRegistry, snapshotVotesForGame, setGameActive, setTournamentVotesSnapshot } from "./lib/votesStore";
 import { TournamentResultModal } from "./components/game/modals/TournamentResultModal";
-
+import { audioManager } from "./lib/audio";
 function App() {
   const [user, setUser] = useState<any>(null);
   const [sessionId] = useState(
@@ -50,6 +50,7 @@ function App() {
       }
     };
     fetchGlobalVotes();
+    audioManager.preloadAll();
   }, []);
 
   const syncRef = useRef<((data: any) => void) | null>(null);

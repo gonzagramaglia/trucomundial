@@ -13,6 +13,7 @@ export const RoundCountdown: React.FC<RoundCountdownProps> = ({ isActive, isGame
   const { t } = useTranslation();
   const [count, setCount] = useState(3);
   const [prevIsActive, setPrevIsActive] = useState(isActive);
+  const playedAudioRef = React.useRef<number | null>(null);
 
   if (isActive !== prevIsActive) {
     setPrevIsActive(isActive);
@@ -22,9 +23,8 @@ export const RoundCountdown: React.FC<RoundCountdownProps> = ({ isActive, isGame
   }
 
   useEffect(() => {
-    if (isActive && isGameStarting && count > 0 && count <= 3) {
-      audioManager.play(`countdown-${count}`);
-    }
+    // Audio is now triggered by the Framer Motion onAnimationStart callback
+    // to ensure perfect synchronization with the text appearing on screen after AnimatePresence wait.
   }, [isActive, isGameStarting, count]);
 
   useEffect(() => {
@@ -61,6 +61,19 @@ export const RoundCountdown: React.FC<RoundCountdownProps> = ({ isActive, isGame
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 1.5, opacity: 0 }}
                 transition={{ duration: 0.3, ease: "easeOut" }}
+                onAnimationStart={() => {
+                  if (isGameStarting && count > 0 && count <= 3) {
+                    if (playedAudioRef.current !== count) {
+                      playedAudioRef.current = count;
+                      audioManager.play(`countdown-${count}`);
+                    }
+                  }
+                }}
+                onAnimationComplete={() => {
+                  if (!isGameStarting) {
+                    audioManager.playSystemSound('proxima-ronda');
+                  }
+                }}
                 style={{
                   display: 'flex',
                   alignItems: 'center',

@@ -2,6 +2,7 @@ import React from 'react';
 import { Modal } from '../../ui/Modal';
 import { Button } from '../../ui/Button';
 import { useTranslation } from 'react-i18next';
+import { audioManager } from '../../../lib/audio';
 
 interface GameModalsProps {
   winnerModal: "player" | "cpu" | null;
@@ -39,6 +40,14 @@ export const GameModals: React.FC<GameModalsProps> = ({
   console.log("[MODALS] Winner Modal Status:", winnerModal);
 
   const isDisconnected = isMultiplayer && (!isRivalConnected || !isSelfConnected) && !showCountdown && !winnerModal && !showExitModal;
+
+  React.useEffect(() => {
+    if (winnerModal === "player") {
+      audioManager.playSystemSound("ganaste");
+    } else if (winnerModal === "cpu") {
+      audioManager.playSystemSound("perdiste");
+    }
+  }, [winnerModal]);
 
   return (
     <>

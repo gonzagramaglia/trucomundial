@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { Volume2, VolumeX } from 'lucide-react';
 import type { PlayedCard as PlayedCardType, GameMode, PlayerRole } from '../../../lib/truco/types';
 import { FieldSlots } from './FieldSlots';
 import { PlayedCard } from './PlayedCard';
 import { CallOverlay } from '../controls/CallOverlay';
 import { RoundCountdown } from '../modals/RoundCountdown';
 import { useTranslation } from 'react-i18next';
+import { audioManager } from '../../../lib/audio';
 
 interface GameFieldProps {
   gameMode: GameMode;
@@ -50,12 +52,20 @@ export const GameField: React.FC<GameFieldProps> = ({
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [isCardDragging, setIsCardDragging] = useState(false);
   const [deckPosition, setDeckPosition] = useState<"left" | "right">("right");
+  const [isMuted, setIsMuted] = useState(audioManager.getIsMuted());
 
   useEffect(() => {
     if (playedCards.length === 0 && whoseTurn) {
       setDeckPosition(whoseTurn === "player" ? "left" : "right");
     }
   }, [playedCards.length, whoseTurn]);
+
+  // Play audio for "Parda! La mejor"
+  useEffect(() => {
+    if (isCooldown && handWinners.length === 1 && handWinners[0] === "draw" && playedCards.length === (gameMode === "2v2" ? 4 : 2)) {
+      audioManager.playSystemSound("parda-la-mejor");
+    }
+  }, [isCooldown, handWinners, playedCards.length, gameMode]);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -217,6 +227,53 @@ export const GameField: React.FC<GameFieldProps> = ({
             {t("deck")}
           </button>
         )}
+      </motion.div>
+
+      {/* Audio Mute Toggle - Mirrors the deck position but slightly closer to the center */}
+      <motion.div
+        animate={{
+          left: deckPosition === "right" ? (isMobile ? "20px" : "40px") : (isMobile ? "calc(100% - 20px - 45px)" : "calc(100% - 40px - 65px)"),
+          opacity: isGameStarting ? 0 : 0.8,
+          scale: isGameStarting ? 0.5 : 1
+        }}
+        transition={{ type: "spring", stiffness: 120, damping: 14 }}
+        style={{
+          position: 'absolute',
+          top: isMobile ? '43%' : '44%',
+          transform: 'translateY(-50%)',
+          width: isMobile ? '45px' : '65px',
+          height: isMobile ? '60px' : '90px',
+          zIndex: 1000,
+          pointerEvents: 'auto',
+          userSelect: 'none',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}
+      >
+        <button
+          onClick={() => {
+            const newMuted = audioManager.toggleMute();
+            setIsMuted(newMuted);
+          }}
+          title={isMuted ? "Activar sonido" : "Silenciar"}
+          className="btn-hover-dark"
+          style={{
+            background: "rgba(255, 255, 255, 0.1)",
+            border: "1px solid rgba(255, 255, 255, 0.2)",
+            color: "#fff",
+            borderRadius: "50%",
+            width: isMobile ? "40px" : "48px",
+            height: isMobile ? "40px" : "48px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            cursor: "pointer",
+            boxShadow: "2px 2px 0px #000"
+          }}
+        >
+          {isMuted ? <VolumeX size={isMobile ? 18 : 22} /> : <Volume2 size={isMobile ? 18 : 22} />}
+        </button>
       </motion.div>
 
       <CallOverlay activeCall={activeCall} gameState={gameState} />

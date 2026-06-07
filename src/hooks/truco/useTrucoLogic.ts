@@ -3,6 +3,7 @@ import type { Card } from "../../data/cards";
 import { CARDS } from "../../data/cards";
 import { calculateEnvido } from "../../lib/truco/engine";
 import i18n from "../../lib/i18n";
+import { audioManager } from "../../lib/audio";
 
 export const useTrucoLogic = (state: any) => {
   const {
@@ -97,61 +98,67 @@ export const useTrucoLogic = (state: any) => {
     
     setIsCooldown(true);
 
-    // 1st speaker (Mano)
-    setTimeout(() => {
-      if (isPlayerMano) {
-        setMatchLog((prev: string[]) => [...prev, `Vos (Mano) cantás envido con: ${pPoints} puntos`]);
-        const text = pPoints >= 10 ? i18n.t("have_points_high", { points: pPoints }) : i18n.t("have_points_low", { points: pPoints });
-        triggerCall(text, "#00f2ff");
-      } else {
-        setMatchLog((prev: string[]) => [...prev, `El Rival (Mano) canta envido con: ${cPoints} puntos`]);
-        const text = cPoints >= 10 ? i18n.t("have_points_high", { points: cPoints }) : i18n.t("have_points_low", { points: cPoints });
-        triggerCall(text, "#F77502");
-      }
-
-      // 2nd speaker (Response)
+      // 1st speaker (Mano)
       setTimeout(() => {
-        let pts = 0;
-        if (state.envidoState.level === 4) {
-          const leaderScore = Math.max(state.score.player, state.score.cpu);
-          const target = (state.maxPoints === 30 && leaderScore < 15) ? 15 : state.maxPoints;
-          pts = Math.max(1, target - leaderScore);
-        } else {
-          pts = state.envidoState.accumulated || 2;
-        }
-
-        const envidoLevel = state.envidoState.level;
-        let envidoName = "el envido";
-        if (envidoLevel === 2) envidoName = "el envido envido";
-        if (envidoLevel === 3) envidoName = "el real envido";
-        if (envidoLevel === 4) envidoName = "el falta envido";
-
-        const playerWinMsg = `Ganaste ${envidoName}`;
-        const cpuWinMsg = `Te ganó ${envidoName}`;
-        
-        const pWins = pPoints > cPoints || (pPoints === cPoints && isPlayerMano);
-        
         if (isPlayerMano) {
-          if (pWins) {
-            setMatchLog((prev: string[]) => [...prev, `El Rival responde: son buenas. Ganás ${pts} puntos de Envido.`]);
-            triggerCall(i18n.t("call_son_buenas"), "#F77502");
-            addPoints("player", pts, playerWinMsg);
-          } else {
-            setMatchLog((prev: string[]) => [...prev, `El Rival responde: tengo ${cPoints}. El Rival gana ${pts} puntos de Envido.`]);
-            triggerCall(i18n.t("call_son_mejores", { points: cPoints }), "#F77502");
-            addPoints("cpu", pts, cpuWinMsg);
-          }
+          setMatchLog((prev: string[]) => [...prev, `Vos (Mano) cantás envido con: ${pPoints} puntos`]);
+          const text = pPoints >= 10 ? i18n.t("have_points_high", { points: pPoints }) : i18n.t("have_points_low", { points: pPoints });
+          triggerCall(text, "#00f2ff");
+          audioManager.playTengo(pPoints, "player");
         } else {
-          if (pWins) {
-            setMatchLog((prev: string[]) => [...prev, `Vos respondés: tengo ${pPoints}. Ganás ${pts} puntos de Envido.`]);
-            triggerCall(i18n.t("call_son_mejores", { points: pPoints }), "#00f2ff");
-            addPoints("player", pts, playerWinMsg);
-          } else {
-            setMatchLog((prev: string[]) => [...prev, `Vos respondés: son buenas. El Rival gana ${pts} puntos de Envido.`]);
-            triggerCall(i18n.t("call_son_buenas"), "#00f2ff");
-            addPoints("cpu", pts, cpuWinMsg);
-          }
+          setMatchLog((prev: string[]) => [...prev, `El Rival (Mano) canta envido con: ${cPoints} puntos`]);
+          const text = cPoints >= 10 ? i18n.t("have_points_high", { points: cPoints }) : i18n.t("have_points_low", { points: cPoints });
+          triggerCall(text, "#F77502");
+          audioManager.playTengo(cPoints, "cpu");
         }
+
+        // 2nd speaker (Response)
+        setTimeout(() => {
+          let pts = 0;
+          if (state.envidoState.level === 4) {
+            const leaderScore = Math.max(state.score.player, state.score.cpu);
+            const target = (state.maxPoints === 30 && leaderScore < 15) ? 15 : state.maxPoints;
+            pts = Math.max(1, target - leaderScore);
+          } else {
+            pts = state.envidoState.accumulated || 2;
+          }
+
+          const envidoLevel = state.envidoState.level;
+          let envidoName = "el envido";
+          if (envidoLevel === 2) envidoName = "el envido envido";
+          if (envidoLevel === 3) envidoName = "el real envido";
+          if (envidoLevel === 4) envidoName = "el falta envido";
+
+          const playerWinMsg = `Ganaste ${envidoName}`;
+          const cpuWinMsg = `Te ganó ${envidoName}`;
+          
+          const pWins = pPoints > cPoints || (pPoints === cPoints && isPlayerMano);
+          
+          if (isPlayerMano) {
+            if (pWins) {
+              setMatchLog((prev: string[]) => [...prev, `El Rival responde: son buenas. Ganás ${pts} puntos de Envido.`]);
+              triggerCall(i18n.t("call_son_buenas"), "#F77502");
+              audioManager.playSonBuenas("cpu");
+              addPoints("player", pts, playerWinMsg);
+            } else {
+              setMatchLog((prev: string[]) => [...prev, `El Rival responde: tengo ${cPoints}. El Rival gana ${pts} puntos de Envido.`]);
+              triggerCall(i18n.t("call_son_mejores", { points: cPoints }), "#F77502");
+              audioManager.playSonMejores(cPoints, "cpu");
+              addPoints("cpu", pts, cpuWinMsg);
+            }
+          } else {
+            if (pWins) {
+              setMatchLog((prev: string[]) => [...prev, `Vos respondés: tengo ${pPoints}. Ganás ${pts} puntos de Envido.`]);
+              triggerCall(i18n.t("call_son_mejores", { points: pPoints }), "#00f2ff");
+              audioManager.playSonMejores(pPoints, "player");
+              addPoints("player", pts, playerWinMsg);
+            } else {
+              setMatchLog((prev: string[]) => [...prev, `Vos respondés: son buenas. El Rival gana ${pts} puntos de Envido.`]);
+              triggerCall(i18n.t("call_son_buenas"), "#00f2ff");
+              audioManager.playSonBuenas("player");
+              addPoints("cpu", pts, cpuWinMsg);
+            }
+          }
 
         if (state.suspendedTruco) {
           setTimeout(() => {

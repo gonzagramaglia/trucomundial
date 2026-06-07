@@ -1,8 +1,6 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Volume2, VolumeX } from 'lucide-react';
 import { GameActions } from './GameActions';
-import { audioManager } from '../../../lib/audio';
 import { Sticker } from '../../shared/Sticker';
 import type { GameMode, PlayerRole, EnvidoState, TrucoState, PlayedCard } from '../../../lib/truco/types';
 
@@ -64,8 +62,6 @@ export const GameBottomBar: React.FC<GameBottomBarProps> = ({
 }) => {
   const isDraggingRef = React.useRef(false);
   const [isMobile, setIsMobile] = React.useState(typeof window !== 'undefined' && window.innerWidth < 768);
-  const [isMuted, setIsMuted] = useState(audioManager.getIsMuted());
-
   React.useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener('resize', handleResize);
@@ -94,35 +90,6 @@ export const GameBottomBar: React.FC<GameBottomBarProps> = ({
       zIndex: 1000,
       position: "relative"
     }}>
-      {/* Audio Mute Toggle */}
-      <button
-        onClick={() => {
-          const newMuted = audioManager.toggleMute();
-          setIsMuted(newMuted);
-        }}
-        title={isMuted ? "Activar sonido" : "Silenciar"}
-        className="btn-hover-dark"
-        style={{
-          position: "absolute",
-          left: isMobile ? "0.5rem" : "1rem",
-          bottom: isMobile ? "4rem" : "2rem",
-          background: "rgba(255, 255, 255, 0.1)",
-          border: "1px solid rgba(255, 255, 255, 0.2)",
-          color: "#fff",
-          borderRadius: "50%",
-          width: "48px",
-          height: "48px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          cursor: "pointer",
-          zIndex: 2000,
-          boxShadow: "2px 2px 0px #000"
-        }}
-      >
-        {isMuted ? <VolumeX size={22} /> : <Volume2 size={22} />}
-      </button>
-
       {/* Truco/Envido Actions */}
       <GameActions
         pendingAction={pendingAction}
