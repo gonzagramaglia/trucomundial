@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Save, Plus, Minus, Search, Trophy, Lock, Check, Home, Star, Calendar, Video, Loader2 } from 'lucide-react';
+import { Save, Plus, Minus, Search, Trophy, Lock, Check, Home, Star, Calendar, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { CARDS } from '../../data/cards';
 import { Sticker } from '../shared/Sticker';
@@ -10,7 +10,7 @@ import { TwitchButton } from '../shared/TwitchButton';
 import { updateVotesRegistry } from '../../lib/votesStore';
 import { useBaseStars } from '../../hooks/useBaseStars';
 import { audioManager } from "../../lib/audio";
-import { VolumeControl } from "../shared/VolumeControl";
+import { UtilityButtons } from "../shared/UtilityButtons";
 
 
 interface RankingScreenProps {
@@ -484,13 +484,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
             <span>{t("home")}</span>
           </button>
 
-          {/* Top Right Controls */}
-          <div style={{ position: "fixed", top: "1.5rem", right: "1.5rem", zIndex: 2000, display: 'flex', flexDirection: 'column', gap: '0.75rem', alignItems: 'center' }}>
-            <VolumeControl expandDirection="left" />
-            <a href="https://youtu.be/228FtMaq8uY" target="_blank" rel="noopener noreferrer" onClick={() => audioManager.setVolume(0)} className="btn-hover-dark mobile-hide" style={{ background: 'rgba(255, 255, 255, 0.1)', border: '1px solid rgba(255, 255, 255, 0.2)', color: 'white', height: '40px', width: '40px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(12px)', transition: 'none' }} title="Video">
-              <Video size={18} />
-            </a>
-          </div>
+          <UtilityButtons />
         </>
       )}
 
@@ -538,12 +532,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
                 {t("home")}
               </button>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'center' }}>
-                <VolumeControl size={36} expandDirection="left" style={{ boxShadow: '3px 3px 0px #000' }} />
-                <a href="https://youtu.be/228FtMaq8uY" target="_blank" rel="noopener noreferrer" onClick={() => audioManager.setVolume(0)} className="btn-hover-dark mobile-hide" style={{ background: 'rgba(255, 255, 255, 0.1)', border: '1px solid rgba(255, 255, 255, 0.2)', color: 'white', height: '36px', width: '36px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(12px)', transition: 'none', boxShadow: '3px 3px 0px #000' }} title="Video">
-                  <Video size={16} />
-                </a>
-              </div>
+              <UtilityButtons isMobile={true} />
             </div>
 
             <div style={{

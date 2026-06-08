@@ -278,7 +278,7 @@ class AudioManager {
     this.play(key);
   }
 
-  public playSystemSound(key: "ganaste" | "perdiste" | "parda-la-mejor" | "proxima-ronda" | "aplausos" | "card-placement" | "ganaste-la-ronda" | "perdiste-la-ronda" | "sonido-de-carta-ganadora") {
+  public playSystemSound(key: "ganaste" | "perdiste" | "parda-la-mejor" | "proxima-ronda" | "aplausos" | "card-placement" | "ganaste-la-ronda" | "perdiste-la-ronda" | "sonido-de-carta-ganadora" | "rewarding-card" | "rare-rewarding-card") {
     if (!this.soundMap[key]) {
       this.soundMap[key] = `/audios/${key}.mp3`;
     }

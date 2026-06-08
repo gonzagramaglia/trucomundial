@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, Calendar, Scroll, ShieldAlert, LogOut, Globe, ArrowLeft, Edit2, Check, X, Clock, Video } from 'lucide-react';
+import { User, Calendar, Scroll, ShieldAlert, LogOut, Globe, ArrowLeft, Edit2, Check, X, Clock } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { audioManager } from '../../lib/audio';
 import { supabase } from '../../lib/supabase';
@@ -8,7 +8,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ticketSchema, type TicketFormData } from '../../lib/schemas';
 import { MessageSquare, Send, ChevronDown } from 'lucide-react';
-import { VolumeControl } from '../shared/VolumeControl';
+import { UtilityButtons } from '../shared/UtilityButtons';
 import { TwitchButton } from '../shared/TwitchButton';
 import { CARDS } from '../../data/cards';
 
@@ -273,13 +273,8 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, handleAuth, 
             <span>{t("back")}</span>
           </button>
 
-          {/* Fixed Mute Button (Desktop Right Corner) */}
-          <div style={{ position: "fixed", top: "1.5rem", right: "1.5rem", zIndex: 2000, display: 'flex', flexDirection: 'column', gap: '0.75rem', alignItems: 'center' }}>
-            <VolumeControl expandDirection="left" />
-            <a href="https://youtu.be/228FtMaq8uY" target="_blank" rel="noopener noreferrer" onClick={() => audioManager.setVolume(0)} className="btn-hover-dark mobile-hide" style={{ background: 'rgba(255, 255, 255, 0.1)', border: '1px solid rgba(255, 255, 255, 0.2)', color: 'white', height: '40px', width: '40px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(12px)', transition: 'none' }} title="Video">
-              <Video size={20} />
-            </a>
-          </div>
+          {/* Fixed Mute & Video Button (Desktop Right Corner) */}
+          <UtilityButtons />
         </>
       )}
 
@@ -328,13 +323,8 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, handleAuth, 
                 {t("back")}
               </button>
 
-              {/* Mute Button */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'center' }}>
-                <VolumeControl size={36} expandDirection="left" style={{ boxShadow: '3px 3px 0px #000' }} />
-                <a href="https://youtu.be/228FtMaq8uY" target="_blank" rel="noopener noreferrer" onClick={() => audioManager.setVolume(0)} className="btn-hover-dark mobile-hide" style={{ background: 'rgba(255, 255, 255, 0.1)', border: '1px solid rgba(255, 255, 255, 0.2)', color: 'white', height: '36px', width: '36px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(12px)', transition: 'none', boxShadow: '3px 3px 0px #000' }} title="Video">
-                  <Video size={16} />
-                </a>
-              </div>
+              {/* Mute & Video Buttons */}
+              <UtilityButtons isMobile={true} />
             </div>
 
             {/* Mobile Title & Subtitle */}

@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Save, Search, Lock, Home, Video, Check, Layers, Unlock, RefreshCw } from 'lucide-react';
+import { Save, Search, Lock, Home, Check, Layers, Unlock, RefreshCw } from 'lucide-react';
+import { isTopCard } from '../../lib/votesStore';
 import { useTranslation } from 'react-i18next';
 import { CARDS } from '../../data/cards';
 import { Sticker } from '../shared/Sticker';
 import { EmptyState } from '../shared/EmptyState';
 import { supabase } from '../../lib/supabase';
 import { audioManager } from "../../lib/audio";
-import { VolumeControl } from "../shared/VolumeControl";
+import { UtilityButtons } from "../shared/UtilityButtons";
 
 interface DeckScreenProps {
   user: any;
@@ -191,7 +192,12 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
     }
     
     // Simulate animation delay
-    setTimeout(async () => {
+      setTimeout(async () => {
+      if (isTopCard(randomCardId)) {
+        audioManager.playSystemSound("rare-rewarding-card");
+      } else {
+        audioManager.playSystemSound("rewarding-card");
+      }
       setUnlockedCards(newUnlocked);
       setSelectedDeck(newSelected);
       setNewCardRevealed(randomCardId);
@@ -272,12 +278,7 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
           }}>
             <Home size={18} /><span>{t("home")}</span>
           </button>
-          <div style={{ position: "fixed", top: "1.5rem", right: "1.5rem", zIndex: 2000, display: 'flex', flexDirection: 'column', gap: '0.75rem', alignItems: 'center' }}>
-            <VolumeControl expandDirection="left" />
-            <a href="#" onClick={(e) => { e.preventDefault(); audioManager.setVolume(0); }} className="btn-hover-dark" style={{ background: 'rgba(255, 255, 255, 0.1)', border: '1px solid rgba(255, 255, 255, 0.2)', color: 'white', height: '40px', width: '40px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(12px)' }} title="Video">
-              <Video size={18} />
-            </a>
-          </div>
+          <UtilityButtons />
         </>
       )}
 
@@ -286,9 +287,7 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
           <button onClick={handleBackRequest} className="btn-hover-dark" style={{ background: 'rgba(255, 255, 255, 0.08)', border: '1px solid rgba(255, 255, 255, 0.15)', color: 'white', height: '36px', borderRadius: '0.75rem', padding: '0 0.85rem', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', fontWeight: 800, cursor: 'pointer', boxShadow: '3px 3px 0px #000' }}>
             <Home size={14} /> {t("home")}
           </button>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', alignItems: 'center' }}>
-            <VolumeControl size={36} expandDirection="left" style={{ boxShadow: '3px 3px 0px #000' }} />
-          </div>
+          <UtilityButtons isMobile={true} />
         </div>
       )}
 
@@ -300,6 +299,9 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
           </h2>
         </div>
         <p style={{ fontSize: '0.95rem', opacity: 0.65, margin: '4px 0 0 0', fontWeight: 600 }}>Abrí sobres, desbloqueá nuevas cartas y seleccioná exactamente 22 para armar tu mazo competitivo online.</p>
+        <p style={{ fontSize: '0.85rem', opacity: 0.8, margin: '8px 0 0 0', fontWeight: 700, color: '#f97316' }}>
+          * En partidas online, tus 22 cartas seleccionadas se van a sumar y mezclar con las 22 cartas de tu rival para formar el mazo de 44 cartas de la partida.
+        </p>
       </div>
 
 
@@ -538,7 +540,7 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
               style={{ position: 'absolute', top: '40%', left: '50%', x: '-50%', y: '-50%', width: '300px', height: '400px', background: 'radial-gradient(circle, rgba(249,115,22,0.6) 0%, rgba(249,115,22,0) 70%)', zIndex: -1, filter: 'blur(30px)' }} 
             />
             
-            <div style={{ transform: 'scale(1.3)', pointerEvents: 'none', marginBottom: '2rem' }}>
+            <div style={{ transform: 'scale(1.3)', marginBottom: '2rem' }}>
               <Sticker card={CARDS.find(c => c.id === newCardRevealed)!} disabled={false} showBack={false} />
             </div>
 

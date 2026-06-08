@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Calendar, Globe, Star, Search, Home, Trophy, Video } from 'lucide-react';
+import { Calendar, Globe, Star, Search, Home, Trophy } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { TwitchButton } from '../shared/TwitchButton';
 import { fixtureMatches } from '../../lib/fixtureData';
 import type { FixtureMatch } from '../../lib/fixtureData';
 import { supabase } from '../../lib/supabase';
 import { audioManager } from '../../lib/audio';
-import { VolumeControl } from '../shared/VolumeControl';
+import { UtilityButtons } from '../shared/UtilityButtons';
 
 type TabType = 'groups' | 'round_16' | 'quarterfinals' | 'semifinals' | 'final';
 
@@ -172,14 +172,7 @@ export const FixtureScreen: React.FC<FixtureScreenProps> = ({ user, onBack }) =>
       )}
 
       {/* Top Right Controls */}
-      {!isMobile && (
-        <div style={{ position: "fixed", top: "1.5rem", right: "1.5rem", zIndex: 2000, display: 'flex', flexDirection: 'column', gap: '0.75rem', alignItems: 'center' }}>
-          <VolumeControl expandDirection="left" />
-          <a href="https://youtu.be/228FtMaq8uY" target="_blank" rel="noopener noreferrer" onClick={() => audioManager.setVolume(0)} className="btn-hover-dark mobile-hide" style={{ background: 'rgba(255, 255, 255, 0.1)', border: '1px solid rgba(255, 255, 255, 0.2)', color: 'white', height: '40px', width: '40px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(12px)', transition: 'none' }} title="Video">
-            <Video size={18} />
-          </a>
-        </div>
-      )}
+      {!isMobile && <UtilityButtons />}
 
       {/* Header */}
       <div style={{
@@ -223,13 +216,8 @@ export const FixtureScreen: React.FC<FixtureScreenProps> = ({ user, onBack }) =>
               {t("home")}
             </button>
 
-            {/* Mobile Mute Button */}
-            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-              <a href="https://youtu.be/228FtMaq8uY" target="_blank" rel="noopener noreferrer" onClick={() => audioManager.setVolume(0)} className="btn-hover-dark mobile-hide" style={{ background: 'rgba(255, 255, 255, 0.1)', border: '1px solid rgba(255, 255, 255, 0.2)', color: 'white', height: '36px', width: '36px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(12px)', transition: 'none', boxShadow: '3px 3px 0px #000' }} title="Video">
-                <Video size={16} />
-              </a>
-              <VolumeControl size={36} expandDirection="down" style={{ boxShadow: '3px 3px 0px #000' }} />
-            </div>
+            {/* Mobile Mute & Video Buttons */}
+            <UtilityButtons isMobile={true} />
           </div>
         )}
 

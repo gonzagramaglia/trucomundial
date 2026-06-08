@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import { Home, User, Video, ArrowLeft, Trophy, ShieldAlert, BookOpen } from "lucide-react";
+import { Home, User, ArrowLeft, Trophy, ShieldAlert, BookOpen } from "lucide-react";
 import { supabase } from "../../lib/supabase";
 import { audioManager } from "../../lib/audio";
-import { VolumeControl } from "../shared/VolumeControl";
+import { UtilityButtons } from "../shared/UtilityButtons";
 import { LandingHeader } from "./LandingHeader";
 import { GameModeSelector } from "./GameModeSelector";
 import { PointSelector } from "./PointSelector";
@@ -1192,34 +1192,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           zIndex: 1000,
         }}
       >
-        <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", alignItems: "center" }}>
-          {/* Mute Button */}
-          <VolumeControl expandDirection="left" />
-          <a
-            href="https://youtu.be/228FtMaq8uY"
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => audioManager.setVolume(0)}
-            className="btn-hover-dark mobile-hide"
-            style={{
-              background: "rgba(255, 255, 255, 0.1)",
-              border: "1px solid rgba(255, 255, 255, 0.2)",
-              color: "white",
-              height: "40px",
-              width: "40px",
-              borderRadius: "50%",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              backdropFilter: "blur(12px)",
-              transition: "none",
-            }}
-            title="Video"
-          >
-            <Video size={20} />
-          </a>
-        </div>
+        <UtilityButtons />
 
         {/* Instagram Button (Hidden for now) */}
         {/*

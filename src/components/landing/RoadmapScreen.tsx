@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Home, Milestone, Calendar, Flame, Users, Sparkles, Award, Video } from 'lucide-react';
+import { Home, Milestone, Calendar, Flame, Users, Sparkles, Award } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { TwitchButton } from '../shared/TwitchButton';
-import { VolumeControl } from '../shared/VolumeControl';
-import { audioManager } from '../../lib/audio';
+import { UtilityButtons } from '../shared/UtilityButtons';
 
 
 interface RoadmapScreenProps {
@@ -129,12 +128,7 @@ export const RoadmapScreen: React.FC<RoadmapScreenProps> = ({ onBack }) => {
           </button>
 
           {/* Top Right Controls */}
-          <div style={{ position: "fixed", top: "1.5rem", right: "1.5rem", zIndex: 2000, display: 'flex', flexDirection: 'column', gap: '0.75rem', alignItems: 'center' }}>
-            <VolumeControl expandDirection="left" />
-            <a href="https://youtu.be/228FtMaq8uY" target="_blank" rel="noopener noreferrer" onClick={() => audioManager.setVolume(0)} className="btn-hover-dark mobile-hide" style={{ background: 'rgba(255, 255, 255, 0.1)', border: '1px solid rgba(255, 255, 255, 0.2)', color: 'white', height: '40px', width: '40px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(12px)', transition: 'none' }} title="Video">
-              <Video size={18} />
-            </a>
-          </div>
+          <UtilityButtons />
 
           {/* Fixed Warning Badge (Desktop Right Corner) */}
           <div
