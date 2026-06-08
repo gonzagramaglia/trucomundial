@@ -491,6 +491,7 @@ export function TwitchApp() {
                       { id: 'Paraguay', flag: '🇵🇾', code: 'PAR' },
                       { id: 'Países Bajos', flag: '🇳🇱', code: 'NED' },
                       { id: 'Portugal', flag: '🇵🇹', code: 'POR' },
+                      { id: 'Suiza', flag: '🇨🇭', code: 'SUI' },
                       { id: 'USA', flag: '🇺🇸', code: 'USA' },
                       { id: 'Uruguay', flag: '🇺🇾', code: 'URU' }
                     ].sort((a, b) => {
