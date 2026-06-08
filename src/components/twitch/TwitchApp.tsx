@@ -473,31 +473,34 @@ export function TwitchApp() {
                   <label style={{ display: "block", marginBottom: "0.5rem", fontSize: "0.9rem", color: "#ccc" }}>Conformación del Mazo (Elegí 4 selecciones)</label>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
                     {[
-                      { id: 'Argentina', flag: '🇦🇷', code: 'ARG' },
-                      { id: 'Francia', flag: '🇫🇷', code: 'FRA' },
-                      { id: 'España', flag: '🇪🇸', code: 'ESP' },
-                      { id: 'Brasil', flag: '🇧🇷', code: 'BRA' },
                       { id: 'Argelia', flag: '🇩🇿', code: 'ALG' },
-                      { id: 'México', flag: '🇲🇽', code: 'MEX' },
-                      { id: 'Colombia', flag: '🇨🇴', code: 'COL' },
-                      { id: 'Japón', flag: '🇯🇵', code: 'JPN' },
-                      { id: 'Uruguay', flag: '🇺🇾', code: 'URU' },
-                      { id: 'Portugal', flag: '🇵🇹', code: 'POR' },
-                      { id: 'Ecuador', flag: '🇪🇨', code: 'ECU' },
-                      { id: 'Paraguay', flag: '🇵🇾', code: 'PAR' },
-                      { id: 'Panamá', flag: '🇵🇦', code: 'PAN' },
-                      { id: 'USA', flag: '🇺🇸', code: 'USA' },
-                      { id: 'Canadá', flag: '🇨🇦', code: 'CAN' },
-                      { id: 'Países Bajos', flag: '🇳🇱', code: 'NED' },
+                      { id: 'Argentina', flag: '🇦🇷', code: 'ARG' },
                       { id: 'Austria', flag: '🇦🇹', code: 'AUT' },
+                      { id: 'Brasil', flag: '🇧🇷', code: 'BRA' },
+                      { id: 'Canadá', flag: '🇨🇦', code: 'CAN' },
+                      { id: 'Colombia', flag: '🇨🇴', code: 'COL' },
                       { id: 'Corea del Sur', flag: '🇰🇷', code: 'KOR' },
-                      { id: 'Nueva Zelanda', flag: '🇳🇿', code: 'NZL' }
+                      { id: 'Croacia', flag: '🇭🇷', code: 'CRO' },
+                      { id: 'Ecuador', flag: '🇪🇨', code: 'ECU' },
+                      { id: 'España', flag: '🇪🇸', code: 'ESP' },
+                      { id: 'Francia', flag: '🇫🇷', code: 'FRA' },
+                      { id: 'Japón', flag: '🇯🇵', code: 'JPN' },
+                      { id: 'México', flag: '🇲🇽', code: 'MEX' },
+                      { id: 'Nueva Zelanda', flag: '🇳🇿', code: 'NZL' },
+                      { id: 'Panamá', flag: '🇵🇦', code: 'PAN' },
+                      { id: 'Paraguay', flag: '🇵🇾', code: 'PAR' },
+                      { id: 'Países Bajos', flag: '🇳🇱', code: 'NED' },
+                      { id: 'Portugal', flag: '🇵🇹', code: 'POR' },
+                      { id: 'USA', flag: '🇺🇸', code: 'USA' },
+                      { id: 'Uruguay', flag: '🇺🇾', code: 'URU' }
                     ].sort((a, b) => {
                       const aSelected = selectedTeams.includes(a.id);
                       const bSelected = selectedTeams.includes(b.id);
                       if (aSelected && !bSelected) return -1;
                       if (!aSelected && bSelected) return 1;
-                      return 0;
+                      const nameA = a.id === 'Corea del Sur' ? 'Korea' : a.id;
+                      const nameB = b.id === 'Corea del Sur' ? 'Korea' : b.id;
+                      return nameA.localeCompare(nameB);
                     }).map(team => {
                       const isSelected = selectedTeams.includes(team.id);
                       return (

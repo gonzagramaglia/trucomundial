@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 
+import { CARDS } from "../data/cards";
+
 // Store the aggregate votes per card ID (live database status)
 export const votesRegistry: Record<string, number> = {};
 
@@ -8,14 +10,29 @@ export const gameVotesRegistry: Record<string, number> = {};
 
 export let topCardsSet: Set<string> = new Set();
 
+function getBaseStars(cardId: string): number {
+  const card = CARDS.find(c => c.id === cardId);
+  if (!card) return 0;
+  if (card.country === 'Argentina') return 3;
+  if (card.country === 'Francia') return 2;
+  if (card.country === 'Croacia') return 1;
+  return 0;
+}
+
 function calculateTopCards(registry: Record<string, number>) {
-  const sorted = Object.entries(registry).sort((a, b) => b[1] - a[1]);
+  const allTotals = CARDS.map(c => {
+    const community = registry[c.id] || 0;
+    const base = getBaseStars(c.id);
+    return { id: c.id, total: community + base };
+  });
+
+  const sorted = allTotals.sort((a, b) => b.total - a.total);
   if (sorted.length === 0) return new Set<string>();
   const cutoffIndex = Math.min(5, sorted.length - 1);
-  const cutoffValue = sorted[cutoffIndex][1];
+  const cutoffValue = sorted[cutoffIndex].total;
   const set = new Set<string>();
-  for (const [id, val] of sorted) {
-    if (val >= cutoffValue) set.add(id);
+  for (const item of sorted) {
+    if (item.total >= cutoffValue) set.add(item.id);
     else break;
   }
   return set;
@@ -72,11 +89,13 @@ export function getCardVotes(cardId: string): number {
   // Card IDs themselves may contain underscores (e.g. "nico_williams"), so we cannot
   // use split('_')[0] — instead we remove only the trailing numeric/remote suffix.
   const baseId = cardId.replace(/(_rem|_cpu)?_\d+$/, '');
+  const baseStars = getBaseStars(baseId);
+
   if (isGameActive && tournamentVotesSnapshot) {
-    return tournamentVotesSnapshot[baseId] || 0;
+    return (tournamentVotesSnapshot[baseId] || 0) + baseStars;
   }
   const extra = (isGameActive ? gameVotesRegistry[baseId] : votesRegistry[baseId]) || 0;
-  return extra;
+  return extra + baseStars;
 }
 
 export function isTopCard(cardId: string): boolean {

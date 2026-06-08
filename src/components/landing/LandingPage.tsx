@@ -1547,25 +1547,26 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
               {(() => {
                 const ALL_TEAMS_LIST = [
-                  { id: 'Argentina', flag: '🇦🇷', code: 'ARG' },
-                  { id: 'Francia', flag: '🇫🇷', code: 'FRA' },
-                  { id: 'España', flag: '🇪🇸', code: 'ESP' },
-                  { id: 'Brasil', flag: '🇧🇷', code: 'BRA' },
                   { id: 'Argelia', flag: '🇩🇿', code: 'ALG' },
-                  { id: 'México', flag: '🇲🇽', code: 'MEX' },
-                  { id: 'Colombia', flag: '🇨🇴', code: 'COL' },
-                  { id: 'Japón', flag: '🇯🇵', code: 'JPN' },
-                  { id: 'Uruguay', flag: '🇺🇾', code: 'URU' },
-                  { id: 'Portugal', flag: '🇵🇹', code: 'POR' },
-                  { id: 'Ecuador', flag: '🇪🇨', code: 'ECU' },
-                  { id: 'Paraguay', flag: '🇵🇾', code: 'PAR' },
-                  { id: 'Panamá', flag: '🇵🇦', code: 'PAN' },
-                  { id: 'USA', flag: '🇺🇸', code: 'USA' },
-                  { id: 'Canadá', flag: '🇨🇦', code: 'CAN' },
-                  { id: 'Países Bajos', flag: '🇳🇱', code: 'NED' },
+                  { id: 'Argentina', flag: '🇦🇷', code: 'ARG' },
                   { id: 'Austria', flag: '🇦🇹', code: 'AUT' },
+                  { id: 'Brasil', flag: '🇧🇷', code: 'BRA' },
+                  { id: 'Canadá', flag: '🇨🇦', code: 'CAN' },
+                  { id: 'Colombia', flag: '🇨🇴', code: 'COL' },
+                  { id: 'Croacia', flag: '🇭🇷', code: 'CRO' },
+                  { id: 'Ecuador', flag: '🇪🇨', code: 'ECU' },
+                  { id: 'España', flag: '🇪🇸', code: 'ESP' },
+                  { id: 'Francia', flag: '🇫🇷', code: 'FRA' },
+                  { id: 'Japón', flag: '🇯🇵', code: 'JPN' },
                   { id: 'Corea del Sur', flag: '🇰🇷', code: 'KOR' },
-                  { id: 'Nueva Zelanda', flag: '🇳🇿', code: 'NZL' }
+                  { id: 'México', flag: '🇲🇽', code: 'MEX' },
+                  { id: 'Nueva Zelanda', flag: '🇳🇿', code: 'NZL' },
+                  { id: 'Panamá', flag: '🇵🇦', code: 'PAN' },
+                  { id: 'Paraguay', flag: '🇵🇾', code: 'PAR' },
+                  { id: 'Países Bajos', flag: '🇳🇱', code: 'NED' },
+                  { id: 'Portugal', flag: '🇵🇹', code: 'POR' },
+                  { id: 'USA', flag: '🇺🇸', code: 'USA' },
+                  { id: 'Uruguay', flag: '🇺🇾', code: 'URU' }
                 ];
                 const pinnedTeams = ALL_TEAMS_LIST.filter(t => selectedTeams.includes(t.id));
                 const unpinnedTeams = ALL_TEAMS_LIST.filter(t => !selectedTeams.includes(t.id));

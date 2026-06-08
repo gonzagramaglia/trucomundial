@@ -70,8 +70,8 @@ export const Sticker: React.FC<StickerProps> = ({
       style={{
         cursor: disabled ? "default" : "pointer",
         opacity: disabled ? 0.6 : 1,
-        borderColor: winnerMode ? "#ffdf00" : isOrangeBorder ? "#ff8c00" : (envColor === "#00f2ff" ? "#00f2ff" : (isTop ? "#a855f7" : "#fff")),
-        boxShadow: winnerMode ? "0 0 20px rgba(255, 223, 0, 0.4)" : isOrangeBorder ? "0 0 20px rgba(255, 140, 0, 0.4)" : (envColor === "#00f2ff" ? "0 0 20px rgba(0, 242, 255, 0.6)" : (isTop ? "0 0 25px rgba(168, 85, 247, 0.9)" : undefined)),
+        borderColor: winnerMode ? "#ffdf00" : isOrangeBorder ? "#ff8c00" : (isTop ? "#a855f7" : "#fff"),
+        boxShadow: winnerMode ? "0 0 20px rgba(255, 223, 0, 0.4)" : isOrangeBorder ? "0 0 20px rgba(255, 140, 0, 0.4)" : (isTop ? "0 0 25px rgba(168, 85, 247, 0.9)" : undefined),
       }}
     >
       <div className="sticker-glitter"></div>

@@ -283,8 +283,9 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
     .map(player => {
       const otherVotes = aggregateOtherVotes[player.id] ?? 0;
       const myActiveVotes = myVotes[player.id] ?? 0;
-      const baseStars = baseStarsByCountry[player.country] || 0;
-      const totalVotes = Math.min(999, player.stars + baseStars + otherVotes + myActiveVotes);
+      const fixtureStars = baseStarsByCountry[player.country] || 0;
+      const hardcodedBaseStars = player.country === 'Argentina' ? 3 : player.country === 'Francia' ? 2 : player.country === 'Croacia' ? 1 : 0;
+      const totalVotes = Math.min(999, hardcodedBaseStars + fixtureStars + otherVotes + myActiveVotes);
       return { id: player.id, totalVotes };
     })
     .sort((a, b) => b.totalVotes - a.totalVotes);
@@ -302,8 +303,9 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
     .map(player => {
       const otherVotes = aggregateOtherVotes[player.id] ?? 0;
       const myActiveVotes = myVotes[player.id] ?? 0;
-      const baseStars = baseStarsByCountry[player.country] || 0;
-      const totalVotes = Math.min(999, player.stars + baseStars + otherVotes + myActiveVotes);
+      const fixtureStars = baseStarsByCountry[player.country] || 0;
+      const hardcodedBaseStars = player.country === 'Argentina' ? 3 : player.country === 'Francia' ? 2 : player.country === 'Croacia' ? 1 : 0;
+      const totalVotes = Math.min(999, hardcodedBaseStars + fixtureStars + otherVotes + myActiveVotes);
 
       return {
         ...player,
@@ -875,23 +877,24 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
             {[
               { id: 'Argelia', code: 'ALG', flag: '🇩🇿' },
               { id: 'Argentina', code: 'ARG', flag: '🇦🇷' },
+              { id: 'Austria', code: 'AUT', flag: '🇦🇹' },
               { id: 'Brasil', code: 'BRA', flag: '🇧🇷' },
+              { id: 'Canadá', code: 'CAN', flag: '🇨🇦' },
+              { id: 'Colombia', code: 'COL', flag: '🇨🇴' },
+              { id: 'Croacia', code: 'CRO', flag: '🇭🇷' },
+              { id: 'Ecuador', code: 'ECU', flag: '🇪🇨' },
               { id: 'España', code: 'ESP', flag: '🇪🇸' },
               { id: 'Francia', code: 'FRA', flag: '🇫🇷' },
-              { id: 'México', code: 'MEX', flag: '🇲🇽' },
-              { id: 'Colombia', code: 'COL', flag: '🇨🇴' },
               { id: 'Japón', code: 'JPN', flag: '🇯🇵' },
-              { id: 'Uruguay', code: 'URU', flag: '🇺🇾' },
-              { id: 'Portugal', code: 'POR', flag: '🇵🇹' },
-              { id: 'Ecuador', code: 'ECU', flag: '🇪🇨' },
-              { id: 'Paraguay', code: 'PAR', flag: '🇵🇾' },
-              { id: 'Panamá', code: 'PAN', flag: '🇵🇦' },
-              { id: 'USA', code: 'USA', flag: '🇺🇸' },
-              { id: 'Canadá', code: 'CAN', flag: '🇨🇦' },
-              { id: 'Países Bajos', code: 'NED', flag: '🇳🇱' },
-              { id: 'Austria', code: 'AUT', flag: '🇦🇹' },
               { id: 'Corea del Sur', code: 'KOR', flag: '🇰🇷' },
+              { id: 'México', code: 'MEX', flag: '🇲🇽' },
               { id: 'Nueva Zelanda', code: 'NZL', flag: '🇳🇿' },
+              { id: 'Panamá', code: 'PAN', flag: '🇵🇦' },
+              { id: 'Paraguay', code: 'PAR', flag: '🇵🇾' },
+              { id: 'Países Bajos', code: 'NED', flag: '🇳🇱' },
+              { id: 'Portugal', code: 'POR', flag: '🇵🇹' },
+              { id: 'USA', code: 'USA', flag: '🇺🇸' },
+              { id: 'Uruguay', code: 'URU', flag: '🇺🇾' },
             ].map((country) => (
               <button
                 key={country.id}
@@ -1251,14 +1254,25 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
                     {/* Active Vote Display */}
                     <div style={{
                       flex: 1,
-                      textAlign: 'center',
-                      fontWeight: 950,
-                      fontSize: '1rem',
-                      color: player.myActiveVotes > 0
-                        ? (hasCardUnsavedChanges ? '#ffb800' : '#a855f7')
-                        : '#ffffff'
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
                     }}>
-                      {player.myActiveVotes}
+                      <span style={{
+                        fontWeight: 950,
+                        fontSize: '1.1rem',
+                        lineHeight: '1',
+                        color: player.myActiveVotes > 0
+                          ? (hasCardUnsavedChanges ? '#ffb800' : '#a855f7')
+                          : '#ffffff',
+                        marginBottom: '2px'
+                      }}>
+                        {player.myActiveVotes}
+                      </span>
+                      <span style={{ fontSize: '0.55rem', opacity: 0.6, textTransform: 'uppercase', color: '#fff', letterSpacing: '0.05em' }}>
+                        Votos Personales
+                      </span>
                     </div>
 
                     {/* Add Vote */}
