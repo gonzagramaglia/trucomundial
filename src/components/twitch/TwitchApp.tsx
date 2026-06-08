@@ -486,6 +486,7 @@ export function TwitchApp() {
                       { id: 'Francia', flag: '🇫🇷', code: 'FRA' },
                       { id: 'Japón', flag: '🇯🇵', code: 'JPN' },
                       { id: 'México', flag: '🇲🇽', code: 'MEX' },
+                      { id: 'Noruega', flag: '🇳🇴', code: 'NOR' },
                       { id: 'Nueva Zelanda', flag: '🇳🇿', code: 'NZL' },
                       { id: 'Panamá', flag: '🇵🇦', code: 'PAN' },
                       { id: 'Paraguay', flag: '🇵🇾', code: 'PAR' },

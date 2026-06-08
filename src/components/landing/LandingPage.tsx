@@ -1560,6 +1560,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   { id: 'Japón', flag: '🇯🇵', code: 'JPN' },
                   { id: 'Corea del Sur', flag: '🇰🇷', code: 'KOR' },
                   { id: 'México', flag: '🇲🇽', code: 'MEX' },
+                  { id: 'Noruega', flag: '🇳🇴', code: 'NOR' },
                   { id: 'Nueva Zelanda', flag: '🇳🇿', code: 'NZL' },
                   { id: 'Panamá', flag: '🇵🇦', code: 'PAN' },
                   { id: 'Paraguay', flag: '🇵🇾', code: 'PAR' },
