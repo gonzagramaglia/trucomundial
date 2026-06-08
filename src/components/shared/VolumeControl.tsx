@@ -35,12 +35,15 @@ export const VolumeControl: React.FC<VolumeControlProps> = ({
       }
     };
     if (isOpen) {
+      document.body.classList.add('volume-control-open');
       document.addEventListener('mousedown', handleClickOutside);
       resetTimer();
     } else {
+      document.body.classList.remove('volume-control-open');
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     }
     return () => {
+      document.body.classList.remove('volume-control-open');
       document.removeEventListener('mousedown', handleClickOutside);
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };

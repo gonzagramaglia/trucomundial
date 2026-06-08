@@ -14,10 +14,13 @@ import {
   ChevronRight,
   CheckCircle2,
   Info,
+  Video,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { supabase } from "../../lib/supabase";
 import { TwitchButton } from '../shared/TwitchButton';
+import { VolumeControl } from '../shared/VolumeControl';
+import { audioManager } from '../../lib/audio';
 import {
 
   formatTournamentDate,
@@ -340,12 +343,20 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({
             <span>{t("home")}</span>
           </button>
 
+          {/* Top Right Controls */}
+          <div style={{ position: "fixed", top: "1.5rem", right: "1.5rem", zIndex: 2000, display: 'flex', flexDirection: 'column', gap: '0.75rem', alignItems: 'center' }}>
+            <VolumeControl expandDirection="left" />
+            <a href="https://youtu.be/228FtMaq8uY" target="_blank" rel="noopener noreferrer" onClick={() => audioManager.setVolume(0)} className="btn-hover-dark mobile-hide" style={{ background: 'rgba(255, 255, 255, 0.1)', border: '1px solid rgba(255, 255, 255, 0.2)', color: 'white', height: '40px', width: '40px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(12px)', transition: 'none' }} title="Video">
+              <Video size={18} />
+            </a>
+          </div>
+
           {/* Fixed Warning Badge (Desktop Right Corner) */}
           <div
             style={{
               position: "fixed",
               top: "1.5rem",
-              right: "1rem",
+              right: "5.5rem",
               background: "rgba(255, 120, 0, 0.06)",
               border: "1.5px solid rgba(255, 120, 0, 0.3)",
               backdropFilter: "blur(12px)",

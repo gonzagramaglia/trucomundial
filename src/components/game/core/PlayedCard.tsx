@@ -72,6 +72,7 @@ export const PlayedCard: React.FC<PlayedCardProps> = ({
         winnerMode={isYellowBorder}
         isOrangeBorder={isOrangeBorder}
         envColor={envColor}
+        hideEnv={envColor !== "#00f2ff"}
       />
     </motion.div>
   );

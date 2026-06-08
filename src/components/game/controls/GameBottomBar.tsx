@@ -176,6 +176,7 @@ export const GameBottomBar: React.FC<GameBottomBarProps> = ({
                     disabled={isCardDisabled}
                     showBack={playerFolded}
                     envColor={envColor}
+                    hideEnv={envColor !== "#00f2ff"}
                     onClick={() => {
                       if (!isDraggingRef.current) {
                         onPlayCard(card);
