@@ -110,7 +110,7 @@ class AudioManager {
     const audio = this.getAudioElement('theme');
     if (audio) {
       audio.loop = true;
-      audio.volume = this.volume * 0.23; // Scale max volume to 30%
+      audio.volume = this.volume * 0.05; // Theme very low
       this.currentTheme = audio;
 
       if (typeof window !== 'undefined') {
@@ -152,9 +152,13 @@ class AudioManager {
       }
     }
 
-    if (this.currentTheme) {
-      this.currentTheme.volume = vol * 0.23; // Scale max volume to 30%
-    }
+    this.audioCache.forEach((audio, key) => {
+      if (key === 'theme') {
+        audio.volume = vol * 0.05; // Theme much lower to be background
+      } else {
+        audio.volume = vol * 0.45; // Sounds higher to stand out
+      }
+    });
     
     // Notify React components of volume change
     if (typeof window !== 'undefined') {
@@ -178,6 +182,7 @@ class AudioManager {
 
     if (!this.audioCache.has(key)) {
       const audio = new Audio(this.soundMap[key]);
+      audio.volume = key === 'theme' ? this.volume * 0.05 : this.volume * 0.45;
       this.audioCache.set(key, audio);
     }
     return this.audioCache.get(key) || null;
@@ -198,6 +203,7 @@ class AudioManager {
 
     const audio = this.getAudioElement(key);
     if (audio) {
+      audio.volume = key === 'theme' ? this.volume * 0.05 : this.volume * 0.45;
       // If it's already playing, reset to start so it plays again immediately
       audio.currentTime = 0;
       audio.play().catch(e => console.warn("Auto-play prevented by browser:", e));

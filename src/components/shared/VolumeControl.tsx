@@ -25,7 +25,7 @@ export const VolumeControl: React.FC<VolumeControlProps> = ({
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     timeoutRef.current = setTimeout(() => {
       setIsOpen(false);
-    }, 3000);
+    }, 1500);
   };
 
   useEffect(() => {
@@ -65,11 +65,11 @@ export const VolumeControl: React.FC<VolumeControlProps> = ({
 
   const popoverStyle: React.CSSProperties = {
     position: 'absolute',
-    background: 'rgba(20, 20, 25, 0.9)',
-    backdropFilter: 'blur(10px)',
-    border: '1px solid rgba(255,255,255,0.15)',
+    background: 'rgba(255, 255, 255, 0.02)',
+    backdropFilter: 'blur(12px)',
+    border: '1px solid rgba(255,255,255,0.2)',
     borderRadius: '20px',
-    padding: '0 15px',
+    padding: '0 20px 0 15px',
     height: size + 'px',
     display: 'flex',
     alignItems: 'center',
@@ -84,7 +84,7 @@ export const VolumeControl: React.FC<VolumeControlProps> = ({
     popoverStyle.marginRight = '10px';
     motionProps = {
       initial: { opacity: 0, width: 0, x: 10 },
-      animate: { opacity: 1, width: 100, x: 0 },
+      animate: { opacity: 1, width: 110, x: 0 },
       exit: { opacity: 0, width: 0, x: 10 }
     };
   } else if (expandDirection === 'right') {
@@ -114,6 +114,13 @@ export const VolumeControl: React.FC<VolumeControlProps> = ({
     <div 
       ref={containerRef}
       style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+      onMouseEnter={() => {
+        setIsOpen(true);
+        if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      }}
+      onMouseLeave={() => {
+        resetTimer();
+      }}
     >
       <button
         onClick={() => {
@@ -137,13 +144,14 @@ export const VolumeControl: React.FC<VolumeControlProps> = ({
         }}
         className={className}
         style={{
-          background: "rgba(255, 255, 255, 0.1)",
+          background: "rgba(255, 255, 255, 0.02)",
           border: "1px solid rgba(255, 255, 255, 0.2)",
           color: "white",
           height: size + "px",
           width: size + "px",
           borderRadius: "50%",
           cursor: "pointer",
+          outline: "none",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -176,8 +184,10 @@ export const VolumeControl: React.FC<VolumeControlProps> = ({
               onChange={handleVolumeChange}
               style={{
                 width: '80px',
-                accentColor: 'white',
+                height: '4px',
+                accentColor: '#ffffff',
                 cursor: 'pointer',
+                outline: 'none',
                 ...(expandDirection === 'down' ? {
                   transform: 'rotate(-90deg)',
                   marginTop: '40px',

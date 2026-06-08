@@ -186,9 +186,11 @@
     z-index: 200;
   }
   .points-indicator-fixed {
+    position: absolute !important;
     left: 50% !important;
     right: auto !important;
-    bottom: 0.5rem !important;
+    bottom: auto !important;
+    top: 2.5rem !important;
     transform: translateX(-50%) !important;
     z-index: 3500;
   }

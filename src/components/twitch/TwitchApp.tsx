@@ -307,7 +307,8 @@ export function TwitchApp() {
 
         {/* Top Right Controls */}
         {!isConfigured && (
-          <div style={{ position: "fixed", top: "1.5rem", right: "1.5rem", zIndex: 2000, display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+          <div style={{ position: "fixed", top: "1.5rem", right: "1.5rem", zIndex: 2000, display: 'flex', flexDirection: 'column', gap: '0.75rem', alignItems: 'center' }}>
+            <VolumeControl expandDirection="left" />
             <button
               onClick={() => setShowRules(true)}
               className="btn-hover-dark"
@@ -329,7 +330,6 @@ export function TwitchApp() {
             >
               <BookOpen size={20} />
             </button>
-            <VolumeControl expandDirection="down" />
           </div>
         )}
 

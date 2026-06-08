@@ -1097,7 +1097,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           zIndex: 1000,
         }}
       >
-        <div style={{ display: "flex", gap: "0.75rem", alignItems: "center" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", alignItems: "center" }}>
+          {/* Mute Button */}
+          <VolumeControl expandDirection="left" />
           <a
             href="https://youtu.be/228FtMaq8uY"
             target="_blank"
@@ -1122,8 +1124,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           >
             <Video size={20} />
           </a>
-          {/* Mute Button */}
-          <VolumeControl expandDirection="down" />
         </div>
 
         {/* Instagram Button (Hidden for now) */}

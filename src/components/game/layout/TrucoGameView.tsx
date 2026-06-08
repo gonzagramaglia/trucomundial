@@ -322,7 +322,7 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
         }}
       >
 
-        <VolumeControl expandDirection="down" />
+        <VolumeControl expandDirection="left" />
       </div>
 
       {/* Mobile/Tablet Rules & Ranking Overlay Modal */}

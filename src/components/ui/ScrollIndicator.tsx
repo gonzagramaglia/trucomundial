@@ -11,6 +11,16 @@ export const ScrollIndicator: React.FC = () => {
     return document.querySelector('.game-container') || document.documentElement;
   };
 
+  const scrollToBottom = () => {
+    const target = getScrollContainer();
+    if (target) {
+      target.scrollTo({
+        top: target.scrollHeight,
+        behavior: 'smooth'
+      });
+    }
+  };
+
   useEffect(() => {
     const handleScroll = () => {
       const target = getScrollContainer();
@@ -59,16 +69,19 @@ export const ScrollIndicator: React.FC = () => {
     <AnimatePresence>
       {showIndicator && !isAtBottom && (
         <motion.div
-          initial={{ opacity: 0, scale: 0.5 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.5 }}
+          initial={{ opacity: 0, scale: 0.5, x: isMobile ? "-50%" : 0 }}
+          animate={{ opacity: 1, scale: 1, x: isMobile ? "-50%" : 0 }}
+          exit={{ opacity: 0, scale: 0.5, x: isMobile ? "-50%" : 0 }}
           style={{
             position: 'fixed',
-            bottom: isMobile ? '0.25rem' : '1.5rem',
-            right: isMobile ? '0.75rem' : '1.5rem',
+            bottom: isMobile ? '0.5rem' : '1.5rem',
+            left: isMobile ? '50%' : 'auto',
+            right: isMobile ? 'auto' : '1.5rem',
             zIndex: 9999,
-            pointerEvents: 'none'
+            pointerEvents: 'auto',
+            cursor: 'pointer'
           }}
+          onClick={scrollToBottom}
         >
           <motion.div
             animate={{ 
