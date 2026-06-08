@@ -11,6 +11,7 @@ import { PointSelector } from "./PointSelector";
 import { MatchmakingOverlay } from "./MatchmakingOverlay";
 import { RankingScreen } from "./RankingScreen";
 import { TournamentScreen } from "./TournamentScreen";
+import { DeckScreen } from "./DeckScreen";
 import TournamentEventPage from "./tournaments/TournamentEventPage";
 import { RoadmapScreen } from "./RoadmapScreen";
 import { FixtureScreen } from "./FixtureScreen";
@@ -103,6 +104,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       (window.location.pathname === "/fixture" ||
         window.location.pathname === "/en/fixture"),
   );
+  const [showDeck, setShowDeck] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      (window.location.pathname === "/mazo" ||
+        window.location.pathname === "/en/mazo"),
+  );
 
   useEffect(() => {
     // Only play theme if not in voting or fixture, which handle it themselves,
@@ -141,6 +148,43 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       (window.location.pathname.startsWith("/torneos/") ||
         window.location.pathname.startsWith("/en/torneos/")),
   );
+
+  const [hasUnlockedDeck, setHasUnlockedDeck] = useState<boolean>(true); // start true to prevent flash
+  const [showDeckLockModal, setShowDeckLockModal] = useState<boolean>(false);
+
+  useEffect(() => {
+    const checkDeckUnlocked = async () => {
+      try {
+        if (user) {
+          const { data } = await supabase
+            .from('user_decks')
+            .select('unlocked_cards')
+            .eq('id', user.id)
+            .single();
+          if (data && data.unlocked_cards && data.unlocked_cards.length >= 22) {
+            setHasUnlockedDeck(true);
+            return;
+          }
+        } else {
+          const local = localStorage.getItem(`trucomundial-deck-anonymous`);
+          if (local) {
+            const parsed = JSON.parse(local);
+            if (parsed.unlockedCards && parsed.unlockedCards.length >= 22) {
+              setHasUnlockedDeck(true);
+              return;
+            }
+          }
+        }
+        setHasUnlockedDeck(false);
+      } catch (e) {
+        console.error("Error checking deck", e);
+        setHasUnlockedDeck(false);
+      }
+    };
+    // give a slight delay to allow DeckScreen saves if returning from it
+    const timer = setTimeout(checkDeckUnlocked, 100);
+    return () => clearTimeout(timer);
+  }, [user, showDeck]);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }: any) => {
@@ -348,6 +392,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       );
       setShowRoadmap(p === "/ruta" || p === "/en/ruta");
       setShowFixture(p === "/fixture" || p === "/en/fixture");
+      setShowDeck(p === "/mazo" || p === "/en/mazo");
       setShowProfile(p === "/perfil" || p === "/en/perfil");
       setShowAdmin(p === "/admin" || p === "/en/admin");
       setShowCreator(p === "/creador" || p === "/en/creador");
@@ -388,6 +433,21 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     return result;
   };
 
+  const fetchUserDeck = async (userId?: string): Promise<string[]> => {
+    let deck: string[] = [];
+    if (userId) {
+      const { data } = await supabase.from('user_decks').select('selected_deck').eq('id', userId).single();
+      if (data && data.selected_deck) deck = data.selected_deck;
+    }
+    if (!deck.length) {
+      const cached = localStorage.getItem(`trucomundial-deck-${userId || 'anonymous'}`);
+      if (cached) {
+        try { deck = JSON.parse(cached).selectedDeck || []; } catch(e){}
+      }
+    }
+    return deck;
+  };
+
   const initiateGame = (
     mode: "1v1" | "2v2" | "multiplayer",
     points: 15 | 30,
@@ -412,10 +472,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     setIsWaiting(true);
     setTimeLeft(300);
 
+    const hostDeck = await fetchUserDeck(user?.id);
+
     const newRoomInfo = {
       creatorId: user?.id || sessionId,
       creatorName: user?.user_metadata?.full_name?.split(" ")[0] || "HOST",
       points: pointsToUse,
+      hostDeck,
     };
 
     // Register room in table
@@ -499,12 +562,16 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         user?.user_metadata?.full_name?.split(" ")[0] || "GUEST";
       const guestId = user?.id || sessionId;
 
+      const guestDeck = await fetchUserDeck(user?.id);
+
       const newRoomInfo = {
         creatorId: rivalId,
         creatorName: rivalName,
         guestId: guestId,
         guestName: guestName,
         points: matchPoints,
+        hostDeck: state.roomInfo?.hostDeck || [],
+        guestDeck: guestDeck,
       };
 
       const { error: updateError } = await supabase
@@ -541,7 +608,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           false,
           code,
           false,
-          selectedTeams,
+          [...(state.roomInfo?.hostDeck || []), ...guestDeck],
         );
       }, 3500);
     } else {
@@ -571,7 +638,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             true,
             code,
             true,
-            selectedTeams,
+            [...(roomInfo.hostDeck || []), ...(roomInfo.guestDeck || [])],
           );
         }, 2000);
       } else if (myId === roomInfo.guestId) {
@@ -591,7 +658,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             false,
             code,
             true,
-            selectedTeams,
+            [...(roomInfo.hostDeck || []), ...(roomInfo.guestDeck || [])],
           );
         }, 2000);
       } else {
@@ -684,7 +751,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 true,
                 roomCode,
                 false,
-                selectedTeams,
+                [...(state.roomInfo?.hostDeck || []), ...(state.roomInfo?.guestDeck || [])],
               );
             }, 3500);
           }
@@ -811,6 +878,34 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           handleAuth={handleAuth}
           onBack={() => {
             setShowTournament(false);
+            if (typeof window !== "undefined") {
+              const isEn = window.location.pathname.startsWith("/en");
+              window.history.pushState({}, "", isEn ? "/en" : "/");
+            }
+          }}
+        />
+      </div>
+    );
+  }
+
+  if (showDeck) {
+    return (
+      <div
+        style={{
+          position: "fixed",
+          inset: 0,
+          background: "transparent",
+          width: "100%",
+          height: "100vh",
+          overflowY: "auto",
+          zIndex: 1500,
+        }}
+      >
+        <DeckScreen
+          user={user}
+          handleAuth={handleAuth}
+          onBack={() => {
+            setShowDeck(false);
             if (typeof window !== "undefined") {
               const isEn = window.location.pathname.startsWith("/en");
               window.history.pushState({}, "", isEn ? "/en" : "/");
@@ -1270,6 +1365,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           <GameModeSelector
             selectedMode={selectedMode || "multiplayer"}
             user={user}
+            hasUnlockedDeck={hasUnlockedDeck}
             onSelect={(mode) => {
               if ((mode as string) === "ranking") {
                 setShowRanking(true);
@@ -1295,6 +1391,18 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 }
                 return;
               }
+              if ((mode as string) === "deck") {
+                setShowDeck(true);
+                if (typeof window !== "undefined") {
+                  const isEn = window.location.pathname.startsWith("/en");
+                  window.history.pushState(
+                    {},
+                    "",
+                    isEn ? "/en/mazo" : "/mazo",
+                  );
+                }
+                return;
+              }
               if ((mode as string) === "roadmap") {
                 setShowRoadmap(true);
                 if (typeof window !== "undefined") {
@@ -1310,6 +1418,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   window.history.pushState({}, "", isEn ? "/en/fixture" : "/fixture");
                 }
                 return;
+              }
+
+              if (mode === "multiplayer") {
+                if (!hasUnlockedDeck) {
+                  setShowDeckLockModal(true);
+                  return;
+                }
               }
 
               setSelectedMode(mode);
@@ -1379,7 +1494,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 onSelect={(points) => {
                   setSelectedPoints(points as 15 | 30);
                   setIsSelectingPoints(false);
-                  setIsSelectingTeams(true);
+                  if (selectedMode === "multiplayer") {
+                    initiateGame("multiplayer", points as 15 | 30);
+                  } else {
+                    setIsSelectingTeams(true);
+                  }
                 }}
               />
 
@@ -1555,7 +1674,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', alignItems: 'center' }}>
                 <button
-                  disabled={selectedTeams.length < 2}
+                  disabled={selectedTeams.length !== 4}
                   onClick={() => {
                     setIsSelectingTeams(false);
                     initiateGame(selectedMode!, selectedPoints);
@@ -1566,13 +1685,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     height: "50px",
                     fontSize: "1.2rem",
                     fontWeight: 950,
-                    backgroundColor: selectedTeams.length < 2 ? "rgba(255,255,255,0.1)" : "#00f2ff",
-                    color: selectedTeams.length < 2 ? "rgba(255,255,255,0.3)" : "#000",
+                    backgroundColor: selectedTeams.length !== 4 ? "rgba(255,255,255,0.1)" : "#00f2ff",
+                    color: selectedTeams.length !== 4 ? "rgba(255,255,255,0.3)" : "#000",
                     border: "none",
                     borderRadius: "1rem",
                     boxShadow: "4px 4px 0px #000",
                     fontStyle: "italic",
-                    cursor: selectedTeams.length < 2 ? "default" : "pointer"
+                    cursor: selectedTeams.length !== 4 ? "default" : "pointer"
                   }}
                 >
                   {t("play_now")}
@@ -1916,6 +2035,59 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           </motion.div>
         )}
       </AnimatePresence>
+
+      <AnimatePresence>
+        {showDeckLockModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowDeckLockModal(false)}
+            style={{
+              position: "fixed", inset: 0, background: "rgba(0,0,0,0.8)", backdropFilter: "blur(10px)",
+              display: "flex", alignItems: "center", justifyContent: "center", zIndex: 3000, padding: "1.5rem"
+            }}
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                background: "#1a1a2e",
+                padding: "2.5rem 2rem",
+                borderRadius: "2rem",
+                maxWidth: "400px",
+                width: "100%",
+                textAlign: "center",
+                border: "2px solid rgba(0, 242, 255, 0.5)",
+                boxShadow: "0 20px 50px rgba(0,0,0,0.5)"
+              }}
+            >
+              <div style={{
+                width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(0, 242, 255, 0.15)', border: '2.5px solid #00f2ff',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem auto', color: '#00f2ff', fontSize: '2rem'
+              }}>
+                🔒
+              </div>
+              <h3 style={{ margin: "0 0 1rem 0", color: "#00f2ff", fontSize: "1.5rem", fontWeight: 900 }}>Mazo Incompleto</h3>
+              <p style={{ margin: "0 0 2rem 0", color: "#fff", opacity: 0.8, fontSize: "0.95rem", lineHeight: 1.5 }}>
+                Para jugar online primero tenés que abrir tus <b>22 sobres gratuitos de bienvenida</b> en la sección "Personalizá tu mazo".
+              </p>
+              <div style={{ display: "flex", justifyContent: "center" }}>
+                <button
+                  onClick={() => setShowDeckLockModal(false)}
+                  className="btn-hover-dark"
+                  style={{ width: "100%", padding: "0.75rem", background: "rgba(255,255,255,0.1)", border: "none", color: "#fff", borderRadius: "1rem", cursor: "pointer", fontWeight: 800 }}
+                >
+                  Cerrar
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <RulesModal isOpen={showRules} onClose={() => setShowRules(false)} />
     </div>
   );

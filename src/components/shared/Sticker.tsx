@@ -61,7 +61,7 @@ export const Sticker: React.FC<StickerProps> = ({
 
   return (
     <motion.div
-      whileHover={{ scale: 1.1, rotate: 2, zIndex: 1000 }}
+      whileHover={!disabled ? { scale: 1.1, rotate: 2, zIndex: 1000 } : {}}
       whileTap={!disabled ? { scale: 0.95 } : {}}
       className={`sticker ${disabled ? "disabled" : ""} ${winnerMode || isOrangeBorder ? "winner" : ""}`}
       onClick={handleClick}

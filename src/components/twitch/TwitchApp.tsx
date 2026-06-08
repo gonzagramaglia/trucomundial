@@ -470,7 +470,7 @@ export function TwitchApp() {
 
 
                 <div style={{ marginBottom: "1.5rem", textAlign: "left" }}>
-                  <label style={{ display: "block", marginBottom: "0.5rem", fontSize: "0.9rem", color: "#ccc" }}>Conformación del Mazo (Elegí de 2 a 4 selecciones)</label>
+                  <label style={{ display: "block", marginBottom: "0.5rem", fontSize: "0.9rem", color: "#ccc" }}>Conformación del Mazo (Elegí 4 selecciones)</label>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
                     {[
                       { id: 'Argentina', flag: '🇦🇷', code: 'ARG' },
@@ -506,7 +506,7 @@ export function TwitchApp() {
                           type="button"
                           onClick={() => {
                             if (isSelected) {
-                              if (selectedTeams.length > 2) setSelectedTeams(prev => prev.filter(t => t !== team.id));
+                              setSelectedTeams(prev => prev.filter(t => t !== team.id));
                             } else {
                               if (selectedTeams.length < 4) {
                                 setSelectedTeams(prev => [...prev, team.id]);
@@ -536,16 +536,16 @@ export function TwitchApp() {
 
                 <button
                   type="submit"
-                  disabled={selectedTeams.length < 2 || channel.trim() === ""}
+                  disabled={selectedTeams.length !== 4 || channel.trim() === ""}
                   style={{
                     width: "100%",
                     padding: "0.8rem",
                     borderRadius: "0.5rem",
                     border: "none",
-                    background: selectedTeams.length < 2 || channel.trim() === "" ? "rgba(145, 70, 255, 0.5)" : "#9146FF",
+                    background: selectedTeams.length !== 4 || channel.trim() === "" ? "rgba(145, 70, 255, 0.5)" : "#9146FF",
                     color: "white",
                     fontWeight: "bold",
-                    cursor: selectedTeams.length < 2 || channel.trim() === "" ? "default" : "pointer",
+                    cursor: selectedTeams.length !== 4 || channel.trim() === "" ? "default" : "pointer",
                     transition: "all 0.2s",
                     marginTop: "1rem",
                     display: "flex",

@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Save, Plus, Minus, Search, Trophy, Lock, Check, Home, Star, Calendar, Video } from 'lucide-react';
+import { Save, Plus, Minus, Search, Trophy, Lock, Check, Home, Star, Calendar, Video, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { CARDS } from '../../data/cards';
 import { Sticker } from '../shared/Sticker';
+import { EmptyState } from '../shared/EmptyState';
 import { supabase } from '../../lib/supabase';
 import { TwitchButton } from '../shared/TwitchButton';
 import { updateVotesRegistry } from '../../lib/votesStore';
@@ -61,6 +62,15 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
   const baseStarsByCountry = useBaseStars();
   const isAdmin = user?.email && ["gonzagramaglia@gmail.com", "ciberportero@gmail.com"].includes(user.email);
   const [showMaxVotesModal, setShowMaxVotesModal] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(12);
+  const observerTarget = useRef<HTMLDivElement>(null);
+
+  // Reset visible count when filters change
+  useEffect(() => {
+    setVisibleCount(12);
+  }, [search, selectedCountries, showOnlyMyVotes, sortBy]);
+
+
 
   useEffect(() => {
     audioManager.playTheme();
@@ -165,7 +175,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
   }, [myVotes, dbVotesData, user]);
 
   // Calculate current user's distributed votes
-  const maxTotalVotes = isAdmin ? 100 : 78;
+  const maxTotalVotes = 78;
   const totalMyVotes = Object.values(myVotes).reduce((sum, v) => sum + v, 0);
   const availableVotes = maxTotalVotes - totalMyVotes;
 
@@ -407,6 +417,24 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
       cleanString(p.club).includes(q)
     );
   });
+
+  // Infinite scroll listener using IntersectionObserver
+  useEffect(() => {
+    const target = observerTarget.current;
+    if (!target) return;
+
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting) {
+          setVisibleCount(prev => prev + 12);
+        }
+      },
+      { threshold: 0.1 }
+    );
+    observer.observe(target);
+
+    return () => observer.unobserve(target);
+  }, [loading, filteredPlayers]); // Re-attach when loading finishes and when players update
 
   const unsaved = hasUnsavedChanges();
 
@@ -697,6 +725,9 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
             initial={{ y: -30, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             style={{
+              position: 'sticky',
+              top: '1rem',
+              zIndex: 100,
               background: 'rgba(145, 70, 255, 0.05)',
               border: '2px dashed rgba(145, 70, 255, 0.45)',
               borderRadius: '2rem',
@@ -1095,68 +1126,25 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
           </div>
         </div>
       ) : filteredPlayers.length === 0 ? (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          style={{
-            width: '100%',
-            background: 'rgba(255, 255, 255, 0.02)',
-            border: '1px solid rgba(255, 255, 255, 0.05)',
-            borderRadius: '2rem',
-            padding: '4rem 2rem',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            textAlign: 'center',
-            backdropFilter: 'blur(10px)',
-            marginTop: '2rem'
-          }}
-        >
-          <div style={{ fontSize: '4rem', marginBottom: '1rem', opacity: 0.5 }}>
-            {showOnlyMyVotes ? '⭐' : '🔍'}
-          </div>
-          <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.5rem', fontWeight: 900, color: 'rgba(255,255,255,0.9)' }}>
-            {showOnlyMyVotes ? 'Aún no has votado' : 'No hay resultados'}
-          </h3>
-          <p style={{ margin: 0, opacity: 0.6, maxWidth: '400px', lineHeight: 1.5 }}>
-            {showOnlyMyVotes
-              ? 'No le has dado ninguna estrella a ninguna carta todavía. ¡Desactivá el filtro y empezá a votar por tus jugadores favoritos!'
-              : 'No encontramos ninguna carta que coincida con tu búsqueda o filtros actuales. Intentá buscar otra cosa.'}
-          </p>
-          {(showOnlyMyVotes || search || selectedCountries.length > 0) && (
-            <button
-              onClick={() => {
-                setShowOnlyMyVotes(false);
-                setSearch('');
-                setSelectedCountries([]);
-              }}
-              style={{
-                marginTop: '2rem',
-                background: 'rgba(168, 85, 247, 0.2)',
-                border: '1px solid #a855f7',
-                color: '#fff',
-                padding: '0.75rem 2rem',
-                borderRadius: '1rem',
-                fontWeight: 800,
-                cursor: 'pointer',
-                transition: 'all 0.2s ease'
-              }}
-              className="btn-hover-dark"
-            >
-              Limpiar filtros
-            </button>
-          )}
-        </motion.div>
+        <EmptyState
+          icon={showOnlyMyVotes ? '⭐' : '🔍'}
+          title={showOnlyMyVotes ? 'Aún no has votado' : 'No hay resultados'}
+          description={showOnlyMyVotes
+            ? 'No le has dado ninguna estrella a ninguna carta todavía. ¡Desactivá el filtro y empezá a votar por tus jugadores favoritos!'
+            : 'No encontramos ninguna carta que coincida con tu búsqueda o filtros actuales. Intentá buscar otra cosa.'}
+          actionText={(showOnlyMyVotes || search || selectedCountries.length > 0) ? 'Limpiar filtros' : undefined}
+          onAction={(showOnlyMyVotes || search || selectedCountries.length > 0) ? () => {
+            setShowOnlyMyVotes(false);
+            setSearch('');
+            setSelectedCountries([]);
+            setVisibleCount(20);
+          } : undefined}
+          color="#a855f7"
+        />
       ) : (
         /* DYNAMIC STICKERS GRID */
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-          gap: '2.5rem',
-          width: '100%'
-        }}>
-          {filteredPlayers.map((player, index) => {
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '2.5rem', width: '100%' }}>
+          {filteredPlayers.slice(0, visibleCount).map((player, index) => {
             const hasCardUnsavedChanges = (myVotes[player.id] ?? 0) !== (lastSavedVotesRef.current[player.id] ?? 0);
             return (
               <motion.div
@@ -1336,6 +1324,20 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
           })}
         </div>
       )}
+
+      {/* Infinite Scroll Target & Loader */}
+      {filteredPlayers.length > 0 && visibleCount < filteredPlayers.length && (
+        <div ref={observerTarget} style={{ display: 'flex', justifyContent: 'center', padding: '3rem 0', width: '100%' }}>
+          <motion.div 
+            animate={{ rotate: 360 }} 
+            transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+            style={{ filter: 'drop-shadow(0 0 12px rgba(255, 223, 0, 0.4))' }}
+          >
+            <Loader2 size={48} color="#ffdf00" />
+          </motion.div>
+        </div>
+      )}
+
       {/* Twitch Button - Centered at the bottom of the page */}
       <TwitchButton />
 

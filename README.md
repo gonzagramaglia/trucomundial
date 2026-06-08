@@ -10,18 +10,19 @@ The game includes the complete Truco experience, featuring **Truco**, **Retruco*
 **Envido Mechanics:** Unlike traditional Truco (which uses suits and a +20 base bonus), Envido points in Truco Mundial are calculated by summing the envido values of two cards that share the same **Country** or **Club**. The standard +20 base bonus is omitted, making the calculations direct and unique to the players' stats!
 
 ## 🎮 Features
-- **Real-Time Multiplayer**: Play online with friends using a 4-letter private room code.
+- **Custom Deck Building (`/mazo`)**: Players can open 22 free welcome packs to unlock their starting collection of cards. Select exactly 4 national teams to build your competitive deck.
+- **Real-Time Multiplayer**: Play online with friends using a 4-letter private room code. *Note: You must have unlocked your 22 free cards and built your deck to enter multiplayer mode!*
 - **Host/Guest Architecture**: Robust real-time synchronization with seamless reconnection if a player drops.
 - **Local Play**: Play locally against the CPU.
 - **Custom Matches**: Choose between short (15 points) or long (30 points) matches.
-- **Google Authentication**: Quick and easy login via Supabase for multiplayer access.
+- **Google Authentication**: Quick and easy login via Supabase for multiplayer access. Anonymous play is also supported.
 - **Bilingual Experience (i18n)**: Full support for both English and Spanish throughout the entire application.
-- **Twitch Integration**: Interactive chat overlay and features specifically designed for streamers, engaging audiences directly from the broadcast.
-- **World Cup Fixture Integration**: An interactive visual fixture of the 2026 World Cup, showing upcoming games, results, and tying game outcomes to card buffs and power levels.
-- **Interactive Card Voting (`/votar`)**: An interactive voting system for the community to rank the best cards. Authenticated users can distribute daily votes to bump up their favorite players' stars.
-- **Streamer & Rapper Tournaments**: An elegant dedicated screen showing custom 1vs1 qualifying tournaments hosted by community streamers and rappers.
-- **Interactive Roadmap**: A gorgeous vertical timeline detailing upcoming project milestones.
-- **Dynamic SPA Routing & SEO**: Zero-dependency URL mapping and client-side history navigation support for `/torneos`, `/votar`, `/ruta`, and `/fixture` paths with real-time dynamic SEO title and Open Graph metadata updates.
+- **Twitch Integration**: Interactive chat overlay and features specifically designed for streamers, allowing viewers to participate in deck selection and game interactions directly from the broadcast.
+- **World Cup Fixture Integration (`/fixture`)**: An interactive visual fixture of the 2026 World Cup, showing upcoming games, results, and tying game outcomes to card buffs and power levels.
+- **Interactive Card Voting (`/votar`)**: An interactive voting system for the community to rank the best cards. Users can distribute up to 78 daily stars to bump up their favorite players.
+- **Streamer & Rapper Tournaments (`/torneos`)**: An elegant dedicated screen showing custom 1vs1 qualifying tournaments hosted by community streamers and rappers.
+- **Interactive Roadmap (`/ruta`)**: A gorgeous vertical timeline detailing upcoming project milestones.
+- **Dynamic SPA Routing & SEO**: Zero-dependency URL mapping and client-side history navigation support for all paths with real-time dynamic SEO title and Open Graph metadata updates.
 
 ## 🛠️ Tech Stack
 - **Frontend**: React + Vite (TypeScript)

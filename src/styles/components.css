@@ -112,7 +112,7 @@
   z-index: 1;
 }
 
-.sticker:hover {
+.sticker:not(.disabled):hover {
   transform: scale(1.08) rotate(2deg);
   z-index: 1000;
 }

@@ -284,41 +284,46 @@ export const FixtureScreen: React.FC<FixtureScreenProps> = ({ user, onBack }) =>
           </>
         )}
 
+      </div>
+
+      <div style={{
+        position: 'sticky',
+        top: '1rem',
+        zIndex: 100,
+        backdropFilter: 'blur(16px)',
+        background: 'rgba(255, 223, 0, 0.1)',
+        border: '1px solid rgba(255, 223, 0, 0.3)',
+        borderRadius: '1rem',
+        padding: '1rem',
+        marginBottom: '2rem',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '1rem',
+        width: '100%',
+        boxSizing: 'border-box'
+      }}>
         <div style={{
-          background: 'rgba(255, 223, 0, 0.1)',
-          border: '1px solid rgba(255, 223, 0, 0.3)',
-          borderRadius: '1rem',
-          padding: '1rem',
-          marginTop: '2rem',
+          background: 'rgba(255, 223, 0, 0.2)',
+          borderRadius: '50%',
+          width: '40px',
+          height: '40px',
           display: 'flex',
           alignItems: 'center',
-          gap: '1rem',
-          width: '100%',
-          boxSizing: 'border-box'
+          justifyContent: 'center',
+          flexShrink: 0
         }}>
-          <div style={{
-            background: 'rgba(255, 223, 0, 0.2)',
-            borderRadius: '50%',
-            width: '40px',
-            height: '40px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0
-          }}>
-            <Star size={20} color="#ffdf00" />
-          </div>
-          <p 
-            style={{
-              margin: 0,
-              fontSize: '0.85rem',
-              color: 'rgba(255,255,255,0.9)',
-              lineHeight: 1.4,
-              textAlign: 'left'
-            }}
-            dangerouslySetInnerHTML={{ __html: t('fixture_info') }}
-          />
+          <Star size={20} color="#ffdf00" />
         </div>
+        <p 
+          style={{
+            margin: 0,
+            fontSize: '0.85rem',
+            color: 'rgba(255,255,255,0.9)',
+            lineHeight: 1.4,
+            textAlign: 'left'
+          }}
+          dangerouslySetInnerHTML={{ __html: t('fixture_info') }}
+        />
       </div>
 
       {/* Tabs */}

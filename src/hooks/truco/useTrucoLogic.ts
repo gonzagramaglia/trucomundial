@@ -38,8 +38,20 @@ export const useTrucoLogic = (state: any) => {
       cHand = remoteHands.cpu;
     } else {
       const countriesToUse = overrideCountries || activeCountriesRef.current;
-      const filteredCards = CARDS.filter(c => countriesToUse.includes(c.country));
-      const deck = [...filteredCards].sort(() => Math.random() - 0.5);
+      
+      // Determine if countriesToUse contains countries or card IDs
+      let rawDeck: Card[] = [];
+      const isCustomDeck = countriesToUse.some((val: string) => CARDS.some(c => c.id === val));
+
+      if (isCustomDeck) {
+        // It's a custom deck (array of card IDs). Map IDs to cards, allowing duplicates.
+        rawDeck = countriesToUse.map((id: string) => CARDS.find(c => c.id === id)).filter(Boolean) as Card[];
+      } else {
+        // It's a traditional team selection
+        rawDeck = CARDS.filter(c => countriesToUse.includes(c.country));
+      }
+
+      const deck = [...rawDeck].sort(() => Math.random() - 0.5);
       
       pHand = deck.slice(0, 3);
       cHand = deck.slice(3, 6);

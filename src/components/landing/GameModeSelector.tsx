@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from '../ui/Button';
-import { User, Globe, Star, Lock, Calendar } from 'lucide-react';
+import { User, Globe, Star, Lock, Calendar, Layers } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { GameMode } from '../../lib/truco/types';
 
@@ -8,9 +8,10 @@ interface GameModeSelectorProps {
   selectedMode: GameMode;
   onSelect: (mode: GameMode) => void;
   user: any;
+  hasUnlockedDeck?: boolean;
 }
 
-export const GameModeSelector: React.FC<GameModeSelectorProps> = ({ selectedMode, onSelect, user: _user }) => {
+export const GameModeSelector: React.FC<GameModeSelectorProps> = ({ selectedMode, onSelect, user: _user, hasUnlockedDeck = true }) => {
   const { t } = useTranslation();
   const showRoadmapAsLocked = false;
   const commonStyle = {
@@ -47,13 +48,14 @@ export const GameModeSelector: React.FC<GameModeSelectorProps> = ({ selectedMode
         onClick={() => onSelect("multiplayer")}
         className="btn-hover-dark"
         style={{
-          ...getButtonStyle("multiplayer", "#00f2ff"),
-          color: "#000",
+          ...getButtonStyle("multiplayer", !hasUnlockedDeck ? "rgba(0, 242, 255, 0.5)" : "#00f2ff"),
+          color: !hasUnlockedDeck ? "rgba(0,0,0,0.5)" : "#000",
           width: "100%",
           gap: "0.75rem",
+          cursor: !hasUnlockedDeck ? "pointer" : "pointer"
         }}
       >
-        <Globe size={22} />
+        {!hasUnlockedDeck ? <Lock size={22} /> : <Globe size={22} />}
         {t("play_online")}
       </Button>
 
@@ -84,6 +86,19 @@ export const GameModeSelector: React.FC<GameModeSelectorProps> = ({ selectedMode
         >
           <Star size={20} fill="currentColor" />
           {t("vote")}
+        </Button>
+        <Button
+          onClick={() => onSelect("deck" as any)}
+          className="btn-hover-dark"
+          style={{
+            ...getButtonStyle("deck" as any, "#f97316"),
+            color: "#000",
+            width: "100%",
+            gap: "0.5rem",
+          }}
+        >
+          <Layers size={20} />
+          Personalizá tu mazo
         </Button>
       </div>
 
