@@ -309,7 +309,7 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
             ARMÁ/PERSONALIZÁ TU MAZO
           </h2>
         </div>
-        <p style={{ fontSize: '0.95rem', opacity: 0.65, margin: '4px 0 0 0', fontWeight: 600 }}>Abrí sobres, desbloqueá nuevas cartas y seleccioná exactamente 22 para armar tu mazo competitivo online.</p>
+        <p style={{ fontSize: '0.95rem', opacity: 0.65, margin: '4px 0 0 0', fontWeight: 600 }}>Abrí sobres, desbloqueá nuevas cartas y seleccioná 22 para armar tu mazo online.</p>
         <p style={{ fontSize: '0.85rem', opacity: 0.8, margin: '8px 0 0 0', fontWeight: 700, color: '#f97316' }}>
           * En partidas online, tus 22 cartas seleccionadas se van a sumar y mezclar con las 22 cartas de tu rival para formar el mazo de 44 cartas de la partida.
         </p>
@@ -392,7 +392,7 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
               {user && unlockedCards.length > 0 ? "¡Seguí armando tu mazo!" : "¡Empezá a armar tu mazo!"}
             </h3>
             <p style={{ margin: 0, opacity: 0.8, fontSize: '0.9rem', lineHeight: 1.5, maxWidth: isMobile ? '400px' : 'none' }}>
-              {user ? "Como nuevo usuario, tenés 8 sobres de bienvenida gratuitos (de 3 cartas cada uno) para armar tu mazo." : "Iniciá sesión para abrir tus 8 sobres de bienvenida gratuitos (de 3 cartas cada uno) y armar tu mazo."}
+              {user ? "Como nuevo usuario, tenés 8 sobres de bienvenida gratuitos (de 3 cartas cada uno) para armar tu mazo." : "Iniciá sesión para abrir tus 8 sobres de bienvenida gratuitos (de 3 cartas cada uno) y empezar a armar tu mazo."}
             </p>
           </div>
           {user ? (
@@ -559,10 +559,10 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
                   <motion.div
                     animate={{ scale: [1, 1.15, 1], opacity: [0.4, 0.75, 0.4] }}
                     transition={{ duration: 2, repeat: Infinity }}
-                    style={{ 
-                      position: 'absolute', top: '50%', left: '50%', x: '-50%', y: '-50%', 
-                      width: '260px', height: '360px', 
-                      background: 'radial-gradient(circle, rgba(249,115,22,0.55) 0%, rgba(249,115,22,0) 70%)', 
+                    style={{
+                      position: 'absolute', top: '50%', left: '50%', x: '-50%', y: '-50%',
+                      width: '260px', height: '360px',
+                      background: 'radial-gradient(circle, rgba(249,115,22,0.55) 0%, rgba(249,115,22,0) 70%)',
                       zIndex: -1, filter: 'blur(25px)', pointerEvents: 'none'
                     }}
                   />

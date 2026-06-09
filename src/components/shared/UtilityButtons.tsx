@@ -36,7 +36,7 @@ export const UtilityButtons: React.FC<UtilityButtonsProps> = ({ isMobile }) => {
         >
           <Video size={16} />
         </a>
-        <VolumeControl size={36} expandDirection="down" style={{ boxShadow: '3px 3px 0px #000' }} />
+        <VolumeControl size={36} expandDirection="left" style={{ boxShadow: '3px 3px 0px #000' }} />
       </div>
     );
   }
