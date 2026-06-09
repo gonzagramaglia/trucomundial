@@ -44,20 +44,36 @@ export const GameModeSelector: React.FC<GameModeSelectorProps> = ({ selectedMode
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "1rem", marginBottom: "2rem", width: "100%", maxWidth: "550px" }}>
-      <Button
-        onClick={() => onSelect("multiplayer")}
-        className="btn-hover-dark"
-        style={{
-          ...getButtonStyle("multiplayer", !hasUnlockedDeck ? "rgba(0, 242, 255, 0.5)" : "#00f2ff"),
-          color: !hasUnlockedDeck ? "rgba(0,0,0,0.5)" : "#000",
-          width: "100%",
-          gap: "0.75rem",
-          cursor: !hasUnlockedDeck ? "pointer" : "pointer"
-        }}
-      >
-        {!hasUnlockedDeck ? <Lock size={22} /> : <Globe size={22} />}
-        {t("play_online")}
-      </Button>
+      {_user ? (
+        <Button
+          onClick={() => onSelect("multiplayer")}
+          className="btn-hover-dark"
+          style={{
+            ...getButtonStyle("multiplayer", !hasUnlockedDeck ? "rgba(0, 242, 255, 0.5)" : "#00f2ff"),
+            color: !hasUnlockedDeck ? "rgba(0,0,0,0.5)" : "#000",
+            width: "100%",
+            gap: "0.75rem",
+            cursor: !hasUnlockedDeck ? "pointer" : "pointer"
+          }}
+        >
+          {!hasUnlockedDeck ? <Lock size={22} /> : <Globe size={22} />}
+          {t("play_online")}
+        </Button>
+      ) : (
+        <Button
+          onClick={() => onSelect("login" as any)}
+          className="btn-hover-dark"
+          style={{
+            ...getButtonStyle("multiplayer", "#00f2ff"),
+            color: "#000",
+            width: "100%",
+            gap: "0.75rem",
+          }}
+        >
+          <img src="/google-icon.png" alt="Google" style={{ width: 24, height: 24 }} />
+          INICIÁ SESIÓN EN GOOGLE
+        </Button>
+      )}
 
       {/* Secondary buttons: VS CPU + Mejorar Cartas stacked */}
       <div style={{ display: "flex", flexDirection: "column", gap: "1rem", width: "100%" }}>

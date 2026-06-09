@@ -1288,6 +1288,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             user={user}
             hasUnlockedDeck={hasUnlockedDeck}
             onSelect={(mode) => {
+              if ((mode as string) === "login") {
+                handleAuth();
+                return;
+              }
               if ((mode as string) === "ranking") {
                 setShowRanking(true);
                 if (typeof window !== "undefined") {
