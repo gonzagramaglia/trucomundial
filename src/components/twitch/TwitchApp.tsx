@@ -450,20 +450,21 @@ export function TwitchApp() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => setOpponentMode("streamer")}
+                      disabled
                       style={{
                         flex: 1,
                         padding: "0.8rem",
                         borderRadius: "0.5rem",
-                        border: opponentMode === "streamer" ? "1px solid #9146FF" : "1px solid rgba(255,255,255,0.2)",
-                        background: opponentMode === "streamer" ? "rgba(145, 70, 255, 0.2)" : "rgba(0,0,0,0.5)",
+                        border: "1px solid rgba(255,255,255,0.2)",
+                        background: "rgba(0,0,0,0.5)",
                         color: "white",
-                        cursor: "pointer",
+                        opacity: 0.5,
+                        cursor: "not-allowed",
                         transition: "all 0.2s",
                         fontSize: "0.9rem"
                       }}
                     >
-                      Chat vs Streamer <span style={{ opacity: 0.6, fontSize: "0.75rem" }}>(beta)</span>
+                      Chat vs Streamer <span style={{ opacity: 0.6, fontSize: "0.75rem" }}>(próximamente)</span>
                     </button>
                   </div>
                 </div>

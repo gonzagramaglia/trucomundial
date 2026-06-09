@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import { Home, User, ArrowLeft, Trophy, ShieldAlert, BookOpen } from "lucide-react";
+import { Home, User, ArrowLeft, Trophy, ShieldAlert, BookOpen, Layers } from "lucide-react";
 import { supabase } from "../../lib/supabase";
 import { audioManager } from "../../lib/audio";
 import { UtilityButtons } from "../shared/UtilityButtons";
@@ -63,7 +63,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       try {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length >= 2) return parsed;
-      } catch (e) {}
+      } catch (e) { }
     }
     return ["Argentina", "Francia", "España", "Nueva Zelanda"];
   });
@@ -442,7 +442,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     if (!deck.length) {
       const cached = localStorage.getItem(`trucomundial-deck-${userId || 'anonymous'}`);
       if (cached) {
-        try { deck = JSON.parse(cached).selectedDeck || []; } catch(e){}
+        try { deck = JSON.parse(cached).selectedDeck || []; } catch (e) { }
       }
     }
     return deck;
@@ -1234,58 +1234,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         */}
       </div>
 
-      {/* Auth Button - Way Up Top & Centered (Only visible if not logged in) */}
-      {!user && (
-        <button
-          onClick={handleAuth}
-          className="btn-hover-dark"
-          style={{
-            position: "absolute",
-            top: typeof window !== "undefined" && window.innerWidth < 768 ? "3.5rem" : "1.5rem",
-            left: "50%",
-            transform: "translateX(-50%)",
-            background: "rgba(255, 255, 255, 0.1)",
-            border: "1px solid rgba(255, 255, 255, 0.2)",
-            color: "white",
-            height: "40px",
-            padding: "0 1.25rem",
-            borderRadius: "1rem",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "0.75rem",
-            fontSize: "0.85rem",
-            fontFamily: "var(--font-display)",
-            fontWeight: 700,
-            letterSpacing: "0.05em",
-            backdropFilter: "blur(12px)",
-            textTransform: "uppercase",
-            transition: "none",
-            zIndex: 1000,
-          }}
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24">
-            <path
-              d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-              fill="#4285F4"
-            />
-            <path
-              d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-              fill="#34A853"
-            />
-            <path
-              d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-              fill="#FBBC05"
-            />
-            <path
-              d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-              fill="#EA4335"
-            />
-          </svg>
-          {t("login")}
-        </button>
-      )}
 
       <MatchmakingOverlay
         isWaiting={isWaiting}
@@ -1395,6 +1343,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
               if (mode === "multiplayer") {
                 if (!hasUnlockedDeck) {
+                  if (!user) {
+                    handleAuth();
+                    return;
+                  }
                   setShowDeckLockModal(true);
                   return;
                 }
@@ -1577,7 +1529,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   const isChecked = selectedTeams.includes(team.id);
                   const isLimitReached = selectedTeams.length >= 4;
                   const isDisabled = !isChecked && isLimitReached;
-                  
+
                   return (
                     <button
                       key={team.id}
@@ -1623,19 +1575,19 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                         {pinnedTeams.map(renderTeamButton)}
                       </div>
                     )}
-                    
+
                     {/* Unpinned Teams (Scrollable) */}
-                    <div 
+                    <div
                       className="white-scrollbar"
-                      style={{ 
-                        display: 'flex', 
-                        flexWrap: 'wrap', 
+                      style={{
+                        display: 'flex',
+                        flexWrap: 'wrap',
                         overflowY: 'auto',
                         maxHeight: '22vh',
                         minHeight: '120px',
-                        gap: '0.6rem', 
-                        justifyContent: 'center', 
-                        marginBottom: '1.5rem', 
+                        gap: '0.6rem',
+                        justifyContent: 'center',
+                        marginBottom: '1.5rem',
                         padding: '0.5rem',
                         WebkitOverflowScrolling: 'touch',
                         borderTop: pinnedTeams.length > 0 ? '1px solid rgba(255,255,255,0.1)' : 'none',
@@ -1795,12 +1747,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                           justifyContent: "center",
                         }}
                         onMouseDown={(e) =>
-                          (e.currentTarget.style.transform =
-                            "translate(2px, 2px)")
+                        (e.currentTarget.style.transform =
+                          "translate(2px, 2px)")
                         }
                         onMouseUp={(e) =>
-                          (e.currentTarget.style.transform =
-                            "translate(0px, 0px)")
+                        (e.currentTarget.style.transform =
+                          "translate(0px, 0px)")
                         }
                       >
                         {t("join")}
@@ -1834,12 +1786,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                           justifyContent: "center",
                         }}
                         onMouseDown={(e) =>
-                          (e.currentTarget.style.transform =
-                            "translate(2px, 2px)")
+                        (e.currentTarget.style.transform =
+                          "translate(2px, 2px)")
                         }
                         onMouseUp={(e) =>
-                          (e.currentTarget.style.transform =
-                            "translate(0px, 0px)")
+                        (e.currentTarget.style.transform =
+                          "translate(0px, 0px)")
                         }
                       >
                         {t("create")}
@@ -2020,7 +1972,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             exit={{ opacity: 0 }}
             onClick={() => setShowDeckLockModal(false)}
             style={{
-              position: "fixed", inset: 0, background: "rgba(0,0,0,0.8)", backdropFilter: "blur(10px)",
+              position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)", backdropFilter: "blur(10px)",
               display: "flex", alignItems: "center", justifyContent: "center", zIndex: 3000, padding: "1.5rem"
             }}
           >
@@ -2030,33 +1982,58 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               exit={{ scale: 0.9, y: 20 }}
               onClick={(e) => e.stopPropagation()}
               style={{
-                background: "#1a1a2e",
-                padding: "2.5rem 2rem",
-                borderRadius: "2rem",
-                maxWidth: "400px",
+                background: "rgba(255, 255, 255, 0.05)",
+                border: "1px solid rgba(255, 255, 255, 0.1)",
+                padding: typeof window !== "undefined" && window.innerWidth < 768 ? "2rem 1.5rem" : "3rem",
+                borderRadius: "2.5rem",
+                maxWidth: "500px",
                 width: "100%",
                 textAlign: "center",
-                border: "2px solid rgba(0, 242, 255, 0.5)",
-                boxShadow: "0 20px 50px rgba(0,0,0,0.5)"
+                boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)"
               }}
             >
               <div style={{
-                width: '64px', height: '64px', borderRadius: '50%', background: 'rgba(0, 242, 255, 0.15)', border: '2.5px solid #00f2ff',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem auto', color: '#00f2ff', fontSize: '2rem'
+                width: typeof window !== "undefined" && window.innerWidth < 768 ? '60px' : '80px', 
+                height: typeof window !== "undefined" && window.innerWidth < 768 ? '60px' : '80px', 
+                borderRadius: '50%', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem auto', color: '#00f2ff', 
+                fontSize: typeof window !== "undefined" && window.innerWidth < 768 ? '1.8rem' : '2.5rem'
               }}>
                 🔒
               </div>
-              <h3 style={{ margin: "0 0 1rem 0", color: "#00f2ff", fontSize: "1.5rem", fontWeight: 900 }}>Mazo Incompleto</h3>
-              <p style={{ margin: "0 0 2rem 0", color: "#fff", opacity: 0.8, fontSize: "0.95rem", lineHeight: 1.5 }}>
-                Para jugar online primero tenés que abrir tus <b>22 sobres gratuitos de bienvenida</b> en la sección "Personalizá tu mazo".
+              <h2
+                className="text-display"
+                style={{ margin: "0 0 1rem 0", color: "#fff", fontSize: typeof window !== "undefined" && window.innerWidth < 768 ? "1.5rem" : "2.5rem", lineHeight: 1 }}
+              >
+                MAZO <span style={{ color: "#f97316" }}>INCOMPLETO</span>
+              </h2>
+              <p style={{ margin: "0 0 1.5rem 0", color: "#fff", opacity: 0.8, fontSize: typeof window !== "undefined" && window.innerWidth < 768 ? "0.85rem" : "1.1rem", lineHeight: 1.5 }}>
+                Para jugar online primero <b style={{color: "#fff"}}>tenés que abrir tus <br/>22 sobres gratuitos de bienvenida</b><br/>en la sección "Armá/Personalizá tu mazo".
               </p>
               <div style={{ display: "flex", justifyContent: "center" }}>
                 <button
                   onClick={() => setShowDeckLockModal(false)}
                   className="btn-hover-dark"
-                  style={{ width: "100%", padding: "0.75rem", background: "rgba(255,255,255,0.1)", border: "none", color: "#fff", borderRadius: "1rem", cursor: "pointer", fontWeight: 800 }}
+                  style={{ 
+                    width: "100%", 
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "0.5rem",
+                    padding: typeof window !== "undefined" && window.innerWidth < 768 ? "0.8rem" : "1rem", 
+                    background: "#f97316", 
+                    border: "none", 
+                    color: "#000", 
+                    borderRadius: "1rem", 
+                    cursor: "pointer", 
+                    fontWeight: 900,
+                    fontSize: typeof window !== "undefined" && window.innerWidth < 768 ? "0.95rem" : "1.1rem",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.05em"
+                  }}
                 >
-                  Cerrar
+                  <Layers size={20} />
+                  Entendido
                 </button>
               </div>
             </motion.div>

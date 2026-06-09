@@ -61,10 +61,20 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, handleAuth, 
       
       // Sync with profiles table
       if (user?.id) {
-        await supabase
+        const { data } = await supabase
           .from("profiles")
           .update({ nationality: newNat })
-          .eq("id", user.id);
+          .eq("id", user.id)
+          .select();
+
+        if (!data || data.length === 0) {
+          await supabase.from("profiles").upsert({ 
+            id: user.id, 
+            nationality: newNat,
+            username: user?.user_metadata?.custom_username || user?.user_metadata?.full_name || user?.user_metadata?.name || 'Usuario',
+            email: user?.email
+          }, { onConflict: 'id' });
+        }
       }
     } catch (e) {
       console.error('Error updating nationality', e);

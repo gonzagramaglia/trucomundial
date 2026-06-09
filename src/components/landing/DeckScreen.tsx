@@ -18,23 +18,23 @@ interface DeckScreenProps {
 
 const TOP_CARDS = [
   'messi', 'dibu', 'mbappe', 'vinicius_jr', 'lautaro', 'rodri', 'yamal', 'pedri', 'macallister', 'alisson',
-  'estevao', 'maignan', 'barcola', 'ekitike', 'doue', 'james_rodriguez', 'luis_diaz', 'cristiano_ronaldo', 
-  'rafael_leao', 'moises_caicedo', 'kendry_paez', 'julio_enciso', 'ramon_sosa', 'christian_pulisic', 
+  'estevao', 'maignan', 'barcola', 'ekitike', 'doue', 'james_rodriguez', 'luis_diaz', 'cristiano_ronaldo',
+  'rafael_leao', 'moises_caicedo', 'kendry_paez', 'julio_enciso', 'ramon_sosa', 'christian_pulisic',
   'alphonso_davies', 'xavi_simons', 'frenkie_de_jong', 'son_heung_min'
 ];
 
 export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack }) => {
   const { t } = useTranslation();
   const [search, setSearch] = useState('');
-  
+
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
-  
+
   const [unlockedCards, setUnlockedCards] = useState<string[]>([]);
   const [selectedDeck, setSelectedDeck] = useState<string[]>([]);
   const lastSavedDeckRef = useRef<string[]>([]);
-  
+
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
   const [showUnsavedModal, setShowUnsavedModal] = useState(false);
   const [openingPack, setOpeningPack] = useState(false);
@@ -174,7 +174,7 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
 
   const buyMysteryCard = async () => {
     if (openingPack) return;
-    
+
     const lockedCards = CARDS.map(c => c.id).filter(id => !unlockedCards.includes(id) && !TOP_CARDS.includes(id));
     if (lockedCards.length === 0) {
       alert("¡Ya tenés todas las cartas desbloqueadas!");
@@ -182,7 +182,7 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
     }
 
     setOpeningPack(true);
-    
+
     // Pick random
     const randomCardId = lockedCards[Math.floor(Math.random() * lockedCards.length)];
     const newUnlocked = [...unlockedCards, randomCardId];
@@ -190,9 +190,9 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
     if (newSelected.length < 22 && !newSelected.includes(randomCardId)) {
       newSelected.push(randomCardId);
     }
-    
+
     // Simulate animation delay
-      setTimeout(async () => {
+    setTimeout(async () => {
       if (isTopCard(randomCardId)) {
         audioManager.playSystemSound("rare-rewarding-card");
       } else {
@@ -203,7 +203,7 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
       setNewCardRevealed(randomCardId);
       setShowRevealModal(true);
       setOpeningPack(false);
-      
+
       // Save to db immediately
       if (user) {
         const { error } = await supabase.from('user_decks').upsert({
@@ -252,12 +252,12 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
     const bSelected = selectedDeck.includes(b.id);
     if (aSelected && !bSelected) return -1;
     if (!aSelected && bSelected) return 1;
-    
+
     const aUnlocked = unlockedCards.includes(a.id);
     const bUnlocked = unlockedCards.includes(b.id);
     if (aUnlocked && !bUnlocked) return -1;
     if (!aUnlocked && bUnlocked) return 1;
-    
+
     return b.env - a.env;
   });
 
@@ -295,7 +295,7 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <Layers size={36} style={{ color: '#f97316', filter: 'drop-shadow(0 0 10px rgba(249, 115, 22, 0.3))' }} />
           <h2 style={{ fontSize: isMobile ? '1.4rem' : '2.2rem', margin: 0, letterSpacing: '0.05em', color: '#f97316', textShadow: '0 0 15px rgba(249, 115, 22, 0.2)' }}>
-            PERSONALIZÁ TU MAZO
+            ARMÁ/PERSONALIZÁ TU MAZO
           </h2>
         </div>
         <p style={{ fontSize: '0.95rem', opacity: 0.65, margin: '4px 0 0 0', fontWeight: 600 }}>Abrí sobres, desbloqueá nuevas cartas y seleccioná exactamente 22 para armar tu mazo competitivo online.</p>
@@ -313,53 +313,53 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
           borderRadius: '2rem', padding: '1.25rem 2rem', marginBottom: '2rem', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1.5rem', backdropFilter: 'blur(16px)'
         }}>
           <div style={{ flex: '1 1 300px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.9rem', fontWeight: 800 }}>
-            <span style={{ color: selectedDeck.length === 22 ? '#10b981' : '#f97316', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Layers size={18} />
-              Cartas Seleccionadas
-            </span>
-            <span style={{ color: selectedDeck.length === 22 ? '#10b981' : '#fff' }}>
-              {selectedDeck.length} / 22
-            </span>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.9rem', fontWeight: 800 }}>
+              <span style={{ color: selectedDeck.length === 22 ? '#10b981' : '#f97316', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Layers size={18} />
+                Cartas Seleccionadas
+              </span>
+              <span style={{ color: selectedDeck.length === 22 ? '#10b981' : '#fff' }}>
+                {selectedDeck.length} / 22
+              </span>
+            </div>
+            <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px', overflow: 'hidden' }}>
+              <motion.div
+                animate={{ width: `${(selectedDeck.length / 22) * 100}%` }}
+                style={{
+                  height: '100%',
+                  background: selectedDeck.length === 22 ? 'linear-gradient(to right, #10b981, #059669)' : 'linear-gradient(to right, #f97316, #ea580c)'
+                }}
+              />
+            </div>
           </div>
-          <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px', overflow: 'hidden' }}>
-            <motion.div
-              animate={{ width: `${(selectedDeck.length / 22) * 100}%` }}
-              style={{
-                height: '100%',
-                background: selectedDeck.length === 22 ? 'linear-gradient(to right, #10b981, #059669)' : 'linear-gradient(to right, #f97316, #ea580c)'
-              }}
-            />
-          </div>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-          {unlockedCards.length >= 22 && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+            {unlockedCards.length >= 22 && (
+              <button
+                disabled={true}
+                className="btn-hover-dark"
+                style={{
+                  background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.4), rgba(217, 119, 6, 0.4))', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.5)', height: '48px', borderRadius: '1.25rem', padding: '0 1.5rem', fontSize: '0.9rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'not-allowed'
+                }}
+                title="Próximamente"
+              >
+                <Lock size={18} />
+                Comprar Carta Misteriosa
+              </button>
+            )}
+
             <button
-              disabled={true}
+              onClick={handleSaveDeck}
+              disabled={saving || saveSuccess || selectedDeck.length !== 22}
               className="btn-hover-dark"
               style={{
-                background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.4), rgba(217, 119, 6, 0.4))', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.5)', height: '48px', borderRadius: '1.25rem', padding: '0 1.5rem', fontSize: '0.9rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'not-allowed'
+                background: saveSuccess ? '#10b981' : (hasUnsavedChanges() ? '#ffb800' : '#f97316'),
+                border: 'none', color: '#fff', height: '48px', borderRadius: '1.25rem', padding: '0 2rem', fontSize: '1rem', fontWeight: 950, display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: (saving || saveSuccess || selectedDeck.length !== 22) ? 'default' : 'pointer', opacity: (saving || selectedDeck.length !== 22) ? 0.5 : 1
               }}
-              title="Próximamente"
             >
-              <Lock size={18} />
-              Comprar Carta Misteriosa
+              {saveSuccess ? <Check size={18} /> : <Save size={18} />}
+              {saveSuccess ? "Guardado" : saving ? "Guardando..." : "Guardar Mazo"}
             </button>
-          )}
-          
-          <button
-            onClick={handleSaveDeck}
-            disabled={saving || saveSuccess || selectedDeck.length !== 22}
-            className="btn-hover-dark"
-            style={{
-              background: saveSuccess ? '#10b981' : (hasUnsavedChanges() ? '#ffb800' : '#f97316'),
-              border: 'none', color: '#fff', height: '48px', borderRadius: '1.25rem', padding: '0 2rem', fontSize: '1rem', fontWeight: 950, display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: (saving || saveSuccess || selectedDeck.length !== 22) ? 'default' : 'pointer', opacity: (saving || selectedDeck.length !== 22) ? 0.5 : 1
-            }}
-          >
-            {saveSuccess ? <Check size={18} /> : <Save size={18} />}
-            {saveSuccess ? "Guardado" : saving ? "Guardando..." : "Guardar Mazo"}
-          </button>
-        </div>
+          </div>
         </div>
       )}
 
@@ -534,12 +534,12 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
             style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative' }}
           >
             {/* Glowing background */}
-            <motion.div 
+            <motion.div
               animate={{ scale: [1, 1.1, 1], opacity: [0.5, 0.8, 0.5] }}
               transition={{ duration: 2, repeat: Infinity }}
-              style={{ position: 'absolute', top: '40%', left: '50%', x: '-50%', y: '-50%', width: '300px', height: '400px', background: 'radial-gradient(circle, rgba(249,115,22,0.6) 0%, rgba(249,115,22,0) 70%)', zIndex: -1, filter: 'blur(30px)' }} 
+              style={{ position: 'absolute', top: '40%', left: '50%', x: '-50%', y: '-50%', width: '300px', height: '400px', background: 'radial-gradient(circle, rgba(249,115,22,0.6) 0%, rgba(249,115,22,0) 70%)', zIndex: -1, filter: 'blur(30px)' }}
             />
-            
+
             <div style={{ transform: 'scale(1.3)', marginBottom: '2rem' }}>
               <Sticker card={CARDS.find(c => c.id === newCardRevealed)!} disabled={false} showBack={false} />
             </div>
@@ -553,8 +553,8 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
               <h2 style={{ margin: 0, color: '#f97316', fontWeight: 950, fontSize: '2rem', textShadow: '0 4px 20px rgba(249,115,22,0.6)', letterSpacing: '1px' }}>
                 ¡CARTA DESBLOQUEADA!
               </h2>
-              
-              <button 
+
+              <button
                 onClick={() => setShowRevealModal(false)}
                 className="btn-hover-dark"
                 style={{

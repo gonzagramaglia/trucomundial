@@ -18,7 +18,7 @@ BEGIN
     SELECT 
         au.id,
         au.email::VARCHAR,
-        p.username::VARCHAR,
+        COALESCE(p.username, au.raw_user_meta_data->>'full_name', au.raw_user_meta_data->>'name', 'Usuario')::VARCHAR AS username,
         au.created_at,
         au.last_sign_in_at
     FROM auth.users au

@@ -60,6 +60,7 @@ interface PlayerStats {
   losses: number;
   lastPlayed: string;
   votes: Record<string, number>;
+  createdAt?: string;
 }
 
 interface CreatorApplication {
@@ -103,6 +104,7 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
   const [isMobile, setIsMobile] = useState(
     typeof window !== "undefined" ? window.innerWidth < 768 : false,
   );
+  const [rpcError, setRpcError] = useState(false);
 
   const isAdmin = user && user.email && ADMIN_EMAILS.includes(user.email);
 
@@ -129,6 +131,7 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
 
       if (profilesError) {
         console.warn("RPC get_admin_users_data failed (did you run the SQL script?), falling back to profiles table:", profilesError);
+        setRpcError(true);
         const fallback = await supabase.from("profiles").select("*");
         profilesData = fallback.data;
         profilesError = fallback.error;
@@ -371,7 +374,8 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
         wins: 0,
         losses: 0,
         lastPlayed: profile.last_sign_in_at || profile.created_at || new Date().toISOString(),
-        votes: {}
+        votes: {},
+        createdAt: profile.created_at || new Date().toISOString()
       });
     });
 
@@ -385,7 +389,8 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
           wins: 0,
           losses: 0,
           lastPlayed: lastActiveDate || new Date().toISOString(),
-          votes: {}
+          votes: {},
+          createdAt: new Date().toISOString()
         });
       }
       return statsMap.get(pId)!;
@@ -681,6 +686,19 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
         boxSizing: "border-box",
       }}
     >
+      {rpcError && (
+        <div style={{
+          background: "rgba(239, 68, 68, 0.2)",
+          border: "1px solid #ef4444",
+          color: "#fff",
+          padding: "1rem",
+          borderRadius: "0.5rem",
+          marginBottom: "1rem",
+          textAlign: "center"
+        }}>
+          ⚠️ <b>Falta configuración:</b> Ejecuta el script SQL <code>scratch/create_admin_users_rpc.sql</code> en el editor SQL de Supabase para poder cargar los correos de los usuarios nuevos correctamente.
+        </div>
+      )}
       {/* HEADER SECTION (Centered column layout on desktop, /ruta style on mobile) */}
       {!isMobile && (
         <>

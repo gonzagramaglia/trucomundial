@@ -120,6 +120,17 @@ export const PlayersTab: React.FC<PlayersTabProps> = ({
                     textTransform: "uppercase",
                   }}
                 >
+                  Creado el
+                </th>
+                <th
+                  style={{
+                    padding: "1.25rem 1.5rem",
+                    fontWeight: 800,
+                    color: "rgba(255, 255, 255, 0.7)",
+                    fontSize: "0.8rem",
+                    textTransform: "uppercase",
+                  }}
+                >
                   Última Vez
                 </th>
                 <th
@@ -187,6 +198,15 @@ export const PlayersTab: React.FC<PlayersTabProps> = ({
                       }}
                     >
                       {stats.losses}
+                    </td>
+                    <td
+                      style={{
+                        padding: "1rem 1.5rem",
+                        fontSize: "0.85rem",
+                        opacity: 0.6,
+                      }}
+                    >
+                      {stats.createdAt ? formatDate(stats.createdAt) : "N/A"}
                     </td>
                     <td
                       style={{

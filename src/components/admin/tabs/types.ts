@@ -22,6 +22,7 @@ export interface PlayerStats {
   losses: number;
   lastPlayed: string;
   votes?: Record<string, number>;
+  createdAt?: string;
 }
 
 export interface UserStarsPayload {

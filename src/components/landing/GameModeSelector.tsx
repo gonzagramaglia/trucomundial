@@ -98,7 +98,7 @@ export const GameModeSelector: React.FC<GameModeSelectorProps> = ({ selectedMode
           }}
         >
           <Layers size={20} />
-          Personalizá tu mazo
+          Armá/Personalizá tu mazo
         </Button>
       </div>
 
