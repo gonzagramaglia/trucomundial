@@ -21,6 +21,8 @@ export const FLAG_MAP: Record<string, string> = {
   'Croacia': '🇭🇷',
   'Suiza': '🇨🇭',
   'Noruega': '🇳🇴',
+  'Sudáfrica': '🇿🇦',
+  'República Checa': '🇨🇿',
   'Otra': '🌍',
   'Ninguna': '🏳️'
 };

@@ -192,6 +192,8 @@ const resources = {
       "country_paises bajos": "Netherlands",
       "country_austria": "Austria",
       "country_corea del sur": "South Korea",
+      "country_republica checa": "Czechia",
+      "country_sudafrica": "South Africa",
 
       // GameModeSelector
       "roadmap": "ROADMAP",
@@ -643,6 +645,8 @@ const resources = {
       "country_paises bajos": "Países Bajos",
       "country_austria": "Austria",
       "country_corea del sur": "Corea del Sur",
+      "country_republica checa": "República Checa",
+      "country_sudafrica": "Sudáfrica",
 
       // GameModeSelector
       "roadmap": "HOJA DE RUTA",

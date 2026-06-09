@@ -61,7 +61,7 @@ export const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
         reset({
           ...tournament,
           prize: normalizeTournamentPrizes(tournament.prize),
-          allowed_teams: tournament.allowed_teams || ["Argentina", "Francia", "España", "Nueva Zelanda", "Brasil", "Argelia", "México", "Colombia", "Japón", "Uruguay", "Portugal", "Ecuador", "Paraguay", "Panamá", "USA", "Canadá", "Países Bajos", "Austria", "Corea del Sur"],
+          allowed_teams: tournament.allowed_teams || ["Argelia", "Argentina", "Austria", "Brasil", "Canadá", "Colombia", "Croacia", "República Checa", "Ecuador", "España", "Francia", "Japón", "Corea del Sur", "México", "Países Bajos", "Noruega", "Nueva Zelanda", "Panamá", "Paraguay", "Portugal", "Sudáfrica", "Suiza", "Uruguay", "USA"],
         });
       } else {
         const now = new Date();
@@ -630,25 +630,30 @@ export const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
                 }}
               >
                 {[
-                  { id: 'Argentina', flag: '🇦🇷', code: 'ARG' },
-                  { id: 'Francia', flag: '🇫🇷', code: 'FRA' },
-                  { id: 'España', flag: '🇪🇸', code: 'ESP' },
-                  { id: 'Brasil', flag: '🇧🇷', code: 'BRA' },
                   { id: 'Argelia', flag: '🇩🇿', code: 'ALG' },
-                  { id: 'México', flag: '🇲🇽', code: 'MEX' },
-                  { id: 'Colombia', flag: '🇨🇴', code: 'COL' },
-                  { id: 'Japón', flag: '🇯🇵', code: 'JPN' },
-                  { id: 'Uruguay', flag: '🇺🇾', code: 'URU' },
-                  { id: 'Portugal', flag: '🇵🇹', code: 'POR' },
-                  { id: 'Ecuador', flag: '🇪🇨', code: 'ECU' },
-                  { id: 'Paraguay', flag: '🇵🇾', code: 'PAR' },
-                  { id: 'Panamá', flag: '🇵🇦', code: 'PAN' },
-                  { id: 'USA', flag: '🇺🇸', code: 'USA' },
-                  { id: 'Canadá', flag: '🇨🇦', code: 'CAN' },
-                  { id: 'Países Bajos', flag: '🇳🇱', code: 'NED' },
+                  { id: 'Argentina', flag: '🇦🇷', code: 'ARG' },
                   { id: 'Austria', flag: '🇦🇹', code: 'AUT' },
+                  { id: 'Brasil', flag: '🇧🇷', code: 'BRA' },
+                  { id: 'Canadá', flag: '🇨🇦', code: 'CAN' },
+                  { id: 'Colombia', flag: '🇨🇴', code: 'COL' },
+                  { id: 'Croacia', flag: '🇭🇷', code: 'CRO' },
+                  { id: 'República Checa', flag: '🇨🇿', code: 'CZE' },
+                  { id: 'Ecuador', flag: '🇪🇨', code: 'ECU' },
+                  { id: 'España', flag: '🇪🇸', code: 'ESP' },
+                  { id: 'Francia', flag: '🇫🇷', code: 'FRA' },
+                  { id: 'Japón', flag: '🇯🇵', code: 'JPN' },
                   { id: 'Corea del Sur', flag: '🇰🇷', code: 'KOR' },
-                  { id: 'Nueva Zelanda', flag: '🇳🇿', code: 'NZL' }
+                  { id: 'México', flag: '🇲🇽', code: 'MEX' },
+                  { id: 'Países Bajos', flag: '🇳🇱', code: 'NED' },
+                  { id: 'Noruega', flag: '🇳🇴', code: 'NOR' },
+                  { id: 'Nueva Zelanda', flag: '🇳🇿', code: 'NZL' },
+                  { id: 'Panamá', flag: '🇵🇦', code: 'PAN' },
+                  { id: 'Paraguay', flag: '🇵🇾', code: 'PAR' },
+                  { id: 'Portugal', flag: '🇵🇹', code: 'POR' },
+                  { id: 'Sudáfrica', flag: '🇿🇦', code: 'RSA' },
+                  { id: 'Suiza', flag: '🇨🇭', code: 'SUI' },
+                  { id: 'Uruguay', flag: '🇺🇾', code: 'URU' },
+                  { id: 'USA', flag: '🇺🇸', code: 'USA' }
                 ].map((team) => {
                   const allowedTeams = formData.allowed_teams || [];
                   const isChecked = allowedTeams.includes(team.id);

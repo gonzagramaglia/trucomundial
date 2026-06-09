@@ -63,10 +63,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length >= 2) return parsed;
+        if (Array.isArray(parsed)) return parsed;
       } catch (e) { }
     }
-    return ["Argentina", "Francia", "España", "Nueva Zelanda"];
+    return [];
   });
   const [showRules, setShowRules] = useState(false);
 
@@ -1518,21 +1518,23 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   { id: 'Canadá', flag: '🇨🇦', code: 'CAN' },
                   { id: 'Colombia', flag: '🇨🇴', code: 'COL' },
                   { id: 'Croacia', flag: '🇭🇷', code: 'CRO' },
+                  { id: 'República Checa', flag: '🇨🇿', code: 'CZE' },
                   { id: 'Ecuador', flag: '🇪🇨', code: 'ECU' },
                   { id: 'España', flag: '🇪🇸', code: 'ESP' },
                   { id: 'Francia', flag: '🇫🇷', code: 'FRA' },
                   { id: 'Japón', flag: '🇯🇵', code: 'JPN' },
                   { id: 'Corea del Sur', flag: '🇰🇷', code: 'KOR' },
                   { id: 'México', flag: '🇲🇽', code: 'MEX' },
+                  { id: 'Países Bajos', flag: '🇳🇱', code: 'NED' },
                   { id: 'Noruega', flag: '🇳🇴', code: 'NOR' },
                   { id: 'Nueva Zelanda', flag: '🇳🇿', code: 'NZL' },
                   { id: 'Panamá', flag: '🇵🇦', code: 'PAN' },
                   { id: 'Paraguay', flag: '🇵🇾', code: 'PAR' },
-                  { id: 'Países Bajos', flag: '🇳🇱', code: 'NED' },
                   { id: 'Portugal', flag: '🇵🇹', code: 'POR' },
+                  { id: 'Sudáfrica', flag: '🇿🇦', code: 'RSA' },
                   { id: 'Suiza', flag: '🇨🇭', code: 'SUI' },
-                  { id: 'USA', flag: '🇺🇸', code: 'USA' },
-                  { id: 'Uruguay', flag: '🇺🇾', code: 'URU' }
+                  { id: 'Uruguay', flag: '🇺🇾', code: 'URU' },
+                  { id: 'USA', flag: '🇺🇸', code: 'USA' }
                 ];
                 const pinnedTeams = ALL_TEAMS_LIST.filter(t => selectedTeams.includes(t.id));
                 const unpinnedTeams = ALL_TEAMS_LIST.filter(t => !selectedTeams.includes(t.id));

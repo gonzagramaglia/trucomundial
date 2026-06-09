@@ -22,10 +22,10 @@ export function TwitchApp() {
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length >= 2) return parsed;
+        if (Array.isArray(parsed)) return parsed;
       } catch (e) { }
     }
-    return ["Argentina", "Francia", "España", "Nueva Zelanda"];
+    return [];
   });
   const [showRules, setShowRules] = useState(false);
 
@@ -480,30 +480,30 @@ export function TwitchApp() {
                       { id: 'Brasil', flag: '🇧🇷', code: 'BRA' },
                       { id: 'Canadá', flag: '🇨🇦', code: 'CAN' },
                       { id: 'Colombia', flag: '🇨🇴', code: 'COL' },
-                      { id: 'Corea del Sur', flag: '🇰🇷', code: 'KOR' },
                       { id: 'Croacia', flag: '🇭🇷', code: 'CRO' },
+                      { id: 'República Checa', flag: '🇨🇿', code: 'CZE' },
                       { id: 'Ecuador', flag: '🇪🇨', code: 'ECU' },
                       { id: 'España', flag: '🇪🇸', code: 'ESP' },
                       { id: 'Francia', flag: '🇫🇷', code: 'FRA' },
                       { id: 'Japón', flag: '🇯🇵', code: 'JPN' },
+                      { id: 'Corea del Sur', flag: '🇰🇷', code: 'KOR' },
                       { id: 'México', flag: '🇲🇽', code: 'MEX' },
+                      { id: 'Países Bajos', flag: '🇳🇱', code: 'NED' },
                       { id: 'Noruega', flag: '🇳🇴', code: 'NOR' },
                       { id: 'Nueva Zelanda', flag: '🇳🇿', code: 'NZL' },
                       { id: 'Panamá', flag: '🇵🇦', code: 'PAN' },
                       { id: 'Paraguay', flag: '🇵🇾', code: 'PAR' },
-                      { id: 'Países Bajos', flag: '🇳🇱', code: 'NED' },
                       { id: 'Portugal', flag: '🇵🇹', code: 'POR' },
+                      { id: 'Sudáfrica', flag: '🇿🇦', code: 'RSA' },
                       { id: 'Suiza', flag: '🇨🇭', code: 'SUI' },
-                      { id: 'USA', flag: '🇺🇸', code: 'USA' },
-                      { id: 'Uruguay', flag: '🇺🇾', code: 'URU' }
+                      { id: 'Uruguay', flag: '🇺🇾', code: 'URU' },
+                      { id: 'USA', flag: '🇺🇸', code: 'USA' }
                     ].sort((a, b) => {
                       const aSelected = selectedTeams.includes(a.id);
                       const bSelected = selectedTeams.includes(b.id);
                       if (aSelected && !bSelected) return -1;
                       if (!aSelected && bSelected) return 1;
-                      const nameA = a.id === 'Corea del Sur' ? 'Korea' : a.id;
-                      const nameB = b.id === 'Corea del Sur' ? 'Korea' : b.id;
-                      return nameA.localeCompare(nameB);
+                      return a.code.localeCompare(b.code);
                     }).map(team => {
                       const isSelected = selectedTeams.includes(team.id);
                       return (
