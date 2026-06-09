@@ -15,6 +15,7 @@ import { DeckScreen } from "./DeckScreen";
 import TournamentEventPage from "./tournaments/TournamentEventPage";
 import { RoadmapScreen } from "./RoadmapScreen";
 import { FixtureScreen } from "./FixtureScreen";
+import { NationalityModal } from "./NationalityModal";
 import { ProfileScreen } from "./ProfileScreen";
 import { AdminScreen } from "../admin/AdminScreen";
 import { CreatorScreen } from "../admin/CreatorScreen";
@@ -251,6 +252,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       }
     };
     checkCreatorStatus();
+  }, [user, isSuperAdmin]);
+
+  const [showNationalityModal, setShowNationalityModal] = useState(false);
+  useEffect(() => {
+    if (user && !user.user_metadata?.nationality) {
+      setShowNationalityModal(true);
+    }
   }, [user, isSuperAdmin]);
 
   // Dynamic SEO, Open Graph & Twitter metadata updates
@@ -1067,7 +1075,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       }}
     >
       {/* Profile / Music - Top Left */}
-      <div style={{ position: "absolute", top: "1.5rem", left: "1.5rem", display: "flex", gap: "0.5rem", zIndex: 1000 }}>
+      <div style={{ position: "fixed", top: "1.5rem", left: "1.5rem", display: "flex", gap: "0.5rem", zIndex: 1000 }}>
         {user ? (
           <button
             onClick={() => {
@@ -1183,13 +1191,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       {/* Utility buttons column (Top Right) */}
       <div
         style={{
-          position: "absolute",
+          position: "fixed",
           top: "1.5rem",
           right: "1.5rem",
           display: "flex",
           flexDirection: "column",
           gap: "0.75rem",
-          zIndex: 1000,
+          zIndex: 4000,
         }}
       >
         <UtilityButtons />
@@ -2012,7 +2020,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 MAZO <span style={{ color: "#f97316" }}>INCOMPLETO</span>
               </h2>
               <p style={{ margin: "0 0 1.5rem 0", color: "#fff", opacity: 0.8, fontSize: typeof window !== "undefined" && window.innerWidth < 768 ? "0.85rem" : "1.1rem", lineHeight: 1.5 }}>
-                Para jugar online primero <b style={{color: "#fff"}}>tenés que abrir tus <br/>22 sobres gratuitos de bienvenida</b><br/>en la sección "Armá/Personalizá tu mazo".
+                Para jugar online primero <b style={{color: "#fff"}}>tenés que abrir <br className="desktop-only" />tus sobres gratuitos de bienvenida</b><br className="desktop-only" /> en la sección "Armá/Personalizá tu mazo".
               </p>
               <div style={{ display: "flex", justifyContent: "center" }}>
                 <button
@@ -2046,6 +2054,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       </AnimatePresence>
 
       <RulesModal isOpen={showRules} onClose={() => setShowRules(false)} />
+
+      {showNationalityModal && (
+        <NationalityModal user={user} onSaved={() => setShowNationalityModal(false)} />
+      )}
     </div>
   );
 };

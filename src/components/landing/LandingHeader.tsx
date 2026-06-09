@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Sticker } from '../shared/Sticker';
 import { CARDS } from '../../data/cards';
 import { useTranslation } from 'react-i18next';
+import { useTopCard } from '../../hooks/useTopCard';
 
 interface LandingHeaderProps {
   user: any;
@@ -11,12 +12,16 @@ interface LandingHeaderProps {
 export const LandingHeader: React.FC<LandingHeaderProps> = ({ user }) => {
   const { t } = useTranslation();
   const [isMobile, setIsMobile] = React.useState(window.innerWidth < 768);
+  const userNationality = user?.user_metadata?.nationality;
+  const topCard = useTopCard(userNationality);
 
   React.useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  const displayCard = topCard || CARDS.find(c => c.id === 'messi') || CARDS[0];
 
   return (
     <div style={{ 
@@ -29,13 +34,13 @@ export const LandingHeader: React.FC<LandingHeaderProps> = ({ user }) => {
       width: '100%',
       transform: 'translateX(-12px)'
     }}>
-      {/* Messi Card (Left) */}
+      {/* Hero Card (Left) */}
       <motion.div
         animate={{ y: [0, -10, 0], rotate: [-5, -8, -5] }}
         transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
         style={{ flexShrink: 0, transform: 'scale(0.8)', originX: 0.5, originY: 0.5 }}
       >
-        <Sticker card={CARDS.find(c => c.id === 'messi') || CARDS[0]} disabled />
+        <Sticker card={displayCard} disabled />
       </motion.div>
 
       {/* Title + Pill (Right Column) */}
@@ -75,8 +80,8 @@ export const LandingHeader: React.FC<LandingHeaderProps> = ({ user }) => {
             fontWeight: 700
           }}>
             <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#00f2ff' }} />
-            <span className="desktop-only">{t("session_desktop")}</span>
-            <strong>{user.user_metadata?.custom_username || user.email?.split('@')[0]}</strong>
+            <span className="desktop-only">¡Hola</span>
+            <strong>{user.user_metadata?.custom_username || user.email?.split('@')[0]}!</strong>
           </div>
         )}
       </div>

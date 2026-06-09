@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, Calendar, Scroll, ShieldAlert, LogOut, Globe, ArrowLeft, Edit2, Check, X, Clock } from 'lucide-react';
+import { User, Calendar, Scroll, ShieldAlert, LogOut, Globe, ArrowLeft, Edit2, Check, X, Clock, Search } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { audioManager } from '../../lib/audio';
 import { supabase } from '../../lib/supabase';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ticketSchema, type TicketFormData } from '../../lib/schemas';
+import { getFlag } from '../../data/flags';
 import { MessageSquare, Send, ChevronDown } from 'lucide-react';
 import { UtilityButtons } from '../shared/UtilityButtons';
 import { TwitchButton } from '../shared/TwitchButton';
@@ -50,6 +51,11 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, handleAuth, 
   const [nationality, setNationality] = useState(user?.user_metadata?.nationality || '');
   const [isUpdatingNationality, setIsUpdatingNationality] = useState(false);
   const [isNatDropdownOpen, setIsNatDropdownOpen] = useState(false);
+  const [natSearch, setNatSearch] = useState('');
+
+  useEffect(() => {
+    setNationality(user?.user_metadata?.nationality || '');
+  }, [user]);
 
   const handleUpdateNationality = async (newNat: string) => {
     setNationality(newNat);
@@ -548,7 +554,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, handleAuth, 
                 </div>
               </div>
               
-              <div style={{ position: 'relative', width: '180px' }}>
+              <div style={{ position: 'relative', width: '160px', marginLeft: 'auto' }}>
                 <button
                   onClick={() => setIsNatDropdownOpen(!isNatDropdownOpen)}
                   disabled={isUpdatingNationality}
@@ -563,7 +569,8 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, handleAuth, 
                     padding: '0 1rem',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'space-between',
+                    justifyContent: 'flex-end',
+                    gap: '0.5rem',
                     cursor: isUpdatingNationality ? 'not-allowed' : 'pointer',
                     opacity: isUpdatingNationality ? 0.5 : 1,
                     fontWeight: 800,
@@ -571,7 +578,8 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, handleAuth, 
                     boxShadow: '2px 2px 0px #000'
                   }}
                 >
-                  <span style={{ color: nationality ? '#fff' : 'rgba(255,255,255,0.5)' }}>
+                  <span style={{ color: nationality ? '#fff' : 'rgba(255,255,255,0.5)', textAlign: 'right', flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.5rem' }}>
+                    {nationality ? <span style={{ fontSize: '1.2rem' }}>{getFlag(nationality)}</span> : null}
                     {nationality || 'Seleccionar...'}
                   </span>
                   <ChevronDown size={16} style={{ 
@@ -583,77 +591,118 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, handleAuth, 
 
                 <AnimatePresence>
                   {isNatDropdownOpen && (
-                    <motion.div
-                      className="white-scrollbar"
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      transition={{ duration: 0.15 }}
-                      style={{
-                        position: 'absolute',
-                        top: 'calc(100% + 0.5rem)',
-                        left: 0,
-                        right: 0,
-                        background: 'rgba(20, 20, 25, 0.95)',
-                        backdropFilter: 'blur(10px)',
-                        border: '1px solid rgba(255, 255, 255, 0.15)',
-                        borderRadius: '1rem',
-                        padding: '0.5rem',
-                        zIndex: 100,
-                        maxHeight: '250px',
-                        overflowY: 'auto',
-                        boxShadow: '0 10px 25px rgba(0,0,0,0.5)'
-                      }}
-                    >
-                      <button
-                        onClick={() => {
-                          handleUpdateNationality('');
-                          setIsNatDropdownOpen(false);
-                        }}
+                    <>
+                      <div 
+                        style={{ position: 'fixed', inset: 0, zIndex: 99 }} 
+                        onClick={() => setIsNatDropdownOpen(false)} 
+                      />
+                      <motion.div
+                        className="white-scrollbar"
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.15 }}
                         style={{
-                          width: '100%',
-                          textAlign: 'left',
-                          padding: '0.75rem 1rem',
-                          background: !nationality ? 'rgba(255,255,255,0.1)' : 'transparent',
-                          border: 'none',
-                          color: !nationality ? '#00f2ff' : 'white',
-                          borderRadius: '0.5rem',
-                          cursor: 'pointer',
-                          fontWeight: 700,
-                          fontSize: '0.85rem'
+                          position: 'absolute',
+                          top: 'calc(100% + 0.5rem)',
+                          left: 0,
+                          right: 0,
+                          background: 'rgba(20, 20, 25, 0.95)',
+                          backdropFilter: 'blur(10px)',
+                          border: '1px solid rgba(255, 255, 255, 0.15)',
+                          borderRadius: '1rem',
+                          padding: '0.5rem',
+                          zIndex: 100,
+                          boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '0.2rem'
                         }}
-                        onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
-                        onMouseOut={(e) => e.currentTarget.style.background = !nationality ? 'rgba(255,255,255,0.1)' : 'transparent'}
                       >
-                        Ninguna
-                      </button>
-                      
-                      {Array.from(new Set(CARDS.map(c => c.country))).sort().map(c => (
+                        <div style={{ position: 'relative', marginBottom: '0.5rem' }}>
+                          <Search size={14} style={{ position: 'absolute', left: '0.8rem', top: '50%', transform: 'translateY(-50%)', opacity: 0.5, color: '#fff' }} />
+                          <input 
+                            type="text"
+                            value={natSearch}
+                            onChange={(e) => setNatSearch(e.target.value)}
+                            placeholder="Buscar país..."
+                            style={{
+                              width: '100%',
+                              background: 'rgba(255, 255, 255, 0.05)',
+                              border: '1px solid rgba(255, 255, 255, 0.1)',
+                              borderRadius: '0.5rem',
+                              padding: '0.5rem 1rem 0.5rem 2.2rem',
+                              color: '#fff',
+                              fontSize: '0.85rem',
+                              outline: 'none'
+                            }}
+                          />
+                        </div>
+
+                        <div className="white-scrollbar" style={{ maxHeight: '180px', overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+                          {Array.from(new Set(CARDS.map(c => c.country)))
+                            .sort()
+                            .filter(c => c.toLowerCase().includes(natSearch.toLowerCase()))
+                            .map(c => (
+                            <button
+                              key={c}
+                              onClick={() => {
+                                handleUpdateNationality(c);
+                                setIsNatDropdownOpen(false);
+                              }}
+                              style={{
+                                width: '100%',
+                                textAlign: 'right',
+                                padding: '0.5rem 1rem',
+                                background: nationality === c ? 'rgba(255,255,255,0.1)' : 'transparent',
+                                border: 'none',
+                                color: nationality === c ? '#00f2ff' : 'white',
+                                borderRadius: '0.5rem',
+                                cursor: 'pointer',
+                                fontWeight: nationality === c ? 800 : 500,
+                                fontSize: '0.85rem'
+                              }}
+                              onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+                              onMouseOut={(e) => e.currentTarget.style.background = nationality === c ? 'rgba(0, 242, 255, 0.1)' : 'transparent'}
+                            >
+                              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.5rem' }}>
+                                {nationality === c && <Check size={14} />}
+                                <span style={{ fontSize: '1.2rem' }}>{getFlag(c)}</span>
+                                <span>{c}</span>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                        
                         <button
-                          key={c}
                           onClick={() => {
-                            handleUpdateNationality(c);
+                            handleUpdateNationality('Otra');
                             setIsNatDropdownOpen(false);
                           }}
                           style={{
                             width: '100%',
-                            textAlign: 'left',
-                            padding: '0.75rem 1rem',
-                            background: nationality === c ? 'rgba(255,255,255,0.1)' : 'transparent',
+                            textAlign: 'right',
+                            padding: '0.5rem 1rem',
+                            background: nationality === 'Otra' ? 'rgba(250, 204, 21, 0.1)' : 'rgba(255,255,255,0.05)',
                             border: 'none',
-                            color: nationality === c ? '#00f2ff' : 'white',
+                            color: nationality === 'Otra' ? '#facc15' : 'white',
                             borderRadius: '0.5rem',
                             cursor: 'pointer',
-                            fontWeight: 700,
-                            fontSize: '0.85rem'
+                            fontWeight: nationality === 'Otra' ? 800 : 500,
+                            fontSize: '0.85rem',
+                            marginTop: '0.2rem'
                           }}
-                          onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
-                          onMouseOut={(e) => e.currentTarget.style.background = nationality === c ? 'rgba(255,255,255,0.1)' : 'transparent'}
+                          onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.1)'}
+                          onMouseOut={(e) => e.currentTarget.style.background = nationality === 'Otra' ? 'rgba(250, 204, 21, 0.1)' : 'rgba(255,255,255,0.05)'}
                         >
-                          {c}
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '0.5rem' }}>
+                            {nationality === 'Otra' && <Check size={14} />}
+                            <span style={{ fontSize: '1.2rem' }}>{getFlag('Otra')}</span>
+                            <span>Otra</span>
+                          </div>
                         </button>
-                      ))}
-                    </motion.div>
+                      </motion.div>
+                    </>
                   )}
                 </AnimatePresence>
               </div>
@@ -675,6 +724,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, handleAuth, 
                 }}
                 className="btn-hover-dark"
                 style={{
+                  marginLeft: 'auto',
                   background: 'rgba(255, 255, 255, 0.08)',
                   border: '1px solid rgba(255, 255, 255, 0.15)',
                   color: 'white',
@@ -711,6 +761,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, handleAuth, 
                 }}
                 className="btn-hover-dark"
                 style={{
+                  marginLeft: 'auto',
                   background: 'rgba(239, 68, 68, 0.1)',
                   border: '1px solid rgba(239, 68, 68, 0.2)',
                   color: '#ef4444',

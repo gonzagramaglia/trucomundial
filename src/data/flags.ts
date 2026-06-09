@@ -1,0 +1,28 @@
+export const FLAG_MAP: Record<string, string> = {
+  'Argentina': '🇦🇷',
+  'Francia': '🇫🇷',
+  'Brasil': '🇧🇷',
+  'España': '🇪🇸',
+  'Nueva Zelanda': '🇳🇿',
+  'Argelia': '🇩🇿',
+  'México': '🇲🇽',
+  'Colombia': '🇨🇴',
+  'Japón': '🇯🇵',
+  'Uruguay': '🇺🇾',
+  'Portugal': '🇵🇹',
+  'Ecuador': '🇪🇨',
+  'Paraguay': '🇵🇾',
+  'Panamá': '🇵🇦',
+  'USA': '🇺🇸',
+  'Canadá': '🇨🇦',
+  'Países Bajos': '🇳🇱',
+  'Austria': '🇦🇹',
+  'Corea del Sur': '🇰🇷',
+  'Croacia': '🇭🇷',
+  'Suiza': '🇨🇭',
+  'Noruega': '🇳🇴',
+  'Otra': '🌍',
+  'Ninguna': '🏳️'
+};
+
+export const getFlag = (country: string) => FLAG_MAP[country] || '🌍';

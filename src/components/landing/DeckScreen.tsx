@@ -38,7 +38,7 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
   const [showUnsavedModal, setShowUnsavedModal] = useState(false);
   const [openingPack, setOpeningPack] = useState(false);
-  const [newCardRevealed, setNewCardRevealed] = useState<string | null>(null);
+  const [newCardsRevealed, setNewCardsRevealed] = useState<string[]>([]);
   const [showRevealModal, setShowRevealModal] = useState(false);
 
   useEffect(() => {
@@ -183,24 +183,35 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
 
     setOpeningPack(true);
 
-    // Pick random
-    const randomCardId = lockedCards[Math.floor(Math.random() * lockedCards.length)];
-    const newUnlocked = [...unlockedCards, randomCardId];
+    // Pick up to 3 random cards
+    const cardsToUnlock: string[] = [];
+    const availableLocked = [...lockedCards];
+    for (let i = 0; i < 3; i++) {
+      if (availableLocked.length === 0) break;
+      const randomIndex = Math.floor(Math.random() * availableLocked.length);
+      cardsToUnlock.push(availableLocked[randomIndex]);
+      availableLocked.splice(randomIndex, 1);
+    }
+
+    const newUnlocked = [...unlockedCards, ...cardsToUnlock];
     let newSelected = [...selectedDeck];
-    if (newSelected.length < 22 && !newSelected.includes(randomCardId)) {
-      newSelected.push(randomCardId);
+    for (const cardId of cardsToUnlock) {
+      if (newSelected.length < 22 && !newSelected.includes(cardId)) {
+        newSelected.push(cardId);
+      }
     }
 
     // Simulate animation delay
     setTimeout(async () => {
-      if (isTopCard(randomCardId)) {
+      const hasTopCard = cardsToUnlock.some(id => isTopCard(id));
+      if (hasTopCard) {
         audioManager.playSystemSound("rare-rewarding-card");
       } else {
         audioManager.playSystemSound("rewarding-card");
       }
       setUnlockedCards(newUnlocked);
       setSelectedDeck(newSelected);
-      setNewCardRevealed(randomCardId);
+      setNewCardsRevealed(cardsToUnlock);
       setShowRevealModal(true);
       setOpeningPack(false);
 
@@ -308,7 +319,7 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
 
       {user && (
         <div style={{
-          position: 'sticky', top: '1rem', zIndex: 100, background: 'rgba(15, 10, 25, 0.9)',
+          position: 'sticky', top: '1rem', zIndex: 3000, background: 'rgba(15, 10, 25, 0.9)',
           border: selectedDeck.length === 22 ? '2px solid rgba(16, 185, 129, 0.45)' : '2px solid rgba(249, 115, 22, 0.25)',
           borderRadius: '2rem', padding: '1.25rem 2rem', marginBottom: '2rem', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1.5rem', backdropFilter: 'blur(16px)'
         }}>
@@ -363,14 +374,14 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
         </div>
       )}
 
-      {unlockedCards.length < 22 && (
+      {unlockedCards.length < 24 && (
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           style={{
             position: !user ? 'sticky' : 'relative',
             top: !user ? '1rem' : undefined,
-            zIndex: !user ? 100 : 1,
+            zIndex: !user ? 3000 : 1,
             background: 'linear-gradient(135deg, rgba(249, 115, 22, 0.15), rgba(234, 88, 12, 0.05))',
             border: '2px dashed rgba(249, 115, 22, 0.4)',
             borderRadius: '2rem', padding: '1.5rem 2rem', marginBottom: '2rem', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1.5rem', backdropFilter: 'blur(16px)'
@@ -380,8 +391,8 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
             <h3 style={{ margin: '0 0 0.5rem 0', color: '#f97316', fontSize: '1.1rem', fontWeight: 900 }}>
               {user && unlockedCards.length > 0 ? "¡Seguí armando tu mazo!" : "¡Empezá a armar tu mazo!"}
             </h3>
-            <p style={{ margin: 0, fontSize: '0.85rem', opacity: 0.8, lineHeight: 1.4, fontWeight: 500 }}>
-              {user ? "Como nuevo usuario, tenés 22 sobres de bienvenida gratuitos para empezar a armar tu mazo." : "Iniciá sesión para abrir tus 22 sobres de bienvenida gratuitos y empezar a armar tu mazo."}
+            <p style={{ margin: 0, opacity: 0.8, fontSize: '0.9rem', lineHeight: 1.5, maxWidth: isMobile ? '400px' : 'none' }}>
+              {user ? "Como nuevo usuario, tenés 8 sobres de bienvenida gratuitos (de 3 cartas cada uno) para armar tu mazo." : "Iniciá sesión para abrir tus 8 sobres de bienvenida gratuitos (de 3 cartas cada uno) y armar tu mazo."}
             </p>
           </div>
           {user ? (
@@ -394,7 +405,7 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
               }}
             >
               {openingPack ? <RefreshCw size={18} className="spin" /> : <Unlock size={18} />}
-              Abrir sobre gratis ({22 - unlockedCards.length} restantes)
+              Abrir sobre gratis ({Math.max(0, 8 - Math.floor(unlockedCards.length / 3))} restantes)
             </button>
           ) : (
             <button
@@ -466,7 +477,7 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
           {filteredPlayers.map(player => {
             const isUnlocked = unlockedCards.includes(player.id);
             const isSelected = selectedDeck.includes(player.id);
-            const isRevealed = newCardRevealed === player.id;
+            const isRevealed = newCardsRevealed.includes(player.id);
 
             return (
               <motion.div
@@ -525,33 +536,49 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
         </div>
       )}
 
-      {showRevealModal && newCardRevealed && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(12px)' }}>
+      {showRevealModal && newCardsRevealed.length > 0 && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 3500, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.60)', backdropFilter: 'blur(8px)' }}>
           <motion.div
             initial={{ scale: 0.5, opacity: 0, rotateY: 180 }}
             animate={{ scale: 1, opacity: 1, rotateY: 0 }}
             transition={{ type: "spring", damping: 15, stiffness: 100 }}
             style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative' }}
           >
-            {/* Glowing background */}
-            <motion.div
-              animate={{ scale: [1, 1.1, 1], opacity: [0.5, 0.8, 0.5] }}
-              transition={{ duration: 2, repeat: Infinity }}
-              style={{ position: 'absolute', top: '40%', left: '50%', x: '-50%', y: '-50%', width: '300px', height: '400px', background: 'radial-gradient(circle, rgba(249,115,22,0.6) 0%, rgba(249,115,22,0) 70%)', zIndex: -1, filter: 'blur(30px)' }}
-            />
-
-            <div style={{ transform: 'scale(1.3)', marginBottom: '2rem' }}>
-              <Sticker card={CARDS.find(c => c.id === newCardRevealed)!} disabled={false} showBack={false} />
+            <div style={{
+              display: 'flex',
+              flexDirection: 'row',
+              gap: isMobile ? '1.25rem' : '2rem',
+              alignItems: 'center',
+              justifyContent: 'center',
+              transform: 'scale(1.1)',
+              marginBottom: '2rem',
+              width: '100%'
+            }} className="white-scrollbar">
+              {newCardsRevealed.map((cardId: string) => (
+                <div key={cardId} style={{ position: 'relative', filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.5))' }}>
+                  <motion.div
+                    animate={{ scale: [1, 1.15, 1], opacity: [0.4, 0.75, 0.4] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                    style={{ 
+                      position: 'absolute', top: '50%', left: '50%', x: '-50%', y: '-50%', 
+                      width: '260px', height: '360px', 
+                      background: 'radial-gradient(circle, rgba(249,115,22,0.55) 0%, rgba(249,115,22,0) 70%)', 
+                      zIndex: -1, filter: 'blur(25px)', pointerEvents: 'none'
+                    }}
+                  />
+                  <Sticker card={CARDS.find(c => c.id === cardId)!} disabled={false} showBack={false} />
+                </div>
+              ))}
             </div>
 
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4 }}
-              style={{ textAlign: 'center', marginTop: '2.5rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', alignItems: 'center' }}
+              style={{ textAlign: 'center', marginTop: isMobile ? '0' : '1rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', alignItems: 'center' }}
             >
-              <h2 style={{ margin: 0, color: '#f97316', fontWeight: 950, fontSize: '2rem', textShadow: '0 4px 20px rgba(249,115,22,0.6)', letterSpacing: '1px' }}>
-                ¡CARTA DESBLOQUEADA!
+              <h2 style={{ margin: isMobile ? '0 0 0.5rem 0' : '0 0 1rem 0', color: '#f97316', fontWeight: 950, fontSize: isMobile ? '1.5rem' : '2rem', textShadow: '0 4px 20px rgba(249,115,22,0.6)', letterSpacing: '1px' }}>
+                ¡CARTAS DESBLOQUEADAS!
               </h2>
 
               <button
