@@ -1021,7 +1021,7 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
             transition: "all 0.2s",
           }}
         >
-          <CalendarDays size={18} /> Fixture
+          <CalendarDays size={18} /> Prode
         </button>
         <button
           onClick={() => setActiveTab("applications")}

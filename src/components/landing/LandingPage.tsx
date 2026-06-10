@@ -15,6 +15,7 @@ import { DeckScreen } from "./DeckScreen";
 import TournamentEventPage from "./tournaments/TournamentEventPage";
 import { RoadmapScreen } from "./RoadmapScreen";
 import { FixtureScreen } from "./FixtureScreen";
+import { ProdeScreen } from "./ProdeScreen";
 import { NationalityModal } from "./NationalityModal";
 import { ProfileScreen } from "./ProfileScreen";
 import { AdminScreen } from "../admin/AdminScreen";
@@ -104,6 +105,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       typeof window !== "undefined" &&
       (window.location.pathname === "/fixture" ||
         window.location.pathname === "/en/fixture"),
+  );
+  const [showProde, setShowProde] = useState(
+    () =>
+      typeof window !== "undefined" &&
+      (window.location.pathname === "/prode" ||
+        window.location.pathname === "/en/prode"),
   );
   const [showDeck, setShowDeck] = useState(
     () =>
@@ -373,7 +380,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         "Viví la evolución del Truco argentino con figuritas coleccionables de tus jugadores de fútbol favoritos. ¡Jugá partidas online en tiempo real gratis contra amigos o local contra la CPU!",
       );
     }
-  }, [showRanking, showRoadmap, showFixture, showTournament, showProfile]);
+  }, [showRanking, showRoadmap, showFixture, showProde, showTournament, showProfile]);
 
   useEffect(() => {
     let timer: any;
@@ -400,6 +407,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       );
       setShowRoadmap(p === "/ruta" || p === "/en/ruta");
       setShowFixture(p === "/fixture" || p === "/en/fixture");
+      setShowProde(p === "/prode" || p === "/en/prode");
       setShowDeck(p === "/mazo" || p === "/en/mazo");
       setShowProfile(p === "/perfil" || p === "/en/perfil");
       setShowAdmin(p === "/admin" || p === "/en/admin");
@@ -778,8 +786,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
-  const renderLeftNav = (offset = false) => (
+  const renderLeftNav = (offset = false) => {
+    const hideRulesBtn = showRanking || showFixture || showDeck || showProde;
+    return (
     <div style={{ position: "fixed", top: offset ? "4.5rem" : "1.5rem", left: "1.5rem", display: "flex", flexDirection: "column", gap: "0.5rem", zIndex: 6000 }}>
+      {!hideRulesBtn && (
       <button
         onClick={() => setShowRules(true)}
         className="btn-hover-dark"
@@ -801,8 +812,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       >
         <BookOpen size={20} />
       </button>
+      )}
 
-      {user && (
+      {user && !showProfile && (
         <button
           onClick={() => {
             const isEn = window.location.pathname.startsWith("/en");
@@ -892,6 +904,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       )}
     </div>
   );
+  };
 
   if (showProfile) {
     return (
@@ -1061,6 +1074,34 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         <RoadmapScreen
           onBack={() => {
             setShowRoadmap(false);
+            if (typeof window !== "undefined") {
+              const isEn = window.location.pathname.startsWith("/en");
+              window.history.pushState({}, "", isEn ? "/en" : "/");
+            }
+          }}
+        />
+      </div>
+    );
+  }
+
+  if (showProde) {
+    return (
+      <div
+        style={{
+          position: "fixed",
+          inset: 0,
+          background: "transparent",
+          width: "100%",
+          height: "100vh",
+          overflowY: "auto",
+          zIndex: 1500,
+        }}
+      >
+        {renderLeftNav(true)}
+        <ProdeScreen
+          user={user}
+          onBack={() => {
+            setShowProde(false);
             if (typeof window !== "undefined") {
               const isEn = window.location.pathname.startsWith("/en");
               window.history.pushState({}, "", isEn ? "/en" : "/");
@@ -1363,6 +1404,15 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 if (typeof window !== "undefined") {
                   const isEn = window.location.pathname.startsWith("/en");
                   window.history.pushState({}, "", isEn ? "/en/fixture" : "/fixture");
+                }
+                return;
+              }
+              if ((mode as string) === "prode") {
+                setShowProde(true);
+                if (typeof window !== "undefined") {
+                  const isEn = window.location.pathname.startsWith("/en");
+                  window.history.pushState({}, "", isEn ? "/en/prode" : "/prode");
+                  window.dispatchEvent(new PopStateEvent("popstate"));
                 }
                 return;
               }

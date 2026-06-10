@@ -140,7 +140,7 @@ export const GameModeSelector: React.FC<GameModeSelectorProps> = ({ selectedMode
       <Button
         onClick={() => {
           if (!showRoadmapAsLocked) {
-            onSelect("fixture" as any);
+            onSelect("prode" as any);
           }
         }}
         className={showRoadmapAsLocked ? "" : "btn-hover-dark"}
@@ -155,7 +155,7 @@ export const GameModeSelector: React.FC<GameModeSelectorProps> = ({ selectedMode
         }}
       >
         {showRoadmapAsLocked ? <Lock size={20} style={{ opacity: 0.5 }} /> : <Calendar size={20} />}
-        {t("world_cup_fixture")}
+        GANÁ SOBRES CON EL PRODE
       </Button>
     </div>
   );

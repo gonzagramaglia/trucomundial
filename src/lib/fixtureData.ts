@@ -15,7 +15,7 @@ export interface FixtureMatch {
 export const fixtureMatches: FixtureMatch[] = [
   {
     "id": "1",
-    "date": "miércoles 10 de junio",
+    "date": "jueves 11 de junio",
     "time": "04:00 p. m.",
     "group": "Group A",
     "teamA": "México",
@@ -37,7 +37,7 @@ export const fixtureMatches: FixtureMatch[] = [
   },
   {
     "id": "3",
-    "date": "jueves 11 de junio",
+    "date": "viernes 12 de junio",
     "time": "04:00 p. m.",
     "group": "Group B",
     "teamA": "Canadá",
@@ -59,7 +59,7 @@ export const fixtureMatches: FixtureMatch[] = [
   },
   {
     "id": "5",
-    "date": "viernes 12 de junio",
+    "date": "sábado 13 de junio",
     "time": "04:00 p. m.",
     "group": "Group B",
     "teamA": "Qatar",
@@ -70,7 +70,7 @@ export const fixtureMatches: FixtureMatch[] = [
   },
   {
     "id": "6",
-    "date": "viernes 12 de junio",
+    "date": "sábado 13 de junio",
     "time": "07:00 p. m.",
     "group": "Group C",
     "teamA": "Brasil",
@@ -92,7 +92,7 @@ export const fixtureMatches: FixtureMatch[] = [
   },
   {
     "id": "8",
-    "date": "sábado 13 de junio",
+    "date": "domingo 14 de junio",
     "time": "01:00 a. m.",
     "group": "Group D",
     "teamA": "Australia",
@@ -103,7 +103,7 @@ export const fixtureMatches: FixtureMatch[] = [
   },
   {
     "id": "9",
-    "date": "sábado 13 de junio",
+    "date": "domingo 14 de junio",
     "time": "02:00 p. m.",
     "group": "Group E",
     "teamA": "Alemania",
@@ -114,7 +114,7 @@ export const fixtureMatches: FixtureMatch[] = [
   },
   {
     "id": "10",
-    "date": "sábado 13 de junio",
+    "date": "domingo 14 de junio",
     "time": "05:00 p. m.",
     "group": "Group F",
     "teamA": "Países Bajos",
@@ -125,7 +125,7 @@ export const fixtureMatches: FixtureMatch[] = [
   },
   {
     "id": "11",
-    "date": "sábado 13 de junio",
+    "date": "domingo 14 de junio",
     "time": "08:00 p. m.",
     "group": "Group E",
     "teamA": "Costa de Marfil",
@@ -147,7 +147,7 @@ export const fixtureMatches: FixtureMatch[] = [
   },
   {
     "id": "13",
-    "date": "domingo 14 de junio",
+    "date": "lunes 15 de junio",
     "time": "01:00 p. m.",
     "group": "Group H",
     "teamA": "España",
@@ -158,7 +158,7 @@ export const fixtureMatches: FixtureMatch[] = [
   },
   {
     "id": "14",
-    "date": "domingo 14 de junio",
+    "date": "lunes 15 de junio",
     "time": "04:00 p. m.",
     "group": "Group G",
     "teamA": "Bélgica",
@@ -169,7 +169,7 @@ export const fixtureMatches: FixtureMatch[] = [
   },
   {
     "id": "15",
-    "date": "domingo 14 de junio",
+    "date": "lunes 15 de junio",
     "time": "07:00 p. m.",
     "group": "Group H",
     "teamA": "Arabia Saudita",
@@ -191,7 +191,7 @@ export const fixtureMatches: FixtureMatch[] = [
   },
   {
     "id": "17",
-    "date": "lunes 15 de junio",
+    "date": "martes 16 de junio",
     "time": "04:00 p. m.",
     "group": "Group I",
     "teamA": "Francia",
@@ -202,7 +202,7 @@ export const fixtureMatches: FixtureMatch[] = [
   },
   {
     "id": "18",
-    "date": "lunes 15 de junio",
+    "date": "martes 16 de junio",
     "time": "07:00 p. m.",
     "group": "Group I",
     "teamA": "Irak",
@@ -609,7 +609,7 @@ export const fixtureMatches: FixtureMatch[] = [
   },
   {
     "id": "55",
-    "date": "miércoles 24 de junio",
+    "date": "jueves 25 de junio",
     "time": "05:00 p. m.",
     "group": "Group E",
     "teamA": "Curaçao",
@@ -620,7 +620,7 @@ export const fixtureMatches: FixtureMatch[] = [
   },
   {
     "id": "56",
-    "date": "miércoles 24 de junio",
+    "date": "jueves 25 de junio",
     "time": "05:00 p. m.",
     "group": "Group E",
     "teamA": "Ecuador",
@@ -631,7 +631,7 @@ export const fixtureMatches: FixtureMatch[] = [
   },
   {
     "id": "57",
-    "date": "miércoles 24 de junio",
+    "date": "jueves 25 de junio",
     "time": "08:00 p. m.",
     "group": "Group F",
     "teamA": "Japón",
@@ -642,7 +642,7 @@ export const fixtureMatches: FixtureMatch[] = [
   },
   {
     "id": "58",
-    "date": "miércoles 24 de junio",
+    "date": "jueves 25 de junio",
     "time": "08:00 p. m.",
     "group": "Group F",
     "teamA": "Túnez",
@@ -675,7 +675,7 @@ export const fixtureMatches: FixtureMatch[] = [
   },
   {
     "id": "61",
-    "date": "jueves 25 de junio",
+    "date": "viernes 26 de junio",
     "time": "04:00 p. m.",
     "group": "Group I",
     "teamA": "Senegal",
@@ -686,7 +686,7 @@ export const fixtureMatches: FixtureMatch[] = [
   },
   {
     "id": "62",
-    "date": "jueves 25 de junio",
+    "date": "viernes 26 de junio",
     "time": "04:00 p. m.",
     "group": "Group I",
     "teamA": "Noruega",
@@ -719,7 +719,7 @@ export const fixtureMatches: FixtureMatch[] = [
   },
   {
     "id": "65",
-    "date": "viernes 26 de junio",
+    "date": "sábado 27 de junio",
     "time": "12:00 a. m.",
     "group": "Group G",
     "teamA": "Nueva Zelanda",
@@ -730,7 +730,7 @@ export const fixtureMatches: FixtureMatch[] = [
   },
   {
     "id": "66",
-    "date": "viernes 26 de junio",
+    "date": "sábado 27 de junio",
     "time": "12:00 a. m.",
     "group": "Group G",
     "teamA": "Egipto",
@@ -741,7 +741,7 @@ export const fixtureMatches: FixtureMatch[] = [
   },
   {
     "id": "67",
-    "date": "viernes 26 de junio",
+    "date": "sábado 27 de junio",
     "time": "06:00 p. m.",
     "group": "Group L",
     "teamA": "Croacia",
@@ -752,7 +752,7 @@ export const fixtureMatches: FixtureMatch[] = [
   },
   {
     "id": "68",
-    "date": "viernes 26 de junio",
+    "date": "sábado 27 de junio",
     "time": "06:00 p. m.",
     "group": "Group L",
     "teamA": "Panamá",
@@ -763,7 +763,7 @@ export const fixtureMatches: FixtureMatch[] = [
   },
   {
     "id": "69",
-    "date": "viernes 26 de junio",
+    "date": "sábado 27 de junio",
     "time": "08:30 p. m.",
     "group": "Group K",
     "teamA": "Colombia",
@@ -774,7 +774,7 @@ export const fixtureMatches: FixtureMatch[] = [
   },
   {
     "id": "70",
-    "date": "viernes 26 de junio",
+    "date": "sábado 27 de junio",
     "time": "08:30 p. m.",
     "group": "Group K",
     "teamA": "DR Congo",
