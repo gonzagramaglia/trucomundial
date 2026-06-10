@@ -1100,6 +1100,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         {renderLeftNav(true)}
         <ProdeScreen
           user={user}
+          handleAuth={handleAuth}
           onBack={() => {
             setShowProde(false);
             if (typeof window !== "undefined") {
