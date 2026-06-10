@@ -41,6 +41,11 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
   const [newCardsRevealed, setNewCardsRevealed] = useState<string[]>([]);
   const [showRevealModal, setShowRevealModal] = useState(false);
 
+  const [showRedeemModal, setShowRedeemModal] = useState(false);
+  const [redeemCode, setRedeemCode] = useState('');
+  const [redeeming, setRedeeming] = useState(false);
+  const [redeemError, setRedeemError] = useState('');
+
   useEffect(() => {
     audioManager.playTheme();
   }, []);
@@ -169,6 +174,45 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
       lastSavedDeckRef.current = selectedDeck;
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleRedeemCode = async () => {
+    if (!user) {
+      setRedeemError("Debes iniciar sesión para canjear códigos.");
+      return;
+    }
+    if (redeemCode.length !== 4) {
+      setRedeemError("El código debe tener 4 caracteres.");
+      return;
+    }
+    setRedeeming(true);
+    setRedeemError('');
+
+    try {
+      const { data, error } = await supabase
+        .from('reward_codes')
+        .select('*')
+        .eq('code', redeemCode.toUpperCase())
+        .eq('used', false)
+        .eq('user_id', user.id)
+        .single();
+
+      if (error || !data) {
+        setRedeemError("Código inválido o ya usado.");
+        setRedeeming(false);
+        return;
+      }
+
+      await supabase.from('reward_codes').update({ used: true }).eq('id', data.id);
+
+      setShowRedeemModal(false);
+      setRedeemCode('');
+      
+      await buyMysteryCard();
+    } catch (err) {
+      setRedeemError("Error de conexión al canjear el código.");
+      setRedeeming(false);
     }
   };
 
@@ -344,19 +388,16 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-            {unlockedCards.length >= 22 && (
               <button
-                disabled={true}
+                onClick={() => setShowRedeemModal(true)}
                 className="btn-hover-dark"
                 style={{
-                  background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.4), rgba(217, 119, 6, 0.4))', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.5)', height: '48px', borderRadius: '1.25rem', padding: '0 1.5rem', fontSize: '0.9rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'not-allowed'
+                  background: 'linear-gradient(135deg, #10b981, #059669)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', height: '48px', borderRadius: '1.25rem', padding: '0 1.5rem', fontSize: '0.9rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer'
                 }}
-                title="Próximamente"
               >
-                <Lock size={18} />
-                Comprar Carta Misteriosa
+                <Unlock size={18} />
+                Canjear Código
               </button>
-            )}
 
             <button
               onClick={handleSaveDeck}
@@ -601,6 +642,44 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
                 Continuar
               </button>
             </motion.div>
+          </motion.div>
+        </div>
+      )}
+
+      {showRedeemModal && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(8px)', padding: '1rem' }}>
+          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} style={{ background: 'rgba(26, 26, 46, 0.6)', backdropFilter: 'blur(16px)', padding: '2.5rem', borderRadius: '1.5rem', maxWidth: '400px', width: '100%', textAlign: 'center', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
+            <h2 style={{ color: '#10b981', marginTop: 0, marginBottom: '1rem', textTransform: 'uppercase' }}>
+              Canjear Código
+            </h2>
+            <p style={{ color: '#fff', fontSize: '0.95rem', marginBottom: '1.5rem' }}>
+              Ingresá el código de 4 caracteres que ganaste en el <a href="/prode" target="_blank" rel="noopener noreferrer" style={{ color: '#10b981', fontWeight: 900, textDecoration: 'none' }}>Prode</a> para desbloquear un <strong>sobre gratis</strong>.
+            </p>
+            <input
+              type="text"
+              maxLength={4}
+              value={redeemCode}
+              onChange={(e) => setRedeemCode(e.target.value.toUpperCase())}
+              placeholder="ABCD"
+              style={{ width: '100%', padding: '1rem', background: 'rgba(255,255,255,0.1)', border: '2px solid rgba(16, 185, 129, 0.5)', borderRadius: '1rem', color: '#fff', fontSize: '2rem', textAlign: 'center', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '1rem', outline: 'none', fontWeight: 900 }}
+            />
+            {redeemError && <p style={{ color: '#ef4444', fontSize: '0.85rem', margin: '0 0 1rem 0', fontWeight: 700 }}>{redeemError}</p>}
+            <div style={{ display: 'flex', gap: '1rem' }}>
+              <button
+                onClick={() => { setShowRedeemModal(false); setRedeemError(''); setRedeemCode(''); }}
+                style={{ flex: 1, padding: '1rem', background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff', borderRadius: '1rem', cursor: 'pointer', fontWeight: 800 }}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleRedeemCode}
+                disabled={redeeming || redeemCode.length !== 4}
+                style={{ flex: 1, padding: '1rem', background: '#10b981', border: 'none', color: '#fff', borderRadius: '1rem', cursor: (redeeming || redeemCode.length !== 4) ? 'not-allowed' : 'pointer', fontWeight: 800, opacity: (redeeming || redeemCode.length !== 4) ? 0.5 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+              >
+                {redeemCode.length === 4 ? <Unlock size={18} /> : <Lock size={18} />}
+                {redeeming ? 'Canjeando...' : 'Canjear'}
+              </button>
+            </div>
           </motion.div>
         </div>
       )}

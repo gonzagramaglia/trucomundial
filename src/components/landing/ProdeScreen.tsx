@@ -30,20 +30,63 @@ export const isMatchStarted = (dateStr: string, timeStr: string, matchStatus: st
     const month = months[monthStr];
     if (!isNaN(day) && month !== undefined) {
       const timeParts = timeStr.split(" ");
-      if (timeParts.length >= 3) {
-        const time = timeParts[0];
-        const ampm = timeParts[1].toLowerCase() + " " + timeParts[2].toLowerCase();
-        const [hourStr, minStr] = time.split(":");
-        let hour = parseInt(hourStr);
-        const min = parseInt(minStr);
+      let hour = 0;
+      let min = 0;
+      if (timeStr.includes("hs")) {
+        const [h, m] = timeParts[0].split(":");
+        hour = parseInt(h);
+        min = parseInt(m || "0");
+      } else {
+        const [h, m] = timeParts[0].split(":");
+        hour = parseInt(h);
+        min = parseInt(m);
+        const ampm = timeParts[1]?.toLowerCase() + " " + timeParts[2]?.toLowerCase();
         if (ampm.includes("p. m.") && hour < 12) hour += 12;
         if (ampm.includes("a. m.") && hour === 12) hour = 0;
-        const matchDate = new Date(2026, month, day, hour, min, 0);
-        return new Date() >= matchDate;
       }
+      // Parse as UTC-3 (Argentina time) by adding 3 hours to get UTC
+      const matchDate = new Date(Date.UTC(2026, month, day, hour + 3, min, 0));
+      return new Date() >= matchDate;
     }
   }
   return false;
+};
+
+export const formatMatchTime = (dateStr: string, timeStr: string) => {
+  const dateParts = dateStr.split(" ");
+  if (dateParts.length < 4) return { localDate: dateStr, localTime: timeStr };
+  
+  const day = parseInt(dateParts[1]);
+  const monthStr = dateParts[3].toLowerCase();
+  const month = months[monthStr];
+  
+  if (isNaN(day) || month === undefined) return { localDate: dateStr, localTime: timeStr };
+  
+  const timeParts = timeStr.split(" ");
+  let hour = 0;
+  let min = 0;
+  
+  if (timeStr.includes("hs")) {
+    const [h, m] = timeParts[0].split(":");
+    hour = parseInt(h);
+    min = parseInt(m || "0");
+  } else {
+    const [h, m] = timeParts[0].split(":");
+    hour = parseInt(h);
+    min = parseInt(m);
+    const ampm = timeParts[1]?.toLowerCase() + " " + timeParts[2]?.toLowerCase();
+    if (ampm.includes("p. m.") && hour < 12) hour += 12;
+    if (ampm.includes("a. m.") && hour === 12) hour = 0;
+  }
+  
+  // Create Date object assuming original time is UTC-3
+  const matchDate = new Date(Date.UTC(2026, month, day, hour + 3, min, 0));
+  
+  let localDateStr = matchDate.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
+  localDateStr = localDateStr.charAt(0).toUpperCase() + localDateStr.slice(1).replace('.', ',');
+  const localTimeStr = matchDate.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) + ' hs';
+  
+  return { localDate: localDateStr, localTime: localTimeStr };
 };
 
 export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, onBack }) => {
@@ -54,9 +97,10 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, onBack }) => {
   const [liveResults, setLiveResults] = useState<Record<string, { scoreA: number, scoreB: number, status: string }>>({});
 
   // Prode states
-  const [predictions, setPredictions] = useState<Record<string, { scoreA: number, scoreB: number }>>({});
+  const [predictions, setPredictions] = useState<Record<string, { scoreA: number, scoreB: number, rewarded?: boolean }>>({});
   const [inputs, setInputs] = useState<Record<string, { scoreA: string, scoreB: string }>>({});
   const [isSaving, setIsSaving] = useState<Record<string, boolean>>({});
+  const [rewardCodesModal, setRewardCodesModal] = useState<{ codes: string[], matchDesc: string, packs: number } | null>(null);
 
   useEffect(() => {
     audioManager.playTheme();
@@ -87,7 +131,7 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, onBack }) => {
           const map: Record<string, any> = {};
           const inputMap: Record<string, any> = {};
           data.forEach(p => {
-            map[p.match_id] = { scoreA: p.score_a, scoreB: p.score_b };
+            map[p.match_id] = { scoreA: p.score_a, scoreB: p.score_b, rewarded: p.rewarded };
             inputMap[p.match_id] = { scoreA: p.score_a.toString(), scoreB: p.score_b.toString() };
           });
           setPredictions(map);
@@ -97,6 +141,67 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, onBack }) => {
     };
     fetchPredictions();
   }, [user]);
+
+  useEffect(() => {
+    const checkRewards = async () => {
+      if (!user || Object.keys(liveResults).length === 0 || Object.keys(predictions).length === 0) return;
+      
+      const toReward: { matchId: string, packs: number, teamA: string, teamB: string }[] = [];
+
+      for (const matchId in predictions) {
+        const pred = predictions[matchId];
+        const res = liveResults[matchId];
+        if (res && res.status === 'finished' && !pred.rewarded) {
+          const exactMatch = pred.scoreA === res.scoreA && pred.scoreB === res.scoreB;
+          const predWinner = pred.scoreA > pred.scoreB ? 'A' : (pred.scoreA < pred.scoreB ? 'B' : 'Draw');
+          const resWinner = res.scoreA > res.scoreB ? 'A' : (res.scoreA < res.scoreB ? 'B' : 'Draw');
+          const normalMatch = predWinner === resWinner;
+          
+          let packs = 0;
+          if (exactMatch) packs = 3;
+          else if (normalMatch) packs = 1;
+
+          if (packs > 0) {
+            const matchDetails = fixtureMatches.find(m => m.id === matchId);
+            toReward.push({ matchId, packs, teamA: matchDetails?.teamA || '', teamB: matchDetails?.teamB || '' });
+          } else {
+            await supabase.from('prode_predictions').update({ rewarded: true }).eq('user_id', user.id).eq('match_id', matchId);
+            setPredictions(prev => ({ ...prev, [matchId]: { ...prev[matchId], rewarded: true } }));
+          }
+        }
+      }
+
+      for (const reward of toReward) {
+        const generatedCodes = [];
+        for (let i = 0; i < reward.packs; i++) {
+          const code = Math.random().toString(36).substring(2, 6).toUpperCase();
+          generatedCodes.push(code);
+        }
+
+        const codeInserts = generatedCodes.map(code => ({
+          code,
+          user_id: user.id,
+          used: false,
+          source: `prode_match_${reward.matchId}`
+        }));
+        
+        const { error } = await supabase.from('reward_codes').insert(codeInserts);
+        if (!error) {
+          await supabase.from('prode_predictions').update({ rewarded: true }).eq('user_id', user.id).eq('match_id', reward.matchId);
+          setPredictions(prev => ({ ...prev, [reward.matchId]: { ...prev[reward.matchId], rewarded: true } }));
+
+          setRewardCodesModal({
+            codes: generatedCodes,
+            matchDesc: `${reward.teamA} vs ${reward.teamB}`,
+            packs: reward.packs
+          });
+          break; // Show one at a time
+        }
+      }
+    };
+
+    checkRewards();
+  }, [liveResults, predictions, user]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -174,10 +279,11 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, onBack }) => {
 
     const groups: { [date: string]: FixtureMatch[] } = {};
     filtered.forEach(match => {
-      if (!groups[match.date]) {
-        groups[match.date] = [];
+      const { localDate } = formatMatchTime(match.date, match.time);
+      if (!groups[localDate]) {
+        groups[localDate] = [];
       }
-      groups[match.date].push(match);
+      groups[localDate].push(match);
     });
 
     return Object.keys(groups).map(date => ({
@@ -274,7 +380,8 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, onBack }) => {
           <h4 style={{ margin: '0 0 0.25rem 0', color: '#ff8c00' }}>¡Premios del Prode!</h4>
           <p style={{ margin: 0, fontSize: '0.85rem', color: 'rgba(255,255,255,0.8)' }}>
             Resultado exacto: <strong>3 sobres</strong>. Acertar ganador/empate: <strong>1 sobre</strong>.<br />
-            ¡No cuelgues! <em>(Una vez guardado o iniciado el partido no se puede cambiar)</em>.
+            ¡No cuelgues! <em>(Una vez guardado o iniciado el partido no se puede cambiar)</em>.<br />
+            Los códigos ganados se canjean en <a href="/mazo" target="_blank" rel="noopener noreferrer" style={{ color: '#10b981', fontWeight: 900, textDecoration: 'none' }}>Armá/Personalizá tu Mazo</a>.
           </p>
         </div>
       </div>
@@ -331,7 +438,7 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, onBack }) => {
                     background: 'rgba(20, 20, 25, 0.8)', border: isMyTeam ? '2px solid #00f2ff' : '1px solid rgba(255, 255, 255, 0.05)', boxShadow: isMyTeam ? '0 0 15px rgba(0, 242, 255, 0.2)' : 'none', borderRadius: '1rem', padding: '1.25rem 1.5rem', display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? '1rem' : '2rem', alignItems: isMobile ? 'flex-start' : 'center', transition: 'all 0.2s ease', cursor: 'default'
                   }}>
                     <div style={{ flex: isMobile ? 'none' : '0 0 120px', display: 'flex', flexDirection: isMobile ? 'row' : 'column', gap: isMobile ? '0.75rem' : '0.25rem', alignItems: isMobile ? 'center' : 'flex-start', justifyContent: isMobile ? 'space-between' : 'flex-start', width: isMobile ? '100%' : 'auto', opacity: 0.8 }}>
-                      <span style={{ fontSize: '1rem', fontWeight: 800 }}>{match.time}</span>
+                      <span style={{ fontSize: '1rem', fontWeight: 800 }}>{formatMatchTime(match.date, match.time).localTime}</span>
                       <span style={{ fontSize: '0.8rem', opacity: 0.6 }}>{match.group.replace('Group', t('group'))}</span>
                     </div>
 
@@ -344,17 +451,23 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, onBack }) => {
                       <div style={{ padding: '0 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: '80px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                           <input
-                            type="number" min="0" max="99" disabled={locked}
+                            type="text" inputMode="numeric" maxLength={1} disabled={locked}
                             value={hasPrediction ? pScoreA : inScoreA}
-                            onChange={(e) => setInputs(prev => ({ ...prev, [match.id]: { ...prev[match.id], scoreA: e.target.value } }))}
-                            style={{ width: '40px', height: '40px', textAlign: 'center', background: locked ? 'transparent' : 'rgba(0,0,0,0.5)', border: locked ? 'none' : '1px solid rgba(255,255,255,0.2)', color: '#fff', borderRadius: '0.5rem', fontWeight: 800, fontSize: '1.2rem', appearance: 'textfield' }}
+                            onChange={(e) => {
+                              const val = e.target.value.replace(/[^0-9]/g, '').slice(0, 1);
+                              setInputs(prev => ({ ...prev, [match.id]: { ...prev[match.id], scoreA: val } }))
+                            }}
+                            style={{ width: '40px', height: '40px', textAlign: 'center', padding: 0, background: locked ? 'transparent' : 'rgba(0,0,0,0.5)', border: locked ? 'none' : '1px solid rgba(255,255,255,0.2)', color: '#fff', borderRadius: '0.5rem', fontWeight: 800, fontSize: '1.2rem' }}
                           />
                           <span style={{ fontWeight: 800, color: 'rgba(255,255,255,0.4)' }}>-</span>
                           <input
-                            type="number" min="0" max="99" disabled={locked}
+                            type="text" inputMode="numeric" maxLength={1} disabled={locked}
                             value={hasPrediction ? pScoreB : inScoreB}
-                            onChange={(e) => setInputs(prev => ({ ...prev, [match.id]: { ...prev[match.id], scoreB: e.target.value } }))}
-                            style={{ width: '40px', height: '40px', textAlign: 'center', background: locked ? 'transparent' : 'rgba(0,0,0,0.5)', border: locked ? 'none' : '1px solid rgba(255,255,255,0.2)', color: '#fff', borderRadius: '0.5rem', fontWeight: 800, fontSize: '1.2rem', appearance: 'textfield' }}
+                            onChange={(e) => {
+                              const val = e.target.value.replace(/[^0-9]/g, '').slice(0, 1);
+                              setInputs(prev => ({ ...prev, [match.id]: { ...prev[match.id], scoreB: val } }))
+                            }}
+                            style={{ width: '40px', height: '40px', textAlign: 'center', padding: 0, background: locked ? 'transparent' : 'rgba(0,0,0,0.5)', border: locked ? 'none' : '1px solid rgba(255,255,255,0.2)', color: '#fff', borderRadius: '0.5rem', fontWeight: 800, fontSize: '1.2rem' }}
                           />
                         </div>
                       </div>
@@ -378,9 +491,9 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, onBack }) => {
                           </div>
                         ) : (
                           <button
-                            disabled={isSaving[match.id]}
+                            disabled={isSaving[match.id] || inScoreA === '' || inScoreB === ''}
                             onClick={() => handleSavePrediction(match.id)}
-                            style={{ background: '#00f2ff', color: '#000', border: 'none', padding: '0.5rem 1rem', borderRadius: '0.5rem', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: isSaving[match.id] ? 0.5 : 1 }}
+                            style={{ background: '#00f2ff', color: '#000', border: 'none', padding: '0.5rem 1rem', borderRadius: '0.5rem', fontWeight: 800, cursor: (isSaving[match.id] || inScoreA === '' || inScoreB === '') ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: (isSaving[match.id] || inScoreA === '' || inScoreB === '') ? 0.5 : 1 }}
                           >
                             <Save size={16} /> Guardar
                           </button>
@@ -390,9 +503,9 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, onBack }) => {
 
                     {isMobile && !locked && match.status !== 'finished' && (
                       <button
-                        disabled={isSaving[match.id]}
+                        disabled={isSaving[match.id] || inScoreA === '' || inScoreB === ''}
                         onClick={() => handleSavePrediction(match.id)}
-                        style={{ background: '#00f2ff', color: '#000', border: 'none', padding: '0.5rem 1rem', borderRadius: '0.5rem', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: isSaving[match.id] ? 0.5 : 1, width: '100%', justifyContent: 'center', marginTop: '1rem' }}
+                        style={{ background: '#00f2ff', color: '#000', border: 'none', padding: '0.5rem 1rem', borderRadius: '0.5rem', fontWeight: 800, cursor: (isSaving[match.id] || inScoreA === '' || inScoreB === '') ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: (isSaving[match.id] || inScoreA === '' || inScoreB === '') ? 0.5 : 1, width: '100%', justifyContent: 'center', marginTop: '1rem' }}
                       >
                         <Save size={16} /> Guardar Predicción
                       </button>
@@ -440,6 +553,34 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, onBack }) => {
       </div>
 
       <TwitchButton />
+
+      {rewardCodesModal && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)', padding: '1rem' }}>
+          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} style={{ background: 'linear-gradient(135deg, #1a1a2e, #101018)', padding: '2.5rem', borderRadius: '1.5rem', maxWidth: '450px', width: '100%', textAlign: 'center', border: '1px solid rgba(0,242,255,0.3)', boxShadow: '0 0 30px rgba(0,242,255,0.1)' }}>
+            <h2 style={{ color: '#00f2ff', marginTop: 0, marginBottom: '1rem', fontSize: '2rem', textTransform: 'uppercase', textShadow: '0 0 10px rgba(0,242,255,0.5)' }}>¡Felicidades!</h2>
+            <p style={{ color: '#fff', fontSize: '1.1rem', marginBottom: '1.5rem' }}>
+              Acertaste tu predicción del partido <strong>{rewardCodesModal.matchDesc}</strong> y ganaste <strong>{rewardCodesModal.packs} sobres</strong> para el mazo.
+            </p>
+            <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.9rem', marginBottom: '1rem' }}>
+              Estos son tus códigos de recompensa. ¡Anotalos y canjealos en la pantalla de Mazo!
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '2rem' }}>
+              {rewardCodesModal.codes.map((code, idx) => (
+                <div key={idx} style={{ background: 'rgba(0,0,0,0.5)', padding: '1rem', borderRadius: '0.75rem', border: '1px dashed rgba(0,242,255,0.4)', fontSize: '1.5rem', fontWeight: 900, letterSpacing: '0.2em', color: '#fff' }}>
+                  {code}
+                </div>
+              ))}
+            </div>
+            <button
+              onClick={() => setRewardCodesModal(null)}
+              className="btn-hover-dark"
+              style={{ width: '100%', background: '#00f2ff', color: '#000', border: 'none', padding: '1rem', borderRadius: '1rem', fontSize: '1.1rem', fontWeight: 900, cursor: 'pointer', textTransform: 'uppercase' }}
+            >
+              ¡Entendido!
+            </button>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 };
