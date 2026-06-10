@@ -778,6 +778,121 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
+  const renderLeftNav = (offset = false) => (
+    <div style={{ position: "fixed", top: offset ? "4.5rem" : "1.5rem", left: "1.5rem", display: "flex", flexDirection: "column", gap: "0.5rem", zIndex: 6000 }}>
+      <button
+        onClick={() => setShowRules(true)}
+        className="btn-hover-dark"
+        style={{
+          background: "rgba(255, 255, 255, 0.1)",
+          border: "1px solid rgba(255, 255, 255, 0.2)",
+          color: "white",
+          height: "40px",
+          width: "40px",
+          borderRadius: "50%",
+          cursor: "pointer",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          backdropFilter: "blur(12px)",
+          transition: "none",
+        }}
+        title={t("rules")}
+      >
+        <BookOpen size={20} />
+      </button>
+
+      {user && (
+        <button
+          onClick={() => {
+            const isEn = window.location.pathname.startsWith("/en");
+            const target = isEn ? "/en/perfil" : "/perfil";
+            if (window.location.pathname !== target) {
+              window.history.pushState({}, "", target);
+              window.dispatchEvent(new PopStateEvent("popstate"));
+            }
+          }}
+          className="btn-hover-dark"
+          style={{
+            background: "rgba(255, 255, 255, 0.1)",
+            border: "1px solid rgba(255, 255, 255, 0.2)",
+            color: "white",
+            height: "40px",
+            width: "40px",
+            borderRadius: "50%",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backdropFilter: "blur(12px)",
+            transition: "none",
+          }}
+          title={t("profile")}
+        >
+          <User size={20} style={{ color: "#ffffff" }} />
+        </button>
+      )}
+
+      {isApprovedCreator && (
+        <button
+          onClick={() => {
+            const isEn = window.location.pathname.startsWith("/en");
+            const path = isEn ? "/en/creador" : "/creador";
+            window.history.pushState({}, "", path);
+            window.dispatchEvent(new PopStateEvent("popstate"));
+          }}
+          className="btn-hover-dark"
+          style={{
+            background: "rgba(255, 255, 255, 0.1)",
+            border: "1px solid rgba(255, 255, 255, 0.2)",
+            color: "white",
+            height: "40px",
+            width: "40px",
+            borderRadius: "50%",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backdropFilter: "blur(12px)",
+            transition: "none",
+          }}
+          title="Panel de Creador"
+        >
+          <Trophy size={18} style={{ color: "#ffffff" }} />
+        </button>
+      )}
+
+      {isSuperAdmin && (
+        <button
+          onClick={() => {
+            const isEn = window.location.pathname.startsWith("/en");
+            const path = isEn ? "/en/admin" : "/admin";
+            window.history.pushState({}, "", path);
+            window.dispatchEvent(new PopStateEvent("popstate"));
+          }}
+          className="btn-hover-dark"
+          style={{
+            background: "rgba(255, 255, 255, 0.1)",
+            border: "1px solid rgba(255, 255, 255, 0.2)",
+            color: "white",
+            height: "40px",
+            width: "40px",
+            borderRadius: "50%",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backdropFilter: "blur(12px)",
+            transition: "none",
+          }}
+          title="Panel de Admin"
+        >
+          <ShieldAlert size={18} style={{ color: "#ffffff" }} />
+        </button>
+      )}
+    </div>
+  );
+
   if (showProfile) {
     return (
       <div
@@ -791,6 +906,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           zIndex: 1500,
         }}
       >
+        {renderLeftNav(true)}
         <ProfileScreen
           user={user}
           handleAuth={handleAuth}
@@ -819,6 +935,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           zIndex: 1500,
         }}
       >
+        {renderLeftNav(true)}
         <RankingScreen
           user={user}
           handleAuth={handleAuth}
@@ -847,6 +964,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           zIndex: 1500,
         }}
       >
+        {renderLeftNav(true)}
         <TournamentEventPage
           user={user}
           handleAuth={handleAuth}
@@ -881,6 +999,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           zIndex: 1500,
         }}
       >
+        {renderLeftNav(true)}
         <TournamentScreen
           user={user}
           handleAuth={handleAuth}
@@ -909,6 +1028,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           zIndex: 1500,
         }}
       >
+        {renderLeftNav(true)}
         <DeckScreen
           user={user}
           handleAuth={handleAuth}
@@ -937,6 +1057,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           zIndex: 1500,
         }}
       >
+        {renderLeftNav(true)}
         <RoadmapScreen
           onBack={() => {
             setShowRoadmap(false);
@@ -963,6 +1084,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           zIndex: 1500,
         }}
       >
+        {renderLeftNav(true)}
         <FixtureScreen
           user={user}
           onBack={() => {
@@ -990,6 +1112,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           zIndex: 1500,
         }}
       >
+        {renderLeftNav(true)}
         <AdminScreen
           user={user}
           handleAuth={handleAuth}
@@ -1018,6 +1141,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           zIndex: 1500,
         }}
       >
+        {renderLeftNav(true)}
         <CreatorScreen
           user={user}
           handleAuth={handleAuth}
@@ -1046,6 +1170,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           zIndex: 1500,
         }}
       >
+        {renderLeftNav(true)}
         <CreatorsApplicationScreen
           user={user}
           handleAuth={handleAuth}
@@ -1075,118 +1200,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       }}
     >
       {/* Profile / Music - Top Left */}
-      <div style={{ position: "fixed", top: "1.5rem", left: "1.5rem", display: "flex", gap: "0.5rem", zIndex: 1000 }}>
-        {user ? (
-          <button
-            onClick={() => {
-              const isEn = window.location.pathname.startsWith("/en");
-              const target = isEn ? "/en/perfil" : "/perfil";
-              if (window.location.pathname !== target) {
-                window.history.pushState({}, "", target);
-                window.dispatchEvent(new PopStateEvent("popstate"));
-              }
-            }}
-            className="btn-hover-dark"
-            style={{
-              background: "rgba(255, 255, 255, 0.1)",
-              border: "1px solid rgba(255, 255, 255, 0.2)",
-              color: "white",
-              height: "40px",
-              width: "40px",
-              borderRadius: "50%",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              backdropFilter: "blur(12px)",
-              transition: "none",
-            }}
-            title={t("profile")}
-          >
-            <User size={20} style={{ color: "#ffffff" }} />
-          </button>
-        ) : (
-          <button
-            onClick={() => setShowRules(true)}
-            className="btn-hover-dark"
-            style={{
-              background: "rgba(255, 255, 255, 0.1)",
-              border: "1px solid rgba(255, 255, 255, 0.2)",
-              color: "white",
-              height: "40px",
-              width: "40px",
-              borderRadius: "50%",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              backdropFilter: "blur(12px)",
-              transition: "none",
-            }}
-            title={t("rules")}
-          >
-            <BookOpen size={20} />
-          </button>
-        )}
-
-        {isApprovedCreator && (
-          <button
-            onClick={() => {
-              const isEn = window.location.pathname.startsWith("/en");
-              const path = isEn ? "/en/creador" : "/creador";
-              window.history.pushState({}, "", path);
-              window.dispatchEvent(new PopStateEvent("popstate"));
-            }}
-            className="btn-hover-dark"
-            style={{
-              background: "rgba(255, 255, 255, 0.1)",
-              border: "1px solid rgba(255, 255, 255, 0.2)",
-              color: "white",
-              height: "40px",
-              width: "40px",
-              borderRadius: "50%",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              backdropFilter: "blur(12px)",
-              transition: "none",
-            }}
-            title="Panel de Creador"
-          >
-            <Trophy size={18} style={{ color: "#ffffff" }} />
-          </button>
-        )}
-
-        {isSuperAdmin && (
-          <button
-            onClick={() => {
-              const isEn = window.location.pathname.startsWith("/en");
-              const path = isEn ? "/en/admin" : "/admin";
-              window.history.pushState({}, "", path);
-              window.dispatchEvent(new PopStateEvent("popstate"));
-            }}
-            className="btn-hover-dark"
-            style={{
-              background: "rgba(255, 255, 255, 0.1)",
-              border: "1px solid rgba(255, 255, 255, 0.2)",
-              color: "white",
-              height: "40px",
-              width: "40px",
-              borderRadius: "50%",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              backdropFilter: "blur(12px)",
-              transition: "none",
-            }}
-            title="Panel de Admin"
-          >
-            <ShieldAlert size={18} style={{ color: "#ffffff" }} />
-          </button>
-        )}
-      </div>
+      {renderLeftNav(false)}
 
       {/* Utility buttons column (Top Right) */}
       <div
