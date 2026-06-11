@@ -17,12 +17,14 @@ import {
   Trophy,
   MessageSquare,
   CalendarDays,
+  Settings,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { supabase } from "../../lib/supabase";
 import { TournamentFormModal } from "./TournamentFormModal";
 import { CreatorProfileModal } from "./CreatorProfileModal";
 import { TwitchButton } from '../shared/TwitchButton';
+import { UtilityButtons } from '../shared/UtilityButtons';
 import { UserStarsModal } from "./UserStarsModal";
 import {
   normalizeTournamentPrizes,
@@ -98,7 +100,7 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
   const [selectedUserStars, setSelectedUserStars] = useState<any | null>(null);
   const [userRoles, setUserRoles] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<
-    "players" | "matches" | "tournaments" | "applications" | "suggestions" | "support" | "fixture"
+    "players" | "matches" | "tournaments" | "applications" | "suggestions" | "support" | "fixture" | "settings"
   >("players");
   const [playerSearchTerm, setPlayerSearchTerm] = useState("");
   const [isMobile, setIsMobile] = useState(
@@ -733,41 +735,8 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
             <span>Volver</span>
           </button>
 
-          {/* Fixed Logout Button (Desktop Right Corner) */}
-          <button
-            onClick={async () => {
-              await supabase.auth.signOut();
-              onBack();
-            }}
-            className="twitch-btn btn-hover-dark profile-nav-btn"
-            style={{
-              position: "fixed",
-              top: "1.5rem",
-              right: "1rem",
-              background: "rgba(239, 68, 68, 0.15)",
-              backdropFilter: "blur(12px)",
-              zIndex: 2000,
-              height: "36px",
-              borderRadius: "0.85rem",
-              padding: "0 0.85rem",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "0.4rem",
-              color: "#ef4848",
-              border: "1px solid rgba(239, 68, 68, 0.3)",
-              boxShadow: "0 4px 14px rgba(239, 68, 68, 0.08)",
-              cursor: "pointer",
-              fontWeight: 900,
-              fontSize: "0.7rem",
-              letterSpacing: "0.05em",
-              textTransform: "uppercase",
-            }}
-            title="Cerrar Sesión"
-          >
-            <LogOut size={14} style={{ transform: "scaleX(-1)" }} />
-            <span>Cerrar Sesión</span>
-          </button>
+          {/* Fixed Utility Buttons (Desktop Right Corner) */}
+          <UtilityButtons />
         </>
       )}
 
@@ -821,32 +790,8 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
                 Volver
               </button>
 
-              {/* Logout Button */}
-              <button
-                onClick={async () => {
-                  await supabase.auth.signOut();
-                  onBack();
-                }}
-                className="btn-hover-dark"
-                style={{
-                  background: "rgba(239, 68, 68, 0.1)",
-                  border: "1px solid rgba(239, 68, 68, 0.2)",
-                  color: "#ef4848",
-                  height: "36px",
-                  borderRadius: "0.75rem",
-                  padding: "0 0.85rem",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.4rem",
-                  fontSize: "0.8rem",
-                  fontWeight: 800,
-                  cursor: "pointer",
-                  boxShadow: "3px 3px 0px #000",
-                }}
-              >
-                <LogOut size={14} style={{ transform: "scaleX(-1)" }} />
-                Cerrar
-              </button>
+              {/* Utility Buttons */}
+              <UtilityButtons isMobile={true} />
             </div>
 
             {/* Mobile Title */}
@@ -1145,6 +1090,36 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
           }
           )
         </button>
+        <button
+          onClick={() => setActiveTab("settings")}
+          style={{
+            background:
+              activeTab === "settings"
+                ? "#a855f7"
+                : "rgba(255, 255, 255, 0.05)",
+            border:
+              activeTab === "settings"
+                ? "none"
+                : "1px solid rgba(255, 255, 255, 0.1)",
+            color:
+              activeTab === "settings"
+                ? "#fff"
+                : "rgba(255, 255, 255, 0.5)",
+            padding: "0.75rem 1.5rem",
+            borderRadius: "1rem",
+            fontWeight: 800,
+            fontSize: "0.9rem",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            gap: "0.5rem",
+            boxShadow:
+              activeTab === "settings" ? "4px 4px 0px #000" : "none",
+            transition: "all 0.2s",
+          }}
+        >
+          <Settings size={18} /> Configuración
+        </button>
       </div>
 
       {/* Content */}
@@ -1207,6 +1182,59 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
           />
         ) : activeTab === "fixture" ? (
           <FixtureTab />
+        ) : activeTab === "settings" ? (
+          <div style={{ animation: "fadeIn 0.3s ease-out" }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h3 className="text-display" style={{ fontSize: '1.5rem', margin: 0, color: '#fff' }}>Configuración</h3>
+              </div>
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '1rem',
+                background: 'rgba(255,255,255,0.03)',
+                border: '1px solid rgba(255,255,255,0.08)',
+                padding: '1.25rem 1.5rem',
+                borderRadius: '1.5rem',
+                marginBottom: '2.5rem'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
+                  <div>
+                    <div style={{ fontWeight: 800, fontSize: '0.95rem', color: '#ef4444' }}>Cerrar sesión</div>
+                    <div style={{ fontSize: '0.8rem', opacity: 0.6, marginTop: '0.2rem' }}>Desconectate de tu cuenta actual de administrador</div>
+                  </div>
+                  
+                  <button
+                    onClick={async () => {
+                      await supabase.auth.signOut();
+                      onBack();
+                    }}
+                    className="btn-hover-dark"
+                    style={{
+                      marginLeft: 'auto',
+                      background: 'rgba(239, 68, 68, 0.1)',
+                      border: '1px solid rgba(239, 68, 68, 0.2)',
+                      color: '#ef4444',
+                      height: '42px',
+                      borderRadius: '1rem',
+                      padding: '0 1.5rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
+                      fontSize: '0.85rem',
+                      fontWeight: 900,
+                      cursor: 'pointer',
+                      boxShadow: '3px 3px 0px #000',
+                      transition: 'all 0.15s ease'
+                    }}
+                  >
+                    <LogOut size={16} style={{ transform: 'scaleX(-1)' }} />
+                    Cerrar sesión
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         ) : null}
 
         {/* DETAILED LOG MODAL */}

@@ -101,7 +101,18 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
   const [predictions, setPredictions] = useState<Record<string, { scoreA: number, scoreB: number, rewarded?: boolean }>>({});
   const [inputs, setInputs] = useState<Record<string, { scoreA: string, scoreB: string }>>({});
   const [isSaving, setIsSaving] = useState<Record<string, boolean>>({});
-  const [rewardCodesModal, setRewardCodesModal] = useState<{ codes: string[], matchDesc: string, packs: number } | null>(null);
+  const [rewardCodesModal, setRewardCodesModal] = useState<{ codes: {code: string, used: boolean}[], matchDesc: string, packs: number } | null>(null);
+
+  const hideSpinnersCSS = `
+    input[type=number]::-webkit-inner-spin-button, 
+    input[type=number]::-webkit-outer-spin-button { 
+      -webkit-appearance: none; 
+      margin: 0; 
+    }
+    input[type=number] {
+      -moz-appearance: textfield;
+    }
+  `;
 
   useEffect(() => {
     audioManager.playTheme();
@@ -238,12 +249,27 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
       setPredictions(prev => ({ ...prev, [matchId]: { ...prev[matchId], rewarded: true } }));
 
       setRewardCodesModal({
-        codes: generatedCodes,
+        codes: generatedCodes.map(c => ({ code: c, used: false })),
         matchDesc: `${teamA} vs ${teamB}`,
         packs: packs
       });
     } else {
       alert("Error al reclamar la recompensa.");
+    }
+  };
+
+  const handleViewRewards = async (matchId: string, packs: number, teamA: string, teamB: string) => {
+    if (!user) return;
+    const { data, error } = await supabase.from('reward_codes').select('code, used').eq('user_id', user.id).eq('source', `prode_match_${matchId}`);
+    
+    if (data && !error) {
+      setRewardCodesModal({
+        codes: data.map(d => ({ code: d.code, used: d.used })),
+        matchDesc: `${teamA} vs ${teamB}`,
+        packs: packs
+      });
+    } else {
+      alert("Error al obtener los códigos.");
     }
   };
 
@@ -329,6 +355,7 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
       color: '#fff',
       boxSizing: 'border-box'
     }}>
+      <style>{hideSpinnersCSS}</style>
       {!isMobile && (
         <button
           onClick={onBack}
@@ -551,80 +578,93 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
 
                     {!isMobile && (
                       <div style={{ flex: '0 0 150px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
-                        {match.status === 'finished' ? (
-                          packsWon > 0 && !isRewarded ? (
-                            <button
-                              onClick={() => handleClaimReward(match.id, packsWon, match.teamA, match.teamB)}
-                              className="btn-hover-dark"
-                              style={{ background: '#ff8c00', color: '#000', border: 'none', padding: '0.5rem 1rem', borderRadius: '0.5rem', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
-                            >
-                              <Layers size={16} /> Reclamar
-                            </button>
-                          ) : packsWon > 0 && isRewarded ? (
-                            <button
-                              disabled
-                              style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.5)', border: 'none', padding: '0.5rem 1rem', borderRadius: '0.5rem', fontWeight: 800, cursor: 'not-allowed', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
-                            >
-                              <Layers size={16} /> Reclamado
-                            </button>
-                          ) : (
-                            <>
-                              <span style={{ fontSize: '0.7rem', textTransform: 'uppercase', opacity: 0.5, fontWeight: 700 }}>Resultado Final</span>
-                              <span style={{ fontSize: '1.25rem', fontWeight: 900, color: '#00f2ff' }}>{match.scoreA} - {match.scoreB}</span>
-                            </>
-                          )
-                        ) : locked || hasPrediction ? (
-                          hasPrediction ? (
-                            <button
-                              disabled
-                              style={{ background: '#00e676', color: '#000', border: 'none', padding: '0.5rem 1rem', borderRadius: '0.5rem', fontWeight: 800, cursor: 'not-allowed', display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: 0.8 }}
-                            >
-                              <Save size={16} /> Guardado
-                            </button>
-                          ) : (
-                            <div style={{ color: '#ff4444', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'center' }}>
-                              Partido Iniciado
-                            </div>
-                          )
-                        ) : (
+                        {!locked && match.status !== 'finished' && (
                           <button
+                            key="btn-save"
                             disabled={!user || isSaving[match.id] || inScoreA === '' || inScoreB === ''}
                             onClick={() => handleSavePrediction(match.id)}
                             style={{ background: '#00f2ff', color: '#000', border: 'none', padding: '0.5rem 1rem', borderRadius: '0.5rem', fontWeight: 800, cursor: (!user || isSaving[match.id] || inScoreA === '' || inScoreB === '') ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: (!user || isSaving[match.id] || inScoreA === '' || inScoreB === '') ? 0.5 : 1 }}
                           >
-                            <Save size={16} /> Guardar
+                            <Save size={16} /> <span>Guardar</span>
                           </button>
+                        )}
+                        
+                        {match.status === 'finished' && (
+                          packsWon > 0 && !isRewarded ? (
+                            <button
+                              key="btn-claim"
+                              onClick={() => handleClaimReward(match.id, packsWon, match.teamA, match.teamB)}
+                              className="btn-hover-dark"
+                              style={{ background: '#ff8c00', color: '#000', border: 'none', padding: '0.5rem 1rem', borderRadius: '0.5rem', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                            >
+                              <Layers size={16} /> <span>Reclamar</span>
+                            </button>
+                          ) : packsWon > 0 && isRewarded ? (
+                            <button
+                              key="btn-claimed"
+                              onClick={() => handleViewRewards(match.id, packsWon, match.teamA, match.teamB)}
+                              className="btn-hover-dark"
+                              style={{ background: 'rgba(255, 140, 0, 0.2)', color: '#ff8c00', border: '1px solid rgba(255, 140, 0, 0.5)', padding: '0.5rem 1rem', borderRadius: '0.5rem', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                            >
+                              <Layers size={16} /> <span>Reclamado</span>
+                            </button>
+                          ) : (
+                            <div key="div-final" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                              <span style={{ fontSize: '0.7rem', textTransform: 'uppercase', opacity: 0.5, fontWeight: 700 }}>Resultado Final</span>
+                              <span style={{ fontSize: '1.25rem', fontWeight: 900, color: '#00f2ff' }}>{match.scoreA} - {match.scoreB}</span>
+                            </div>
+                          )
+                        )}
+
+                        {locked && match.status !== 'finished' && (
+                          hasPrediction ? (
+                            <button
+                              key="btn-saved"
+                              disabled
+                              style={{ background: 'rgba(0, 230, 118, 0.2)', color: '#00e676', border: '1px solid rgba(0, 230, 118, 0.5)', padding: '0.5rem 1rem', borderRadius: '0.5rem', fontWeight: 800, cursor: 'not-allowed', display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: 0.8 }}
+                            >
+                              <Save size={16} /> <span>Guardado</span>
+                            </button>
+                          ) : (
+                            <div key="div-started" style={{ color: '#ff4444', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'center' }}>
+                              Partido Iniciado
+                            </div>
+                          )
                         )}
                       </div>
                     )}
 
                     {isMobile && !locked && match.status !== 'finished' && (
                       <button
+                        key="m-btn-save"
                         disabled={!user || isSaving[match.id] || inScoreA === '' || inScoreB === ''}
                         onClick={() => handleSavePrediction(match.id)}
                         style={{ background: '#00f2ff', color: '#000', border: 'none', padding: '0.5rem 1rem', borderRadius: '0.5rem', fontWeight: 800, cursor: (!user || isSaving[match.id] || inScoreA === '' || inScoreB === '') ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: (!user || isSaving[match.id] || inScoreA === '' || inScoreB === '') ? 0.5 : 1, width: '100%', justifyContent: 'center', marginTop: '1rem' }}
                       >
-                        <Save size={16} /> Guardar Predicción
+                        <Save size={16} /> <span>Guardar Predicción</span>
                       </button>
                     )}
                     {isMobile && match.status === 'finished' && (
                       packsWon > 0 && !isRewarded ? (
                         <button
+                          key="m-btn-claim"
                           onClick={() => handleClaimReward(match.id, packsWon, match.teamA, match.teamB)}
                           className="btn-hover-dark"
                           style={{ background: '#ff8c00', color: '#000', border: 'none', padding: '0.5rem 1rem', borderRadius: '0.5rem', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', width: '100%', marginTop: '1rem' }}
                         >
-                          <Layers size={16} /> Reclamar Recompensa
+                          <Layers size={16} /> <span>Reclamar Recompensa</span>
                         </button>
                       ) : packsWon > 0 && isRewarded ? (
                         <button
-                          disabled
-                          style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.5)', border: 'none', padding: '0.5rem 1rem', borderRadius: '0.5rem', fontWeight: 800, cursor: 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', width: '100%', marginTop: '1rem' }}
+                          key="m-btn-claimed"
+                          onClick={() => handleViewRewards(match.id, packsWon, match.teamA, match.teamB)}
+                          className="btn-hover-dark"
+                          style={{ background: 'rgba(255, 140, 0, 0.2)', color: '#ff8c00', border: '1px solid rgba(255, 140, 0, 0.5)', padding: '0.5rem 1rem', borderRadius: '0.5rem', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', width: '100%', marginTop: '1rem' }}
                         >
-                          <Layers size={16} /> Reclamado
+                          <Layers size={16} /> <span>Reclamado</span>
                         </button>
                       ) : (
-                        <div style={{ marginTop: '1rem', color: '#00f2ff', fontSize: '1rem', fontWeight: 900, textTransform: 'uppercase', textAlign: 'center', width: '100%' }}>
+                        <div key="m-div-final" style={{ marginTop: '1rem', color: '#00f2ff', fontSize: '1rem', fontWeight: 900, textTransform: 'uppercase', textAlign: 'center', width: '100%' }}>
                           RESULTADO FINAL: {match.scoreA} - {match.scoreB}
                         </div>
                       )
@@ -632,13 +672,14 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
                     {isMobile && locked && match.status !== 'finished' && (
                       hasPrediction ? (
                         <button
+                          key="m-btn-saved"
                           disabled
-                          style={{ background: '#00e676', color: '#000', border: 'none', padding: '0.5rem 1rem', borderRadius: '0.5rem', fontWeight: 800, cursor: 'not-allowed', display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: 0.8, width: '100%', justifyContent: 'center', marginTop: '1rem' }}
+                          style={{ background: 'rgba(0, 230, 118, 0.2)', color: '#00e676', border: '1px solid rgba(0, 230, 118, 0.5)', padding: '0.5rem 1rem', borderRadius: '0.5rem', fontWeight: 800, cursor: 'not-allowed', display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: 0.8, width: '100%', justifyContent: 'center', marginTop: '1rem' }}
                         >
-                          <Save size={16} /> Guardado
+                          <Save size={16} /> <span>Guardado</span>
                         </button>
                       ) : (
-                        <div style={{ marginTop: '1rem', color: '#ff4444', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'center', width: '100%' }}>
+                        <div key="m-div-started" style={{ marginTop: '1rem', color: '#ff4444', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'center', width: '100%' }}>
                           Partido Iniciado
                         </div>
                       )
@@ -678,26 +719,27 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
       <TwitchButton />
 
       {rewardCodesModal && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)', padding: '1rem' }}>
-          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} style={{ background: 'linear-gradient(135deg, #1a1a2e, #101018)', padding: '2.5rem', borderRadius: '1.5rem', maxWidth: '450px', width: '100%', textAlign: 'center', border: '1px solid rgba(0,242,255,0.3)', boxShadow: '0 0 30px rgba(0,242,255,0.1)' }}>
-            <h2 style={{ color: '#00f2ff', marginTop: 0, marginBottom: '1rem', fontSize: '2rem', textTransform: 'uppercase', textShadow: '0 0 10px rgba(0,242,255,0.5)' }}>¡Felicidades!</h2>
-            <p style={{ color: '#fff', fontSize: '1.1rem', marginBottom: '1.5rem' }}>
+        <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)', padding: '1rem' }}>
+          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} style={{ background: 'rgba(26, 26, 46, 0.85)', backdropFilter: 'blur(16px)', padding: '2.5rem', borderRadius: '1.5rem', maxWidth: '600px', width: '100%', textAlign: 'center', border: '1px solid rgba(255, 140, 0, 0.3)', boxShadow: '0 0 30px rgba(255, 140, 0, 0.15)' }}>
+            <h2 style={{ color: '#ff8c00', marginTop: 0, marginBottom: '0.5rem', fontSize: '2rem', textTransform: 'uppercase', textShadow: '0 0 10px rgba(255, 140, 0, 0.5)' }}>¡Felicidades!</h2>
+            <p style={{ color: '#fff', fontSize: '1.1rem', marginBottom: '0.75rem' }}>
               Acertaste tu predicción del partido <strong>{rewardCodesModal.matchDesc}</strong> y ganaste <strong>{rewardCodesModal.packs} sobres</strong> para el mazo.
             </p>
             <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.9rem', marginBottom: '1rem' }}>
-              Estos son tus códigos de recompensa. ¡Anotalos y canjealos en la pantalla de Mazo!
+              Estos son tus códigos de recompensa. ¡Anotalos y canjealos en la <a href="/mazo" target="_blank" rel="noopener noreferrer" style={{ color: '#ff8c00', textDecoration: 'none', fontWeight: 800 }} className="hover-underline">pantalla de Mazo</a>!
             </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '2rem' }}>
-              {rewardCodesModal.codes.map((code, idx) => (
-                <div key={idx} style={{ background: 'rgba(0,0,0,0.5)', padding: '1rem', borderRadius: '0.75rem', border: '1px dashed rgba(0,242,255,0.4)', fontSize: '1.5rem', fontWeight: 900, letterSpacing: '0.2em', color: '#fff' }}>
-                  {code}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem', marginBottom: '2rem' }}>
+              {rewardCodesModal.codes.map((item, idx) => (
+                <div key={idx} style={{ background: 'rgba(0,0,0,0.5)', padding: isMobile ? '0.75rem 0.25rem' : '1rem 0.5rem', borderRadius: '0.75rem', border: '1px dashed rgba(255, 140, 0, 0.4)', fontSize: isMobile ? '1.1rem' : '1.35rem', fontWeight: 900, letterSpacing: isMobile ? '0.05em' : '0.1em', color: item.used ? 'rgba(255,255,255,0.3)' : '#fff', textDecoration: item.used ? 'line-through' : 'none', position: 'relative' }}>
+                  {item.code}
+                  {item.used && <div style={{ position: 'absolute', top: '-8px', right: '-8px', background: '#ff4444', color: '#fff', fontSize: '0.6rem', padding: '0.2rem 0.4rem', borderRadius: '0.5rem', fontWeight: 'bold' }}>USADO</div>}
                 </div>
               ))}
             </div>
             <button
               onClick={() => setRewardCodesModal(null)}
               className="btn-hover-dark"
-              style={{ width: '100%', background: '#00f2ff', color: '#000', border: 'none', padding: '1rem', borderRadius: '1rem', fontSize: '1.1rem', fontWeight: 900, cursor: 'pointer', textTransform: 'uppercase' }}
+              style={{ width: '100%', background: '#ff8c00', color: '#000', border: 'none', padding: '1rem', borderRadius: '1rem', fontSize: '1.1rem', fontWeight: 900, cursor: 'pointer', textTransform: 'uppercase' }}
             >
               ¡Entendido!
             </button>

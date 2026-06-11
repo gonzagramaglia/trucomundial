@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { supabase } from '../../../lib/supabase';
 import { fixtureMatches } from '../../../lib/fixtureData';
-import { Search, Save } from 'lucide-react';
+import { Search, Save, Check } from 'lucide-react';
 
 export const FixtureTab: React.FC = () => {
-  const [results, setResults] = useState<Record<string, { scoreA: number; scoreB: number; status: string }>>({});
+  const [results, setResults] = useState<Record<string, { scoreA?: number; scoreB?: number; status: string }>>({});
   const [loading, setLoading] = useState(true);
   const [savingId, setSavingId] = useState<string | null>(null);
+  const [savedMap, setSavedMap] = useState<Record<string, boolean>>({});
   const [searchQuery, setSearchQuery] = useState('');
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
 
@@ -21,7 +22,7 @@ export const FixtureTab: React.FC = () => {
       const { data, error } = await supabase.from('fixture_results').select('*');
       if (error) throw error;
       
-      const resultsMap: Record<string, { scoreA: number; scoreB: number; status: string }> = {};
+      const resultsMap: Record<string, { scoreA?: number; scoreB?: number; status: string }> = {};
       data?.forEach(row => {
         resultsMap[row.match_id] = {
           scoreA: row.score_a,
@@ -42,14 +43,14 @@ export const FixtureTab: React.FC = () => {
   }, []);
 
   const handleScoreChange = (matchId: string, team: 'A' | 'B', val: string) => {
-    const num = parseInt(val);
-    if (isNaN(num)) return;
+    const cleaned = val.replace(/[^0-9]/g, '').slice(0, 1);
+    const num = cleaned === '' ? undefined : parseInt(cleaned);
     
     setResults(prev => ({
       ...prev,
       [matchId]: {
-        scoreA: team === 'A' ? num : (prev[matchId]?.scoreA || 0),
-        scoreB: team === 'B' ? num : (prev[matchId]?.scoreB || 0),
+        scoreA: team === 'A' ? num : prev[matchId]?.scoreA,
+        scoreB: team === 'B' ? num : prev[matchId]?.scoreB,
         status: 'finished'
       }
     }));
@@ -71,14 +72,10 @@ export const FixtureTab: React.FC = () => {
       
       if (error) throw error;
       
-      // Update local state temporarily to show success
-      const btn = document.getElementById(`btn-save-${matchId}`);
-      if (btn) {
-        btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Guardado';
-        setTimeout(() => {
-          btn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg> Guardar';
-        }, 2000);
-      }
+      setSavedMap(prev => ({ ...prev, [matchId]: true }));
+      setTimeout(() => {
+        setSavedMap(prev => ({ ...prev, [matchId]: false }));
+      }, 2000);
     } catch (err: any) {
       alert("Error guardando el resultado: " + err.message);
     } finally {
@@ -173,8 +170,9 @@ export const FixtureTab: React.FC = () => {
               {/* Score Inputs */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(0,0,0,0.5)', padding: '0.5rem', borderRadius: '0.5rem' }}>
                 <input 
-                  type="number"
-                  min="0"
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={1}
                   value={results[match.id]?.scoreA ?? ''}
                   onChange={(e) => handleScoreChange(match.id, 'A', e.target.value)}
                   style={{
@@ -186,13 +184,15 @@ export const FixtureTab: React.FC = () => {
                     borderRadius: '0.5rem',
                     color: 'white',
                     fontSize: '1.25rem',
-                    fontWeight: 'bold'
+                    fontWeight: 'bold',
+                    padding: 0
                   }}
                 />
                 <span style={{ opacity: 0.5, fontWeight: 'bold' }}>-</span>
                 <input 
-                  type="number"
-                  min="0"
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={1}
                   value={results[match.id]?.scoreB ?? ''}
                   onChange={(e) => handleScoreChange(match.id, 'B', e.target.value)}
                   style={{
@@ -204,7 +204,8 @@ export const FixtureTab: React.FC = () => {
                     borderRadius: '0.5rem',
                     color: 'white',
                     fontSize: '1.25rem',
-                    fontWeight: 'bold'
+                    fontWeight: 'bold',
+                    padding: 0
                   }}
                 />
               </div>
@@ -240,11 +241,13 @@ export const FixtureTab: React.FC = () => {
                 }}
               >
                 {savingId === match.id ? (
-                  <div style={{ width: '16px', height: '16px', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+                  <div key="spinner" style={{ width: '16px', height: '16px', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+                ) : savedMap[match.id] ? (
+                  <Check key="check" size={16} />
                 ) : (
-                  <Save size={16} />
+                  <Save key="icon" size={16} />
                 )}
-                Guardar
+                <span>{savedMap[match.id] ? 'Guardado' : 'Guardar'}</span>
               </button>
             </div>
           </div>

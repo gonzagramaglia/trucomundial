@@ -814,7 +814,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       </button>
       )}
 
-      {user && !showProfile && (
+      {user && !showProfile && !showAdmin && (
         <button
           onClick={() => {
             const isEn = window.location.pathname.startsWith("/en");
@@ -845,7 +845,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         </button>
       )}
 
-      {isApprovedCreator && (
+      {isApprovedCreator && !showCreator && !showAdmin && (
         <button
           onClick={() => {
             const isEn = window.location.pathname.startsWith("/en");
@@ -874,7 +874,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         </button>
       )}
 
-      {isSuperAdmin && (
+      {isSuperAdmin && !showAdmin && (
         <button
           onClick={() => {
             const isEn = window.location.pathname.startsWith("/en");
