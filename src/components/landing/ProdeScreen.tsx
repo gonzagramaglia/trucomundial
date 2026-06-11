@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Calendar, Globe, Search, Home, Trophy, Save, AlertCircle } from 'lucide-react';
+import { Calendar, Globe, Search, Home, Trophy, Save, AlertCircle, Layers } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { TwitchButton } from '../shared/TwitchButton';
 import { fixtureMatches } from '../../lib/fixtureData';
@@ -147,8 +147,6 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
     const checkRewards = async () => {
       if (!user || Object.keys(liveResults).length === 0 || Object.keys(predictions).length === 0) return;
       
-      const toReward: { matchId: string, packs: number, teamA: string, teamB: string }[] = [];
-
       for (const matchId in predictions) {
         const pred = predictions[matchId];
         const res = liveResults[matchId];
@@ -162,41 +160,12 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
           if (exactMatch) packs = 3;
           else if (normalMatch) packs = 1;
 
-          if (packs > 0) {
-            const matchDetails = fixtureMatches.find(m => m.id === matchId);
-            toReward.push({ matchId, packs, teamA: matchDetails?.teamA || '', teamB: matchDetails?.teamB || '' });
-          } else {
+          // If packs is 0, we can mark it as rewarded so we don't check again.
+          // If packs > 0, we wait for the user to manually claim it!
+          if (packs === 0) {
             await supabase.from('prode_predictions').update({ rewarded: true }).eq('user_id', user.id).eq('match_id', matchId);
             setPredictions(prev => ({ ...prev, [matchId]: { ...prev[matchId], rewarded: true } }));
           }
-        }
-      }
-
-      for (const reward of toReward) {
-        const generatedCodes = [];
-        for (let i = 0; i < reward.packs; i++) {
-          const code = Math.random().toString(36).substring(2, 6).toUpperCase();
-          generatedCodes.push(code);
-        }
-
-        const codeInserts = generatedCodes.map(code => ({
-          code,
-          user_id: user.id,
-          used: false,
-          source: `prode_match_${reward.matchId}`
-        }));
-        
-        const { error } = await supabase.from('reward_codes').insert(codeInserts);
-        if (!error) {
-          await supabase.from('prode_predictions').update({ rewarded: true }).eq('user_id', user.id).eq('match_id', reward.matchId);
-          setPredictions(prev => ({ ...prev, [reward.matchId]: { ...prev[reward.matchId], rewarded: true } }));
-
-          setRewardCodesModal({
-            codes: generatedCodes,
-            matchDesc: `${reward.teamA} vs ${reward.teamB}`,
-            packs: reward.packs
-          });
-          break; // Show one at a time
         }
       }
     };
@@ -239,12 +208,43 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
       if (!error) {
         setPredictions(prev => ({ ...prev, [matchId]: { scoreA, scoreB } }));
       } else {
-        alert("Error al guardar la predicción. Asegúrate de haber creado la tabla prode_predictions.");
+        console.error("Error completo de Supabase:", error);
+        alert(`Error al guardar la predicción: ${error.message}\n(Revisá la consola para más detalles)`);
       }
     } catch (err) {
       alert("Error de conexión.");
     }
     setIsSaving(prev => ({ ...prev, [matchId]: false }));
+  };
+
+  const handleClaimReward = async (matchId: string, packs: number, teamA: string, teamB: string) => {
+    if (!user) return;
+    const generatedCodes = [];
+    for (let i = 0; i < packs; i++) {
+      const code = Math.random().toString(36).substring(2, 6).toUpperCase();
+      generatedCodes.push(code);
+    }
+
+    const codeInserts = generatedCodes.map(code => ({
+      code,
+      user_id: user.id,
+      used: false,
+      source: `prode_match_${matchId}`
+    }));
+    
+    const { error } = await supabase.from('reward_codes').insert(codeInserts);
+    if (!error) {
+      await supabase.from('prode_predictions').update({ rewarded: true }).eq('user_id', user.id).eq('match_id', matchId);
+      setPredictions(prev => ({ ...prev, [matchId]: { ...prev[matchId], rewarded: true } }));
+
+      setRewardCodesModal({
+        codes: generatedCodes,
+        matchDesc: `${teamA} vs ${teamB}`,
+        packs: packs
+      });
+    } else {
+      alert("Error al reclamar la recompensa.");
+    }
   };
 
   const groupedMatches = useMemo(() => {
@@ -480,8 +480,19 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
                 const locked = started || hasPrediction;
                 const pScoreA = predictions[match.id]?.scoreA;
                 const pScoreB = predictions[match.id]?.scoreB;
+                const isRewarded = predictions[match.id]?.rewarded;
                 const inScoreA = inputs[match.id]?.scoreA ?? '';
                 const inScoreB = inputs[match.id]?.scoreB ?? '';
+
+                let packsWon = 0;
+                let wonExact = false;
+                if (match.status === 'finished' && hasPrediction) {
+                  const exactMatch = pScoreA === match.scoreA! && pScoreB === match.scoreB!;
+                  const predWinner = pScoreA > pScoreB ? 'A' : (pScoreA < pScoreB ? 'B' : 'Draw');
+                  const resWinner = match.scoreA! > match.scoreB! ? 'A' : (match.scoreA! < match.scoreB! ? 'B' : 'Draw');
+                  if (exactMatch) { packsWon = 3; wonExact = true; }
+                  else if (predWinner === resWinner) packsWon = 1;
+                }
 
                 return (
                   <div key={match.id} style={{
@@ -498,7 +509,12 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
                         <span style={{ fontSize: '1.5rem', width: '32px', textAlign: 'center' }}>{match.flagA}</span>
                       </div>
 
-                      <div style={{ padding: '0 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: '80px' }}>
+                      <div style={{ padding: '0 1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minWidth: '80px', gap: '0.25rem' }}>
+                        {match.status === 'finished' && packsWon > 0 && (
+                          <div style={{ color: '#00e676', fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', textAlign: 'center', whiteSpace: 'nowrap' }}>
+                            {wonExact ? "¡Acertaste el resultado exacto!" : "¡Acertaste el ganador!"}
+                          </div>
+                        )}
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                           <input
                             type="text" inputMode="numeric" maxLength={1} disabled={locked || !user}
@@ -520,6 +536,11 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
                             style={{ width: '40px', height: '40px', textAlign: 'center', padding: 0, background: (locked || !user) ? 'transparent' : 'rgba(0,0,0,0.5)', border: (locked || !user) ? 'none' : '1px solid rgba(255,255,255,0.2)', color: '#fff', borderRadius: '0.5rem', fontWeight: 800, fontSize: '1.2rem' }}
                           />
                         </div>
+                        {match.status === 'finished' && packsWon > 0 && (
+                          <div style={{ color: '#ff8c00', fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', textAlign: 'center', whiteSpace: 'nowrap' }}>
+                            Ganaste {packsWon} {packsWon === 1 ? 'sobre' : 'sobres'}
+                          </div>
+                        )}
                       </div>
 
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1, justifyContent: 'flex-start' }}>
@@ -531,14 +552,40 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
                     {!isMobile && (
                       <div style={{ flex: '0 0 150px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
                         {match.status === 'finished' ? (
-                          <>
-                            <span style={{ fontSize: '0.7rem', textTransform: 'uppercase', opacity: 0.5, fontWeight: 700 }}>Resultado Final</span>
-                            <span style={{ fontSize: '1.25rem', fontWeight: 900, color: '#00f2ff' }}>{match.scoreA} - {match.scoreB}</span>
-                          </>
+                          packsWon > 0 && !isRewarded ? (
+                            <button
+                              onClick={() => handleClaimReward(match.id, packsWon, match.teamA, match.teamB)}
+                              className="btn-hover-dark"
+                              style={{ background: '#ff8c00', color: '#000', border: 'none', padding: '0.5rem 1rem', borderRadius: '0.5rem', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                            >
+                              <Layers size={16} /> Reclamar
+                            </button>
+                          ) : packsWon > 0 && isRewarded ? (
+                            <button
+                              disabled
+                              style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.5)', border: 'none', padding: '0.5rem 1rem', borderRadius: '0.5rem', fontWeight: 800, cursor: 'not-allowed', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                            >
+                              <Layers size={16} /> Reclamado
+                            </button>
+                          ) : (
+                            <>
+                              <span style={{ fontSize: '0.7rem', textTransform: 'uppercase', opacity: 0.5, fontWeight: 700 }}>Resultado Final</span>
+                              <span style={{ fontSize: '1.25rem', fontWeight: 900, color: '#00f2ff' }}>{match.scoreA} - {match.scoreB}</span>
+                            </>
+                          )
                         ) : locked || hasPrediction ? (
-                          <div style={{ color: started ? '#ff4444' : '#00f2ff', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'center' }}>
-                            {started ? 'Partido Iniciado' : 'Predicción Guardada'}
-                          </div>
+                          hasPrediction ? (
+                            <button
+                              disabled
+                              style={{ background: '#00e676', color: '#000', border: 'none', padding: '0.5rem 1rem', borderRadius: '0.5rem', fontWeight: 800, cursor: 'not-allowed', display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: 0.8 }}
+                            >
+                              <Save size={16} /> Guardado
+                            </button>
+                          ) : (
+                            <div style={{ color: '#ff4444', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'center' }}>
+                              Partido Iniciado
+                            </div>
+                          )
                         ) : (
                           <button
                             disabled={!user || isSaving[match.id] || inScoreA === '' || inScoreB === ''}
@@ -561,14 +608,40 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
                       </button>
                     )}
                     {isMobile && match.status === 'finished' && (
-                      <div style={{ marginTop: '1rem', color: '#00f2ff', fontSize: '1rem', fontWeight: 900, textTransform: 'uppercase', textAlign: 'center', width: '100%' }}>
-                        RESULTADO FINAL: {match.scoreA} - {match.scoreB}
-                      </div>
+                      packsWon > 0 && !isRewarded ? (
+                        <button
+                          onClick={() => handleClaimReward(match.id, packsWon, match.teamA, match.teamB)}
+                          className="btn-hover-dark"
+                          style={{ background: '#ff8c00', color: '#000', border: 'none', padding: '0.5rem 1rem', borderRadius: '0.5rem', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', width: '100%', marginTop: '1rem' }}
+                        >
+                          <Layers size={16} /> Reclamar Recompensa
+                        </button>
+                      ) : packsWon > 0 && isRewarded ? (
+                        <button
+                          disabled
+                          style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.5)', border: 'none', padding: '0.5rem 1rem', borderRadius: '0.5rem', fontWeight: 800, cursor: 'not-allowed', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', width: '100%', marginTop: '1rem' }}
+                        >
+                          <Layers size={16} /> Reclamado
+                        </button>
+                      ) : (
+                        <div style={{ marginTop: '1rem', color: '#00f2ff', fontSize: '1rem', fontWeight: 900, textTransform: 'uppercase', textAlign: 'center', width: '100%' }}>
+                          RESULTADO FINAL: {match.scoreA} - {match.scoreB}
+                        </div>
+                      )
                     )}
                     {isMobile && locked && match.status !== 'finished' && (
-                      <div style={{ marginTop: '1rem', color: started ? '#ff4444' : '#00f2ff', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'center', width: '100%' }}>
-                        {started ? 'Partido Iniciado' : 'Predicción Guardada'}
-                      </div>
+                      hasPrediction ? (
+                        <button
+                          disabled
+                          style={{ background: '#00e676', color: '#000', border: 'none', padding: '0.5rem 1rem', borderRadius: '0.5rem', fontWeight: 800, cursor: 'not-allowed', display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: 0.8, width: '100%', justifyContent: 'center', marginTop: '1rem' }}
+                        >
+                          <Save size={16} /> Guardado
+                        </button>
+                      ) : (
+                        <div style={{ marginTop: '1rem', color: '#ff4444', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'center', width: '100%' }}>
+                          Partido Iniciado
+                        </div>
+                      )
                     )}
                   </div>
                 );
