@@ -906,7 +906,7 @@ const resources = {
       "error_sending_suggestion": "Error al enviar la sugerencia: ",
       "fixture_desc": "Calendario oficial de los partidos de la Copa del Mundo.",
       "fixture_info": "Al finalizar cada partido, <a href=\"/votar\" style=\"color: #ffdf00; text-decoration: none; font-weight: bold;\">sumarán estrellas de base en el Ranking Global</a> las cartas de los equipos que ganen (+2), y de los equipos que empaten (+1).",
-      "ranking_fixture_info": "Al finalizar cada partido del <a href=\"/fixture\" style=\"color: #00f2ff; text-decoration: none; font-weight: bold;\">fixture de la Copa del Mundo 2026</a>, sumarán <strong>+2 estrellas de base</strong> las cartas de los equipos que ganen, y <strong>+1 estrella</strong> aquellas que empaten.",
+      "ranking_fixture_info": "Al finalizar <a href=\"/prode\" style=\"color: #00f2ff; text-decoration: none; font-weight: bold;\">cada partido de la Copa del Mundo 2026</a>, sumarán <strong>+2 estrellas de base</strong> las cartas de los equipos que ganen, y <strong>+1 estrella</strong> aquellas que empaten.",
       "search_team": "Buscar equipo, grupo o fecha...",
       "group_stage": "Fase de Grupos",
 

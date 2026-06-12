@@ -126,6 +126,7 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
   const [activeTab, setActiveTab] = useState<TabType>('groups');
   const [searchQuery, setSearchQuery] = useState('');
+  const [showFinishedOnly, setShowFinishedOnly] = useState(false);
   const [liveResults, setLiveResults] = useState<Record<string, { scoreA: number, scoreB: number, status: string }>>({});
 
   // Prode states
@@ -318,15 +319,20 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
     });
 
     if (searchQuery) {
-      const q = searchQuery.toLowerCase();
+      const removeAccents = (str: string) => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      const q = removeAccents(searchQuery.toLowerCase());
       const groupSearch = q.replace('grupo', 'group');
       filtered = filtered.filter(m =>
-        m.teamA.toLowerCase().includes(q) ||
-        m.teamB.toLowerCase().includes(q) ||
-        m.group.toLowerCase().includes(q) ||
-        m.group.toLowerCase().includes(groupSearch) ||
-        m.date.toLowerCase().includes(q)
+        removeAccents(m.teamA.toLowerCase()).includes(q) ||
+        removeAccents(m.teamB.toLowerCase()).includes(q) ||
+        removeAccents(m.group.toLowerCase()).includes(q) ||
+        removeAccents(m.group.toLowerCase()).includes(groupSearch) ||
+        removeAccents(m.date.toLowerCase()).includes(q)
       );
+    }
+
+    if (showFinishedOnly) {
+      filtered = filtered.filter(m => m.status === 'finished');
     }
 
     filtered.sort((a, b) => {
@@ -348,7 +354,7 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
       date,
       matches: groups[date]
     }));
-  }, [searchQuery, liveResults]);
+  }, [searchQuery, liveResults, showFinishedOnly]);
 
   const renderTab = (id: TabType, label: string, Icon: any) => (
     <button
@@ -548,6 +554,28 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
               onBlur={(e) => e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)'}
             />
           </div>
+          <button
+            onClick={() => setShowFinishedOnly(!showFinishedOnly)}
+            style={{
+              background: showFinishedOnly ? '#fff' : 'rgba(255, 255, 255, 0.05)',
+              border: showFinishedOnly ? '1px solid #fff' : '1px solid rgba(255, 255, 255, 0.1)',
+              color: showFinishedOnly ? '#000' : '#fff',
+              padding: '0 1.25rem',
+              borderRadius: '1rem',
+              fontWeight: 700,
+              fontSize: '0.85rem',
+              cursor: 'pointer',
+              height: '46px',
+              transition: 'all 0.2s ease',
+              whiteSpace: 'nowrap',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '0.5rem'
+            }}
+          >
+            FILTRAR PARTIDOS FINALIZADOS
+          </button>
         </div>
       )}
 

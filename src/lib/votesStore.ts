@@ -10,20 +10,11 @@ export const gameVotesRegistry: Record<string, number> = {};
 
 export let topCardsSet: Set<string> = new Set();
 
-function getBaseStars(cardId: string): number {
-  const card = CARDS.find(c => c.id === cardId);
-  if (!card) return 0;
-  if (card.country === 'Argentina') return 3;
-  if (card.country === 'Francia') return 2;
-  if (card.country === 'Croacia') return 1;
-  return 0;
-}
 
 function calculateTopCards(registry: Record<string, number>) {
   const allTotals = CARDS.map(c => {
-    const community = registry[c.id] || 0;
-    const base = getBaseStars(c.id);
-    return { id: c.id, total: community + base };
+    const total = registry[c.id] || 0;
+    return { id: c.id, total };
   });
 
   const sorted = allTotals.sort((a, b) => b.total - a.total);
@@ -89,13 +80,11 @@ export function getCardVotes(cardId: string): number {
   // Card IDs themselves may contain underscores (e.g. "nico_williams"), so we cannot
   // use split('_')[0] — instead we remove only the trailing numeric/remote suffix.
   const baseId = cardId.replace(/(_rem|_cpu)?_\d+$/, '');
-  const baseStars = getBaseStars(baseId);
 
   if (isGameActive && tournamentVotesSnapshot) {
-    return (tournamentVotesSnapshot[baseId] || 0) + baseStars;
+    return (tournamentVotesSnapshot[baseId] || 0);
   }
-  const extra = (isGameActive ? gameVotesRegistry[baseId] : votesRegistry[baseId]) || 0;
-  return extra + baseStars;
+  return (isGameActive ? gameVotesRegistry[baseId] : votesRegistry[baseId]) || 0;
 }
 
 export function isTopCard(cardId: string): boolean {

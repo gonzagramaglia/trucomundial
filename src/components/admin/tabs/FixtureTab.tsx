@@ -23,14 +23,17 @@ export const FixtureTab: React.FC = () => {
       if (error) throw error;
       
       const resultsMap: Record<string, { scoreA?: number; scoreB?: number; status: string }> = {};
+      const initialSaved: Record<string, boolean> = {};
       data?.forEach(row => {
         resultsMap[row.match_id] = {
           scoreA: row.score_a,
           scoreB: row.score_b,
           status: row.status
         };
+        initialSaved[row.match_id] = true;
       });
       setResults(resultsMap);
+      setSavedMap(initialSaved);
     } catch (err) {
       console.error("Error fetching fixture results:", err);
     } finally {
@@ -73,9 +76,6 @@ export const FixtureTab: React.FC = () => {
       if (error) throw error;
       
       setSavedMap(prev => ({ ...prev, [matchId]: true }));
-      setTimeout(() => {
-        setSavedMap(prev => ({ ...prev, [matchId]: false }));
-      }, 2000);
     } catch (err: any) {
       alert("Error guardando el resultado: " + err.message);
     } finally {
@@ -175,17 +175,19 @@ export const FixtureTab: React.FC = () => {
                   maxLength={1}
                   value={results[match.id]?.scoreA ?? ''}
                   onChange={(e) => handleScoreChange(match.id, 'A', e.target.value)}
+                  disabled={savedMap[match.id]}
                   style={{
                     width: '40px',
                     height: '40px',
                     textAlign: 'center',
-                    background: 'rgba(255,255,255,0.1)',
-                    border: '1px solid rgba(255,255,255,0.2)',
+                    background: savedMap[match.id] ? 'transparent' : 'rgba(255,255,255,0.1)',
+                    border: savedMap[match.id] ? 'none' : '1px solid rgba(255,255,255,0.2)',
                     borderRadius: '0.5rem',
                     color: 'white',
                     fontSize: '1.25rem',
                     fontWeight: 'bold',
-                    padding: 0
+                    padding: 0,
+                    opacity: savedMap[match.id] ? 0.8 : 1
                   }}
                 />
                 <span style={{ opacity: 0.5, fontWeight: 'bold' }}>-</span>
@@ -195,17 +197,19 @@ export const FixtureTab: React.FC = () => {
                   maxLength={1}
                   value={results[match.id]?.scoreB ?? ''}
                   onChange={(e) => handleScoreChange(match.id, 'B', e.target.value)}
+                  disabled={savedMap[match.id]}
                   style={{
                     width: '40px',
                     height: '40px',
                     textAlign: 'center',
-                    background: 'rgba(255,255,255,0.1)',
-                    border: '1px solid rgba(255,255,255,0.2)',
+                    background: savedMap[match.id] ? 'transparent' : 'rgba(255,255,255,0.1)',
+                    border: savedMap[match.id] ? 'none' : '1px solid rgba(255,255,255,0.2)',
                     borderRadius: '0.5rem',
                     color: 'white',
                     fontSize: '1.25rem',
                     fontWeight: 'bold',
-                    padding: 0
+                    padding: 0,
+                    opacity: savedMap[match.id] ? 0.8 : 1
                   }}
                 />
               </div>
@@ -221,21 +225,21 @@ export const FixtureTab: React.FC = () => {
             <div style={{ flex: isMobile ? 'none' : '0 0 100px', display: 'flex', justifyContent: 'center', width: isMobile ? '100%' : 'auto' }}>
               <button
                 id={`btn-save-${match.id}`}
-                disabled={results[match.id]?.scoreA === undefined || results[match.id]?.scoreB === undefined || savingId === match.id}
+                disabled={results[match.id]?.scoreA === undefined || results[match.id]?.scoreB === undefined || savingId === match.id || savedMap[match.id]}
                 onClick={() => handleSave(match.id)}
                 className="btn-hover-dark"
                 style={{
-                  background: 'rgba(34, 197, 94, 0.2)',
-                  border: '1px solid rgba(34, 197, 94, 0.5)',
-                  color: '#4ade80',
+                  background: savedMap[match.id] ? 'rgba(0, 230, 118, 0.2)' : 'rgba(34, 197, 94, 0.2)',
+                  border: savedMap[match.id] ? '1px solid rgba(0, 230, 118, 0.5)' : '1px solid rgba(34, 197, 94, 0.5)',
+                  color: savedMap[match.id] ? '#00e676' : '#4ade80',
                   padding: '0.5rem 1rem',
                   borderRadius: '0.5rem',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '0.5rem',
                   fontWeight: 'bold',
-                  cursor: (results[match.id]?.scoreA === undefined || results[match.id]?.scoreB === undefined || savingId === match.id) ? 'not-allowed' : 'pointer',
-                  opacity: (results[match.id]?.scoreA === undefined || results[match.id]?.scoreB === undefined) ? 0.5 : 1,
+                  cursor: (results[match.id]?.scoreA === undefined || results[match.id]?.scoreB === undefined || savingId === match.id || savedMap[match.id]) ? 'not-allowed' : 'pointer',
+                  opacity: (results[match.id]?.scoreA === undefined || results[match.id]?.scoreB === undefined || savedMap[match.id]) ? 0.6 : 1,
                   width: isMobile ? '100%' : 'auto',
                   justifyContent: 'center'
                 }}

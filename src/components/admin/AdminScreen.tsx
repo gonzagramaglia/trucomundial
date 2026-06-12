@@ -101,7 +101,7 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
   const [userRoles, setUserRoles] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<
     "players" | "matches" | "tournaments" | "applications" | "suggestions" | "support" | "fixture" | "settings"
-  >("players");
+  >("fixture");
   const [playerSearchTerm, setPlayerSearchTerm] = useState("");
   const [isMobile, setIsMobile] = useState(
     typeof window !== "undefined" ? window.innerWidth < 768 : false,
@@ -889,6 +889,33 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
         }}
       >
         <button
+          onClick={() => setActiveTab("fixture")}
+          style={{
+            background:
+              activeTab === "fixture"
+                ? "#a855f7"
+                : "rgba(255, 255, 255, 0.05)",
+            border:
+              activeTab === "fixture"
+                ? "none"
+                : "1px solid rgba(255, 255, 255, 0.1)",
+            color:
+              activeTab === "fixture" ? "#fff" : "rgba(255, 255, 255, 0.5)",
+            padding: "0.75rem 1.5rem",
+            borderRadius: "1rem",
+            fontWeight: 800,
+            fontSize: "0.9rem",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            gap: "0.5rem",
+            boxShadow: activeTab === "fixture" ? "4px 4px 0px #000" : "none",
+            transition: "all 0.2s",
+          }}
+        >
+          <CalendarDays size={18} /> Prode
+        </button>
+        <button
           onClick={() => setActiveTab("players")}
           style={{
             background:
@@ -938,36 +965,7 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
         >
           <Swords size={18} /> Partidas Globales ({history.length})
         </button>
-        <button
-          onClick={() => setActiveTab("fixture")}
-          style={{
-            background:
-              activeTab === "fixture"
-                ? "#a855f7"
-                : "rgba(255, 255, 255, 0.05)",
-            border:
-              activeTab === "fixture"
-                ? "none"
-                : "1px solid rgba(255, 255, 255, 0.1)",
-            color:
-              activeTab === "fixture"
-                ? "#fff"
-                : "rgba(255, 255, 255, 0.5)",
-            padding: "0.75rem 1.5rem",
-            borderRadius: "1rem",
-            fontWeight: 800,
-            fontSize: "0.9rem",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            gap: "0.5rem",
-            boxShadow:
-              activeTab === "fixture" ? "4px 4px 0px #000" : "none",
-            transition: "all 0.2s",
-          }}
-        >
-          <CalendarDays size={18} /> Prode
-        </button>
+
         <button
           onClick={() => setActiveTab("applications")}
           style={{
