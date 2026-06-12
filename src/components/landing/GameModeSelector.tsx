@@ -71,7 +71,7 @@ export const GameModeSelector: React.FC<GameModeSelectorProps> = ({ selectedMode
           }}
         >
           <img src="/google-icon.png" alt="Google" style={{ width: 24, height: 24 }} />
-          INICIÁ SESIÓN EN GOOGLE
+          {t("login_with_google")}
         </Button>
       )}
 
@@ -114,7 +114,7 @@ export const GameModeSelector: React.FC<GameModeSelectorProps> = ({ selectedMode
           }}
         >
           <Layers size={20} />
-          Armá/Personalizá tu mazo
+          {t("customize_deck")}
         </Button>
       </div>
 
@@ -155,7 +155,7 @@ export const GameModeSelector: React.FC<GameModeSelectorProps> = ({ selectedMode
         }}
       >
         {showRoadmapAsLocked ? <Lock size={20} style={{ opacity: 0.5 }} /> : <Calendar size={20} />}
-        GANÁ SOBRES CON EL PRODE
+        {t("win_packs_prode")}
       </Button>
     </div>
   );

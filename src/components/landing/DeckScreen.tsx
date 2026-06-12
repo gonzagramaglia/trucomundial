@@ -179,11 +179,11 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
 
   const handleRedeemCode = async () => {
     if (!user) {
-      setRedeemError("Debes iniciar sesión para canjear códigos.");
+      setRedeemError(t("error_login_redeem"));
       return;
     }
     if (redeemCode.length !== 4) {
-      setRedeemError("El código debe tener 4 caracteres.");
+      setRedeemError(t("error_code_length"));
       return;
     }
     setRedeeming(true);
@@ -199,7 +199,7 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
         .single();
 
       if (error || !data) {
-        setRedeemError("Código inválido o ya usado.");
+        setRedeemError(t("error_invalid_code"));
         setRedeeming(false);
         return;
       }
@@ -211,7 +211,7 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
 
       await buyMysteryCard();
     } catch (err) {
-      setRedeemError("Error de conexión al canjear el código.");
+      setRedeemError(t("error_redeem_connection"));
       setRedeeming(false);
     }
   };
@@ -221,7 +221,7 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
 
     const lockedCards = CARDS.map(c => c.id).filter(id => !unlockedCards.includes(id) && !TOP_CARDS.includes(id));
     if (lockedCards.length === 0) {
-      alert("¡Ya tenés todas las cartas desbloqueadas!");
+      alert(t("alert_all_cards_unlocked"));
       return;
     }
 
@@ -350,12 +350,12 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
           <Layers size={36} style={{ color: '#f97316', filter: 'drop-shadow(0 0 10px rgba(249, 115, 22, 0.3))' }} />
           <h2 style={{ fontSize: isMobile ? '1.4rem' : '2.2rem', margin: 0, letterSpacing: '0.05em', color: '#f97316', textShadow: '0 0 15px rgba(249, 115, 22, 0.2)' }}>
-            ARMÁ/PERSONALIZÁ TU MAZO
+            {t("deck_build_title")}
           </h2>
         </div>
-        <p style={{ fontSize: '0.95rem', opacity: 0.65, margin: '4px 0 0 0', fontWeight: 600 }}>Abrí sobres, desbloqueá nuevas cartas y seleccioná 22 para armar tu mazo online.</p>
+        <p style={{ fontSize: '0.95rem', opacity: 0.65, margin: '4px 0 0 0', fontWeight: 600 }}>{t("deck_build_subtitle")}</p>
         <p style={{ fontSize: '0.85rem', opacity: 0.8, margin: '8px 0 0 0', fontWeight: 700, color: '#f97316' }}>
-          * En partidas online, tus 22 cartas seleccionadas se van a sumar y mezclar con las 22 cartas de tu rival para formar el mazo de 44 cartas de la partida.
+          {t("deck_build_disclaimer")}
         </p>
       </div>
 
@@ -371,7 +371,7 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.9rem', fontWeight: 800 }}>
               <span style={{ color: selectedDeck.length === 22 ? '#10b981' : '#f97316', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <Layers size={18} />
-                Cartas Seleccionadas
+                {t("selected_cards")}
               </span>
               <span style={{ color: selectedDeck.length === 22 ? '#10b981' : '#fff' }}>
                 {selectedDeck.length} / 22
@@ -396,7 +396,7 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
               }}
             >
               <Unlock size={18} />
-              Canjear Código
+              {t("redeem_code")}
             </button>
 
             <button
@@ -409,7 +409,7 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
               }}
             >
               {saveSuccess ? <Check size={18} /> : <Save size={18} />}
-              {saveSuccess ? "Guardado" : saving ? "Guardando..." : "Guardar Mazo"}
+              {saveSuccess ? t("saved") : saving ? t("saving") : t("save_deck")}
             </button>
           </div>
         </div>
@@ -430,10 +430,10 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
         >
           <div style={{ flex: '1 1 300px' }}>
             <h3 style={{ margin: '0 0 0.5rem 0', color: '#f97316', fontSize: '1.1rem', fontWeight: 900 }}>
-              {user && unlockedCards.length > 0 ? "¡Seguí armando tu mazo!" : "¡Empezá a armar tu mazo!"}
+              {user && unlockedCards.length > 0 ? t("continue_building_deck") : t("start_building_deck")}
             </h3>
             <p style={{ margin: 0, opacity: 0.8, fontSize: '0.9rem', lineHeight: 1.5, maxWidth: isMobile ? '400px' : 'none' }}>
-              {user ? "Como nuevo usuario, tenés 8 sobres de bienvenida gratuitos (de 3 cartas cada uno) para armar tu mazo." : "Iniciá sesión para abrir tus 8 sobres de bienvenida gratuitos (de 3 cartas cada uno) y empezar a armar tu mazo."}
+              {user ? t("new_user_packs_desc") : t("login_packs_desc")}
             </p>
           </div>
           {user ? (
@@ -446,7 +446,7 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
               }}
             >
               {openingPack ? <RefreshCw size={18} className="spin" /> : <Unlock size={18} />}
-              Abrir sobre gratis ({Math.max(0, 8 - Math.floor(unlockedCards.length / 3))} restantes)
+              {t("open_free_pack", { count: Math.max(0, 8 - Math.floor(unlockedCards.length / 3)) })}
             </button>
           ) : (
             <button
@@ -472,7 +472,7 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
               <svg width="18" height="18" viewBox="0 0 24 24" style={{ fill: 'currentColor' }}>
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" /><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" /><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" /><path d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
               </svg>
-              Iniciar Sesión con Google
+              {t("login_with_google")}
             </button>
           )}
         </motion.div>
@@ -483,7 +483,7 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
           <Search size={20} />
         </div>
         <input
-          type="text" placeholder="Buscar por nombre, país o club..."
+          type="text" placeholder={t("search_name_country_club")}
           value={search} onChange={e => setSearch(e.target.value)}
           style={{ width: '100%', padding: '1.25rem 1.25rem 1.25rem 3.25rem', background: 'rgba(255, 255, 255, 0.05)', border: '2px solid rgba(255, 255, 255, 0.1)', borderRadius: '1.5rem', color: '#fff', fontSize: '1.1rem', outline: 'none', boxSizing: 'border-box' }}
         />
@@ -511,16 +511,16 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
               <div style={{ position: 'absolute', inset: '6px', border: '4px solid transparent', borderTopColor: '#f97316', borderRadius: '50%', animation: 'spin-counter 0.8s cubic-bezier(0.5, 0, 0.5, 1) infinite', boxShadow: '0 0 10px rgba(249, 115, 22, 0.35)' }} />
             </div>
             <p style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800, letterSpacing: '0.05em', color: '#f97316', textShadow: '0 0 8px rgba(249, 115, 22, 0.2)', animation: 'pulse-soft 1.5s ease-in-out infinite' }}>
-              Cargando inventario...
+              {t("loading_inventory")}
             </p>
           </div>
         </div>
       ) : filteredPlayers.length === 0 ? (
         <EmptyState
           icon="🔍"
-          title="No hay resultados"
-          description="No encontramos ninguna carta que coincida con tu búsqueda. Intentá buscar otra cosa."
-          actionText={search ? "Limpiar búsqueda" : undefined}
+          title={t("no_results")}
+          description={t("no_results_deck_desc")}
+          actionText={search ? t("clear_search") : undefined}
           onAction={search ? () => setSearch('') : undefined}
           color="#f97316"
         />
@@ -583,11 +583,11 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
       {showUnsavedModal && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.8)' }}>
           <div style={{ background: '#1a1a2e', padding: '2rem', borderRadius: '1.5rem', maxWidth: '400px', width: '90%', textAlign: 'center', border: '1px solid rgba(255,184,0,0.3)' }}>
-            <h3 style={{ color: '#ffb800', marginTop: 0 }}>Cambios sin guardar</h3>
-            <p>Tenés cambios en tu mazo que no guardaste. ¿Seguro que querés salir sin guardar?</p>
+            <h3 style={{ color: '#ffb800', marginTop: 0 }}>{t("unsaved_changes")}</h3>
+            <p>{t("unsaved_deck_changes_desc")}</p>
             <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem' }}>
-              <button onClick={() => setShowUnsavedModal(false)} style={{ flex: 1, padding: '0.75rem', background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff', borderRadius: '0.75rem', cursor: 'pointer' }}>Cancelar</button>
-              <button onClick={() => { setShowUnsavedModal(false); onBack(); }} style={{ flex: 1, padding: '0.75rem', background: '#e11d48', border: 'none', color: '#fff', borderRadius: '0.75rem', cursor: 'pointer', fontWeight: 'bold' }}>Salir sin guardar</button>
+              <button onClick={() => setShowUnsavedModal(false)} style={{ flex: 1, padding: '0.75rem', background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff', borderRadius: '0.75rem', cursor: 'pointer' }}>{t("cancel")}</button>
+              <button onClick={() => { setShowUnsavedModal(false); onBack(); }} style={{ flex: 1, padding: '0.75rem', background: '#e11d48', border: 'none', color: '#fff', borderRadius: '0.75rem', cursor: 'pointer', fontWeight: 'bold' }}>{t("exit_without_saving_btn")}</button>
             </div>
           </div>
         </div>
@@ -635,7 +635,7 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
               style={{ textAlign: 'center', marginTop: isMobile ? '0' : '1rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', alignItems: 'center' }}
             >
               <h2 style={{ margin: isMobile ? '0 0 0.5rem 0' : '0 0 1rem 0', color: '#f97316', fontWeight: 950, fontSize: isMobile ? '1.5rem' : '2rem', textShadow: '0 4px 20px rgba(249,115,22,0.6)', letterSpacing: '1px' }}>
-                ¡CARTAS DESBLOQUEADAS!
+                {t("cards_unlocked")}
               </h2>
 
               <button
@@ -655,7 +655,7 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
                   letterSpacing: '1px'
                 }}
               >
-                Continuar
+                {t("continue")}
               </button>
             </motion.div>
           </motion.div>
@@ -666,10 +666,10 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
         <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(8px)', padding: '1rem' }}>
           <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} style={{ background: 'rgba(26, 26, 46, 0.6)', backdropFilter: 'blur(16px)', padding: '2.5rem', borderRadius: '1.5rem', maxWidth: '400px', width: '100%', textAlign: 'center', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
             <h2 style={{ color: '#10b981', marginTop: 0, marginBottom: '1rem', textTransform: 'uppercase' }}>
-              Canjear Código
+              {t("redeem_code_title")}
             </h2>
             <p style={{ color: '#fff', fontSize: '0.95rem', marginBottom: '1.5rem' }}>
-              Ingresá el código de 4 caracteres que ganaste en el <a href="/prode" target="_blank" rel="noopener noreferrer" style={{ color: '#10b981', fontWeight: 900, textDecoration: 'none' }}>Prode</a> para desbloquear un <strong>sobre gratis</strong>.
+              {t("redeem_code_desc_1")}<a href="/prode" target="_blank" rel="noopener noreferrer" style={{ color: '#10b981', fontWeight: 900, textDecoration: 'none' }}>{t("prode")}</a><span dangerouslySetInnerHTML={{ __html: t("redeem_code_desc_2") }} />
             </p>
             <input
               type="text"
@@ -685,7 +685,7 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
                 onClick={() => { setShowRedeemModal(false); setRedeemError(''); setRedeemCode(''); }}
                 style={{ flex: 1, padding: '1rem', background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff', borderRadius: '1rem', cursor: 'pointer', fontWeight: 800 }}
               >
-                Cancelar
+                {t("cancel")}
               </button>
               <button
                 onClick={handleRedeemCode}
@@ -693,7 +693,7 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
                 style={{ flex: 1, padding: '1rem', background: '#10b981', border: 'none', color: '#fff', borderRadius: '1rem', cursor: (redeeming || redeemCode.length !== 4) ? 'not-allowed' : 'pointer', fontWeight: 800, opacity: (redeeming || redeemCode.length !== 4) ? 0.5 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
               >
                 {redeemCode.length === 4 ? <Unlock size={18} /> : <Lock size={18} />}
-                {redeeming ? 'Canjeando...' : 'Canjear'}
+                {redeeming ? t("redeeming") : t("redeem_btn")}
               </button>
             </div>
           </motion.div>

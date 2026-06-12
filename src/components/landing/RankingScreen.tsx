@@ -878,7 +878,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
                 whiteSpace: 'nowrap'
               }}
             >
-              <span style={{ marginRight: '0.4rem' }}>⭐</span> MIS VOTOS
+              <span style={{ marginRight: '0.4rem' }}>⭐</span> {t("filter_my_votes")}
             </button>
 
             {[
@@ -1131,11 +1131,11 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
       ) : filteredPlayers.length === 0 ? (
         <EmptyState
           icon={showOnlyMyVotes ? '⭐' : '🔍'}
-          title={showOnlyMyVotes ? 'Aún no has votado' : 'No hay resultados'}
+          title={showOnlyMyVotes ? t("no_votes_yet_title", "Aún no has votado") : t("no_results")}
           description={showOnlyMyVotes
-            ? 'No le has dado ninguna estrella a ninguna carta todavía. ¡Desactivá el filtro y empezá a votar por tus jugadores favoritos!'
-            : 'No encontramos ninguna carta que coincida con tu búsqueda o filtros actuales. Intentá buscar otra cosa.'}
-          actionText={(showOnlyMyVotes || search || selectedCountries.length > 0) ? 'Limpiar filtros' : undefined}
+            ? t("no_votes_yet_desc", "No le has dado ninguna estrella a ninguna carta todavía. ¡Desactivá el filtro y empezá a votar por tus jugadores favoritos!")
+            : t("no_results_deck_desc")}
+          actionText={(showOnlyMyVotes || search || selectedCountries.length > 0) ? t("clear_filters", "Limpiar filtros") : undefined}
           onAction={(showOnlyMyVotes || search || selectedCountries.length > 0) ? () => {
             setShowOnlyMyVotes(false);
             setSearch('');
@@ -1282,7 +1282,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
                         {player.myActiveVotes}
                       </span>
                       <span style={{ fontSize: '0.55rem', opacity: 0.6, textTransform: 'uppercase', color: '#fff', letterSpacing: '0.05em' }}>
-                        Votos Personales
+                        {t("personal_votes")}
                       </span>
                     </div>
 
@@ -1505,10 +1505,10 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
               }}
             >
               <h3 style={{ margin: '0 0 1rem 0', color: '#ffb800', fontSize: '1.25rem' }}>
-                Límite de votos
+                {t("vote_limit_title")}
               </h3>
               <p style={{ margin: '0 0 1.5rem 0', opacity: 0.8, fontSize: '0.9rem', lineHeight: 1.5 }}>
-                No puedes asignar más de 3 estrellas a un mismo jugador. ¡Distribuye tus votos para mejorar otras cartas!
+                {t("vote_limit_desc")}
               </p>
               <button
                 onClick={() => setShowMaxVotesModal(false)}
@@ -1522,7 +1522,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
                   cursor: 'pointer'
                 }}
               >
-                Entendido
+                {t("understood")}
               </button>
             </motion.div>
           </motion.div>
