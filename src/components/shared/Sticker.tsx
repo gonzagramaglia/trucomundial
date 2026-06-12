@@ -31,7 +31,8 @@ export const Sticker: React.FC<StickerProps> = ({
   showBack = false,
 }) => {
   const [isHovered, setIsHovered] = useState(false);
-  const votes = useCardVotes(card.id);
+  const storeVotes = useCardVotes(card.id);
+  const votes = (card as any).stars !== undefined ? (card as any).stars : storeVotes;
   const isTop = useIsTopCard(card.id);
 
   const handleClick = () => {

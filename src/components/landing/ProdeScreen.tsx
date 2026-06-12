@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Calendar, Globe, Search, Home, Trophy, Save, AlertCircle, Layers } from 'lucide-react';
+import { Calendar, Globe, Search, Home, Trophy, Save, AlertCircle, Layers, Star } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { TwitchButton } from '../shared/TwitchButton';
 import { fixtureMatches } from '../../lib/fixtureData';
@@ -53,20 +53,51 @@ export const isMatchStarted = (dateStr: string, timeStr: string, matchStatus: st
   return false;
 };
 
+export const isMatchFinishedAuto = (dateStr: string, timeStr: string): boolean => {
+  const dateParts = dateStr.split(" ");
+  if (dateParts.length >= 4) {
+    const day = parseInt(dateParts[1]);
+    const monthStr = dateParts[3].toLowerCase();
+    const month = months[monthStr];
+    if (!isNaN(day) && month !== undefined) {
+      const timeParts = timeStr.split(" ");
+      let hour = 0;
+      let min = 0;
+      if (timeStr.includes("hs")) {
+        const [h, m] = timeParts[0].split(":");
+        hour = parseInt(h);
+        min = parseInt(m || "0");
+      } else {
+        const [h, m] = timeParts[0].split(":");
+        hour = parseInt(h);
+        min = parseInt(m);
+        const ampm = timeParts[1]?.toLowerCase() + " " + timeParts[2]?.toLowerCase();
+        if (ampm.includes("p. m.") && hour < 12) hour += 12;
+        if (ampm.includes("a. m.") && hour === 12) hour = 0;
+      }
+      // Parse as UTC-3 (Argentina time) by adding 3 hours to get UTC
+      const matchDate = new Date(Date.UTC(2026, month, day, hour + 3, min, 0));
+      const finishedDate = new Date(matchDate.getTime() + 2 * 60 * 60 * 1000);
+      return new Date() >= finishedDate;
+    }
+  }
+  return false;
+};
+
 export const formatMatchTime = (dateStr: string, timeStr: string) => {
   const dateParts = dateStr.split(" ");
   if (dateParts.length < 4) return { localDate: dateStr, localTime: timeStr };
-  
+
   const day = parseInt(dateParts[1]);
   const monthStr = dateParts[3].toLowerCase();
   const month = months[monthStr];
-  
+
   if (isNaN(day) || month === undefined) return { localDate: dateStr, localTime: timeStr };
-  
+
   const timeParts = timeStr.split(" ");
   let hour = 0;
   let min = 0;
-  
+
   if (timeStr.includes("hs")) {
     const [h, m] = timeParts[0].split(":");
     hour = parseInt(h);
@@ -79,14 +110,14 @@ export const formatMatchTime = (dateStr: string, timeStr: string) => {
     if (ampm.includes("p. m.") && hour < 12) hour += 12;
     if (ampm.includes("a. m.") && hour === 12) hour = 0;
   }
-  
+
   // Create Date object assuming original time is UTC-3
   const matchDate = new Date(Date.UTC(2026, month, day, hour + 3, min, 0));
-  
+
   let localDateStr = matchDate.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
   localDateStr = localDateStr.charAt(0).toUpperCase() + localDateStr.slice(1).replace('.', ',');
   const localTimeStr = matchDate.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) + ' hs';
-  
+
   return { localDate: localDateStr, localTime: localTimeStr };
 };
 
@@ -101,7 +132,7 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
   const [predictions, setPredictions] = useState<Record<string, { scoreA: number, scoreB: number, rewarded?: boolean }>>({});
   const [inputs, setInputs] = useState<Record<string, { scoreA: string, scoreB: string }>>({});
   const [isSaving, setIsSaving] = useState<Record<string, boolean>>({});
-  const [rewardCodesModal, setRewardCodesModal] = useState<{ codes: {code: string, used: boolean}[], matchDesc: string, packs: number } | null>(null);
+  const [rewardCodesModal, setRewardCodesModal] = useState<{ codes: { code: string, used: boolean }[], matchDesc: string, packs: number } | null>(null);
 
   const hideSpinnersCSS = `
     input[type=number]::-webkit-inner-spin-button, 
@@ -157,7 +188,7 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
   useEffect(() => {
     const checkRewards = async () => {
       if (!user || Object.keys(liveResults).length === 0 || Object.keys(predictions).length === 0) return;
-      
+
       for (const matchId in predictions) {
         const pred = predictions[matchId];
         const res = liveResults[matchId];
@@ -166,7 +197,7 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
           const predWinner = pred.scoreA > pred.scoreB ? 'A' : (pred.scoreA < pred.scoreB ? 'B' : 'Draw');
           const resWinner = res.scoreA > res.scoreB ? 'A' : (res.scoreA < res.scoreB ? 'B' : 'Draw');
           const normalMatch = predWinner === resWinner;
-          
+
           let packs = 0;
           if (exactMatch) packs = 3;
           else if (normalMatch) packs = 1;
@@ -242,7 +273,7 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
       used: false,
       source: `prode_match_${matchId}`
     }));
-    
+
     const { error } = await supabase.from('reward_codes').insert(codeInserts);
     if (!error) {
       await supabase.from('prode_predictions').update({ rewarded: true }).eq('user_id', user.id).eq('match_id', matchId);
@@ -261,7 +292,7 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
   const handleViewRewards = async (matchId: string, packs: number, teamA: string, teamB: string) => {
     if (!user) return;
     const { data, error } = await supabase.from('reward_codes').select('code, used').eq('user_id', user.id).eq('source', `prode_match_${matchId}`);
-    
+
     if (data && !error) {
       setRewardCodesModal({
         codes: data.map(d => ({ code: d.code, used: d.used })),
@@ -414,6 +445,36 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
         </div>
       </div>
 
+      {/* NEW FIXTURE STARS INFO BOX */}
+      <div style={{
+        background: 'rgba(255, 223, 0, 0.1)',
+        border: '1px solid rgba(255, 223, 0, 0.3)',
+        borderRadius: '12px',
+        padding: '1rem',
+        marginBottom: '2rem',
+        display: 'flex',
+        alignItems: 'flex-start',
+        gap: '1rem',
+        width: '100%',
+        boxSizing: 'border-box'
+      }}>
+        <div style={{
+          background: 'rgba(255, 223, 0, 0.2)',
+          borderRadius: '50%',
+          width: '36px',
+          height: '36px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexShrink: 0
+        }}>
+          <Star size={20} color="#ffdf00" />
+        </div>
+        <p style={{ margin: 0, fontSize: '0.85rem', color: 'rgba(255,255,255,0.9)', lineHeight: 1.4, textAlign: 'left' }}>
+          Al finalizar cada partido, <strong style={{ color: '#ffdf00' }}>sumarán estrellas de base en el Ranking Global</strong> las cartas de los equipos que ganen (+2), y de los equipos que empaten (+1).
+        </p>
+      </div>
+
       {!user && (
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -503,6 +564,7 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
                 const userNationality = user?.user_metadata?.nationality;
                 const isMyTeam = userNationality && (match.teamA === userNationality || match.teamB === userNationality);
                 const started = isMatchStarted(match.date, match.time, match.status);
+                const finishedAuto = isMatchFinishedAuto(match.date, match.time);
                 const hasPrediction = !!predictions[match.id];
                 const locked = started || hasPrediction;
                 const pScoreA = predictions[match.id]?.scoreA;
@@ -542,6 +604,11 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
                             {wonExact ? "¡Acertaste el resultado exacto!" : "¡Acertaste el ganador!"}
                           </div>
                         )}
+                        {match.status !== 'finished' && started && hasPrediction && (
+                          <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', textAlign: 'center', whiteSpace: 'nowrap' }}>
+                            Esperando resultado
+                          </div>
+                        )}
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                           <input
                             type="text" inputMode="numeric" maxLength={1} disabled={locked || !user}
@@ -568,6 +635,11 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
                             Ganaste {packsWon} {packsWon === 1 ? 'sobre' : 'sobres'}
                           </div>
                         )}
+                        {match.status !== 'finished' && started && hasPrediction && (
+                          <div style={{ color: '#ffffff', fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', textAlign: 'center', whiteSpace: 'nowrap', marginTop: '0.25rem' }}>
+                            {finishedAuto ? 'Partido Finalizado' : 'Partido Iniciado'}
+                          </div>
+                        )}
                       </div>
 
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1, justifyContent: 'flex-start' }}>
@@ -588,7 +660,7 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
                             <Save size={16} /> <span>Guardar</span>
                           </button>
                         )}
-                        
+
                         {match.status === 'finished' && (
                           packsWon > 0 && !isRewarded ? (
                             <button
@@ -626,8 +698,9 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
                               <Save size={16} /> <span>Guardado</span>
                             </button>
                           ) : (
-                            <div key="div-started" style={{ color: '#ff4444', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'center' }}>
-                              Partido Iniciado
+                            <div key="div-started" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', marginTop: '-0.25rem' }}>
+                              <span style={{ fontSize: '1rem', fontWeight: 900, color: '#ffffff', textAlign: 'center', textTransform: 'uppercase', lineHeight: 1.1, marginBottom: '0.25rem' }}>{finishedAuto ? 'Partido Finalizado' : 'Partido Iniciado'}</span>
+                              <span style={{ fontSize: '0.7rem', textTransform: 'uppercase', opacity: 0.5, fontWeight: 700, textAlign: 'center' }}>Esperando resultado</span>
                             </div>
                           )
                         )}
@@ -679,8 +752,9 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
                           <Save size={16} /> <span>Guardado</span>
                         </button>
                       ) : (
-                        <div key="m-div-started" style={{ marginTop: '1rem', color: '#ff4444', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', textAlign: 'center', width: '100%' }}>
-                          Partido Iniciado
+                        <div key="m-div-started" style={{ marginTop: '0.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+                          <span style={{ color: '#ffffff', fontSize: '0.85rem', fontWeight: 900, textTransform: 'uppercase', textAlign: 'center', lineHeight: 1.1, marginBottom: '0.25rem' }}>{finishedAuto ? 'Partido Finalizado' : 'Partido Iniciado'}</span>
+                          <span style={{ fontSize: '0.7rem', textTransform: 'uppercase', opacity: 0.5, fontWeight: 700, textAlign: 'center' }}>Esperando resultado</span>
                         </div>
                       )
                     )}

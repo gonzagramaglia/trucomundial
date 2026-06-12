@@ -12,6 +12,8 @@ import i18n from "./lib/i18n";
 import { updateVotesRegistry, snapshotVotesForGame, setGameActive, setTournamentVotesSnapshot } from "./lib/votesStore";
 import { TournamentResultModal } from "./components/game/modals/TournamentResultModal";
 import { audioManager } from "./lib/audio";
+import { CARDS } from "./data/cards";
+import { fixtureMatches } from "./lib/fixtureData";
 function App() {
   const [user, setUser] = useState<any>(null);
   const [sessionId] = useState(
@@ -30,8 +32,27 @@ function App() {
           .select('match_id, last_move')
           .like('match_id', 'user_votes_%');
         
+        const { data: resultsData } = await supabase.from('fixture_results').select('match_id, score_a, score_b, status');
+        
+        let fixtureStars: Record<string, number> = {};
+        if (resultsData) {
+          resultsData.forEach(r => {
+            const match = fixtureMatches.find(m => m.id === r.match_id);
+            if (match && r.status === 'finished') {
+              if (r.score_a > r.score_b) {
+                fixtureStars[match.teamA] = (fixtureStars[match.teamA] || 0) + 2;
+              } else if (r.score_b > r.score_a) {
+                fixtureStars[match.teamB] = (fixtureStars[match.teamB] || 0) + 2;
+              } else {
+                fixtureStars[match.teamA] = (fixtureStars[match.teamA] || 0) + 1;
+                fixtureStars[match.teamB] = (fixtureStars[match.teamB] || 0) + 1;
+              }
+            }
+          });
+        }
+
+        const aggregate: Record<string, number> = {};
         if (data) {
-          const aggregate: Record<string, number> = {};
           data.forEach(item => {
             const votes = item.last_move?.votes;
             if (votes && typeof votes === 'object') {
@@ -42,9 +63,15 @@ function App() {
               });
             }
           });
-          
-          updateVotesRegistry(aggregate);
         }
+          
+        CARDS.forEach(c => {
+          const base = c.country === 'Argentina' ? 3 : c.country === 'Francia' ? 2 : c.country === 'Croacia' ? 1 : 0;
+          const fix = fixtureStars[c.country] || 0;
+          aggregate[c.id] = Math.min(999, (aggregate[c.id] || 0) + base + fix);
+        });
+
+        updateVotesRegistry(aggregate);
       } catch (err) {
         console.error('Error fetching global votes on init:', err);
       }

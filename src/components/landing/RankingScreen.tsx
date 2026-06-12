@@ -171,8 +171,15 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
       }
     });
 
+    // 3. Add base stars and fixture results stars
+    CARDS.forEach(c => {
+      const base = c.country === 'Argentina' ? 3 : c.country === 'Francia' ? 2 : c.country === 'Croacia' ? 1 : 0;
+      const fix = baseStarsByCountry[c.country] || 0;
+      aggregate[c.id] = Math.min(999, (aggregate[c.id] || 0) + base + fix);
+    });
+
     updateVotesRegistry(aggregate);
-  }, [myVotes, dbVotesData, user]);
+  }, [myVotes, dbVotesData, user, baseStarsByCountry]);
 
   // Calculate current user's distributed votes
   const maxTotalVotes = 78;
