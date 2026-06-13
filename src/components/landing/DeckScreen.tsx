@@ -124,11 +124,18 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
       }
     };
 
-    fetchDeck();
+    fetchDeck().then(() => {
+      // If after loading, the deck is full, set it to saved state
+      if (lastSavedDeckRef.current && lastSavedDeckRef.current.length === 22) {
+        setSaveSuccess(true);
+      }
+    });
   }, [user]);
 
   const toggleCardSelection = (cardId: string) => {
     if (!unlockedCards.includes(cardId)) return; // Can't select locked
+
+    setSaveSuccess(false);
 
     setSelectedDeck(prev => {
       if (prev.includes(cardId)) {
@@ -154,7 +161,6 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
     if (!user) {
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify({ unlockedCards, selectedDeck }));
       setSaveSuccess(true);
-      setTimeout(() => setSaveSuccess(false), 2000);
       lastSavedDeckRef.current = selectedDeck;
       return;
     }
@@ -173,7 +179,6 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
       if (error) throw error;
 
       setSaveSuccess(true);
-      setTimeout(() => setSaveSuccess(false), 2000);
       lastSavedDeckRef.current = selectedDeck;
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify({ unlockedCards, selectedDeck }));
     } catch (err) {
@@ -181,7 +186,6 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
       // Fallback local
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify({ unlockedCards, selectedDeck }));
       setSaveSuccess(true);
-      setTimeout(() => setSaveSuccess(false), 2000);
       lastSavedDeckRef.current = selectedDeck;
     } finally {
       setSaving(false);
@@ -387,12 +391,12 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
       {user && unlockedCards.length >= 24 && (
         <div style={{
           position: 'sticky', top: '1rem', zIndex: 3000, background: 'rgba(15, 10, 25, 0.9)',
-          border: selectedDeck.length === 22 ? '2px solid rgba(16, 185, 129, 0.45)' : '2px solid rgba(249, 115, 22, 0.25)',
+          border: '2px solid rgba(16, 185, 129, 0.45)',
           borderRadius: '2rem', padding: '1.25rem 2rem', marginBottom: '2rem', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1.5rem', backdropFilter: 'blur(16px)'
         }}>
           <div style={{ flex: '1 1 300px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.9rem', fontWeight: 800 }}>
-              <span style={{ color: selectedDeck.length === 22 ? '#10b981' : '#f97316', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span style={{ color: selectedDeck.length === 22 ? '#10b981' : '#fff', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <Layers size={18} />
                 {t("selected_cards")}
               </span>
@@ -405,34 +409,34 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
                 animate={{ width: `${(selectedDeck.length / 22) * 100}%` }}
                 style={{
                   height: '100%',
-                  background: selectedDeck.length === 22 ? 'linear-gradient(to right, #10b981, #059669)' : 'linear-gradient(to right, #f97316, #ea580c)'
+                  background: selectedDeck.length === 22 ? 'linear-gradient(to right, #10b981, #059669)' : '#fff'
                 }}
               />
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
             <button
-              onClick={() => setShowRedeemModal(true)}
-              className="btn-hover-dark"
-              style={{
-                background: 'linear-gradient(135deg, #10b981, #059669)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', height: '48px', borderRadius: '1.25rem', padding: '0 1.5rem', fontSize: '0.9rem', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer'
-              }}
-            >
-              <Unlock size={18} />
-              {t("redeem_code")}
-            </button>
-
-            <button
               onClick={handleSaveDeck}
               disabled={saving || saveSuccess || selectedDeck.length !== 22}
               className="btn-hover-dark"
               style={{
-                background: saveSuccess ? '#10b981' : (hasUnsavedChanges() ? '#ffb800' : '#f97316'),
+                background: saveSuccess ? '#10b981' : 'linear-gradient(135deg, #10b981, #059669)',
                 border: 'none', color: '#fff', height: '48px', borderRadius: '1.25rem', padding: '0 2rem', fontSize: '1rem', fontWeight: 950, display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: (saving || saveSuccess || selectedDeck.length !== 22) ? 'default' : 'pointer', opacity: (saving || selectedDeck.length !== 22) ? 0.5 : 1
               }}
             >
               {saveSuccess ? <Check size={18} /> : <Save size={18} />}
               {saveSuccess ? t("saved") : saving ? t("saving") : t("save_deck")}
+            </button>
+
+            <button
+              onClick={() => setShowRedeemModal(true)}
+              className="btn-hover-dark"
+              style={{
+                background: '#f97316', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', height: '48px', borderRadius: '1.25rem', padding: '0 1.5rem', fontSize: '1rem', fontWeight: 950, display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer'
+              }}
+            >
+              <Unlock size={18} />
+              {t("redeem_code")}
             </button>
           </div>
         </div>
@@ -804,12 +808,18 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
 
       {showRedeemModal && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(8px)', padding: '1rem' }}>
-          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} style={{ background: 'rgba(26, 26, 46, 0.6)', backdropFilter: 'blur(16px)', padding: '2.5rem', borderRadius: '1.5rem', maxWidth: '400px', width: '100%', textAlign: 'center', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
-            <h2 style={{ color: '#10b981', marginTop: 0, marginBottom: '1rem', textTransform: 'uppercase' }}>
+          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} style={{ background: 'rgba(26, 26, 46, 0.6)', backdropFilter: 'blur(16px)', padding: '2.5rem', borderRadius: '1.5rem', maxWidth: '400px', width: '100%', textAlign: 'center', border: '1px solid rgba(249, 115, 22, 0.3)' }}>
+            <h2 style={{ color: '#f97316', marginTop: 0, marginBottom: '1rem', textTransform: 'uppercase' }}>
               {t("redeem_code_title")}
             </h2>
-            <p style={{ color: '#fff', fontSize: '0.95rem', marginBottom: '1.5rem' }}>
-              {t("redeem_code_desc_1")}<a href="/prode" target="_blank" rel="noopener noreferrer" style={{ color: '#10b981', fontWeight: 900, textDecoration: 'none' }}>{t("prode")}</a><span dangerouslySetInnerHTML={{ __html: t("redeem_code_desc_2") }} />
+            <p style={{ color: '#fff', fontSize: '0.95rem', marginBottom: '1.5rem', lineHeight: 1.5 }}>
+              <span>{t("redeem_code_desc_1")}</span>
+              {' '}
+              <a href="/prode" target="_blank" rel="noopener noreferrer" style={{ color: '#00f2ff', fontWeight: 900, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.2rem', verticalAlign: 'middle' }}>
+                <ExternalLink size={14} />
+                {t("prode")}
+              </a>
+              <span dangerouslySetInnerHTML={{ __html: t("redeem_code_desc_2") }} />
             </p>
             <input
               type="text"
@@ -817,7 +827,7 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
               value={redeemCode}
               onChange={(e) => setRedeemCode(e.target.value.toUpperCase())}
               placeholder="ABCD"
-              style={{ width: '100%', padding: '1rem', background: 'rgba(255,255,255,0.1)', border: '2px solid rgba(16, 185, 129, 0.5)', borderRadius: '1rem', color: '#fff', fontSize: '2rem', textAlign: 'center', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '1rem', outline: 'none', fontWeight: 900 }}
+              style={{ width: '100%', padding: '1rem', background: 'rgba(255,255,255,0.1)', border: '2px solid rgba(249, 115, 22, 0.5)', borderRadius: '1rem', color: '#fff', fontSize: '2rem', textAlign: 'center', letterSpacing: '0.2em', textTransform: 'uppercase', marginBottom: '1rem', outline: 'none', fontWeight: 900, boxSizing: 'border-box' }}
             />
             {redeemError && <p style={{ color: '#ef4444', fontSize: '0.85rem', margin: '0 0 1rem 0', fontWeight: 700 }}>{redeemError}</p>}
             <div style={{ display: 'flex', gap: '1rem' }}>
@@ -830,7 +840,7 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
               <button
                 onClick={handleRedeemCode}
                 disabled={redeeming || redeemCode.length !== 4}
-                style={{ flex: 1, padding: '1rem', background: '#10b981', border: 'none', color: '#fff', borderRadius: '1rem', cursor: (redeeming || redeemCode.length !== 4) ? 'not-allowed' : 'pointer', fontWeight: 800, opacity: (redeeming || redeemCode.length !== 4) ? 0.5 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
+                style={{ flex: 1, padding: '1rem', background: '#f97316', border: 'none', color: '#fff', borderRadius: '1rem', cursor: (redeeming || redeemCode.length !== 4) ? 'not-allowed' : 'pointer', fontWeight: 800, opacity: (redeeming || redeemCode.length !== 4) ? 0.5 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
               >
                 {redeemCode.length === 4 ? <Unlock size={18} /> : <Lock size={18} />}
                 {redeeming ? t("redeeming") : t("redeem_btn")}
