@@ -24,6 +24,7 @@ export const FLAG_MAP: Record<string, string> = {
   'Sudáfrica': '🇿🇦',
   'República Checa': '🇨🇿',
   'Bosnia y Herz': '🇧🇦',
+  'Marruecos': '🇲🇦',
   'Qatar': '🇶🇦',
   'Otra': '🌍',
   'Ninguna': '🏳️'
