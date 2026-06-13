@@ -24,6 +24,7 @@ const flagMap: Record<string, string> = {
   'Ecuador': '🇪🇨',
   'España': '🇪🇸',
   'Francia': '🇫🇷',
+  'Alemania': '🇩🇪',
   'Inglaterra': '🏴󠁧󠁢󠁥󠁮󠁧󠁿',
   'Japón': '🇯🇵',
   'Marruecos': '🇲🇦',
@@ -137,7 +138,7 @@ export const UserStarsModal: React.FC<UserStarsModalProps> = ({
           }}>
             <span>Total Distribuido:</span>
             <span style={{ fontSize: '1rem', color: '#fff', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-              <Star size={16} fill="var(--color-accent)" color="var(--color-accent)" /> {totalStars} / 100
+              <Star size={16} fill="var(--color-accent)" color="var(--color-accent)" /> {totalStars} / 78
             </span>
           </div>
 

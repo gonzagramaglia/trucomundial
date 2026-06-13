@@ -12,6 +12,7 @@ export const FLAG_MAP: Record<string, string> = {
   'Inglaterra': '🏴󠁧󠁢󠁥󠁮󠁧󠁿',
   'España': '🇪🇸',
   'Francia': '🇫🇷',
+  'Alemania': '🇩🇪',
   'Japón': '🇯🇵',
   'Corea del Sur': '🇰🇷',
   'Marruecos': '🇲🇦',

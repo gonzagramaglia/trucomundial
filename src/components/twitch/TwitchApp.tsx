@@ -474,7 +474,7 @@ export function TwitchApp() {
                   <label style={{ display: "block", marginBottom: "0.5rem", fontSize: "0.9rem", color: "#ccc" }}>Conformación del Mazo (Elegí 4 selecciones)</label>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
                     {[
-                      { id: 'Argelia', flag: '🇩🇿', code: 'ALG' },
+                  { id: 'Argelia', flag: '🇩🇿', code: 'ALG' },
                   { id: 'Argentina', flag: '🇦🇷', code: 'ARG' },
                   { id: 'Austria', flag: '🇦🇹', code: 'AUT' },
                   { id: 'Bosnia y Herz', flag: '🇧🇦', code: 'BIH' },
@@ -487,6 +487,7 @@ export function TwitchApp() {
                   { id: 'Inglaterra', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', code: 'ENG' },
                   { id: 'España', flag: '🇪🇸', code: 'ESP' },
                   { id: 'Francia', flag: '🇫🇷', code: 'FRA' },
+              { id: 'Alemania', code: 'GER', flag: '🇩🇪' },
                   { id: 'Japón', flag: '🇯🇵', code: 'JPN' },
                   { id: 'Corea del Sur', flag: '🇰🇷', code: 'KOR' },
                   { id: 'Marruecos', flag: '🇲🇦', code: 'MAR' },

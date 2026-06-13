@@ -61,7 +61,7 @@ export const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
         reset({
           ...tournament,
           prize: normalizeTournamentPrizes(tournament.prize),
-          allowed_teams: tournament.allowed_teams || ["Argelia","Argentina","Austria","Bosnia y Herz","Brasil","Canadá","Colombia","Croacia","República Checa","Ecuador","Inglaterra","España","Francia","Japón","Corea del Sur","Marruecos","México","Países Bajos","Noruega","Nueva Zelanda","Panamá","Paraguay","Portugal","Qatar","Sudáfrica","Suiza","Uruguay","USA"],
+          allowed_teams: tournament.allowed_teams || ["Argelia","Argentina","Austria","Bosnia y Herz","Brasil","Canadá","Colombia","Croacia","República Checa","Ecuador","Inglaterra","España","Francia","Alemania","Japón","Corea del Sur","Marruecos","México","Países Bajos","Noruega","Nueva Zelanda","Panamá","Paraguay","Portugal","Qatar","Sudáfrica","Suiza","Uruguay","USA"],
         });
       } else {
         const now = new Date();
@@ -83,7 +83,7 @@ export const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
           visibility: "public",
           code_type: "single",
           codes: [],
-          allowed_teams: ["Argelia","Argentina","Austria","Bosnia y Herz","Brasil","Canadá","Colombia","Croacia","República Checa","Ecuador","Inglaterra","España","Francia","Japón","Corea del Sur","Marruecos","México","Países Bajos","Noruega","Nueva Zelanda","Panamá","Paraguay","Portugal","Qatar","Sudáfrica","Suiza","Uruguay","USA"],
+          allowed_teams: ["Argelia","Argentina","Austria","Bosnia y Herz","Brasil","Canadá","Colombia","Croacia","República Checa","Ecuador","Inglaterra","España","Francia","Alemania","Japón","Corea del Sur","Marruecos","México","Países Bajos","Noruega","Nueva Zelanda","Panamá","Paraguay","Portugal","Qatar","Sudáfrica","Suiza","Uruguay","USA"],
         });
       }
     }
@@ -643,6 +643,7 @@ export const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
                   { id: 'Inglaterra', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', code: 'ENG' },
                   { id: 'España', flag: '🇪🇸', code: 'ESP' },
                   { id: 'Francia', flag: '🇫🇷', code: 'FRA' },
+                  { id: 'Alemania', flag: '🇩🇪', code: 'GER' },
                   { id: 'Japón', flag: '🇯🇵', code: 'JPN' },
                   { id: 'Corea del Sur', flag: '🇰🇷', code: 'KOR' },
                   { id: 'Marruecos', flag: '🇲🇦', code: 'MAR' },

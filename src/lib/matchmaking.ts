@@ -6,8 +6,8 @@ export const matchmakingService = {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: window.location.origin
-      }
+        redirectTo: typeof window !== "undefined" ? window.location.href : undefined,
+      },
     });
     if (error) throw error;
   },

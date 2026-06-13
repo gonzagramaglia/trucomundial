@@ -227,33 +227,40 @@ export const PlayersTab: React.FC<PlayersTabProps> = ({
                           justifyContent: "flex-end",
                         }}
                       >
-                        <button
-                          onClick={() =>
-                            setSelectedUserStars({
-                              userName: stats.userName,
-                              userEmail: stats.email,
-                              votes: stats.votes
-                            })
-                          }
-                          style={{
-                            background: "rgba(254, 240, 138, 0.15)",
-                            border: "1px solid rgba(254, 240, 138, 0.3)",
-                            color: "var(--color-accent)",
-                            padding: "0.25rem 0.6rem",
-                            borderRadius: "0.5rem",
-                            fontSize: "0.75rem",
-                            fontWeight: 800,
-                            cursor: "pointer",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            gap: "0.25rem",
-                            marginRight: "0.25rem"
-                          }}
-                          title="Ver Distribución de Estrellas"
-                        >
-                          <Star size={11} fill="var(--color-accent)" /> Estrellas
-                        </button>
+                        {(() => {
+                          const hasVotes = Object.values(stats.votes || {}).reduce((a, b) => a + b, 0) > 0;
+                          return (
+                            <button
+                              disabled={!hasVotes}
+                              onClick={() =>
+                                setSelectedUserStars({
+                                  userName: stats.userName,
+                                  userEmail: stats.email,
+                                  votes: stats.votes
+                                })
+                              }
+                              style={{
+                                background: hasVotes ? "rgba(254, 240, 138, 0.15)" : "rgba(255, 255, 255, 0.05)",
+                                border: hasVotes ? "1px solid rgba(254, 240, 138, 0.3)" : "1px solid rgba(255, 255, 255, 0.1)",
+                                color: hasVotes ? "var(--color-accent)" : "rgba(255, 255, 255, 0.3)",
+                                padding: "0.25rem 0.6rem",
+                                borderRadius: "0.5rem",
+                                fontSize: "0.75rem",
+                                fontWeight: 800,
+                                cursor: hasVotes ? "pointer" : "not-allowed",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                gap: "0.25rem",
+                                marginRight: "0.25rem",
+                                opacity: hasVotes ? 1 : 0.5
+                              }}
+                              title={hasVotes ? "Ver Distribución de Estrellas" : "No ha distribuido estrellas"}
+                            >
+                              <Star size={11} fill={hasVotes ? "var(--color-accent)" : "rgba(255, 255, 255, 0.3)"} /> Estrellas
+                            </button>
+                          );
+                        })()}
                         <select
                           value={getPlayerRole(stats.userId)}
                           onChange={(e) => handleRoleChange(stats.userId, e.target.value)}

@@ -427,11 +427,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         window.history.pushState({}, "", isEn ? "/en/perfil" : "/perfil");
       }
     } else {
-      const origin = window.location.origin;
       await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: origin,
+          redirectTo: window.location.href,
           queryParams: {
             prompt: "select_account",
           },
@@ -698,7 +697,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         .eq("match_code", matchCode)
         .maybeSingle();
 
-      let allowed = ["Argelia","Argentina","Austria","Bosnia y Herz","Brasil","Canadá","Colombia","Croacia","República Checa","Ecuador","Inglaterra","España","Francia","Japón","Corea del Sur","Marruecos","México","Países Bajos","Noruega","Nueva Zelanda","Panamá","Paraguay","Portugal","Qatar","Sudáfrica","Suiza","Uruguay","USA"];
+      let allowed = ["Argelia","Argentina","Austria","Bosnia y Herz","Brasil","Canadá","Colombia","Croacia","República Checa","Ecuador","Inglaterra","España","Francia","Alemania","Japón","Corea del Sur","Marruecos","México","Países Bajos","Noruega","Nueva Zelanda","Panamá","Paraguay","Portugal","Qatar","Sudáfrica","Suiza","Uruguay","USA"];
       if (mData && mData.tournament_id) {
         const { data: tData } = await supabase
           .from("tournaments")
@@ -1589,6 +1588,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   { id: 'Inglaterra', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', code: 'ENG' },
                   { id: 'España', flag: '🇪🇸', code: 'ESP' },
                   { id: 'Francia', flag: '🇫🇷', code: 'FRA' },
+              { id: 'Alemania', code: 'GER', flag: '🇩🇪' },
                   { id: 'Japón', flag: '🇯🇵', code: 'JPN' },
                   { id: 'Corea del Sur', flag: '🇰🇷', code: 'KOR' },
                   { id: 'Marruecos', flag: '🇲🇦', code: 'MAR' },
