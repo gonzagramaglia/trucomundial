@@ -697,7 +697,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         .eq("match_code", matchCode)
         .maybeSingle();
 
-      let allowed = ["Argelia","Argentina","Austria","Bosnia y Herz","Brasil","Canadá","Colombia","Croacia","República Checa","Ecuador","Inglaterra","España","Francia","Alemania","Japón","Corea del Sur","Marruecos","México","Países Bajos","Noruega","Nueva Zelanda","Panamá","Paraguay","Portugal","Qatar","Sudáfrica","Suiza","Uruguay","USA"];
+      let allowed = ["Argelia","Argentina","Austria","Bélgica","Bosnia y Herz","Brasil","Canadá","Colombia","Croacia","República Checa","Ecuador","Inglaterra","España","Francia","Alemania","Japón","Corea del Sur","Marruecos","México","Países Bajos","Noruega","Nueva Zelanda","Panamá","Paraguay","Portugal","Qatar","Sudáfrica","Suiza","Suecia","Uruguay","USA"];
       if (mData && mData.tournament_id) {
         const { data: tData } = await supabase
           .from("tournaments")
@@ -1578,7 +1578,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   { id: 'Argelia', flag: '🇩🇿', code: 'ALG' },
                   { id: 'Argentina', flag: '🇦🇷', code: 'ARG' },
                   { id: 'Austria', flag: '🇦🇹', code: 'AUT' },
-                  { id: 'Bosnia y Herz', flag: '🇧🇦', code: 'BIH' },
+                  { id: 'Bélgica', code: 'BEL', flag: '🇧🇪' },
+              { id: 'Bosnia y Herz', flag: '🇧🇦', code: 'BIH' },
                   { id: 'Brasil', flag: '🇧🇷', code: 'BRA' },
                   { id: 'Canadá', flag: '🇨🇦', code: 'CAN' },
                   { id: 'Colombia', flag: '🇨🇴', code: 'COL' },
@@ -1602,7 +1603,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   { id: 'Qatar', flag: '🇶🇦', code: 'QAT' },
                   { id: 'Sudáfrica', flag: '🇿🇦', code: 'RSA' },
                   { id: 'Suiza', flag: '🇨🇭', code: 'SUI' },
-                  { id: 'Uruguay', flag: '🇺🇾', code: 'URU' },
+                  { id: 'Suecia', code: 'SWE', flag: '🇸🇪' },
+              { id: 'Uruguay', flag: '🇺🇾', code: 'URU' },
                   { id: 'USA', flag: '🇺🇸', code: 'USA' }
                 ];
                 const pinnedTeams = ALL_TEAMS_LIST.filter(t => selectedTeams.includes(t.id));

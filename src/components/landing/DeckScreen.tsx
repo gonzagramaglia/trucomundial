@@ -579,6 +579,7 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
               { id: 'Argelia', code: 'ALG', flag: '🇩🇿' },
               { id: 'Argentina', code: 'ARG', flag: '🇦🇷' },
               { id: 'Austria', code: 'AUT', flag: '🇦🇹' },
+              { id: 'Bélgica', code: 'BEL', flag: '🇧🇪' },
               { id: 'Bosnia y Herz', code: 'BIH', flag: '🇧🇦' },
               { id: 'Brasil', code: 'BRA', flag: '🇧🇷' },
               { id: 'Canadá', code: 'CAN', flag: '🇨🇦' },
@@ -603,6 +604,7 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
               { id: 'Qatar', code: 'QAT', flag: '🇶🇦' },
               { id: 'Sudáfrica', code: 'RSA', flag: '🇿🇦' },
               { id: 'Suiza', code: 'SUI', flag: '🇨🇭' },
+              { id: 'Suecia', code: 'SWE', flag: '🇸🇪' },
               { id: 'Uruguay', code: 'URU', flag: '🇺🇾' },
               { id: 'USA', code: 'USA', flag: '🇺🇸' },
             ].filter(c => unlockedCountries.includes(c.id)).map((country) => (

@@ -477,7 +477,8 @@ export function TwitchApp() {
                   { id: 'Argelia', flag: '🇩🇿', code: 'ALG' },
                   { id: 'Argentina', flag: '🇦🇷', code: 'ARG' },
                   { id: 'Austria', flag: '🇦🇹', code: 'AUT' },
-                  { id: 'Bosnia y Herz', flag: '🇧🇦', code: 'BIH' },
+                  { id: 'Bélgica', code: 'BEL', flag: '🇧🇪' },
+              { id: 'Bosnia y Herz', flag: '🇧🇦', code: 'BIH' },
                   { id: 'Brasil', flag: '🇧🇷', code: 'BRA' },
                   { id: 'Canadá', flag: '🇨🇦', code: 'CAN' },
                   { id: 'Colombia', flag: '🇨🇴', code: 'COL' },
@@ -501,7 +502,8 @@ export function TwitchApp() {
                   { id: 'Qatar', flag: '🇶🇦', code: 'QAT' },
                   { id: 'Sudáfrica', flag: '🇿🇦', code: 'RSA' },
                   { id: 'Suiza', flag: '🇨🇭', code: 'SUI' },
-                  { id: 'Uruguay', flag: '🇺🇾', code: 'URU' },
+                  { id: 'Suecia', code: 'SWE', flag: '🇸🇪' },
+              { id: 'Uruguay', flag: '🇺🇾', code: 'URU' },
                   { id: 'USA', flag: '🇺🇸', code: 'USA' }
                     ].sort((a, b) => {
                       const aSelected = selectedTeams.includes(a.id);
