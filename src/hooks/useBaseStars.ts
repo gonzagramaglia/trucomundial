@@ -4,6 +4,7 @@ import { fixtureMatches } from '../lib/fixtureData';
 
 const normalizeCountry = (teamName: string) => {
   if (teamName === 'Estados Unidos') return 'USA';
+  if (teamName === 'Bosnia & Herzegovina') return 'Bosnia y Herz';
   return teamName;
 };
 
