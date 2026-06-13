@@ -698,7 +698,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         .eq("match_code", matchCode)
         .maybeSingle();
 
-      let allowed = ["Argentina", "Francia", "España", "Nueva Zelanda", "Brasil", "Argelia", "México", "Colombia", "Japón", "Uruguay", "Portugal", "Ecuador", "Paraguay", "Panamá", "USA", "Canadá", "Países Bajos", "Austria", "Corea del Sur"];
+      let allowed = ["Argentina", "Francia", "España", "Nueva Zelanda", "Brasil", "Argelia", "México", "Colombia", "Japón", "Uruguay", "Portugal", "Ecuador", "Paraguay", "Panamá", "USA", "Canadá", "Países Bajos", "Austria", "Corea del Sur", "Bosnia y Herz", "Qatar"];
       if (mData && mData.tournament_id) {
         const { data: tData } = await supabase
           .from("tournaments")
@@ -1579,6 +1579,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   { id: 'Argelia', flag: '🇩🇿', code: 'ALG' },
                   { id: 'Argentina', flag: '🇦🇷', code: 'ARG' },
                   { id: 'Austria', flag: '🇦🇹', code: 'AUT' },
+                  { id: 'Bosnia y Herz', flag: '🇧🇦', code: 'BIH' },
                   { id: 'Brasil', flag: '🇧🇷', code: 'BRA' },
                   { id: 'Canadá', flag: '🇨🇦', code: 'CAN' },
                   { id: 'Colombia', flag: '🇨🇴', code: 'COL' },
@@ -1596,6 +1597,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   { id: 'Panamá', flag: '🇵🇦', code: 'PAN' },
                   { id: 'Paraguay', flag: '🇵🇾', code: 'PAR' },
                   { id: 'Portugal', flag: '🇵🇹', code: 'POR' },
+                  { id: 'Qatar', flag: '🇶🇦', code: 'QAT' },
                   { id: 'Sudáfrica', flag: '🇿🇦', code: 'RSA' },
                   { id: 'Suiza', flag: '🇨🇭', code: 'SUI' },
                   { id: 'Uruguay', flag: '🇺🇾', code: 'URU' },
