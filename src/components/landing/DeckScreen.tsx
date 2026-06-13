@@ -26,6 +26,7 @@ const TOP_CARDS = [
 export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack }) => {
   const { t } = useTranslation();
   const [search, setSearch] = useState('');
+  const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -135,6 +136,16 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
       } else {
         if (prev.length >= 22) return prev; // Max 22
         return [...prev, cardId];
+      }
+    });
+  };
+
+  const toggleCountryFilter = (country: string) => {
+    setSelectedCountries(prev => {
+      if (prev.includes(country)) {
+        return prev.filter(c => c !== country);
+      } else {
+        return [...prev, country];
       }
     });
   };
@@ -292,13 +303,23 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
 
   const cleanString = (str: string): string => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
+  const unlockedCountries = Array.from(new Set(
+    CARDS.filter(c => unlockedCards.includes(c.id)).map(c => c.country)
+  ));
+
   const filteredPlayers = CARDS.filter(p => {
+    if (selectedCountries.length > 0 && !selectedCountries.includes(p.country)) {
+      return false;
+    }
+
     const q = cleanString(search);
     if (!q) return true;
 
+    const translatedCountry = t(`country_${p.country.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase()}`, p.country);
     return (
       cleanString(p.name).includes(q) ||
       cleanString(p.country).includes(q) ||
+      cleanString(translatedCountry).includes(q) ||
       cleanString(p.club).includes(q)
     );
   }).sort((a, b) => {
@@ -478,15 +499,95 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
         </motion.div>
       )}
 
-      <div style={{ position: 'relative', width: '100%', marginBottom: '1rem' }}>
-        <div style={{ position: 'absolute', top: '50%', left: '1.25rem', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.4)', pointerEvents: 'none' }}>
-          <Search size={20} />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%', marginBottom: '2rem' }}>
+        <div style={{ position: 'relative', width: '100%' }}>
+          <div style={{ position: 'absolute', top: '50%', left: '1.25rem', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.4)', pointerEvents: 'none' }}>
+            <Search size={20} />
+          </div>
+          <input
+            type="text" placeholder={t("search_name_country_club")}
+            value={search} onChange={e => setSearch(e.target.value)}
+            style={{ width: '100%', padding: '1.25rem 1.25rem 1.25rem 3.25rem', background: 'rgba(255, 255, 255, 0.05)', border: '2px solid rgba(255, 255, 255, 0.1)', borderRadius: '1.5rem', color: '#fff', fontSize: '1.1rem', outline: 'none', boxSizing: 'border-box' }}
+          />
         </div>
-        <input
-          type="text" placeholder={t("search_name_country_club")}
-          value={search} onChange={e => setSearch(e.target.value)}
-          style={{ width: '100%', padding: '1.25rem 1.25rem 1.25rem 3.25rem', background: 'rgba(255, 255, 255, 0.05)', border: '2px solid rgba(255, 255, 255, 0.1)', borderRadius: '1.5rem', color: '#fff', fontSize: '1.1rem', outline: 'none', boxSizing: 'border-box' }}
-        />
+
+        {unlockedCountries.length > 0 && (
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', width: '100%' }}>
+            <button
+              onClick={() => setSelectedCountries([])}
+              style={{
+                height: '42px',
+                padding: '0 1.25rem',
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxSizing: 'border-box',
+                borderRadius: '1.1rem',
+                background: selectedCountries.length === 0 ? 'rgba(249, 115, 22, 0.2)' : 'rgba(255, 255, 255, 0.05)',
+                border: selectedCountries.length === 0 ? '1.5px solid #f97316' : '1px solid rgba(255, 255, 255, 0.1)',
+                color: '#fff',
+                fontSize: '0.85rem',
+                fontWeight: 700,
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                boxShadow: selectedCountries.length === 0 ? '0 0 10px rgba(249, 115, 22, 0.2)' : 'none',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              <span style={{ marginRight: '0.4rem' }}>🌎</span> {t('filter_all')}
+            </button>
+
+            {[
+              { id: 'Argelia', code: 'ALG', flag: '🇩🇿' },
+              { id: 'Argentina', code: 'ARG', flag: '🇦🇷' },
+              { id: 'Austria', code: 'AUT', flag: '🇦🇹' },
+              { id: 'Brasil', code: 'BRA', flag: '🇧🇷' },
+              { id: 'Canadá', code: 'CAN', flag: '🇨🇦' },
+              { id: 'Colombia', code: 'COL', flag: '🇨🇴' },
+              { id: 'Croacia', code: 'CRO', flag: '🇭🇷' },
+              { id: 'República Checa', code: 'CZE', flag: '🇨🇿' },
+              { id: 'Ecuador', code: 'ECU', flag: '🇪🇨' },
+              { id: 'España', code: 'ESP', flag: '🇪🇸' },
+              { id: 'Francia', code: 'FRA', flag: '🇫🇷' },
+              { id: 'Japón', code: 'JPN', flag: '🇯🇵' },
+              { id: 'Corea del Sur', code: 'KOR', flag: '🇰🇷' },
+              { id: 'México', code: 'MEX', flag: '🇲🇽' },
+              { id: 'Países Bajos', code: 'NED', flag: '🇳🇱' },
+              { id: 'Noruega', code: 'NOR', flag: '🇳🇴' },
+              { id: 'Nueva Zelanda', code: 'NZL', flag: '🇳🇿' },
+              { id: 'Panamá', code: 'PAN', flag: '🇵🇦' },
+              { id: 'Paraguay', code: 'PAR', flag: '🇵🇾' },
+              { id: 'Portugal', code: 'POR', flag: '🇵🇹' },
+              { id: 'Sudáfrica', code: 'RSA', flag: '🇿🇦' },
+              { id: 'Suiza', code: 'SUI', flag: '🇨🇭' },
+              { id: 'Uruguay', code: 'URU', flag: '🇺🇾' },
+              { id: 'USA', code: 'USA', flag: '🇺🇸' },
+            ].filter(c => unlockedCountries.includes(c.id)).map((country) => (
+              <button
+                key={country.id}
+                onClick={() => toggleCountryFilter(country.id)}
+                style={{
+                  height: '42px',
+                  padding: '0 1.25rem',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxSizing: 'border-box',
+                  borderRadius: '1.1rem',
+                  background: selectedCountries.includes(country.id) ? 'rgba(249, 115, 22, 0.2)' : 'rgba(255, 255, 255, 0.05)',
+                  border: selectedCountries.includes(country.id) ? '1.5px solid #f97316' : '1px solid rgba(255, 255, 255, 0.1)',
+                  color: selectedCountries.includes(country.id) ? '#fff' : 'rgba(255, 255, 255, 0.6)',
+                  fontWeight: selectedCountries.includes(country.id) ? 'bold' : 'normal',
+                  boxShadow: selectedCountries.includes(country.id) ? '0 0 10px rgba(249, 115, 22, 0.2)' : 'none',
+                  whiteSpace: 'nowrap',
+                  cursor: 'pointer'
+                }}
+              >
+                <span style={{ marginRight: '0.4rem' }}>{country.flag}</span> {country.code}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {loading ? (
