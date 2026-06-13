@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Save, Search, Lock, Home, Check, Layers, Unlock, RefreshCw } from 'lucide-react';
+import { Save, Search, Lock, Home, Check, Layers, Unlock, RefreshCw, AlertCircle, ExternalLink, Star } from 'lucide-react';
 import { isTopCard } from '../../lib/votesStore';
 import { useTranslation } from 'react-i18next';
 import { CARDS } from '../../data/cards';
@@ -378,11 +378,13 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
         <p style={{ fontSize: '0.85rem', opacity: 0.8, margin: '8px 0 0 0', fontWeight: 700, color: '#f97316' }}>
           {t("deck_build_disclaimer")}
         </p>
+
+
       </div>
 
 
 
-      {user && (
+      {user && unlockedCards.length >= 24 && (
         <div style={{
           position: 'sticky', top: '1rem', zIndex: 3000, background: 'rgba(15, 10, 25, 0.9)',
           border: selectedDeck.length === 22 ? '2px solid rgba(16, 185, 129, 0.45)' : '2px solid rgba(249, 115, 22, 0.25)',
@@ -498,6 +500,38 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
           )}
         </motion.div>
       )}
+
+      <div style={{
+        background: 'rgba(255, 223, 0, 0.1)', border: '1px solid rgba(255, 223, 0, 0.3)', borderRadius: '1rem', padding: '1rem', marginBottom: '1rem', marginTop: '0', display: 'flex', alignItems: 'center', gap: '1rem', width: '100%', boxSizing: 'border-box'
+      }}>
+        <Star size={24} color="#ffdf00" style={{ flexShrink: 0 }} />
+        <div>
+          <h4 style={{ margin: '0 0 0.25rem 0', color: '#ffdf00', textAlign: 'left' }}>{t("deck_ranking_promo_title")}</h4>
+          <p style={{ margin: 0, fontSize: '0.85rem', color: 'rgba(255,255,255,0.8)', textAlign: 'left' }}>
+            <span>{t("deck_ranking_promo_text")} </span>
+            <a href="/votar" style={{ color: '#ffdf00', fontWeight: 800, textDecoration: 'none', whiteSpace: 'nowrap' }}>
+              <ExternalLink size={14} style={{ verticalAlign: 'middle', marginRight: '0.2rem', marginTop: '-0.1rem' }} />
+              {t("deck_ranking_promo_link")}
+            </a>.
+          </p>
+        </div>
+      </div>
+
+      <div style={{
+        background: 'rgba(0, 242, 255, 0.1)', border: '1px solid rgba(0, 242, 255, 0.3)', borderRadius: '1rem', padding: '1rem', marginBottom: '2rem', marginTop: '0', display: 'flex', alignItems: 'center', gap: '1rem', width: '100%', boxSizing: 'border-box'
+      }}>
+        <AlertCircle size={24} color="#00f2ff" style={{ flexShrink: 0 }} />
+        <div>
+          <h4 style={{ margin: '0 0 0.25rem 0', color: '#00f2ff', textAlign: 'left' }}>{t("deck_prode_promo_title")}</h4>
+          <p style={{ margin: 0, fontSize: '0.85rem', color: 'rgba(255,255,255,0.8)', textAlign: 'left' }}>
+            <span>{t("deck_prode_promo_text")} </span>
+            <a href="/prode" style={{ color: '#00f2ff', fontWeight: 800, textDecoration: 'none', whiteSpace: 'nowrap' }}>
+              <ExternalLink size={14} style={{ verticalAlign: 'middle', marginRight: '0.2rem', marginTop: '-0.1rem' }} />
+              {t("deck_prode_promo_link")}
+            </a>.
+          </p>
+        </div>
+      </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%', marginBottom: '2rem' }}>
         <div style={{ position: 'relative', width: '100%' }}>

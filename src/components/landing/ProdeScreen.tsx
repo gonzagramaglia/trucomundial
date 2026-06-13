@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Calendar, Globe, Search, Home, Trophy, Save, AlertCircle, Layers, Star } from 'lucide-react';
+import { Calendar, Globe, Search, Home, Trophy, Save, AlertCircle, Layers, Star, ExternalLink } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { TwitchButton } from '../shared/TwitchButton';
 import { fixtureMatches } from '../../lib/fixtureData';
@@ -438,9 +438,19 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
         </div>
       </div>
 
+      <div style={{ display: 'flex', justifyContent: isMobile ? 'flex-start' : 'center', gap: '0.75rem', marginBottom: '1rem', overflowX: 'auto', paddingBottom: '0.5rem', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+        <div style={{ display: 'flex', gap: '0.5rem', width: 'max-content' }}>
+          {renderTab('groups', t('group_stage'), Globe)}
+          {renderTab('round_16', t('round_of_16'), Trophy)}
+          {renderTab('quarterfinals', t('quarterfinals'), Trophy)}
+          {renderTab('semifinals', t('semifinals'), Trophy)}
+          {renderTab('final', t('final'), Trophy)}
+        </div>
+      </div>
+
       {/* Rewards Banner */}
       <div style={{
-        background: 'rgba(255, 140, 0, 0.1)', border: '1px solid rgba(255, 140, 0, 0.3)', borderRadius: '1rem', padding: '1rem', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '1rem',
+        background: 'rgba(255, 140, 0, 0.1)', border: '1px solid rgba(255, 140, 0, 0.3)', borderRadius: '1rem', padding: '1rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '1rem',
       }}>
         <AlertCircle size={24} color="#ff8c00" style={{ flexShrink: 0 }} />
         <div>
@@ -448,7 +458,7 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
           <p style={{ margin: 0, fontSize: '0.85rem', color: 'rgba(255,255,255,0.8)' }}>
             <span dangerouslySetInnerHTML={{ __html: t("prode_rewards_desc_1") }} />
             <span dangerouslySetInnerHTML={{ __html: t("prode_rewards_desc_2") }} />
-            {t("prode_rewards_desc_3")}<a href="/mazo" target="_blank" rel="noopener noreferrer" style={{ color: '#ff8c00', fontWeight: 900, textDecoration: 'none' }}>{t("prode_build_deck_link")}</a>.
+            {t("prode_rewards_desc_3")}<a href="/mazo" style={{ color: '#ff8c00', fontWeight: 900, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.2rem', verticalAlign: 'middle' }}><ExternalLink size={14} />{t("prode_build_deck_link")}</a>.
           </p>
         </div>
       </div>
@@ -478,7 +488,14 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
         }}>
           <Star size={20} color="#ffdf00" />
         </div>
-        <p style={{ margin: 0, fontSize: '0.85rem', color: 'rgba(255,255,255,0.9)', lineHeight: 1.4, textAlign: 'left' }} dangerouslySetInnerHTML={{ __html: t("prode_fixture_stars_info") }}></p>
+        <p style={{ margin: 0, fontSize: '0.85rem', color: 'rgba(255,255,255,0.9)', lineHeight: 1.4, textAlign: 'left' }}>
+          <span>{t("prode_fixture_stars_info_1")}</span>
+          <a href="/votar" style={{ color: '#ffdf00', textDecoration: 'none', fontWeight: 'bold', whiteSpace: 'nowrap' }}>
+            <ExternalLink size={14} style={{ verticalAlign: 'middle', marginRight: '0.2rem', marginTop: '-0.1rem' }} />
+            {t("prode_fixture_stars_info_link")}
+          </a>
+          <span dangerouslySetInnerHTML={{ __html: t("prode_fixture_stars_info_2") }} />
+        </p>
       </div>
 
       {!user && (
@@ -529,16 +546,6 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
           </button>
         </motion.div>
       )}
-
-      <div style={{ display: 'flex', justifyContent: isMobile ? 'flex-start' : 'center', gap: '0.75rem', marginBottom: '2rem', overflowX: 'auto', paddingBottom: '0.5rem', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-        <div style={{ display: 'flex', gap: '0.5rem', width: 'max-content' }}>
-          {renderTab('groups', t('group_stage'), Globe)}
-          {renderTab('round_16', t('round_of_16'), Trophy)}
-          {renderTab('quarterfinals', t('quarterfinals'), Trophy)}
-          {renderTab('semifinals', t('semifinals'), Trophy)}
-          {renderTab('final', t('final'), Trophy)}
-        </div>
-      </div>
 
       {activeTab === 'groups' && (
         <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: '1rem', marginBottom: '2rem', width: '100%', boxSizing: 'border-box' }}>

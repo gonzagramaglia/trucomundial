@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Save, Plus, Minus, Search, Trophy, Lock, Check, Home, Star, Calendar, Loader2 } from 'lucide-react';
+import { Save, Plus, Minus, Search, Trophy, Lock, Check, Home, Star, Calendar, Loader2, ExternalLink } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { CARDS } from '../../data/cards';
 import { Sticker } from '../shared/Sticker';
@@ -593,42 +593,6 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
         )}
       </div>
 
-      {/* INFO BOX */}
-      <div style={{
-        background: 'rgba(0, 242, 255, 0.1)',
-        border: '1px solid rgba(0, 242, 255, 0.3)',
-        borderRadius: '12px',
-        padding: '1rem',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '1rem',
-        marginBottom: '2rem',
-        width: '100%',
-        boxSizing: 'border-box'
-      }}>
-        <div style={{
-          background: 'rgba(0, 242, 255, 0.2)',
-          borderRadius: '50%',
-          width: '36px',
-          height: '36px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          flexShrink: 0
-        }}>
-          <Calendar size={20} color="#00f2ff" />
-        </div>
-        <p
-          style={{
-            margin: 0,
-            fontSize: '0.85rem',
-            color: 'rgba(255,255,255,0.9)',
-            lineHeight: 1.4,
-            textAlign: 'left'
-          }}
-          dangerouslySetInnerHTML={{ __html: t('ranking_fixture_info') }}
-        />
-      </div>
 
       {/* VOTING CONTROL BLOCK (STICKY HUD) */}
       <AnimatePresence mode="wait">
@@ -775,6 +739,49 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* INFO BOX */}
+      <div style={{
+        background: 'rgba(0, 242, 255, 0.1)',
+        border: '1px solid rgba(0, 242, 255, 0.3)',
+        borderRadius: '12px',
+        padding: '1rem',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '1rem',
+        marginBottom: '2rem',
+        width: '100%',
+        boxSizing: 'border-box'
+      }}>
+        <div style={{
+          background: 'rgba(0, 242, 255, 0.2)',
+          borderRadius: '50%',
+          width: '36px',
+          height: '36px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexShrink: 0
+        }}>
+          <Calendar size={20} color="#00f2ff" />
+        </div>
+        <p
+          style={{
+            margin: 0,
+            fontSize: '0.85rem',
+            color: 'rgba(255,255,255,0.9)',
+            lineHeight: 1.4,
+            textAlign: 'left'
+          }}
+        >
+          <span>{t("ranking_fixture_info_1")}</span>
+          <a href="/prode" style={{ color: '#00f2ff', textDecoration: 'none', fontWeight: 'bold', whiteSpace: 'nowrap' }}>
+            <ExternalLink size={14} style={{ verticalAlign: 'middle', marginRight: '0.2rem', marginTop: '-0.1rem' }} />
+            {t("ranking_fixture_info_link")}
+          </a>
+          <span dangerouslySetInnerHTML={{ __html: t("ranking_fixture_info_2") }} />
+        </p>
+      </div>
 
       {/* SEARCH BOX & FILTERS */}
       <div style={{
