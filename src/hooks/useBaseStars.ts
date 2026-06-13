@@ -2,6 +2,11 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { fixtureMatches } from '../lib/fixtureData';
 
+const normalizeCountry = (teamName: string) => {
+  if (teamName === 'Estados Unidos') return 'USA';
+  return teamName;
+};
+
 export const useBaseStars = () => {
   const [baseStarsByCountry, setBaseStarsByCountry] = useState<Record<string, number>>({});
 
@@ -14,13 +19,15 @@ export const useBaseStars = () => {
           data.forEach(r => {
             const match = fixtureMatches.find(m => m.id === r.match_id);
             if (match && r.status === 'finished') {
+              const teamA = normalizeCountry(match.teamA);
+              const teamB = normalizeCountry(match.teamB);
               if (r.score_a > r.score_b) {
-                starsMap[match.teamA] = (starsMap[match.teamA] || 0) + 2;
+                starsMap[teamA] = (starsMap[teamA] || 0) + 2;
               } else if (r.score_b > r.score_a) {
-                starsMap[match.teamB] = (starsMap[match.teamB] || 0) + 2;
+                starsMap[teamB] = (starsMap[teamB] || 0) + 2;
               } else {
-                starsMap[match.teamA] = (starsMap[match.teamA] || 0) + 1;
-                starsMap[match.teamB] = (starsMap[match.teamB] || 0) + 1;
+                starsMap[teamA] = (starsMap[teamA] || 0) + 1;
+                starsMap[teamB] = (starsMap[teamB] || 0) + 1;
               }
             }
           });
