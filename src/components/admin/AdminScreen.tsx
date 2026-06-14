@@ -457,7 +457,7 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
     return Array.from(statsMap.values()).sort(
       (a, b) => new Date(b.lastPlayed).getTime() - new Date(a.lastPlayed).getTime(),
     );
-  }, [profiles, history, globalVotesData]);
+  }, [profiles, history, globalVotesData, prodePredictions]);
 
   const getPlayerRole = (userId: string): "normal" | "mod" | "admin" | "creator" => {
     const roleRecord = userRoles.find(r => r.user_id === userId);

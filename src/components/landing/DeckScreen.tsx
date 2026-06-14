@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Save, Search, Lock, Home, Check, Layers, Unlock, RefreshCw, AlertCircle, ExternalLink, Star } from 'lucide-react';
 import { isTopCard } from '../../lib/votesStore';
 import { useTranslation } from 'react-i18next';
@@ -40,6 +40,7 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
   const [showUnsavedModal, setShowUnsavedModal] = useState(false);
   const [openingPack, setOpeningPack] = useState(false);
   const [newCardsRevealed, setNewCardsRevealed] = useState<string[]>([]);
+  const [highlightingCards, setHighlightingCards] = useState(false);
   const [showRevealModal, setShowRevealModal] = useState(false);
 
   const [showRedeemModal, setShowRedeemModal] = useState(false);
@@ -309,11 +310,17 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
     setShowRevealModal(false);
     setTimeout(() => {
       if (newCardsRevealed.length > 0) {
+        setHighlightingCards(true);
         const firstCardId = newCardsRevealed[0];
         const element = document.getElementById(`deck-card-${firstCardId}`);
         if (element) {
           element.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
+        
+        setTimeout(() => {
+          setHighlightingCards(false);
+          setNewCardsRevealed([]);
+        }, 1500);
       }
     }, 300);
   };
@@ -685,6 +692,23 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
           color="#f97316"
         />
       ) : (
+        <>
+          <AnimatePresence>
+            {highlightingCards && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                style={{
+                  position: 'fixed',
+                  inset: 0,
+                  background: 'rgba(0, 0, 0, 0.75)',
+                  zIndex: 10,
+                  pointerEvents: 'none'
+                }}
+              />
+            )}
+          </AnimatePresence>
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))',
@@ -705,7 +729,9 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
                 animate={isRevealed ? { scale: [0, 1.2, 1], rotate: 0 } : {}}
                 transition={{ duration: 0.8, type: 'spring' }}
                 style={{
-                  display: 'flex', flexDirection: 'column', alignItems: 'center', position: 'relative',
+                  position: 'relative',
+                  display: 'flex', flexDirection: 'column', alignItems: 'center',
+                  zIndex: isRevealed && highlightingCards ? 20 : 1,
                   opacity: isUnlocked ? 1 : 0.5,
                   filter: isUnlocked ? 'none' : 'grayscale(100%)',
                   cursor: isUnlocked ? 'pointer' : 'default',
@@ -739,6 +765,7 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
             );
           })}
         </div>
+        </>
       )}
 
       {showUnsavedModal && (
