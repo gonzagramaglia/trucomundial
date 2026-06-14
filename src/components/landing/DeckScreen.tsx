@@ -305,6 +305,19 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
     }
   };
 
+  const handleCloseRevealModal = () => {
+    setShowRevealModal(false);
+    setTimeout(() => {
+      if (newCardsRevealed.length > 0) {
+        const firstCardId = newCardsRevealed[0];
+        const element = document.getElementById(`deck-card-${firstCardId}`);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }
+    }, 300);
+  };
+
   const cleanString = (str: string): string => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
   const unlockedCountries = Array.from(new Set(
@@ -603,6 +616,7 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
               { id: 'Portugal', code: 'POR', flag: '🇵🇹' },
               { id: 'Qatar', code: 'QAT', flag: '🇶🇦' },
               { id: 'Sudáfrica', code: 'RSA', flag: '🇿🇦' },
+              { id: 'Escocia', code: 'SCO', flag: '🏴󠁧󠁢󠁳󠁣󠁴󠁿' },
               { id: 'Suiza', code: 'SUI', flag: '🇨🇭' },
               { id: 'Suecia', code: 'SWE', flag: '🇸🇪' },
               { id: 'Uruguay', code: 'URU', flag: '🇺🇾' },
@@ -685,6 +699,7 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
             return (
               <motion.div
                 key={player.id}
+                id={`deck-card-${player.id}`}
                 layoutId={`deck-card-${player.id}`}
                 initial={isRevealed ? { scale: 0, rotate: -180 } : false}
                 animate={isRevealed ? { scale: [0, 1.2, 1], rotate: 0 } : {}}
@@ -785,7 +800,7 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
               </h2>
 
               <button
-                onClick={() => setShowRevealModal(false)}
+                onClick={handleCloseRevealModal}
                 className="btn-hover-dark"
                 style={{
                   background: 'linear-gradient(135deg, #f97316, #ea580c)',

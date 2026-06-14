@@ -1602,6 +1602,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   { id: 'Portugal', flag: '🇵🇹', code: 'POR' },
                   { id: 'Qatar', flag: '🇶🇦', code: 'QAT' },
                   { id: 'Sudáfrica', flag: '🇿🇦', code: 'RSA' },
+                  { id: 'Escocia', code: 'SCO', flag: '🏴󠁧󠁢󠁳󠁣󠁴󠁿' },
+                  
                   { id: 'Suiza', flag: '🇨🇭', code: 'SUI' },
                   { id: 'Suecia', code: 'SWE', flag: '🇸🇪' },
               { id: 'Uruguay', flag: '🇺🇾', code: 'URU' },

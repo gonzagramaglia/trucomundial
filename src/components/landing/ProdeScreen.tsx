@@ -833,12 +833,16 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
           <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} style={{ background: 'rgba(26, 26, 46, 0.85)', backdropFilter: 'blur(16px)', padding: '2.5rem', borderRadius: '1.5rem', maxWidth: '600px', width: '100%', textAlign: 'center', border: '1px solid rgba(255, 140, 0, 0.3)', boxShadow: '0 0 30px rgba(255, 140, 0, 0.15)' }}>
             <h2 style={{ color: '#ff8c00', marginTop: 0, marginBottom: '0.5rem', fontSize: '2rem', textTransform: 'uppercase', textShadow: '0 0 10px rgba(255, 140, 0, 0.5)' }}>¡Felicidades!</h2>
             <p style={{ color: '#fff', fontSize: '1.1rem', marginBottom: '0.75rem' }}>
-              Acertaste tu predicción del partido <strong>{rewardCodesModal.matchDesc}</strong> y ganaste <strong>{rewardCodesModal.packs} sobres</strong> para el mazo.
+              Acertaste tu predicción del partido <strong>{rewardCodesModal.matchDesc}</strong> y ganaste <strong>{rewardCodesModal.packs} {rewardCodesModal.packs === 1 ? 'sobre' : 'sobres'}</strong> para el mazo.
             </p>
             <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.9rem', marginBottom: '1rem' }}>
-              Estos son tus códigos de recompensa. ¡Anotalos y canjealos en la <a href="/mazo" target="_blank" rel="noopener noreferrer" style={{ color: '#ff8c00', textDecoration: 'none', fontWeight: 800 }} className="hover-underline">pantalla de Mazo</a>!
+              {rewardCodesModal.packs === 1 ? (
+                <>Este es tu código de recompensa. ¡Anotalo y canjealo en la <a href="/mazo" target="_blank" rel="noopener noreferrer" style={{ color: '#ff8c00', textDecoration: 'none', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '0.2rem', verticalAlign: 'middle' }} className="hover-underline"><ExternalLink size={14} />pantalla de Mazo</a>!</>
+              ) : (
+                <>Estos son tus códigos de recompensa. ¡Anotalos y canjealos en la <a href="/mazo" target="_blank" rel="noopener noreferrer" style={{ color: '#ff8c00', textDecoration: 'none', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '0.2rem', verticalAlign: 'middle' }} className="hover-underline"><ExternalLink size={14} />pantalla de Mazo</a>!</>
+              )}
             </p>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem', marginBottom: '2rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: rewardCodesModal.codes.length === 1 ? 'minmax(180px, 250px)' : 'repeat(3, 1fr)', justifyContent: 'center', gap: '0.75rem', marginBottom: '2rem' }}>
               {rewardCodesModal.codes.map((item, idx) => (
                 <div key={idx} style={{ background: 'rgba(0,0,0,0.5)', padding: isMobile ? '0.75rem 0.25rem' : '1rem 0.5rem', borderRadius: '0.75rem', border: '1px dashed rgba(255, 140, 0, 0.4)', fontSize: isMobile ? '1.1rem' : '1.35rem', fontWeight: 900, letterSpacing: isMobile ? '0.05em' : '0.1em', color: item.used ? 'rgba(255,255,255,0.3)' : '#fff', textDecoration: item.used ? 'line-through' : 'none', position: 'relative' }}>
                   {item.code}
@@ -849,8 +853,9 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
             <button
               onClick={() => setRewardCodesModal(null)}
               className="btn-hover-dark"
-              style={{ width: '100%', background: '#ff8c00', color: '#000', border: 'none', padding: '1rem', borderRadius: '1rem', fontSize: '1.1rem', fontWeight: 900, cursor: 'pointer', textTransform: 'uppercase' }}
+              style={{ width: '100%', background: '#ff8c00', color: '#000', border: 'none', padding: '1rem', borderRadius: '1rem', fontSize: '1.1rem', fontWeight: 900, cursor: 'pointer', textTransform: 'uppercase', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
             >
+              <Layers size={20} />
               ¡Entendido!
             </button>
           </motion.div>

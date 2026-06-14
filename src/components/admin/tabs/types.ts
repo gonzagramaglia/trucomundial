@@ -23,12 +23,19 @@ export interface PlayerStats {
   lastPlayed: string;
   votes?: Record<string, number>;
   createdAt?: string;
+  prodePredictions?: any[];
 }
 
 export interface UserStarsPayload {
   userName: string;
   userEmail: string;
   votes?: Record<string, number>;
+}
+
+export interface UserProdePayload {
+  userName: string;
+  userEmail: string;
+  predictions: any[];
 }
 
 export interface CreatorApplication {

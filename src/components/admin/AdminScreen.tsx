@@ -26,6 +26,7 @@ import { CreatorProfileModal } from "./CreatorProfileModal";
 import { TwitchButton } from '../shared/TwitchButton';
 import { UtilityButtons } from '../shared/UtilityButtons';
 import { UserStarsModal } from "./UserStarsModal";
+import { UserProdeModal } from "./UserProdeModal";
 import {
   normalizeTournamentPrizes,
 } from "../../lib/formatters";
@@ -63,6 +64,7 @@ interface PlayerStats {
   lastPlayed: string;
   votes: Record<string, number>;
   createdAt?: string;
+  prodePredictions?: any[];
 }
 
 interface CreatorApplication {
@@ -97,7 +99,9 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
   const [editingCreator, setEditingCreator] = useState<any>(null);
   const [profiles, setProfiles] = useState<any[]>([]);
   const [globalVotesData, setGlobalVotesData] = useState<any[]>([]);
+  const [prodePredictions, setProdePredictions] = useState<any[]>([]);
   const [selectedUserStars, setSelectedUserStars] = useState<any | null>(null);
+  const [selectedUserProde, setSelectedUserProde] = useState<any | null>(null);
   const [userRoles, setUserRoles] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<
     "players" | "matches" | "tournaments" | "applications" | "suggestions" | "support" | "fixture" | "settings"
@@ -255,6 +259,17 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
         console.error("Error fetching tickets:", ticketsError);
       } else if (ticketsData) {
         setTickets(ticketsData);
+      }
+
+      // Fetch Prode Predictions
+      const { data: prodeData, error: prodeError } = await supabase
+        .from("prode_predictions")
+        .select("*");
+
+      if (prodeError) {
+        console.error("Error fetching prode predictions:", prodeError);
+      } else if (prodeData) {
+        setProdePredictions(prodeData);
       }
     } catch (err) {
       console.error("Unexpected error fetching global data:", err);
@@ -430,6 +445,13 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
       if (item.last_move?.userName && pStats.userName === "Usuario") {
         pStats.userName = item.last_move.userName;
       }
+    });
+
+    // 4. Add Prode Predictions data
+    prodePredictions.forEach((pred) => {
+      const pStats = getOrCreatePlayer(pred.user_id, "Usuario", pred.updated_at);
+      if (!pStats.prodePredictions) pStats.prodePredictions = [];
+      pStats.prodePredictions.push(pred);
     });
 
     return Array.from(statsMap.values()).sort(
@@ -1140,6 +1162,7 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
             playerSearchTerm={playerSearchTerm}
             setPlayerSearchTerm={setPlayerSearchTerm}
             setSelectedUserStars={setSelectedUserStars}
+            setSelectedUserProde={setSelectedUserProde}
             getPlayerRole={getPlayerRole}
             handleRoleChange={handleRoleChange}
             formatDate={formatDate}
@@ -1447,6 +1470,13 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
         userName={selectedUserStars?.userName || ""}
         userEmail={selectedUserStars?.userEmail || ""}
         votes={selectedUserStars?.votes || {}}
+      />
+      <UserProdeModal
+        isOpen={!!selectedUserProde}
+        onClose={() => setSelectedUserProde(null)}
+        userName={selectedUserProde?.userName || ""}
+        userEmail={selectedUserProde?.userEmail || ""}
+        predictions={selectedUserProde?.predictions || []}
       />
     </div>
   );

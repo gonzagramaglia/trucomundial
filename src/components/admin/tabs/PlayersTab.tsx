@@ -1,13 +1,14 @@
 import React from "react";
-import { Star, Search } from "lucide-react";
+import { Star, Search, CalendarDays } from "lucide-react";
 
-import type { PlayerStats, UserStarsPayload } from "./types";
+import type { PlayerStats, UserStarsPayload, UserProdePayload } from "./types";
 
 interface PlayersTabProps {
   playerStats: PlayerStats[];
   playerSearchTerm: string;
   setPlayerSearchTerm: (term: string) => void;
   setSelectedUserStars: (user: UserStarsPayload) => void;
+  setSelectedUserProde: (user: UserProdePayload) => void;
   getPlayerRole: (userId: string) => "normal" | "mod" | "admin" | "creator";
   handleRoleChange: (userId: string, newRole: string) => void;
   formatDate: (dateStr: string) => string;
@@ -18,6 +19,7 @@ export const PlayersTab: React.FC<PlayersTabProps> = ({
   playerSearchTerm,
   setPlayerSearchTerm,
   setSelectedUserStars,
+  setSelectedUserProde,
   getPlayerRole,
   handleRoleChange,
   formatDate,
@@ -258,6 +260,40 @@ export const PlayersTab: React.FC<PlayersTabProps> = ({
                               title={hasVotes ? "Ver Distribución de Estrellas" : "No ha distribuido estrellas"}
                             >
                               <Star size={11} fill={hasVotes ? "var(--color-accent)" : "rgba(255, 255, 255, 0.3)"} /> Estrellas
+                            </button>
+                          );
+                        })()}
+                        {(() => {
+                          const hasProde = stats.prodePredictions && stats.prodePredictions.length > 0;
+                          return (
+                            <button
+                              disabled={!hasProde}
+                              onClick={() =>
+                                setSelectedUserProde({
+                                  userName: stats.userName,
+                                  userEmail: stats.email,
+                                  predictions: stats.prodePredictions || []
+                                })
+                              }
+                              style={{
+                                background: hasProde ? "rgba(0, 242, 255, 0.15)" : "rgba(255, 255, 255, 0.05)",
+                                border: hasProde ? "1px solid rgba(0, 242, 255, 0.3)" : "1px solid rgba(255, 255, 255, 0.1)",
+                                color: hasProde ? "#00f2ff" : "rgba(255, 255, 255, 0.3)",
+                                padding: "0.25rem 0.6rem",
+                                borderRadius: "0.5rem",
+                                fontSize: "0.75rem",
+                                fontWeight: 800,
+                                cursor: hasProde ? "pointer" : "not-allowed",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                gap: "0.25rem",
+                                marginRight: "0.25rem",
+                                opacity: hasProde ? 1 : 0.5
+                              }}
+                              title={hasProde ? "Ver Predicciones de Prode" : "No ha participado en Prode"}
+                            >
+                              <CalendarDays size={11} color={hasProde ? "#00f2ff" : "rgba(255, 255, 255, 0.3)"} /> Prode
                             </button>
                           );
                         })()}

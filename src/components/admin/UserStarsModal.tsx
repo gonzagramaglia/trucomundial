@@ -12,6 +12,7 @@ interface UserStarsModalProps {
 }
 
 const flagMap: Record<string, string> = {
+  'Alemania': '🇩🇪',
   'Argelia': '🇩🇿',
   'Argentina': '🇦🇷',
   'Austria': '🇦🇹',
@@ -23,9 +24,9 @@ const flagMap: Record<string, string> = {
   'Corea del Sur': '🇰🇷',
   'Croacia': '🇭🇷',
   'Ecuador': '🇪🇨',
+  'Escocia': '🏴󠁧󠁢󠁳󠁣󠁴󠁿',
   'España': '🇪🇸',
   'Francia': '🇫🇷',
-  'Alemania': '🇩🇪',
   'Inglaterra': '🏴󠁧󠁢󠁥󠁮󠁧󠁿',
   'Japón': '🇯🇵',
   'Marruecos': '🇲🇦',
@@ -39,8 +40,8 @@ const flagMap: Record<string, string> = {
   'Qatar': '🇶🇦',
   'República Checa': '🇨🇿',
   'Sudáfrica': '🇿🇦',
-  'Suiza': '🇨🇭',
   'Suecia': '🇸🇪',
+  'Suiza': '🇨🇭',
   'Uruguay': '🇺🇾',
   'USA': '🇺🇸'
 };
