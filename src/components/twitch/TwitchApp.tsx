@@ -481,6 +481,7 @@ export function TwitchApp() {
               { id: 'Bosnia y Herz', flag: '🇧🇦', code: 'BIH' },
                   { id: 'Brasil', flag: '🇧🇷', code: 'BRA' },
                   { id: 'Canadá', flag: '🇨🇦', code: 'CAN' },
+                  { id: 'Costa de Marfil', code: 'CIV', flag: '🇨🇮' },
                   { id: 'Colombia', flag: '🇨🇴', code: 'COL' },
                   { id: 'Croacia', flag: '🇭🇷', code: 'CRO' },
                   { id: 'República Checa', flag: '🇨🇿', code: 'CZE' },

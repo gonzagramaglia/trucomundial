@@ -61,7 +61,7 @@ export const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
         reset({
           ...tournament,
           prize: normalizeTournamentPrizes(tournament.prize),
-          allowed_teams: tournament.allowed_teams || ["Alemania","Argelia","Argentina","Austria","Bélgica","Bosnia y Herz","Brasil","Canadá","Colombia","Corea del Sur","Croacia","Ecuador","Escocia","España","Francia","Inglaterra","Japón","Marruecos","México","Noruega","Nueva Zelanda","Países Bajos","Panamá","Paraguay","Portugal","Qatar","República Checa","Sudáfrica","Suecia","Suiza","Uruguay","USA"],
+          allowed_teams: tournament.allowed_teams || ["Alemania","Argelia","Argentina","Austria","Bélgica","Bosnia y Herz","Brasil","Canadá","Colombia","Corea del Sur","Costa de Marfil","Croacia","Ecuador","Escocia","España","Francia","Inglaterra","Japón","Marruecos","México","Noruega","Nueva Zelanda","Países Bajos","Panamá","Paraguay","Portugal","Qatar","República Checa","Sudáfrica","Suecia","Suiza","Uruguay","USA"],
         });
       } else {
         const now = new Date();

@@ -9,6 +9,7 @@ export const FLAG_MAP: Record<string, string> = {
   'Canadá': '🇨🇦',
   'Colombia': '🇨🇴',
   'Corea del Sur': '🇰🇷',
+  'Costa de Marfil': '🇨🇮',
   'Croacia': '🇭🇷',
   'Ecuador': '🇪🇨',
   'Escocia': '🏴󠁧󠁢󠁳󠁣󠁴󠁿',
@@ -18,8 +19,10 @@ export const FLAG_MAP: Record<string, string> = {
   'Japón': '🇯🇵',
   'Marruecos': '🇲🇦',
   'México': '🇲🇽',
+  'Ninguna': '🏳️',
   'Noruega': '🇳🇴',
   'Nueva Zelanda': '🇳🇿',
+  'Otra': '🌍',
   'Países Bajos': '🇳🇱',
   'Panamá': '🇵🇦',
   'Paraguay': '🇵🇾',
@@ -31,8 +34,6 @@ export const FLAG_MAP: Record<string, string> = {
   'Suiza': '🇨🇭',
   'Uruguay': '🇺🇾',
   'USA': '🇺🇸',
-  'Otra': '🌍',
-  'Ninguna': '🏳️'
 };
 
 export const getFlag = (country: string) => FLAG_MAP[country] || '🌍';
