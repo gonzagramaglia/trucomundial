@@ -27,6 +27,7 @@ const flagMap: Record<string, string> = {
   'Croacia': '🇭🇷',
   'Ecuador': '🇪🇨',
   'Egipto': '🇪🇬',
+  'Senegal': '🇸🇳',
   'Escocia': '🏴󠁧󠁢󠁳󠁣󠁴󠁿',
   'España': '🇪🇸',
   'Francia': '🇫🇷',

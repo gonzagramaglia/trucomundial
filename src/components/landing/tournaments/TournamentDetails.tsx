@@ -17,6 +17,7 @@ const FLAG_MAP: Record<string, string> = {
   "Croacia": "🇭🇷",
   "Ecuador": "🇪🇨",
   "Egipto": "🇪🇬",
+  "Senegal": "🇸🇳",
   "España": "🇪🇸",
   "Francia": "🇫🇷",
   "Alemania": "🇩🇪",

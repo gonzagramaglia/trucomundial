@@ -425,4 +425,16 @@ export const CARDS: Card[] = [
   { id: 'saman_ghoddos', name: 'S. GHODDOS', env: 14, country: 'Irán', club: 'Kalba FC', image: '/stickers/iran/figu-de-saman-ghoddos-14.jpeg', stickerNumber: 'IRN 14' },
   { id: 'sardar_azmoun', name: 'S. AZMOUN', env: 20, country: 'Irán', club: 'Shabab Al-Ahli', image: '/stickers/iran/figu-de-sardar-azmoun-20.jpeg', stickerNumber: 'IRN 20' },
   { id: 'shoja_khalilzadeh', name: 'S. KHALILZADEH', env: 4, country: 'Irán', club: 'Tractor FC', image: '/stickers/iran/figu-de-shoja-khalilzadeh-4.jpeg', stickerNumber: 'IRN 4' },
+
+  { id: 'edouard_mendy', name: 'EDOUARD MENDY', env: 16, country: 'Senegal', club: 'Al-Ahli', image: '/stickers/senegal/figu-de-edouard-mendy-16.jpeg', stickerNumber: 'SEN 16' },
+  { id: 'kalidou_koulibaly', name: 'K. KOULIBALY', env: 3, country: 'Senegal', club: 'Al-Hilal', image: '/stickers/senegal/figu-de-kalidou-koulibaly-3.jpeg', stickerNumber: 'SEN 3' },
+  { id: 'idrissa_gana_gueye', name: 'I. GANA GUEYE', env: 5, country: 'Senegal', club: 'Everton', image: '/stickers/senegal/figu-de-idrissa-gana-gueye-5.jpeg', stickerNumber: 'SEN 5' },
+  { id: 'sadio_mane', name: 'SADIO MANÉ', env: 10, country: 'Senegal', club: 'Al-Nassr', image: '/stickers/senegal/figu-de-sadio-mane-10.jpeg', stickerNumber: 'SEN 10' },
+  { id: 'nicolas_jackson', name: 'N. JACKSON', env: 11, country: 'Senegal', club: 'Chelsea', image: '/stickers/senegal/figu-de-nicolas-jackson-11.jpeg', stickerNumber: 'SEN 11' },
+  { id: 'iliman_ndiaye', name: 'I. NDIAYE', env: 13, country: 'Senegal', club: 'Everton', image: '/stickers/senegal/figu-de-iliman-ndiaye-13.jpeg', stickerNumber: 'SEN 13' },
+  { id: 'krepin_diatta', name: 'K. DIATTA', env: 15, country: 'Senegal', club: 'Monaco', image: '/stickers/senegal/figu-de-krepin-diatta-15.jpeg', stickerNumber: 'SEN 15' },
+  { id: 'pape_matar_sarr', name: 'P. MATAR SARR', env: 17, country: 'Senegal', club: 'Tottenham', image: '/stickers/senegal/figu-de-pape-matar-sarr-17.jpeg', stickerNumber: 'SEN 17' },
+  { id: 'ismaila_sarr', name: 'ISMAÏLA SARR', env: 18, country: 'Senegal', club: 'Crystal Palace', image: '/stickers/senegal/figu-de-ismaila-sarr-18.jpeg', stickerNumber: 'SEN 18' },
+  { id: 'moussa_niakhate', name: 'M. NIAKHATÉ', env: 19, country: 'Senegal', club: 'Lyon', image: '/stickers/senegal/figu-de-moussa-niakhate-19.jpeg', stickerNumber: 'SEN 19' },
+  { id: 'el_hadji_malick_diouf', name: 'E. DIOUF', env: 25, country: 'Senegal', club: 'Slavia Prague', image: '/stickers/senegal/figu-de-el-hadji-malick-diouf-25.jpeg', stickerNumber: 'SEN 25' },
 ];

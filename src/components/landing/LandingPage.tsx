@@ -1,7 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import { Home, User, ArrowLeft, Trophy, ShieldAlert, BookOpen, Layers, Search } from "lucide-react";
+import {
+  Home,
+  User,
+  ArrowLeft,
+  Trophy,
+  ShieldAlert,
+  BookOpen,
+  Layers,
+  Search,
+} from "lucide-react";
 import { supabase } from "../../lib/supabase";
 import { audioManager } from "../../lib/audio";
 import { UtilityButtons } from "../shared/UtilityButtons";
@@ -22,9 +31,8 @@ import { AdminScreen } from "../admin/AdminScreen";
 import { CreatorScreen } from "../admin/CreatorScreen";
 import { CreatorsApplicationScreen } from "./CreatorsApplicationScreen";
 import { RulesModal } from "../shared/RulesModal";
-import { TwitchButton } from '../shared/TwitchButton';
+import { TwitchButton } from "../shared/TwitchButton";
 import { setTournamentVotesSnapshot } from "../../lib/votesStore";
-
 
 interface LandingPageProps {
   onStart: (
@@ -59,22 +67,26 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   const [isSelectingPoints, setIsSelectingPoints] = useState(false);
   const [isSelectingTeams, setIsSelectingTeams] = useState(false);
   const [selectedPoints, setSelectedPoints] = useState<15 | 30>(15);
-  const [countrySearch, setCountrySearch] = useState('');
-  const cleanString = (str: string) => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  const [countrySearch, setCountrySearch] = useState("");
+  const cleanString = (str: string) =>
+    str
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase();
   const [selectedTeams, setSelectedTeams] = useState<string[]>(() => {
-    const saved = localStorage.getItem('truco_selected_teams');
+    const saved = localStorage.getItem("truco_selected_teams");
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) return parsed;
-      } catch (e) { }
+      } catch (e) {}
     }
     return [];
   });
   const [showRules, setShowRules] = useState(false);
 
   useEffect(() => {
-    localStorage.setItem('truco_selected_teams', JSON.stringify(selectedTeams));
+    localStorage.setItem("truco_selected_teams", JSON.stringify(selectedTeams));
   }, [selectedTeams]);
 
   const [roomCode, setRoomCode] = useState<string>("");
@@ -83,7 +95,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   const [joinError, setJoinError] = useState("");
   const [isCreator, setIsCreator] = useState(false);
   const [isApprovedCreator, setIsApprovedCreator] = useState(false);
-  const isSuperAdmin = user?.email && ["gonzagramaglia@gmail.com", "ciberportero@gmail.com"].includes(user.email);
+  const isSuperAdmin =
+    user?.email &&
+    ["gonzagramaglia@gmail.com", "ciberportero@gmail.com"].includes(user.email);
   const [showRanking, setShowRanking] = useState(
     () =>
       typeof window !== "undefined" &&
@@ -123,7 +137,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
   useEffect(() => {
     // Only play theme if not in voting or fixture, which handle it themselves,
-    // actually LandingPage mounts first, so it can just play it. 
+    // actually LandingPage mounts first, so it can just play it.
     // audioManager will not restart if already playing.
     audioManager.playTheme();
   }, []);
@@ -167,9 +181,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       try {
         if (user) {
           const { data } = await supabase
-            .from('user_decks')
-            .select('unlocked_cards')
-            .eq('id', user.id)
+            .from("user_decks")
+            .select("unlocked_cards")
+            .eq("id", user.id)
             .single();
           if (data && data.unlocked_cards && data.unlocked_cards.length >= 22) {
             setHasUnlockedDeck(true);
@@ -322,11 +336,20 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       );
     } else if (showFixture) {
       document.title = "Fixture del Mundial 2026";
-      updateMetaTag("description", "Fixture del Mundial 2026 de Truco Mundial.");
+      updateMetaTag(
+        "description",
+        "Fixture del Mundial 2026 de Truco Mundial.",
+      );
       updateMetaTag("og:title", "Fixture del Mundial 2026");
-      updateMetaTag("og:description", "Fixture del Mundial 2026 de Truco Mundial.");
+      updateMetaTag(
+        "og:description",
+        "Fixture del Mundial 2026 de Truco Mundial.",
+      );
       updateMetaTag("twitter:title", "Fixture del Mundial 2026");
-      updateMetaTag("twitter:description", "Fixture del Mundial 2026 de Truco Mundial.");
+      updateMetaTag(
+        "twitter:description",
+        "Fixture del Mundial 2026 de Truco Mundial.",
+      );
     } else if (showTournament) {
       document.title = "Torneos de Truco Mundial";
       updateMetaTag(
@@ -382,7 +405,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         "Viví la evolución del Truco argentino con figuritas coleccionables de tus jugadores de fútbol favoritos. ¡Jugá partidas online en tiempo real gratis contra amigos o local contra la CPU!",
       );
     }
-  }, [showRanking, showRoadmap, showFixture, showProde, showTournament, showProfile]);
+  }, [
+    showRanking,
+    showRoadmap,
+    showFixture,
+    showProde,
+    showTournament,
+    showProfile,
+  ]);
 
   useEffect(() => {
     let timer: any;
@@ -453,13 +483,21 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   const fetchUserDeck = async (userId?: string): Promise<string[]> => {
     let deck: string[] = [];
     if (userId) {
-      const { data } = await supabase.from('user_decks').select('selected_deck').eq('id', userId).single();
+      const { data } = await supabase
+        .from("user_decks")
+        .select("selected_deck")
+        .eq("id", userId)
+        .single();
       if (data && data.selected_deck) deck = data.selected_deck;
     }
     if (!deck.length) {
-      const cached = localStorage.getItem(`trucomundial-deck-${userId || 'anonymous'}`);
+      const cached = localStorage.getItem(
+        `trucomundial-deck-${userId || "anonymous"}`,
+      );
       if (cached) {
-        try { deck = JSON.parse(cached).selectedDeck || []; } catch (e) { }
+        try {
+          deck = JSON.parse(cached).selectedDeck || [];
+        } catch (e) {}
       }
     }
     return deck;
@@ -478,7 +516,16 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         handleCreateRoom(points); // Pass points directly to avoid state race
       }
     } else {
-      onStart(mode, points, undefined, undefined, undefined, undefined, false, selectedTeams);
+      onStart(
+        mode,
+        points,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        false,
+        selectedTeams,
+      );
     }
   };
 
@@ -517,7 +564,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   };
 
   const handleJoinRoom = async (customCode?: string) => {
-    const code = customCode ? customCode.toUpperCase() : inputCode.toUpperCase();
+    const code = customCode
+      ? customCode.toUpperCase()
+      : inputCode.toUpperCase();
     if (!customCode && code.length !== 4) return;
     setIsCreator(false);
 
@@ -699,7 +748,45 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         .eq("match_code", matchCode)
         .maybeSingle();
 
-      let allowed = ["Alemania","Arabia Saudita","Argelia","Argentina","Austria","Bélgica","Bosnia y Herz","Brasil","Cabo Verde","Canadá","Colombia","Costa de Marfil","Croacia","República Checa","Ecuador","Egipto","Inglaterra","España","Francia","Japón","Jordania","Corea del Sur","Marruecos","México","Países Bajos","Noruega","Nueva Zelanda","Panamá","Paraguay","Portugal","Qatar","Sudáfrica","Suiza","Suecia","Uruguay","USA"];
+      let allowed = [
+        "Alemania",
+        "Arabia Saudita",
+        "Argelia",
+        "Argentina",
+        "Austria",
+        "Bélgica",
+        "Bosnia y Herz",
+        "Brasil",
+        "Cabo Verde",
+        "Canadá",
+        "Colombia",
+        "Costa de Marfil",
+        "Croacia",
+        "República Checa",
+        "Ecuador",
+        "Egipto",
+        "Senegal",
+        "Inglaterra",
+        "España",
+        "Francia",
+        "Japón",
+        "Jordania",
+        "Corea del Sur",
+        "Marruecos",
+        "México",
+        "Países Bajos",
+        "Noruega",
+        "Nueva Zelanda",
+        "Panamá",
+        "Paraguay",
+        "Portugal",
+        "Qatar",
+        "Sudáfrica",
+        "Suiza",
+        "Suecia",
+        "Uruguay",
+        "USA",
+      ];
       if (mData && mData.tournament_id) {
         const { data: tData } = await supabase
           .from("tournaments")
@@ -768,7 +855,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 true,
                 roomCode,
                 false,
-                [...(state.roomInfo?.hostDeck || []), ...(state.roomInfo?.guestDeck || [])],
+                [
+                  ...(state.roomInfo?.hostDeck || []),
+                  ...(state.roomInfo?.guestDeck || []),
+                ],
               );
             }, 3500);
           }
@@ -790,121 +880,131 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   const renderLeftNav = (offset = false) => {
     const hideRulesBtn = showRanking || showFixture || showDeck || showProde;
     return (
-    <div style={{ position: "fixed", top: offset ? "4.5rem" : "1.5rem", left: "1.5rem", display: "flex", flexDirection: "column", gap: "0.5rem", zIndex: 6000 }}>
-      {!hideRulesBtn && (
-      <button
-        onClick={() => setShowRules(true)}
-        className="btn-hover-dark"
+      <div
         style={{
-          background: "rgba(255, 255, 255, 0.1)",
-          border: "1px solid rgba(255, 255, 255, 0.2)",
-          color: "white",
-          height: "40px",
-          width: "40px",
-          borderRadius: "50%",
-          cursor: "pointer",
+          position: "fixed",
+          top: offset ? "4.5rem" : "1.5rem",
+          left: "1.5rem",
           display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          backdropFilter: "blur(12px)",
-          transition: "none",
+          flexDirection: "column",
+          gap: "0.5rem",
+          zIndex: 6000,
         }}
-        title={t("rules")}
       >
-        <BookOpen size={20} />
-      </button>
-      )}
+        {!hideRulesBtn && (
+          <button
+            onClick={() => setShowRules(true)}
+            className="btn-hover-dark"
+            style={{
+              background: "rgba(255, 255, 255, 0.1)",
+              border: "1px solid rgba(255, 255, 255, 0.2)",
+              color: "white",
+              height: "40px",
+              width: "40px",
+              borderRadius: "50%",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              backdropFilter: "blur(12px)",
+              transition: "none",
+            }}
+            title={t("rules")}
+          >
+            <BookOpen size={20} />
+          </button>
+        )}
 
-      {user && !showProfile && !showAdmin && (
-        <button
-          onClick={() => {
-            const isEn = window.location.pathname.startsWith("/en");
-            const target = isEn ? "/en/perfil" : "/perfil";
-            if (window.location.pathname !== target) {
-              window.history.pushState({}, "", target);
+        {user && !showProfile && !showAdmin && (
+          <button
+            onClick={() => {
+              const isEn = window.location.pathname.startsWith("/en");
+              const target = isEn ? "/en/perfil" : "/perfil";
+              if (window.location.pathname !== target) {
+                window.history.pushState({}, "", target);
+                window.dispatchEvent(new PopStateEvent("popstate"));
+              }
+            }}
+            className="btn-hover-dark"
+            style={{
+              background: "rgba(255, 255, 255, 0.1)",
+              border: "1px solid rgba(255, 255, 255, 0.2)",
+              color: "white",
+              height: "40px",
+              width: "40px",
+              borderRadius: "50%",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              backdropFilter: "blur(12px)",
+              transition: "none",
+            }}
+            title={t("profile")}
+          >
+            <User size={20} style={{ color: "#ffffff" }} />
+          </button>
+        )}
+
+        {isApprovedCreator && !showCreator && !showAdmin && (
+          <button
+            onClick={() => {
+              const isEn = window.location.pathname.startsWith("/en");
+              const path = isEn ? "/en/creador" : "/creador";
+              window.history.pushState({}, "", path);
               window.dispatchEvent(new PopStateEvent("popstate"));
-            }
-          }}
-          className="btn-hover-dark"
-          style={{
-            background: "rgba(255, 255, 255, 0.1)",
-            border: "1px solid rgba(255, 255, 255, 0.2)",
-            color: "white",
-            height: "40px",
-            width: "40px",
-            borderRadius: "50%",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            backdropFilter: "blur(12px)",
-            transition: "none",
-          }}
-          title={t("profile")}
-        >
-          <User size={20} style={{ color: "#ffffff" }} />
-        </button>
-      )}
+            }}
+            className="btn-hover-dark"
+            style={{
+              background: "rgba(255, 255, 255, 0.1)",
+              border: "1px solid rgba(255, 255, 255, 0.2)",
+              color: "white",
+              height: "40px",
+              width: "40px",
+              borderRadius: "50%",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              backdropFilter: "blur(12px)",
+              transition: "none",
+            }}
+            title="Panel de Creador"
+          >
+            <Trophy size={18} style={{ color: "#ffffff" }} />
+          </button>
+        )}
 
-      {isApprovedCreator && !showCreator && !showAdmin && (
-        <button
-          onClick={() => {
-            const isEn = window.location.pathname.startsWith("/en");
-            const path = isEn ? "/en/creador" : "/creador";
-            window.history.pushState({}, "", path);
-            window.dispatchEvent(new PopStateEvent("popstate"));
-          }}
-          className="btn-hover-dark"
-          style={{
-            background: "rgba(255, 255, 255, 0.1)",
-            border: "1px solid rgba(255, 255, 255, 0.2)",
-            color: "white",
-            height: "40px",
-            width: "40px",
-            borderRadius: "50%",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            backdropFilter: "blur(12px)",
-            transition: "none",
-          }}
-          title="Panel de Creador"
-        >
-          <Trophy size={18} style={{ color: "#ffffff" }} />
-        </button>
-      )}
-
-      {isSuperAdmin && !showAdmin && (
-        <button
-          onClick={() => {
-            const isEn = window.location.pathname.startsWith("/en");
-            const path = isEn ? "/en/admin" : "/admin";
-            window.history.pushState({}, "", path);
-            window.dispatchEvent(new PopStateEvent("popstate"));
-          }}
-          className="btn-hover-dark"
-          style={{
-            background: "rgba(255, 255, 255, 0.1)",
-            border: "1px solid rgba(255, 255, 255, 0.2)",
-            color: "white",
-            height: "40px",
-            width: "40px",
-            borderRadius: "50%",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            backdropFilter: "blur(12px)",
-            transition: "none",
-          }}
-          title="Panel de Admin"
-        >
-          <ShieldAlert size={18} style={{ color: "#ffffff" }} />
-        </button>
-      )}
-    </div>
-  );
+        {isSuperAdmin && !showAdmin && (
+          <button
+            onClick={() => {
+              const isEn = window.location.pathname.startsWith("/en");
+              const path = isEn ? "/en/admin" : "/admin";
+              window.history.pushState({}, "", path);
+              window.dispatchEvent(new PopStateEvent("popstate"));
+            }}
+            className="btn-hover-dark"
+            style={{
+              background: "rgba(255, 255, 255, 0.1)",
+              border: "1px solid rgba(255, 255, 255, 0.2)",
+              color: "white",
+              height: "40px",
+              width: "40px",
+              borderRadius: "50%",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              backdropFilter: "blur(12px)",
+              transition: "none",
+            }}
+            title="Panel de Admin"
+          >
+            <ShieldAlert size={18} style={{ color: "#ffffff" }} />
+          </button>
+        )}
+      </div>
+    );
   };
 
   if (showProfile) {
@@ -1299,7 +1399,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         */}
       </div>
 
-
       <MatchmakingOverlay
         isWaiting={isWaiting}
         timeLeft={timeLeft}
@@ -1340,14 +1439,18 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             opacity: 1,
             textAlign: "center",
             letterSpacing: "0.05em",
-            whiteSpace: "pre-line"
+            whiteSpace: "pre-line",
           }}
         >
           <span className="desktop-only">{t("subtitle")}</span>
-          <span className="mobile-only">{t("subtitle").replace(" con ", "\ncon ")}</span>
+          <span className="mobile-only">
+            {t("subtitle").replace(" con ", "\ncon ")}
+          </span>
         </p>
 
-        <div style={{ width: "100%", display: "flex", justifyContent: "center" }}>
+        <div
+          style={{ width: "100%", display: "flex", justifyContent: "center" }}
+        >
           <GameModeSelector
             selectedMode={selectedMode || "multiplayer"}
             user={user}
@@ -1385,11 +1488,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 setShowDeck(true);
                 if (typeof window !== "undefined") {
                   const isEn = window.location.pathname.startsWith("/en");
-                  window.history.pushState(
-                    {},
-                    "",
-                    isEn ? "/en/mazo" : "/mazo",
-                  );
+                  window.history.pushState({}, "", isEn ? "/en/mazo" : "/mazo");
                 }
                 return;
               }
@@ -1405,7 +1504,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 setShowFixture(true);
                 if (typeof window !== "undefined") {
                   const isEn = window.location.pathname.startsWith("/en");
-                  window.history.pushState({}, "", isEn ? "/en/fixture" : "/fixture");
+                  window.history.pushState(
+                    {},
+                    "",
+                    isEn ? "/en/fixture" : "/fixture",
+                  );
                 }
                 return;
               }
@@ -1413,7 +1516,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 setShowProde(true);
                 if (typeof window !== "undefined") {
                   const isEn = window.location.pathname.startsWith("/en");
-                  window.history.pushState({}, "", isEn ? "/en/prode" : "/prode");
+                  window.history.pushState(
+                    {},
+                    "",
+                    isEn ? "/en/prode" : "/prode",
+                  );
                   window.dispatchEvent(new PopStateEvent("popstate"));
                 }
                 return;
@@ -1532,7 +1639,11 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     transition: "none",
                   }}
                 >
-                  {selectedMode === "multiplayer" ? <ArrowLeft size={18} /> : <Home size={18} />}
+                  {selectedMode === "multiplayer" ? (
+                    <ArrowLeft size={18} />
+                  ) : (
+                    <Home size={18} />
+                  )}
                   {t("back")}
                 </button>
               </motion.div>
@@ -1566,62 +1677,81 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               exit={{ scale: 0.9, y: 20 }}
               className="team-selection-card"
             >
-              <h2 className="text-display team-selection-title" style={{ marginBottom: "0.5rem" }}>
+              <h2
+                className="text-display team-selection-title"
+                style={{ marginBottom: "0.5rem" }}
+              >
                 {t("deck_selection_title_line1")}
                 <br />
-                <span style={{ color: "#00f2ff" }}>{t("deck_selection_title_line2")}</span>
+                <span style={{ color: "#00f2ff" }}>
+                  {t("deck_selection_title_line2")}
+                </span>
               </h2>
-              <p style={{ color: "rgba(255,255,255,0.6)", fontSize: "1.05rem", marginBottom: "1rem", fontWeight: 500 }}>
+              <p
+                style={{
+                  color: "rgba(255,255,255,0.6)",
+                  fontSize: "1.05rem",
+                  marginBottom: "1rem",
+                  fontWeight: 500,
+                }}
+              >
                 {t("deck_selection_subtitle")}
               </p>
 
               {(() => {
                 const ALL_TEAMS_LIST = [
-                  { id: 'Argelia', flag: '🇩🇿', code: 'ALG' },
-                  { id: 'Argentina', flag: '🇦🇷', code: 'ARG' },
-                  { id: 'Austria', flag: '🇦🇹', code: 'AUT' },
-                  { id: 'Bélgica', code: 'BEL', flag: '🇧🇪' },
-              { id: 'Bosnia y Herz', flag: '🇧🇦', code: 'BIH' },
-                  { id: 'Brasil', flag: '🇧🇷', code: 'BRA' },
-                  { id: 'Canadá', flag: '🇨🇦', code: 'CAN' },
-                  { id: 'Costa de Marfil', code: 'CIV', flag: '🇨🇮' },
-                  { id: 'Colombia', flag: '🇨🇴', code: 'COL' },
-                  { id: 'Cabo Verde', flag: '🇨🇻', code: 'CPV' },
-                  { id: 'Croacia', flag: '🇭🇷', code: 'CRO' },
-                  { id: 'República Checa', flag: '🇨🇿', code: 'CZE' },
-                  { id: 'Ecuador', flag: '🇪🇨', code: 'ECU' },
-                  { id: 'Egipto', flag: '🇪🇬', code: 'EGY' },
-                  { id: 'Inglaterra', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', code: 'ENG' },
-                  { id: 'Irán', flag: '🇮🇷', code: 'IRN' },
-                  { id: 'España', flag: '🇪🇸', code: 'ESP' },
-                  { id: 'Francia', flag: '🇫🇷', code: 'FRA' },
-              { id: 'Alemania', code: 'GER', flag: '🇩🇪' },
-                  { id: 'Jordania', flag: '🇯🇴', code: 'JOR' },
-                  { id: 'Japón', flag: '🇯🇵', code: 'JPN' },
-                  { id: 'Corea del Sur', flag: '🇰🇷', code: 'KOR' },
-                  { id: 'Arabia Saudita', flag: '🇸🇦', code: 'KSA' },
-                  { id: 'Marruecos', flag: '🇲🇦', code: 'MAR' },
-                  { id: 'México', flag: '🇲🇽', code: 'MEX' },
-                  { id: 'Países Bajos', flag: '🇳🇱', code: 'NED' },
-                  { id: 'Noruega', flag: '🇳🇴', code: 'NOR' },
-                  { id: 'Nueva Zelanda', flag: '🇳🇿', code: 'NZL' },
-                  { id: 'Panamá', flag: '🇵🇦', code: 'PAN' },
-                  { id: 'Paraguay', flag: '🇵🇾', code: 'PAR' },
-                  { id: 'Portugal', flag: '🇵🇹', code: 'POR' },
-                  { id: 'Qatar', flag: '🇶🇦', code: 'QAT' },
-                  { id: 'Sudáfrica', flag: '🇿🇦', code: 'RSA' },
-                  { id: 'Escocia', code: 'SCO', flag: '🏴󠁧󠁢󠁳󠁣󠁴󠁿' },
-                  
-                  { id: 'Suiza', flag: '🇨🇭', code: 'SUI' },
-                  { id: 'Suecia', code: 'SWE', flag: '🇸🇪' },
-              { id: 'Uruguay', flag: '🇺🇾', code: 'URU' },
-                  { id: 'USA', flag: '🇺🇸', code: 'USA' }
+                  { id: "Argelia", flag: "🇩🇿", code: "ALG" },
+                  { id: "Argentina", flag: "🇦🇷", code: "ARG" },
+                  { id: "Austria", flag: "🇦🇹", code: "AUT" },
+                  { id: "Bélgica", code: "BEL", flag: "🇧🇪" },
+                  { id: "Bosnia y Herz", flag: "🇧🇦", code: "BIH" },
+                  { id: "Brasil", flag: "🇧🇷", code: "BRA" },
+                  { id: "Canadá", flag: "🇨🇦", code: "CAN" },
+                  { id: "Costa de Marfil", code: "CIV", flag: "🇨🇮" },
+                  { id: "Colombia", flag: "🇨🇴", code: "COL" },
+                  { id: "Cabo Verde", flag: "🇨🇻", code: "CPV" },
+                  { id: "Croacia", flag: "🇭🇷", code: "CRO" },
+                  { id: "República Checa", flag: "🇨🇿", code: "CZE" },
+                  { id: "Ecuador", flag: "🇪🇨", code: "ECU" },
+                  { id: "Egipto", flag: "🇪🇬", code: "EGY" },
+                  { id: "Inglaterra", flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", code: "ENG" },
+                  { id: "España", flag: "🇪🇸", code: "ESP" },
+                  { id: "Francia", flag: "🇫🇷", code: "FRA" },
+                  { id: "Alemania", code: "GER", flag: "🇩🇪" },
+                  { id: "Irán", flag: "🇮🇷", code: "IRN" },
+                  { id: "Jordania", flag: "🇯🇴", code: "JOR" },
+                  { id: "Japón", flag: "🇯🇵", code: "JPN" },
+                  { id: "Corea del Sur", flag: "🇰🇷", code: "KOR" },
+                  { id: "Arabia Saudita", flag: "🇸🇦", code: "KSA" },
+                  { id: "Marruecos", flag: "🇲🇦", code: "MAR" },
+                  { id: "México", flag: "🇲🇽", code: "MEX" },
+                  { id: "Países Bajos", flag: "🇳🇱", code: "NED" },
+                  { id: "Noruega", flag: "🇳🇴", code: "NOR" },
+                  { id: "Nueva Zelanda", flag: "🇳🇿", code: "NZL" },
+                  { id: "Panamá", flag: "🇵🇦", code: "PAN" },
+                  { id: "Paraguay", flag: "🇵🇾", code: "PAR" },
+                  { id: "Portugal", flag: "🇵🇹", code: "POR" },
+                  { id: "Qatar", flag: "🇶🇦", code: "QAT" },
+                  { id: "Sudáfrica", flag: "🇿🇦", code: "RSA" },
+                  { id: "Escocia", code: "SCO", flag: "🏴󠁧󠁢󠁳󠁣󠁴󠁿" },
+                  { id: "Senegal", flag: "🇸🇳", code: "SEN" },
+                  { id: "Suiza", flag: "🇨🇭", code: "SUI" },
+                  { id: "Suecia", code: "SWE", flag: "🇸🇪" },
+                  { id: "Uruguay", flag: "🇺🇾", code: "URU" },
+                  { id: "USA", flag: "🇺🇸", code: "USA" },
                 ];
-                
-                const pinnedTeams = ALL_TEAMS_LIST.filter(t => selectedTeams.includes(t.id));
-                const unpinnedTeams = ALL_TEAMS_LIST.filter(t => !selectedTeams.includes(t.id)).filter(c => {
+
+                const pinnedTeams = ALL_TEAMS_LIST.filter((t) =>
+                  selectedTeams.includes(t.id),
+                );
+                const unpinnedTeams = ALL_TEAMS_LIST.filter(
+                  (t) => !selectedTeams.includes(t.id),
+                ).filter((c) => {
                   const q = cleanString(countrySearch);
-                  return cleanString(c.id).includes(q) || cleanString(c.code).includes(q);
+                  return (
+                    cleanString(c.id).includes(q) ||
+                    cleanString(c.code).includes(q)
+                  );
                 });
 
                 const renderTeamButton = (team: any) => {
@@ -1635,16 +1765,20 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                       type="button"
                       onClick={() => {
                         if (isDisabled) return;
-                        setSelectedTeams(prev =>
+                        setSelectedTeams((prev) =>
                           prev.includes(team.id)
-                            ? prev.filter(t => t !== team.id)
-                            : [...prev, team.id]
+                            ? prev.filter((t) => t !== team.id)
+                            : [...prev, team.id],
                         );
                       }}
                       style={{
-                        background: isChecked ? "#ffdf00" : "rgba(255,255,255,0.1)",
+                        background: isChecked
+                          ? "#ffdf00"
+                          : "rgba(255,255,255,0.1)",
                         border: "1px solid",
-                        borderColor: isChecked ? "#ffdf00" : "rgba(255,255,255,0.2)",
+                        borderColor: isChecked
+                          ? "#ffdf00"
+                          : "rgba(255,255,255,0.2)",
                         borderRadius: "2rem",
                         padding: "0.5rem 1rem",
                         color: isChecked ? "#000" : "white",
@@ -1656,8 +1790,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                         gap: "0.5rem",
                         opacity: isDisabled ? 0.45 : 1,
                         fontWeight: 800,
-                        boxShadow: isChecked ? '0 0 15px rgba(255, 223, 0, 0.4)' : 'none',
-                        flexShrink: 0
+                        boxShadow: isChecked
+                          ? "0 0 15px rgba(255, 223, 0, 0.4)"
+                          : "none",
+                        flexShrink: 0,
                       }}
                     >
                       <span style={{ fontSize: "1.2rem" }}>{team.flag}</span>
@@ -1670,31 +1806,55 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   <>
                     {/* Pinned Teams (Always Visible) */}
                     {pinnedTeams.length > 0 && (
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.6rem', justifyContent: 'center', marginBottom: '0.8rem' }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          flexWrap: "wrap",
+                          gap: "0.6rem",
+                          justifyContent: "center",
+                          marginBottom: "0.8rem",
+                        }}
+                      >
                         {pinnedTeams.map(renderTeamButton)}
                       </div>
                     )}
 
-                    <div style={{ position: 'relative', width: '85%', margin: '0 auto 0.75rem auto' }}>
-                      <Search size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af', pointerEvents: 'none' }} />
+                    <div
+                      style={{
+                        position: "relative",
+                        width: "85%",
+                        margin: "0 auto 0.75rem auto",
+                      }}
+                    >
+                      <Search
+                        size={18}
+                        style={{
+                          position: "absolute",
+                          left: "1rem",
+                          top: "50%",
+                          transform: "translateY(-50%)",
+                          color: "#9ca3af",
+                          pointerEvents: "none",
+                        }}
+                      />
                       <input
                         type="text"
                         placeholder="Buscar país..."
                         value={countrySearch}
                         onChange={(e) => setCountrySearch(e.target.value)}
                         style={{
-                          display: 'block',
-                          height: '42px',
-                          padding: '0 1.25rem 0 2.5rem',
-                          borderRadius: '1.1rem',
-                          background: 'rgba(255, 255, 255, 0.05)',
-                          border: '1px solid rgba(255, 255, 255, 0.1)',
-                          color: '#fff',
-                          fontSize: '0.9rem',
-                          outline: 'none',
-                          width: '100%',
-                          boxSizing: 'border-box',
-                          margin: 0
+                          display: "block",
+                          height: "42px",
+                          padding: "0 1.25rem 0 2.5rem",
+                          borderRadius: "1.1rem",
+                          background: "rgba(255, 255, 255, 0.05)",
+                          border: "1px solid rgba(255, 255, 255, 0.1)",
+                          color: "#fff",
+                          fontSize: "0.9rem",
+                          outline: "none",
+                          width: "100%",
+                          boxSizing: "border-box",
+                          margin: 0,
                         }}
                       />
                     </div>
@@ -1703,19 +1863,23 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     <div
                       className="white-scrollbar"
                       style={{
-                        display: 'flex',
-                        flexWrap: 'wrap',
-                        alignItems: 'flex-start',
-                        alignContent: 'flex-start',
-                        overflowY: 'auto',
-                        maxHeight: '22vh',
-                        gap: '0.6rem',
-                        justifyContent: 'center',
-                        marginBottom: '1rem',
-                        padding: '0.5rem',
-                        WebkitOverflowScrolling: 'touch',
-                        borderTop: pinnedTeams.length > 0 ? '1px solid rgba(255,255,255,0.1)' : 'none',
-                        paddingTop: pinnedTeams.length > 0 ? '0.8rem' : '0.5rem'
+                        display: "flex",
+                        flexWrap: "wrap",
+                        alignItems: "flex-start",
+                        alignContent: "flex-start",
+                        overflowY: "auto",
+                        maxHeight: "22vh",
+                        gap: "0.6rem",
+                        justifyContent: "center",
+                        marginBottom: "1rem",
+                        padding: "0.5rem",
+                        WebkitOverflowScrolling: "touch",
+                        borderTop:
+                          pinnedTeams.length > 0
+                            ? "1px solid rgba(255,255,255,0.1)"
+                            : "none",
+                        paddingTop:
+                          pinnedTeams.length > 0 ? "0.8rem" : "0.5rem",
                       }}
                     >
                       {unpinnedTeams.map(renderTeamButton)}
@@ -1724,7 +1888,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 );
               })()}
 
-              <div style={{ display: 'flex', flexDirection: 'row', gap: '0.75rem', width: '100%' }}>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "row",
+                  gap: "0.75rem",
+                  width: "100%",
+                }}
+              >
                 <button
                   onClick={() => {
                     setIsSelectingTeams(false);
@@ -1746,7 +1917,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     fontWeight: 900,
                     cursor: "pointer",
                     transition: "none",
-                    flexShrink: 0
+                    flexShrink: 0,
                   }}
                 >
                   <ArrowLeft size={18} />
@@ -1765,13 +1936,20 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     height: "50px",
                     fontSize: "1.2rem",
                     fontWeight: 950,
-                    backgroundColor: selectedTeams.length !== 4 ? "rgba(255,255,255,0.1)" : "#00f2ff",
-                    color: selectedTeams.length !== 4 ? "rgba(255,255,255,0.3)" : "#000",
+                    backgroundColor:
+                      selectedTeams.length !== 4
+                        ? "rgba(255,255,255,0.1)"
+                        : "#00f2ff",
+                    color:
+                      selectedTeams.length !== 4
+                        ? "rgba(255,255,255,0.3)"
+                        : "#000",
                     border: "none",
                     borderRadius: "1rem",
-                    boxShadow: selectedTeams.length !== 4 ? "none" : "4px 4px 0px #000",
+                    boxShadow:
+                      selectedTeams.length !== 4 ? "none" : "4px 4px 0px #000",
                     fontStyle: "italic",
-                    cursor: selectedTeams.length !== 4 ? "default" : "pointer"
+                    cursor: selectedTeams.length !== 4 ? "default" : "pointer",
                   }}
                 >
                   {t("play_now")}
@@ -1784,309 +1962,327 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
       {/* Room Selection Modal (Multiplayer only) */}
       <AnimatePresence>
-        {selectedMode === "multiplayer" && !isWaiting && !isSelectingPoints && !isSelectingTeams && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            style={{
-              position: "fixed",
-              inset: 0,
-              background: "rgba(0, 0, 0, 0.45)",
-              backdropFilter: "blur(10px)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              zIndex: 2000,
-              padding: "2rem",
-            }}
-          >
+        {selectedMode === "multiplayer" &&
+          !isWaiting &&
+          !isSelectingPoints &&
+          !isSelectingTeams && (
             <motion.div
-              initial={{ scale: 0.9, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
               style={{
-                background: "rgba(255, 255, 255, 0.05)",
-                border: "1px solid rgba(255, 255, 255, 0.1)",
-                padding: "3rem",
-                borderRadius: "2.5rem",
-                width: "100%",
-                maxWidth: "500px",
-                textAlign: "center",
-                boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)",
+                position: "fixed",
+                inset: 0,
+                background: "rgba(0, 0, 0, 0.45)",
+                backdropFilter: "blur(10px)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                zIndex: 2000,
+                padding: "2rem",
               }}
             >
-              <h2
-                className="text-display"
+              <motion.div
+                initial={{ scale: 0.9, y: 20 }}
+                animate={{ scale: 1, y: 0 }}
                 style={{
-                  fontSize: "3rem",
-                  color: "#fff",
-                  marginBottom: "1rem",
-                  lineHeight: 1,
-                  whiteSpace: "pre-wrap",
+                  background: "rgba(255, 255, 255, 0.05)",
+                  border: "1px solid rgba(255, 255, 255, 0.1)",
+                  padding: "3rem",
+                  borderRadius: "2.5rem",
+                  width: "100%",
+                  maxWidth: "500px",
+                  textAlign: "center",
+                  boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)",
                 }}
               >
-                {t("private_match").split("\n")[0]}
-                <br />
-                <span style={{ color: "#00f2ff" }}>
-                  {t("private_match").split("\n")[1]}
-                </span>
-              </h2>
+                <h2
+                  className="text-display"
+                  style={{
+                    fontSize: "3rem",
+                    color: "#fff",
+                    marginBottom: "1rem",
+                    lineHeight: 1,
+                    whiteSpace: "pre-wrap",
+                  }}
+                >
+                  {t("private_match").split("\n")[0]}
+                  <br />
+                  <span style={{ color: "#00f2ff" }}>
+                    {t("private_match").split("\n")[1]}
+                  </span>
+                </h2>
 
-              {!isJoining ? (
-                <>
+                {!isJoining ? (
+                  <>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection:
+                          window.innerWidth < 768 ? "column" : "row",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "1.25rem",
+                        width: "100%",
+                        padding: "0.5rem 0",
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          gap: "0.75rem",
+                        }}
+                      >
+                        <button
+                          onClick={() => {
+                            if (!user) {
+                              handleAuth();
+                              return;
+                            }
+                            setIsJoining(true);
+                          }}
+                          className="btn-hover-dark"
+                          style={{
+                            background: "#00f2ff",
+                            border: "none",
+                            color: "#000",
+                            width: "160px",
+                            height: "80px",
+                            fontSize: "2rem",
+                            fontWeight: 950,
+                            cursor: "pointer",
+                            boxShadow: "6px 6px 0px #000",
+                            transition: "transform 0.1s ease",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                          onMouseDown={(e) =>
+                            (e.currentTarget.style.transform =
+                              "translate(2px, 2px)")
+                          }
+                          onMouseUp={(e) =>
+                            (e.currentTarget.style.transform =
+                              "translate(0px, 0px)")
+                          }
+                        >
+                          {t("join")}
+                        </button>
+                      </div>
+
+                      <div
+                        style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          gap: "0.75rem",
+                        }}
+                      >
+                        <button
+                          onClick={() => {
+                            if (!user) {
+                              handleAuth();
+                              return;
+                            }
+                            setIsSelectingPoints(true);
+                          }}
+                          className="btn-hover-dark"
+                          style={{
+                            background: "#00f2ff",
+                            border: "none",
+                            color: "#000",
+                            width: "160px",
+                            height: "80px",
+                            fontSize: "2rem",
+                            fontWeight: 950,
+                            cursor: "pointer",
+                            boxShadow: "6px 6px 0px #000",
+                            transition: "transform 0.1s ease",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                          onMouseDown={(e) =>
+                            (e.currentTarget.style.transform =
+                              "translate(2px, 2px)")
+                          }
+                          onMouseUp={(e) =>
+                            (e.currentTarget.style.transform =
+                              "translate(0px, 0px)")
+                          }
+                        >
+                          {t("create")}
+                        </button>
+                      </div>
+                    </div>
+
+                    <motion.div
+                      style={{
+                        width: "100%",
+                        display: "flex",
+                        justifyContent: "center",
+                        marginTop: "1rem",
+                      }}
+                    >
+                      <button
+                        onClick={() => {
+                          setSelectedMode(null);
+                          setInputCode("");
+                        }}
+                        className="btn-hover-dark"
+                        style={{
+                          background: "rgba(255, 255, 255, 0.1)",
+                          border: "1px solid rgba(255, 255, 255, 0.2)",
+                          color: "white",
+                          height: "40px",
+                          borderRadius: "1rem",
+                          padding: "0 1.5rem",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "0.5rem",
+                          fontSize: "0.8rem",
+                          fontWeight: 900,
+                          cursor: "pointer",
+                          transition: "none",
+                        }}
+                      >
+                        <Home size={18} />
+                        {t("back")}
+                      </button>
+                    </motion.div>
+                  </>
+                ) : (
                   <div
                     style={{
                       display: "flex",
-                      flexDirection: window.innerWidth < 768 ? "column" : "row",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: "1.25rem",
+                      flexDirection: "column",
+                      gap: "1.5rem",
                       width: "100%",
-                      padding: "0.5rem 0",
                     }}
                   >
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        gap: "0.75rem",
-                      }}
-                    >
-                      <button
-                        onClick={() => { if (!user) { handleAuth(); return; } setIsJoining(true); }}
-                        className="btn-hover-dark"
-                        style={{
-                          background: "#00f2ff",
-                          border: "none",
-                          color: "#000",
-                          width: "160px",
-                          height: "80px",
-                          fontSize: "2rem",
-                          fontWeight: 950,
-                          cursor: "pointer",
-                          boxShadow: "6px 6px 0px #000",
-                          transition: "transform 0.1s ease",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                        }}
-                        onMouseDown={(e) =>
-                        (e.currentTarget.style.transform =
-                          "translate(2px, 2px)")
-                        }
-                        onMouseUp={(e) =>
-                        (e.currentTarget.style.transform =
-                          "translate(0px, 0px)")
-                        }
-                      >
-                        {t("join")}
-                      </button>
-                    </div>
-
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        gap: "0.75rem",
-                      }}
-                    >
-                      <button
-                        onClick={() => { if (!user) { handleAuth(); return; } setIsSelectingPoints(true); }}
-                        className="btn-hover-dark"
-                        style={{
-                          background: "#00f2ff",
-                          border: "none",
-                          color: "#000",
-                          width: "160px",
-                          height: "80px",
-                          fontSize: "2rem",
-                          fontWeight: 950,
-                          cursor: "pointer",
-                          boxShadow: "6px 6px 0px #000",
-                          transition: "transform 0.1s ease",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                        }}
-                        onMouseDown={(e) =>
-                        (e.currentTarget.style.transform =
-                          "translate(2px, 2px)")
-                        }
-                        onMouseUp={(e) =>
-                        (e.currentTarget.style.transform =
-                          "translate(0px, 0px)")
-                        }
-                      >
-                        {t("create")}
-                      </button>
-                    </div>
-                  </div>
-
-                  <motion.div
-                    style={{
-                      width: "100%",
-                      display: "flex",
-                      justifyContent: "center",
-                      marginTop: "1rem",
-                    }}
-                  >
-                    <button
-                      onClick={() => {
-                        setSelectedMode(null);
-                        setInputCode("");
-                      }}
-                      className="btn-hover-dark"
-                      style={{
-                        background: "rgba(255, 255, 255, 0.1)",
-                        border: "1px solid rgba(255, 255, 255, 0.2)",
-                        color: "white",
-                        height: "40px",
-                        borderRadius: "1rem",
-                        padding: "0 1.5rem",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "0.5rem",
-                        fontSize: "0.8rem",
-                        fontWeight: 900,
-                        cursor: "pointer",
-                        transition: "none",
-                      }}
-                    >
-                      <Home size={18} />
-                      {t("back")}
-                    </button>
-                  </motion.div>
-                </>
-              ) : (
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "1.5rem",
-                    width: "100%",
-                  }}
-                >
-                  <input
-                    type="text"
-                    maxLength={4}
-                    placeholder={t("code")}
-                    value={inputCode}
-                    onChange={(e) => {
-                      setInputCode(e.target.value.toUpperCase());
-                      setJoinError("");
-                    }}
-                    style={{
-                      background: "rgba(0,0,0,0.3)",
-                      border: "2px solid #00f2ff",
-                      borderRadius: "0",
-                      padding: "0.75rem",
-                      color: "#fff",
-                      fontSize: "clamp(1.5rem, 6vw, 2rem)",
-                      textAlign: "center",
-                      fontFamily: "var(--font-display)",
-                      fontStyle: "italic",
-                      fontWeight: 900,
-                      letterSpacing: "0.3rem",
-                      outline: "none",
-                      width: "100%",
-                      maxWidth: "240px",
-                      margin: "0.5rem auto 0 auto",
-                      boxSizing: "border-box",
-                      boxShadow: "4px 4px 0px #00f2ff",
-                    }}
-                  />
-                  {joinError && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      style={{
-                        color: "#ef4444",
-                        fontSize: "0.95rem",
-                        fontWeight: 600,
-                        textAlign: "center",
-                        marginTop: "-0.5rem",
-                        marginBottom: "-0.75rem",
-                        background: "rgba(239, 68, 68, 0.1)",
-                        padding: "0.5rem",
-                        borderRadius: "0.5rem",
-                        border: "1px solid rgba(239, 68, 68, 0.2)",
-                      }}
-                    >
-                      {joinError}
-                    </motion.div>
-                  )}
-                  <button
-                    onClick={() => handleJoinRoom()}
-                    className="btn-hover-dark"
-                    style={{
-                      background: "#00f2ff",
-                      color: "#000",
-                      border: "none",
-                      padding: "0.75rem",
-                      borderRadius: "0",
-                      fontSize: "2rem",
-                      fontWeight: 950,
-                      fontStyle: "italic",
-                      cursor: "pointer",
-                      textTransform: "uppercase",
-                      width: "100%",
-                      maxWidth: "240px",
-                      margin: "0 auto",
-                      boxShadow: "6px 6px 0px #000",
-                      transition: "transform 0.1s ease",
-                    }}
-                    onMouseDown={(e) =>
-                      (e.currentTarget.style.transform = "translate(2px, 2px)")
-                    }
-                    onMouseUp={(e) =>
-                      (e.currentTarget.style.transform = "translate(0px, 0px)")
-                    }
-                  >
-                    {t("start")}
-                  </button>
-
-                  <motion.div
-                    style={{
-                      width: "100%",
-                      display: "flex",
-                      justifyContent: "center",
-                      marginTop: "0.5rem",
-                    }}
-                  >
-                    <button
-                      onClick={() => {
-                        setIsJoining(false);
-                        setInputCode("");
+                    <input
+                      type="text"
+                      maxLength={4}
+                      placeholder={t("code")}
+                      value={inputCode}
+                      onChange={(e) => {
+                        setInputCode(e.target.value.toUpperCase());
                         setJoinError("");
                       }}
+                      style={{
+                        background: "rgba(0,0,0,0.3)",
+                        border: "2px solid #00f2ff",
+                        borderRadius: "0",
+                        padding: "0.75rem",
+                        color: "#fff",
+                        fontSize: "clamp(1.5rem, 6vw, 2rem)",
+                        textAlign: "center",
+                        fontFamily: "var(--font-display)",
+                        fontStyle: "italic",
+                        fontWeight: 900,
+                        letterSpacing: "0.3rem",
+                        outline: "none",
+                        width: "100%",
+                        maxWidth: "240px",
+                        margin: "0.5rem auto 0 auto",
+                        boxSizing: "border-box",
+                        boxShadow: "4px 4px 0px #00f2ff",
+                      }}
+                    />
+                    {joinError && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        style={{
+                          color: "#ef4444",
+                          fontSize: "0.95rem",
+                          fontWeight: 600,
+                          textAlign: "center",
+                          marginTop: "-0.5rem",
+                          marginBottom: "-0.75rem",
+                          background: "rgba(239, 68, 68, 0.1)",
+                          padding: "0.5rem",
+                          borderRadius: "0.5rem",
+                          border: "1px solid rgba(239, 68, 68, 0.2)",
+                        }}
+                      >
+                        {joinError}
+                      </motion.div>
+                    )}
+                    <button
+                      onClick={() => handleJoinRoom()}
                       className="btn-hover-dark"
                       style={{
-                        background: "rgba(255, 255, 255, 0.1)",
-                        border: "1px solid rgba(255, 255, 255, 0.2)",
-                        color: "white",
-                        height: "40px",
-                        borderRadius: "1rem",
-                        padding: "0 1.5rem",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "0.5rem",
-                        fontSize: "0.8rem",
-                        fontWeight: 900,
+                        background: "#00f2ff",
+                        color: "#000",
+                        border: "none",
+                        padding: "0.75rem",
+                        borderRadius: "0",
+                        fontSize: "2rem",
+                        fontWeight: 950,
+                        fontStyle: "italic",
                         cursor: "pointer",
-                        transition: "none",
+                        textTransform: "uppercase",
+                        width: "100%",
+                        maxWidth: "240px",
+                        margin: "0 auto",
+                        boxShadow: "6px 6px 0px #000",
+                        transition: "transform 0.1s ease",
+                      }}
+                      onMouseDown={(e) =>
+                        (e.currentTarget.style.transform =
+                          "translate(2px, 2px)")
+                      }
+                      onMouseUp={(e) =>
+                        (e.currentTarget.style.transform =
+                          "translate(0px, 0px)")
+                      }
+                    >
+                      {t("start")}
+                    </button>
+
+                    <motion.div
+                      style={{
+                        width: "100%",
+                        display: "flex",
+                        justifyContent: "center",
+                        marginTop: "0.5rem",
                       }}
                     >
-                      <ArrowLeft size={18} />
-                      {t("back")}
-                    </button>
-                  </motion.div>
-                </div>
-              )}
+                      <button
+                        onClick={() => {
+                          setIsJoining(false);
+                          setInputCode("");
+                          setJoinError("");
+                        }}
+                        className="btn-hover-dark"
+                        style={{
+                          background: "rgba(255, 255, 255, 0.1)",
+                          border: "1px solid rgba(255, 255, 255, 0.2)",
+                          color: "white",
+                          height: "40px",
+                          borderRadius: "1rem",
+                          padding: "0 1.5rem",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "0.5rem",
+                          fontSize: "0.8rem",
+                          fontWeight: 900,
+                          cursor: "pointer",
+                          transition: "none",
+                        }}
+                      >
+                        <ArrowLeft size={18} />
+                        {t("back")}
+                      </button>
+                    </motion.div>
+                  </div>
+                )}
+              </motion.div>
             </motion.div>
-          </motion.div>
-        )}
+          )}
       </AnimatePresence>
 
       <AnimatePresence>
@@ -2097,8 +2293,15 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             exit={{ opacity: 0 }}
             onClick={() => setShowDeckLockModal(false)}
             style={{
-              position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)", backdropFilter: "blur(10px)",
-              display: "flex", alignItems: "center", justifyContent: "center", zIndex: 3000, padding: "1.5rem"
+              position: "fixed",
+              inset: 0,
+              background: "rgba(0,0,0,0.45)",
+              backdropFilter: "blur(10px)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 3000,
+              padding: "1.5rem",
             }}
           >
             <motion.div
@@ -2109,52 +2312,103 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               style={{
                 background: "rgba(255, 255, 255, 0.05)",
                 border: "1px solid rgba(255, 255, 255, 0.1)",
-                padding: typeof window !== "undefined" && window.innerWidth < 768 ? "2rem 1.5rem" : "3rem",
+                padding:
+                  typeof window !== "undefined" && window.innerWidth < 768
+                    ? "2rem 1.5rem"
+                    : "3rem",
                 borderRadius: "2.5rem",
                 maxWidth: "500px",
                 width: "100%",
                 textAlign: "center",
-                boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)"
+                boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)",
               }}
             >
-              <div style={{
-                width: typeof window !== "undefined" && window.innerWidth < 768 ? '60px' : '80px', 
-                height: typeof window !== "undefined" && window.innerWidth < 768 ? '60px' : '80px', 
-                borderRadius: '50%', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem auto', color: '#00f2ff', 
-                fontSize: typeof window !== "undefined" && window.innerWidth < 768 ? '1.8rem' : '2.5rem'
-              }}>
+              <div
+                style={{
+                  width:
+                    typeof window !== "undefined" && window.innerWidth < 768
+                      ? "60px"
+                      : "80px",
+                  height:
+                    typeof window !== "undefined" && window.innerWidth < 768
+                      ? "60px"
+                      : "80px",
+                  borderRadius: "50%",
+                  background: "rgba(255, 255, 255, 0.05)",
+                  border: "1px solid rgba(255, 255, 255, 0.1)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  margin: "0 auto 1.5rem auto",
+                  color: "#00f2ff",
+                  fontSize:
+                    typeof window !== "undefined" && window.innerWidth < 768
+                      ? "1.8rem"
+                      : "2.5rem",
+                }}
+              >
                 🔒
               </div>
               <h2
                 className="text-display"
-                style={{ margin: "0 0 1rem 0", color: "#fff", fontSize: typeof window !== "undefined" && window.innerWidth < 768 ? "1.5rem" : "2.5rem", lineHeight: 1 }}
+                style={{
+                  margin: "0 0 1rem 0",
+                  color: "#fff",
+                  fontSize:
+                    typeof window !== "undefined" && window.innerWidth < 768
+                      ? "1.5rem"
+                      : "2.5rem",
+                  lineHeight: 1,
+                }}
               >
                 MAZO <span style={{ color: "#f97316" }}>INCOMPLETO</span>
               </h2>
-              <p style={{ margin: "0 0 1.5rem 0", color: "#fff", opacity: 0.8, fontSize: typeof window !== "undefined" && window.innerWidth < 768 ? "0.85rem" : "1.1rem", lineHeight: 1.5 }}>
-                Para jugar online primero <b style={{color: "#fff"}}>tenés que abrir <br className="desktop-only" />tus sobres gratuitos de bienvenida</b><br className="desktop-only" /> en la sección "Armá/Personalizá tu mazo".
+              <p
+                style={{
+                  margin: "0 0 1.5rem 0",
+                  color: "#fff",
+                  opacity: 0.8,
+                  fontSize:
+                    typeof window !== "undefined" && window.innerWidth < 768
+                      ? "0.85rem"
+                      : "1.1rem",
+                  lineHeight: 1.5,
+                }}
+              >
+                Para jugar online primero{" "}
+                <b style={{ color: "#fff" }}>
+                  tenés que abrir <br className="desktop-only" />
+                  tus sobres gratuitos de bienvenida
+                </b>
+                <br className="desktop-only" /> en la sección "Armá/Personalizá
+                tu mazo".
               </p>
               <div style={{ display: "flex", justifyContent: "center" }}>
                 <button
                   onClick={() => setShowDeckLockModal(false)}
                   className="btn-hover-dark"
-                  style={{ 
-                    width: "100%", 
+                  style={{
+                    width: "100%",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                     gap: "0.5rem",
-                    padding: typeof window !== "undefined" && window.innerWidth < 768 ? "0.8rem" : "1rem", 
-                    background: "#f97316", 
-                    border: "none", 
-                    color: "#000", 
-                    borderRadius: "1rem", 
-                    cursor: "pointer", 
+                    padding:
+                      typeof window !== "undefined" && window.innerWidth < 768
+                        ? "0.8rem"
+                        : "1rem",
+                    background: "#f97316",
+                    border: "none",
+                    color: "#000",
+                    borderRadius: "1rem",
+                    cursor: "pointer",
                     fontWeight: 900,
-                    fontSize: typeof window !== "undefined" && window.innerWidth < 768 ? "0.95rem" : "1.1rem",
+                    fontSize:
+                      typeof window !== "undefined" && window.innerWidth < 768
+                        ? "0.95rem"
+                        : "1.1rem",
                     textTransform: "uppercase",
-                    letterSpacing: "0.05em"
+                    letterSpacing: "0.05em",
                   }}
                 >
                   <Layers size={20} />
@@ -2169,7 +2423,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       <RulesModal isOpen={showRules} onClose={() => setShowRules(false)} />
 
       {showNationalityModal && (
-        <NationalityModal user={user} onSaved={() => setShowNationalityModal(false)} />
+        <NationalityModal
+          user={user}
+          onSaved={() => setShowNationalityModal(false)}
+        />
       )}
     </div>
   );

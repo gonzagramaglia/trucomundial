@@ -1,17 +1,29 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Save, Plus, Minus, Search, Trophy, Lock, Check, Home, Star, Calendar, Loader2, ExternalLink } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
-import { CARDS } from '../../data/cards';
-import { Sticker } from '../shared/Sticker';
-import { EmptyState } from '../shared/EmptyState';
-import { supabase } from '../../lib/supabase';
-import { TwitchButton } from '../shared/TwitchButton';
-import { updateVotesRegistry } from '../../lib/votesStore';
-import { useBaseStars } from '../../hooks/useBaseStars';
+import React, { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  Save,
+  Plus,
+  Minus,
+  Search,
+  Trophy,
+  Lock,
+  Check,
+  Home,
+  Star,
+  Calendar,
+  Loader2,
+  ExternalLink,
+} from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { CARDS } from "../../data/cards";
+import { Sticker } from "../shared/Sticker";
+import { EmptyState } from "../shared/EmptyState";
+import { supabase } from "../../lib/supabase";
+import { TwitchButton } from "../shared/TwitchButton";
+import { updateVotesRegistry } from "../../lib/votesStore";
+import { useBaseStars } from "../../hooks/useBaseStars";
 import { audioManager } from "../../lib/audio";
 import { UtilityButtons } from "../shared/UtilityButtons";
-
 
 interface RankingScreenProps {
   user: any;
@@ -19,8 +31,7 @@ interface RankingScreenProps {
   onBack: () => void;
 }
 
-
-const BASE_PLAYERS = CARDS.map(card => ({
+const BASE_PLAYERS = CARDS.map((card) => ({
   id: card.id,
   name: card.name,
   country: card.country,
@@ -29,24 +40,30 @@ const BASE_PLAYERS = CARDS.map(card => ({
   env: card.env,
   image: card.image,
   stickerNumber: card.stickerNumber,
-  randomOffset: Math.random()
+  randomOffset: Math.random(),
 }));
 
-export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, onBack }) => {
+export const RankingScreen: React.FC<RankingScreenProps> = ({
+  user,
+  handleAuth,
+  onBack,
+}) => {
   const { t } = useTranslation();
-  const [search, setSearch] = useState('');
+  const [search, setSearch] = useState("");
   const [showOnlyMyVotes, setShowOnlyMyVotes] = useState(false);
   const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
   const toggleCountryFilter = (country: string) => {
-    setSelectedCountries(prev => {
+    setSelectedCountries((prev) => {
       if (prev.includes(country)) {
-        return prev.filter(c => c !== country);
+        return prev.filter((c) => c !== country);
       } else {
         return [...prev, country];
       }
     });
   };
-  const [sortBy, setSortBy] = useState<'most_voted' | 'least_voted'>('most_voted');
+  const [sortBy, setSortBy] = useState<"most_voted" | "least_voted">(
+    "most_voted",
+  );
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [dbVotesData, setDbVotesData] = useState<any[]>([]);
@@ -56,11 +73,15 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
   const [showUnsavedModal, setShowUnsavedModal] = useState(false);
   const lastOrderRef = useRef<string>("");
   const lastVotedCardIdRef = useRef<string | null>(null);
-  const lastVoteActionRef = useRef<'add' | 'sub' | null>(null);
+  const lastVoteActionRef = useRef<"add" | "sub" | null>(null);
   const lastSavedVotesRef = useRef<Record<string, number>>({});
-  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
+  const [isMobile, setIsMobile] = useState(
+    typeof window !== "undefined" ? window.innerWidth < 768 : false,
+  );
   const baseStarsByCountry = useBaseStars();
-  const isAdmin = user?.email && ["gonzagramaglia@gmail.com", "ciberportero@gmail.com"].includes(user.email);
+  const isAdmin =
+    user?.email &&
+    ["gonzagramaglia@gmail.com", "ciberportero@gmail.com"].includes(user.email);
   const [showMaxVotesModal, setShowMaxVotesModal] = useState(false);
   const [visibleCount, setVisibleCount] = useState(12);
   const observerTarget = useRef<HTMLDivElement>(null);
@@ -70,8 +91,6 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
     setVisibleCount(12);
   }, [search, selectedCountries, showOnlyMyVotes, sortBy]);
 
-
-
   useEffect(() => {
     audioManager.playTheme();
   }, []);
@@ -80,11 +99,11 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
     };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const LOCAL_STORAGE_KEY = `trucomundial-uservotes-${user?.id || 'anonymous'}`;
+  const LOCAL_STORAGE_KEY = `trucomundial-uservotes-${user?.id || "anonymous"}`;
 
   // 1. Fetch user's local/cached votes on mount or when user changes
   useEffect(() => {
@@ -110,26 +129,35 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
     try {
       // Fetch all records whose match_id starts with user_votes_
       const { data, error } = await supabase
-        .from('game_sync')
-        .select('match_id, last_move')
-        .like('match_id', 'user_votes_%');
+        .from("game_sync")
+        .select("match_id, last_move")
+        .like("match_id", "user_votes_%");
 
       if (error) {
-        console.error('Error fetching votes from Supabase:', error);
+        console.error("Error fetching votes from Supabase:", error);
       } else if (data) {
         setDbVotesData(data);
 
         // If logged in, also try to restore our official votes from the DB
         if (user) {
-          const myDbRecord = data.find(item => item.match_id === `user_votes_${user.id}`);
-          if (myDbRecord && myDbRecord.last_move && myDbRecord.last_move.votes) {
+          const myDbRecord = data.find(
+            (item) => item.match_id === `user_votes_${user.id}`,
+          );
+          if (
+            myDbRecord &&
+            myDbRecord.last_move &&
+            myDbRecord.last_move.votes
+          ) {
             lastSavedVotesRef.current = myDbRecord.last_move.votes;
 
             // Only overwrite myVotes if local storage was empty
             const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
             if (!stored) {
               setMyVotes(myDbRecord.last_move.votes);
-              localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(myDbRecord.last_move.votes));
+              localStorage.setItem(
+                LOCAL_STORAGE_KEY,
+                JSON.stringify(myDbRecord.last_move.votes),
+              );
             }
           } else {
             lastSavedVotesRef.current = {};
@@ -137,7 +165,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
         }
       }
     } catch (err) {
-      console.error('Unexpected error fetching global votes:', err);
+      console.error("Unexpected error fetching global votes:", err);
     } finally {
       setLoading(false);
     }
@@ -152,12 +180,12 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
     const aggregate: Record<string, number> = {};
 
     // 1. Add other users' votes from DB
-    dbVotesData.forEach(item => {
+    dbVotesData.forEach((item) => {
       if (user && item.match_id === `user_votes_${user.id}`) return;
       const recordVotes = item.last_move?.votes;
-      if (recordVotes && typeof recordVotes === 'object') {
+      if (recordVotes && typeof recordVotes === "object") {
         Object.entries(recordVotes).forEach(([cardId, count]) => {
-          if (typeof count === 'number') {
+          if (typeof count === "number") {
             aggregate[cardId] = (aggregate[cardId] || 0) + count;
           }
         });
@@ -166,14 +194,21 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
 
     // 2. Add current user's local myVotes
     Object.entries(myVotes).forEach(([cardId, count]) => {
-      if (typeof count === 'number') {
+      if (typeof count === "number") {
         aggregate[cardId] = (aggregate[cardId] || 0) + count;
       }
     });
 
     // 3. Add base stars and fixture results stars
-    CARDS.forEach(c => {
-      const base = c.country === 'Argentina' ? 3 : c.country === 'Francia' ? 2 : c.country === 'Croacia' ? 1 : 0;
+    CARDS.forEach((c) => {
+      const base =
+        c.country === "Argentina"
+          ? 3
+          : c.country === "Francia"
+            ? 2
+            : c.country === "Croacia"
+              ? 1
+              : 0;
       const fix = baseStarsByCountry[c.country] || 0;
       aggregate[c.id] = Math.min(999, (aggregate[c.id] || 0) + base + fix);
     });
@@ -186,14 +221,13 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
   const totalMyVotes = Object.values(myVotes).reduce((sum, v) => sum + v, 0);
   const availableVotes = maxTotalVotes - totalMyVotes;
 
-
   // Handle subtracting a vote
   const handleSubVote = (cardId: string) => {
     if (!user) return;
 
     lastVotedCardIdRef.current = cardId;
-    lastVoteActionRef.current = 'sub';
-    setMyVotes(prev => {
+    lastVoteActionRef.current = "sub";
+    setMyVotes((prev) => {
       const current = prev[cardId] ?? 0;
       if (current <= 0) return prev;
       const updated = { ...prev, [cardId]: current - 1 };
@@ -212,19 +246,23 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
     setSaveSuccess(false);
 
     try {
-      const { error } = await supabase
-        .from('game_sync')
-        .upsert({
+      const { error } = await supabase.from("game_sync").upsert(
+        {
           match_id: `user_votes_${user.id}`,
           last_move: {
-            type: 'user_votes',
+            type: "user_votes",
             userId: user.id,
-            userName: user.user_metadata?.full_name?.split(' ')[0] || user.email?.split('@')[0] || "Usuario",
+            userName:
+              user.user_metadata?.full_name?.split(" ")[0] ||
+              user.email?.split("@")[0] ||
+              "Usuario",
             votes: myVotes,
-            updatedAt: new Date().toISOString()
+            updatedAt: new Date().toISOString(),
           },
-          updated_at: new Date().toISOString()
-        }, { onConflict: 'match_id' });
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "match_id" },
+      );
 
       if (error) {
         throw error;
@@ -237,8 +275,8 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
       // Refresh global list to show new calculations
       await fetchGlobalVotes();
     } catch (err) {
-      console.error('Error saving votes to Supabase:', err);
-      alert(t('save_error'));
+      console.error("Error saving votes to Supabase:", err);
+      alert(t("save_error"));
     } finally {
       setSaving(false);
     }
@@ -270,15 +308,16 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
   // 3. Compile aggregate votes
   // Aggregate all other users' votes from DB
   const aggregateOtherVotes: Record<string, number> = {};
-  dbVotesData.forEach(item => {
+  dbVotesData.forEach((item) => {
     // Skip current user's DB record to avoid double counting (we use current user's local state instead)
     if (user && item.match_id === `user_votes_${user.id}`) return;
 
     const recordVotes = item.last_move?.votes;
-    if (recordVotes && typeof recordVotes === 'object') {
+    if (recordVotes && typeof recordVotes === "object") {
       Object.entries(recordVotes).forEach(([cardId, count]) => {
-        if (typeof count === 'number') {
-          aggregateOtherVotes[cardId] = (aggregateOtherVotes[cardId] ?? 0) + count;
+        if (typeof count === "number") {
+          aggregateOtherVotes[cardId] =
+            (aggregateOtherVotes[cardId] ?? 0) + count;
         }
       });
     }
@@ -287,12 +326,22 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
   // Calculate absolute ranks (always based on most voted to least voted, sharing ranks for ties)
   const absoluteRanks = new Map<string, number>();
   const rankedList = [...BASE_PLAYERS]
-    .map(player => {
+    .map((player) => {
       const otherVotes = aggregateOtherVotes[player.id] ?? 0;
       const myActiveVotes = myVotes[player.id] ?? 0;
       const fixtureStars = baseStarsByCountry[player.country] || 0;
-      const hardcodedBaseStars = player.country === 'Argentina' ? 3 : player.country === 'Francia' ? 2 : player.country === 'Croacia' ? 1 : 0;
-      const totalVotes = Math.min(999, hardcodedBaseStars + fixtureStars + otherVotes + myActiveVotes);
+      const hardcodedBaseStars =
+        player.country === "Argentina"
+          ? 3
+          : player.country === "Francia"
+            ? 2
+            : player.country === "Croacia"
+              ? 1
+              : 0;
+      const totalVotes = Math.min(
+        999,
+        hardcodedBaseStars + fixtureStars + otherVotes + myActiveVotes,
+      );
       return { id: player.id, totalVotes };
     })
     .sort((a, b) => b.totalVotes - a.totalVotes);
@@ -307,23 +356,33 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
 
   // Combine: baseVotes + other users' votes + current user's active local votes
   const sortedPlayers = [...BASE_PLAYERS]
-    .map(player => {
+    .map((player) => {
       const otherVotes = aggregateOtherVotes[player.id] ?? 0;
       const myActiveVotes = myVotes[player.id] ?? 0;
       const fixtureStars = baseStarsByCountry[player.country] || 0;
-      const hardcodedBaseStars = player.country === 'Argentina' ? 3 : player.country === 'Francia' ? 2 : player.country === 'Croacia' ? 1 : 0;
-      const totalVotes = Math.min(999, hardcodedBaseStars + fixtureStars + otherVotes + myActiveVotes);
+      const hardcodedBaseStars =
+        player.country === "Argentina"
+          ? 3
+          : player.country === "Francia"
+            ? 2
+            : player.country === "Croacia"
+              ? 1
+              : 0;
+      const totalVotes = Math.min(
+        999,
+        hardcodedBaseStars + fixtureStars + otherVotes + myActiveVotes,
+      );
 
       return {
         ...player,
         otherVotes,
         myActiveVotes,
-        totalVotes
+        totalVotes,
       };
     })
     .sort((a, b) => {
       if (b.totalVotes !== a.totalVotes) {
-        if (sortBy === 'least_voted') {
+        if (sortBy === "least_voted") {
           return a.totalVotes - b.totalVotes;
         }
         return b.totalVotes - a.totalVotes;
@@ -345,14 +404,14 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
     }
 
     // Check global 999-vote limit
-    const player = sortedPlayers.find(p => p.id === cardId);
+    const player = sortedPlayers.find((p) => p.id === cardId);
     if (player && player.totalVotes >= 999) {
       return; // Cap global votes at 999
     }
 
     lastVotedCardIdRef.current = cardId;
-    lastVoteActionRef.current = 'add';
-    setMyVotes(prev => {
+    lastVoteActionRef.current = "add";
+    setMyVotes((prev) => {
       const current = prev[cardId] ?? 0;
       const updated = { ...prev, [cardId]: current + 1 };
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updated));
@@ -360,7 +419,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
     });
   };
 
-  const currentOrder = sortedPlayers.map(p => p.id).join(',');
+  const currentOrder = sortedPlayers.map((p) => p.id).join(",");
 
   useEffect(() => {
     if (!lastOrderRef.current) {
@@ -377,7 +436,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
         const tryScroll = () => {
           const element = document.getElementById(`ranking-card-${cardId}`);
           if (element) {
-            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            element.scrollIntoView({ behavior: "smooth", block: "center" });
           }
         };
 
@@ -403,14 +462,17 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
   };
 
   // Filter players based on search query and nationality
-  const filteredPlayers = sortedPlayers.filter(p => {
+  const filteredPlayers = sortedPlayers.filter((p) => {
     // 0. My Votes filter
     if (showOnlyMyVotes && (myVotes[p.id] ?? 0) <= 0) {
       return false;
     }
 
     // 1. Nationality filter
-    if (selectedCountries.length > 0 && !selectedCountries.includes(p.country)) {
+    if (
+      selectedCountries.length > 0 &&
+      !selectedCountries.includes(p.country)
+    ) {
       return false;
     }
 
@@ -418,7 +480,13 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
     const q = cleanString(search);
     if (!q) return true;
 
-    const translatedCountry = t(`country_${p.country.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase()}`, p.country);
+    const translatedCountry = t(
+      `country_${p.country
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()}`,
+      p.country,
+    );
     return (
       cleanString(p.name).includes(q) ||
       cleanString(p.country).includes(q) ||
@@ -433,12 +501,12 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
     if (!target) return;
 
     const observer = new IntersectionObserver(
-      entries => {
+      (entries) => {
         if (entries[0].isIntersecting) {
-          setVisibleCount(prev => prev + 12);
+          setVisibleCount((prev) => prev + 12);
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
     observer.observe(target);
 
@@ -448,17 +516,19 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
   const unsaved = hasUnsavedChanges();
 
   return (
-    <div style={{
-      width: '100%',
-      maxWidth: '1200px',
-      margin: '0 auto',
-      minHeight: '100vh',
-      display: 'flex',
-      flexDirection: 'column',
-      padding: isMobile ? '1.5rem 1rem 4rem 1rem' : '1.1rem 1rem 4rem 1rem',
-      color: '#fff',
-      boxSizing: 'border-box'
-    }}>
+    <div
+      style={{
+        width: "100%",
+        maxWidth: "1200px",
+        margin: "0 auto",
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        padding: isMobile ? "1.5rem 1rem 4rem 1rem" : "1.1rem 1rem 4rem 1rem",
+        color: "#fff",
+        boxSizing: "border-box",
+      }}
+    >
       {/* HEADER SECTION (Centered column layout on desktop, responsive style on mobile) */}
       {!isMobile && (
         <>
@@ -486,7 +556,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
               fontSize: "0.75rem",
               letterSpacing: "0.05em",
               textTransform: "uppercase",
-              cursor: "pointer"
+              cursor: "pointer",
             }}
           >
             <Home size={18} />
@@ -498,43 +568,47 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
       )}
 
       {/* HEADER SECTION (Responsive Container) */}
-      <div style={{
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginBottom: isMobile ? '1.5rem' : '2rem',
-        width: '100%',
-        position: 'relative'
-      }}>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          marginBottom: isMobile ? "1.5rem" : "2rem",
+          width: "100%",
+          position: "relative",
+        }}
+      >
         {isMobile ? (
           <>
             {/* Mobile Header Layout */}
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              width: '100%',
-              gap: '0.75rem',
-              marginBottom: '1rem'
-            }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                width: "100%",
+                gap: "0.75rem",
+                marginBottom: "1rem",
+              }}
+            >
               <button
                 onClick={handleBackRequest}
                 className="btn-hover-dark"
                 style={{
-                  background: 'rgba(255, 255, 255, 0.08)',
-                  border: '1px solid rgba(255, 255, 255, 0.15)',
-                  color: 'white',
-                  height: '36px',
-                  borderRadius: '0.75rem',
-                  padding: '0 0.85rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.4rem',
-                  fontSize: '0.8rem',
+                  background: "rgba(255, 255, 255, 0.08)",
+                  border: "1px solid rgba(255, 255, 255, 0.15)",
+                  color: "white",
+                  height: "36px",
+                  borderRadius: "0.75rem",
+                  padding: "0 0.85rem",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.4rem",
+                  fontSize: "0.8rem",
                   fontWeight: 800,
-                  cursor: 'pointer',
-                  boxShadow: '3px 3px 0px #000',
+                  cursor: "pointer",
+                  boxShadow: "3px 3px 0px #000",
                 }}
               >
                 <Home size={14} />
@@ -544,55 +618,105 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
               <UtilityButtons isMobile={true} />
             </div>
 
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '0.25rem',
-              justifyContent: 'center',
-              textAlign: 'center'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Star size={24} fill="#ffdf00" style={{ color: '#ffdf00', filter: 'drop-shadow(0 0 6px rgba(255, 223, 0, 0.25))' }} />
-                <h2 className="text-display" style={{
-                  fontSize: '1.4rem',
-                  margin: 0,
-                  letterSpacing: '0.05em',
-                  color: '#ffdf00',
-                  textShadow: '0 0 8px rgba(255, 223, 0, 0.15)'
-                }}>
-                  {t('card_ranking').toUpperCase()}
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: "0.25rem",
+                justifyContent: "center",
+                textAlign: "center",
+              }}
+            >
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
+              >
+                <Star
+                  size={24}
+                  fill="#ffdf00"
+                  style={{
+                    color: "#ffdf00",
+                    filter: "drop-shadow(0 0 6px rgba(255, 223, 0, 0.25))",
+                  }}
+                />
+                <h2
+                  className="text-display"
+                  style={{
+                    fontSize: "1.4rem",
+                    margin: 0,
+                    letterSpacing: "0.05em",
+                    color: "#ffdf00",
+                    textShadow: "0 0 8px rgba(255, 223, 0, 0.15)",
+                  }}
+                >
+                  {t("card_ranking").toUpperCase()}
                 </h2>
               </div>
-              <p style={{ fontSize: '0.75rem', opacity: 0.6, margin: '4px 0 0 0' }}>
-                {t('ranking_subtitle')}
+              <p
+                style={{
+                  fontSize: "0.75rem",
+                  opacity: 0.6,
+                  margin: "4px 0 0 0",
+                }}
+              >
+                {t("ranking_subtitle")}
               </p>
             </div>
           </>
         ) : (
           <>
             {/* Desktop Centered Header Layout */}
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', textAlign: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                <Star size={36} fill="#ffdf00" style={{ color: '#ffdf00', filter: 'drop-shadow(0 0 10px rgba(255, 223, 0, 0.3))' }} />
-                <h2 className="text-display" style={{
-                  fontSize: '2.2rem',
-                  margin: 0,
-                  letterSpacing: '0.05em',
-                  color: '#ffdf00',
-                  textShadow: '0 0 15px rgba(255, 223, 0, 0.2)'
-                }}>
-                  {t('card_ranking').toUpperCase()}
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: "0.5rem",
+                textAlign: "center",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.75rem",
+                }}
+              >
+                <Star
+                  size={36}
+                  fill="#ffdf00"
+                  style={{
+                    color: "#ffdf00",
+                    filter: "drop-shadow(0 0 10px rgba(255, 223, 0, 0.3))",
+                  }}
+                />
+                <h2
+                  className="text-display"
+                  style={{
+                    fontSize: "2.2rem",
+                    margin: 0,
+                    letterSpacing: "0.05em",
+                    color: "#ffdf00",
+                    textShadow: "0 0 15px rgba(255, 223, 0, 0.2)",
+                  }}
+                >
+                  {t("card_ranking").toUpperCase()}
                 </h2>
               </div>
-              <p style={{ fontSize: '0.95rem', opacity: 0.65, margin: '4px 0 0 0', fontWeight: 600 }}>
-                {t('ranking_subtitle')}
+              <p
+                style={{
+                  fontSize: "0.95rem",
+                  opacity: 0.65,
+                  margin: "4px 0 0 0",
+                  fontWeight: 600,
+                }}
+              >
+                {t("ranking_subtitle")}
               </p>
             </div>
           </>
         )}
       </div>
-
 
       {/* VOTING CONTROL BLOCK (STICKY HUD) */}
       <AnimatePresence mode="wait">
@@ -601,84 +725,149 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
             initial={{ y: -30, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             style={{
-              position: 'sticky',
-              top: '1rem',
+              position: "sticky",
+              top: "1rem",
               zIndex: 100,
-              background: 'rgba(15, 10, 25, 0.9)',
-              border: unsaved ? '2px solid rgba(255, 184, 0, 0.45)' : (availableVotes === 0 ? '2px solid rgba(16, 185, 129, 0.45)' : '2px solid rgba(168, 85, 247, 0.25)'),
-              borderRadius: '2rem',
-              padding: '1.25rem 2rem',
-              marginBottom: '2rem',
-              display: 'flex',
-              flexWrap: 'wrap',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: '1.5rem',
-              boxShadow: unsaved ? '0 10px 30px rgba(255, 184, 0, 0.05), inset 0 0 20px rgba(255, 184, 0, 0.05)' : (availableVotes === 0 ? '0 10px 30px rgba(16, 185, 129, 0.05), inset 0 0 20px rgba(16, 185, 129, 0.05)' : '0 10px 30px rgba(168, 85, 247, 0.05), inset 0 0 20px rgba(168, 85, 247, 0.05)'),
-              backdropFilter: 'blur(16px)'
+              background: "rgba(15, 10, 25, 0.9)",
+              border: unsaved
+                ? "2px solid rgba(255, 184, 0, 0.45)"
+                : availableVotes === 0
+                  ? "2px solid rgba(16, 185, 129, 0.45)"
+                  : "2px solid rgba(168, 85, 247, 0.25)",
+              borderRadius: "2rem",
+              padding: "1.25rem 2rem",
+              marginBottom: "2rem",
+              display: "flex",
+              flexWrap: "wrap",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: "1.5rem",
+              boxShadow: unsaved
+                ? "0 10px 30px rgba(255, 184, 0, 0.05), inset 0 0 20px rgba(255, 184, 0, 0.05)"
+                : availableVotes === 0
+                  ? "0 10px 30px rgba(16, 185, 129, 0.05), inset 0 0 20px rgba(16, 185, 129, 0.05)"
+                  : "0 10px 30px rgba(168, 85, 247, 0.05), inset 0 0 20px rgba(168, 85, 247, 0.05)",
+              backdropFilter: "blur(16px)",
             }}
           >
-            <div style={{ flex: '1 1 300px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', fontSize: '0.9rem', fontWeight: 800 }}>
-                <span style={{ color: unsaved ? '#ffb800' : (availableVotes === 0 ? '#10b981' : '#a855f7'), display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <div style={{ flex: "1 1 300px" }}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  marginBottom: "0.5rem",
+                  fontSize: "0.9rem",
+                  fontWeight: 800,
+                }}
+              >
+                <span
+                  style={{
+                    color: unsaved
+                      ? "#ffb800"
+                      : availableVotes === 0
+                        ? "#10b981"
+                        : "#a855f7",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.5rem",
+                  }}
+                >
                   <Trophy size={18} />
-                  {t('your_votes_distributed')}
+                  {t("your_votes_distributed")}
                 </span>
-                <span style={{ color: unsaved ? '#ffb800' : (availableVotes === 0 ? '#10b981' : '#fff') }}>
-                  {totalMyVotes} / {maxTotalVotes} {t('votes_label')}
+                <span
+                  style={{
+                    color: unsaved
+                      ? "#ffb800"
+                      : availableVotes === 0
+                        ? "#10b981"
+                        : "#fff",
+                  }}
+                >
+                  {totalMyVotes} / {maxTotalVotes} {t("votes_label")}
                 </span>
               </div>
 
               {/* Progress bar */}
-              <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px', overflow: 'hidden' }}>
+              <div
+                style={{
+                  width: "100%",
+                  height: "8px",
+                  background: "rgba(255,255,255,0.1)",
+                  borderRadius: "4px",
+                  overflow: "hidden",
+                }}
+              >
                 <motion.div
                   initial={{ width: 0 }}
-                  animate={{ width: `${(totalMyVotes / maxTotalVotes) * 100}%` }}
+                  animate={{
+                    width: `${(totalMyVotes / maxTotalVotes) * 100}%`,
+                  }}
                   style={{
-                    height: '100%',
+                    height: "100%",
                     background: unsaved
-                      ? 'linear-gradient(to right, #ffb800, #f59e0b)'
-                      : (availableVotes === 0 ? 'linear-gradient(to right, #10b981, #059669)' : 'linear-gradient(to right, #a855f7, #7c3aed)'),
+                      ? "linear-gradient(to right, #ffb800, #f59e0b)"
+                      : availableVotes === 0
+                        ? "linear-gradient(to right, #10b981, #059669)"
+                        : "linear-gradient(to right, #a855f7, #7c3aed)",
                     boxShadow: unsaved
-                      ? '0 0 8px rgba(255, 184, 0, 0.8)'
-                      : (availableVotes === 0 ? '0 0 8px rgba(16, 185, 129, 0.8)' : '0 0 8px rgba(168, 85, 247, 0.8)')
+                      ? "0 0 8px rgba(255, 184, 0, 0.8)"
+                      : availableVotes === 0
+                        ? "0 0 8px rgba(16, 185, 129, 0.8)"
+                        : "0 0 8px rgba(168, 85, 247, 0.8)",
                   }}
                 />
               </div>
 
-              <div style={{ fontSize: '0.75rem', opacity: 0.5, marginTop: '0.4rem' }}>
+              <div
+                style={{
+                  fontSize: "0.75rem",
+                  opacity: 0.5,
+                  marginTop: "0.4rem",
+                }}
+              >
                 {availableVotes > 0
-                  ? t('votes_available_hint', { count: availableVotes })
-                  : t('votes_all_used')}
+                  ? t("votes_available_hint", { count: availableVotes })
+                  : t("votes_all_used")}
               </div>
             </div>
 
             {/* Save Button */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
               <button
                 onClick={handleSaveVotes}
                 disabled={saving || saveSuccess}
                 className="btn-hover-dark"
                 style={{
-                  background: saveSuccess ? '#10b981' : (unsaved ? '#ffb800' : (availableVotes === 0 ? '#10b981' : '#a855f7')),
-                  border: 'none',
-                  color: '#fff',
-                  height: '48px',
-                  borderRadius: '1.25rem',
-                  padding: '0 2rem',
-                  fontSize: '1rem',
+                  background: saveSuccess
+                    ? "#10b981"
+                    : unsaved
+                      ? "#ffb800"
+                      : availableVotes === 0
+                        ? "#10b981"
+                        : "#a855f7",
+                  border: "none",
+                  color: "#fff",
+                  height: "48px",
+                  borderRadius: "1.25rem",
+                  padding: "0 2rem",
+                  fontSize: "1rem",
                   fontWeight: 950,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.75rem',
-                  cursor: (saving || saveSuccess) ? 'default' : 'pointer',
-                  boxShadow: '4px 4px 0px #000',
-                  transition: 'all 0.2s ease',
-                  opacity: saving ? 0.7 : 1
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.75rem",
+                  cursor: saving || saveSuccess ? "default" : "pointer",
+                  boxShadow: "4px 4px 0px #000",
+                  transition: "all 0.2s ease",
+                  opacity: saving ? 0.7 : 1,
                 }}
               >
                 {saveSuccess ? <Check size={18} /> : <Save size={18} />}
-                {saveSuccess ? t('votes_saved') : saving ? t('saving') : t('save_to_cloud')}
+                {saveSuccess
+                  ? t("votes_saved")
+                  : saving
+                    ? t("saving")
+                    : t("save_to_cloud")}
               </button>
             </div>
           </motion.div>
@@ -687,197 +876,278 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
             initial={{ y: -30, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             style={{
-              position: 'sticky',
-              top: '1rem',
+              position: "sticky",
+              top: "1rem",
               zIndex: 100,
-              background: 'rgba(145, 70, 255, 0.05)',
-              border: '2px dashed rgba(145, 70, 255, 0.45)',
-              borderRadius: '2rem',
-              padding: '1.5rem 2rem',
-              marginBottom: '2rem',
-              display: 'flex',
-              flexWrap: 'wrap',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              gap: '1.5rem',
-              backdropFilter: 'blur(16px)'
+              background: "rgba(145, 70, 255, 0.05)",
+              border: "2px dashed rgba(145, 70, 255, 0.45)",
+              borderRadius: "2rem",
+              padding: "1.5rem 2rem",
+              marginBottom: "2rem",
+              display: "flex",
+              flexWrap: "wrap",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: "1.5rem",
+              backdropFilter: "blur(16px)",
             }}
           >
-            <div style={{ flex: '1 1 300px' }}>
-              <h3 style={{ margin: '0 0 0.5rem 0', color: '#a855f7', display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '1.1rem', fontWeight: 900 }}>
+            <div style={{ flex: "1 1 300px" }}>
+              <h3
+                style={{
+                  margin: "0 0 0.5rem 0",
+                  color: "#a855f7",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "0.6rem",
+                  fontSize: "1.1rem",
+                  fontWeight: 900,
+                }}
+              >
                 <Lock size={18} />
-                {t('login_to_vote_title')}
+                {t("login_to_vote_title")}
               </h3>
-              <p style={{ margin: 0, fontSize: '0.8rem', opacity: 0.7, lineHeight: 1.4 }} dangerouslySetInnerHTML={{ __html: t('login_to_vote_desc') }} />
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: "0.8rem",
+                  opacity: 0.7,
+                  lineHeight: 1.4,
+                }}
+                dangerouslySetInnerHTML={{ __html: t("login_to_vote_desc") }}
+              />
             </div>
 
             <button
               onClick={handleAuth}
               className="btn-hover-dark"
               style={{
-                background: '#9146ff',
-                border: 'none',
-                color: '#fff',
-                height: '46px',
-                borderRadius: '1.25rem',
-                padding: '0 1.5rem',
-                fontSize: '0.9rem',
+                background: "#9146ff",
+                border: "none",
+                color: "#fff",
+                height: "46px",
+                borderRadius: "1.25rem",
+                padding: "0 1.5rem",
+                fontSize: "0.9rem",
                 fontWeight: 950,
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.6rem',
-                cursor: 'pointer',
-                boxShadow: '4px 4px 0px #000',
-                marginTop: isMobile ? '-0.5rem' : 0,
+                display: "flex",
+                alignItems: "center",
+                gap: "0.6rem",
+                cursor: "pointer",
+                boxShadow: "4px 4px 0px #000",
+                marginTop: isMobile ? "-0.5rem" : 0,
               }}
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" style={{ fill: 'currentColor' }}>
-                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" /><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" /><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" /><path d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                style={{ fill: "currentColor" }}
+              >
+                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
               </svg>
-              {t('login_with_google')}
+              {t("login_with_google")}
             </button>
           </motion.div>
         )}
       </AnimatePresence>
 
       {/* INFO BOX */}
-      <div style={{
-        background: 'rgba(0, 242, 255, 0.1)',
-        border: '1px solid rgba(0, 242, 255, 0.3)',
-        borderRadius: '12px',
-        padding: '1rem',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '1rem',
-        marginBottom: '2rem',
-        width: '100%',
-        boxSizing: 'border-box'
-      }}>
-        <div style={{
-          background: 'rgba(0, 242, 255, 0.2)',
-          borderRadius: '50%',
-          width: '36px',
-          height: '36px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          flexShrink: 0
-        }}>
+      <div
+        style={{
+          background: "rgba(0, 242, 255, 0.1)",
+          border: "1px solid rgba(0, 242, 255, 0.3)",
+          borderRadius: "12px",
+          padding: "1rem",
+          display: "flex",
+          alignItems: "center",
+          gap: "1rem",
+          marginBottom: "2rem",
+          width: "100%",
+          boxSizing: "border-box",
+        }}
+      >
+        <div
+          style={{
+            background: "rgba(0, 242, 255, 0.2)",
+            borderRadius: "50%",
+            width: "36px",
+            height: "36px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+          }}
+        >
           <Calendar size={20} color="#00f2ff" />
         </div>
         <p
           style={{
             margin: 0,
-            fontSize: '0.85rem',
-            color: 'rgba(255,255,255,0.9)',
+            fontSize: "0.85rem",
+            color: "rgba(255,255,255,0.9)",
             lineHeight: 1.4,
-            textAlign: 'left'
+            textAlign: "left",
           }}
         >
           <span>{t("ranking_fixture_info_1")}</span>
-          <a href="/prode" style={{ color: '#00f2ff', textDecoration: 'none', fontWeight: 'bold', whiteSpace: 'nowrap' }}>
-            <ExternalLink size={14} style={{ verticalAlign: 'middle', marginRight: '0.2rem', marginTop: '-0.1rem' }} />
+          <a
+            href="/prode"
+            style={{
+              color: "#00f2ff",
+              textDecoration: "none",
+              fontWeight: "bold",
+              whiteSpace: "nowrap",
+            }}
+          >
+            <ExternalLink
+              size={14}
+              style={{
+                verticalAlign: "middle",
+                marginRight: "0.2rem",
+                marginTop: "-0.1rem",
+              }}
+            />
             {t("ranking_fixture_info_link")}
           </a>
-          <span dangerouslySetInnerHTML={{ __html: t("ranking_fixture_info_2") }} />
+          <span
+            dangerouslySetInnerHTML={{ __html: t("ranking_fixture_info_2") }}
+          />
         </p>
       </div>
 
       {/* SEARCH BOX & FILTERS */}
-      <div style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '1rem',
-        width: '100%',
-        marginBottom: '2rem'
-      }}>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "1rem",
+          width: "100%",
+          marginBottom: "2rem",
+        }}
+      >
         {/* Top Row: Search + Sort */}
-        <div style={{
-          display: 'flex',
-          flexDirection: isMobile ? 'column' : 'row',
-          gap: '1rem',
-          width: '100%',
-          alignItems: isMobile ? 'stretch' : 'center'
-        }}>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: isMobile ? "column" : "row",
+            gap: "1rem",
+            width: "100%",
+            alignItems: isMobile ? "stretch" : "center",
+          }}
+        >
           {/* Search Input */}
-          <div style={{ position: 'relative', flex: 1 }}>
-          <div style={{
-            position: 'absolute',
-            top: '50%',
-            left: '1.25rem',
-            transform: 'translateY(-50%)',
-            color: 'rgba(255,255,255,0.4)',
-            pointerEvents: 'none'
-          }}>
-            <Search size={20} />
+          <div style={{ position: "relative", flex: 1 }}>
+            <div
+              style={{
+                position: "absolute",
+                top: "50%",
+                left: "1.25rem",
+                transform: "translateY(-50%)",
+                color: "rgba(255,255,255,0.4)",
+                pointerEvents: "none",
+              }}
+            >
+              <Search size={20} />
+            </div>
+            <input
+              type="text"
+              placeholder={t("search_placeholder")}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "1.25rem 1.25rem 1.25rem 3.25rem",
+                background: "rgba(255, 255, 255, 0.05)",
+                border: "2px solid rgba(255, 255, 255, 0.1)",
+                borderRadius: "1.5rem",
+                color: "#fff",
+                fontSize: "1.1rem",
+                outline: "none",
+                boxSizing: "border-box",
+                transition: "all 0.2s ease",
+                boxShadow: "0 8px 32px rgba(0, 0, 0, 0.2)",
+              }}
+              onFocus={(e) =>
+                (e.target.style.borderColor = "rgba(168, 85, 247, 0.5)")
+              }
+              onBlur={(e) =>
+                (e.target.style.borderColor = "rgba(255, 255, 255, 0.1)")
+              }
+            />
           </div>
-          <input
-            type="text"
-            placeholder={t('search_placeholder')}
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            style={{
-              width: '100%',
-              padding: '1.25rem 1.25rem 1.25rem 3.25rem',
-              background: 'rgba(255, 255, 255, 0.05)',
-              border: '2px solid rgba(255, 255, 255, 0.1)',
-              borderRadius: '1.5rem',
-              color: '#fff',
-              fontSize: '1.1rem',
-              outline: 'none',
-              boxSizing: 'border-box',
-              transition: 'all 0.2s ease',
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)'
-            }}
-            onFocus={e => e.target.style.borderColor = 'rgba(168, 85, 247, 0.5)'}
-            onBlur={e => e.target.style.borderColor = 'rgba(255, 255, 255, 0.1)'}
-          />
-        </div>
 
           {/* Sort Selector moved here for desktop */}
-          <div className="ranking-sort-container" style={{ 
-            display: 'flex', 
-            flexDirection: isMobile ? 'column' : 'row', 
-            alignItems: isMobile ? 'flex-start' : 'center', 
-            gap: isMobile ? '0.3rem' : '0.8rem',
-            flexShrink: 0
-          }}>
-            <span style={{ fontSize: '0.8rem', opacity: 0.6, marginLeft: isMobile ? '0.5rem' : '0' }}>{t('sort_by', 'Ordenar por')}:</span>
-            <div className="ranking-sort-inner" style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
+          <div
+            className="ranking-sort-container"
+            style={{
+              display: "flex",
+              flexDirection: isMobile ? "column" : "row",
+              alignItems: isMobile ? "flex-start" : "center",
+              gap: isMobile ? "0.3rem" : "0.8rem",
+              flexShrink: 0,
+            }}
+          >
+            <span
+              style={{
+                fontSize: "0.8rem",
+                opacity: 0.6,
+                marginLeft: isMobile ? "0.5rem" : "0",
+              }}
+            >
+              {t("sort_by", "Ordenar por")}:
+            </span>
+            <div
+              className="ranking-sort-inner"
+              style={{
+                position: "relative",
+                display: "inline-flex",
+                alignItems: "center",
+              }}
+            >
               <select
                 value={sortBy}
-                onChange={e => setSortBy(e.target.value as any)}
+                onChange={(e) => setSortBy(e.target.value as any)}
                 style={{
-                  height: '44px',
-                  padding: '0 2.2rem 0 1.1rem',
-                  borderRadius: '1.1rem',
-                  background: 'rgba(0, 0, 0, 0.3)',
-                  border: '1px solid rgba(255, 255, 255, 0.15)',
-                  color: '#fff',
-                  fontSize: '0.85rem',
+                  height: "44px",
+                  padding: "0 2.2rem 0 1.1rem",
+                  borderRadius: "1.1rem",
+                  background: "rgba(0, 0, 0, 0.3)",
+                  border: "1px solid rgba(255, 255, 255, 0.15)",
+                  color: "#fff",
+                  fontSize: "0.85rem",
                   fontWeight: 700,
-                  outline: 'none',
-                  cursor: 'pointer',
-                  appearance: 'none',
-                  WebkitAppearance: 'none',
-                  MozAppearance: 'none',
-                  transition: 'all 0.2s',
-                  boxSizing: 'border-box'
+                  outline: "none",
+                  cursor: "pointer",
+                  appearance: "none",
+                  WebkitAppearance: "none",
+                  MozAppearance: "none",
+                  transition: "all 0.2s",
+                  boxSizing: "border-box",
                 }}
               >
-                <option value="most_voted">📈 {t('most_voted', 'Más Votados')}</option>
-                <option value="least_voted">📉 {t('least_voted', 'Menos Votados')}</option>
+                <option value="most_voted">
+                  📈 {t("most_voted", "Más Votados")}
+                </option>
+                <option value="least_voted">
+                  📉 {t("least_voted", "Menos Votados")}
+                </option>
               </select>
-              <span style={{
-                position: 'absolute',
-                right: '1.1rem',
-                pointerEvents: 'none',
-                fontSize: '0.5rem',
-                opacity: 0.7,
-                display: 'flex',
-                alignItems: 'center',
-                color: '#fff'
-              }}>
+              <span
+                style={{
+                  position: "absolute",
+                  right: "1.1rem",
+                  pointerEvents: "none",
+                  fontSize: "0.5rem",
+                  opacity: 0.7,
+                  display: "flex",
+                  alignItems: "center",
+                  color: "#fff",
+                }}
+              >
                 ▼
               </span>
             </div>
@@ -885,130 +1155,168 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
         </div>
 
         {/* Filters Row */}
-        <div style={{
-          display: 'flex',
-          justifyContent: 'flex-start',
-          alignItems: 'center',
-          gap: '1rem',
-          flexWrap: 'wrap',
-          width: '100%'
-        }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "flex-start",
+            alignItems: "center",
+            gap: "1rem",
+            flexWrap: "wrap",
+            width: "100%",
+          }}
+        >
           {/* Nationality Filters (Pills) */}
 
-          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', flex: 1 }}>
+          <div
+            style={{
+              display: "flex",
+              gap: "0.5rem",
+              flexWrap: "wrap",
+              flex: 1,
+            }}
+          >
             <button
               onClick={() => {
                 setSelectedCountries([]);
                 setShowOnlyMyVotes(false);
               }}
               style={{
-                height: '42px',
-                padding: '0 1.25rem',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxSizing: 'border-box',
-                borderRadius: '1.1rem',
-                background: selectedCountries.length === 0 && !showOnlyMyVotes ? 'rgba(168, 85, 247, 0.2)' : 'rgba(255, 255, 255, 0.05)',
-                border: selectedCountries.length === 0 && !showOnlyMyVotes ? '1.5px solid #a855f7' : '1px solid rgba(255, 255, 255, 0.1)',
-                color: '#fff',
-                fontSize: '0.85rem',
+                height: "42px",
+                padding: "0 1.25rem",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                boxSizing: "border-box",
+                borderRadius: "1.1rem",
+                background:
+                  selectedCountries.length === 0 && !showOnlyMyVotes
+                    ? "rgba(168, 85, 247, 0.2)"
+                    : "rgba(255, 255, 255, 0.05)",
+                border:
+                  selectedCountries.length === 0 && !showOnlyMyVotes
+                    ? "1.5px solid #a855f7"
+                    : "1px solid rgba(255, 255, 255, 0.1)",
+                color: "#fff",
+                fontSize: "0.85rem",
                 fontWeight: 700,
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                boxShadow: selectedCountries.length === 0 && !showOnlyMyVotes ? '0 0 10px rgba(168, 85, 247, 0.2)' : 'none',
-                whiteSpace: 'nowrap'
+                cursor: "pointer",
+                transition: "all 0.2s ease",
+                boxShadow:
+                  selectedCountries.length === 0 && !showOnlyMyVotes
+                    ? "0 0 10px rgba(168, 85, 247, 0.2)"
+                    : "none",
+                whiteSpace: "nowrap",
               }}
             >
-              <span style={{ marginRight: '0.4rem' }}>🌎</span> {t('filter_all')}
+              <span style={{ marginRight: "0.4rem" }}>🌎</span>{" "}
+              {t("filter_all")}
             </button>
 
             <button
-              onClick={() => setShowOnlyMyVotes(prev => !prev)}
+              onClick={() => setShowOnlyMyVotes((prev) => !prev)}
               style={{
-                height: '42px',
-                padding: '0 1.25rem',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxSizing: 'border-box',
-                borderRadius: '1.1rem',
-                background: showOnlyMyVotes ? 'rgba(168, 85, 247, 0.2)' : 'rgba(255, 255, 255, 0.05)',
-                border: showOnlyMyVotes ? '1.5px solid #a855f7' : '1px solid rgba(255, 255, 255, 0.1)',
-                color: showOnlyMyVotes ? '#fff' : 'rgba(255, 255, 255, 0.6)',
-                fontSize: '0.85rem',
-                fontWeight: showOnlyMyVotes ? 'bold' : 'normal',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                boxShadow: showOnlyMyVotes ? '0 0 10px rgba(168, 85, 247, 0.2)' : 'none',
-                whiteSpace: 'nowrap'
+                height: "42px",
+                padding: "0 1.25rem",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                boxSizing: "border-box",
+                borderRadius: "1.1rem",
+                background: showOnlyMyVotes
+                  ? "rgba(168, 85, 247, 0.2)"
+                  : "rgba(255, 255, 255, 0.05)",
+                border: showOnlyMyVotes
+                  ? "1.5px solid #a855f7"
+                  : "1px solid rgba(255, 255, 255, 0.1)",
+                color: showOnlyMyVotes ? "#fff" : "rgba(255, 255, 255, 0.6)",
+                fontSize: "0.85rem",
+                fontWeight: showOnlyMyVotes ? "bold" : "normal",
+                cursor: "pointer",
+                transition: "all 0.2s ease",
+                boxShadow: showOnlyMyVotes
+                  ? "0 0 10px rgba(168, 85, 247, 0.2)"
+                  : "none",
+                whiteSpace: "nowrap",
               }}
             >
-              <span style={{ marginRight: '0.4rem' }}>⭐</span> {t("filter_my_votes")}
+              <span style={{ marginRight: "0.4rem" }}>⭐</span>{" "}
+              {t("filter_my_votes")}
             </button>
 
             {[
-              { id: 'Arabia Saudita', code: 'KSA', flag: '🇸🇦' },
-              { id: 'Argelia', code: 'ALG', flag: '🇩🇿' },
-              { id: 'Argentina', code: 'ARG', flag: '🇦🇷' },
-              { id: 'Austria', code: 'AUT', flag: '🇦🇹' },
-              { id: 'Bélgica', code: 'BEL', flag: '🇧🇪' },
-              { id: 'Bosnia y Herz', code: 'BIH', flag: '🇧🇦' },
-              { id: 'Brasil', code: 'BRA', flag: '🇧🇷' },
-              { id: 'Canadá', code: 'CAN', flag: '🇨🇦' },
-                  { id: 'Costa de Marfil', code: 'CIV', flag: '🇨🇮' },
-              { id: 'Colombia', code: 'COL', flag: '🇨🇴' },
-              { id: 'Cabo Verde', code: 'CPV', flag: '🇨🇻' },
-              { id: 'Croacia', code: 'CRO', flag: '🇭🇷' },
-              { id: 'República Checa', code: 'CZE', flag: '🇨🇿' },
-              { id: 'Ecuador', code: 'ECU', flag: '🇪🇨' },
-              { id: 'Egipto', code: 'EGY', flag: '🇪🇬' },
-              { id: 'Inglaterra', code: 'ENG', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿' },
-              { id: 'Irán', code: 'IRN', flag: '🇮🇷' },
-              { id: 'España', code: 'ESP', flag: '🇪🇸' },
-              { id: 'Francia', code: 'FRA', flag: '🇫🇷' },
-              { id: 'Alemania', code: 'GER', flag: '🇩🇪' },
-              { id: 'Japón', code: 'JPN', flag: '🇯🇵' },
-              { id: 'Jordania', code: 'JOR', flag: '🇯🇴' },
-              { id: 'Corea del Sur', code: 'KOR', flag: '🇰🇷' },
-              { id: 'Marruecos', code: 'MAR', flag: '🇲🇦' },
-              { id: 'México', code: 'MEX', flag: '🇲🇽' },
-              { id: 'Países Bajos', code: 'NED', flag: '🇳🇱' },
-              { id: 'Noruega', code: 'NOR', flag: '🇳🇴' },
-              { id: 'Nueva Zelanda', code: 'NZL', flag: '🇳🇿' },
-              { id: 'Panamá', code: 'PAN', flag: '🇵🇦' },
-              { id: 'Paraguay', code: 'PAR', flag: '🇵🇾' },
-              { id: 'Portugal', code: 'POR', flag: '🇵🇹' },
-              { id: 'Qatar', code: 'QAT', flag: '🇶🇦' },
-              { id: 'Sudáfrica', code: 'RSA', flag: '🇿🇦' },
-              { id: 'Escocia', code: 'SCO', flag: '🏴󠁧󠁢󠁳󠁣󠁴󠁿' },
-              { id: 'Suiza', code: 'SUI', flag: '🇨🇭' },
-              { id: 'Suecia', code: 'SWE', flag: '🇸🇪' },
-              { id: 'Uruguay', code: 'URU', flag: '🇺🇾' },
-              { id: 'USA', code: 'USA', flag: '🇺🇸' },
+              { id: "Argelia", code: "ALG", flag: "🇩🇿" },
+              { id: "Argentina", code: "ARG", flag: "🇦🇷" },
+              { id: "Austria", code: "AUT", flag: "🇦🇹" },
+              { id: "Bélgica", code: "BEL", flag: "🇧🇪" },
+              { id: "Bosnia y Herz", code: "BIH", flag: "🇧🇦" },
+              { id: "Brasil", code: "BRA", flag: "🇧🇷" },
+              { id: "Canadá", code: "CAN", flag: "🇨🇦" },
+              { id: "Costa de Marfil", code: "CIV", flag: "🇨🇮" },
+              { id: "Colombia", code: "COL", flag: "🇨🇴" },
+              { id: "Cabo Verde", code: "CPV", flag: "🇨🇻" },
+              { id: "Croacia", code: "CRO", flag: "🇭🇷" },
+              { id: "República Checa", code: "CZE", flag: "🇨🇿" },
+              { id: "Ecuador", code: "ECU", flag: "🇪🇨" },
+              { id: "Egipto", code: "EGY", flag: "🇪🇬" },
+              { id: "Inglaterra", code: "ENG", flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿" },
+              { id: "España", code: "ESP", flag: "🇪🇸" },
+              { id: "Francia", code: "FRA", flag: "🇫🇷" },
+              { id: "Alemania", code: "GER", flag: "🇩🇪" },
+              { id: "Irán", code: "IRN", flag: "🇮🇷" },
+              { id: "Jordania", code: "JOR", flag: "🇯🇴" },
+              { id: "Japón", code: "JPN", flag: "🇯🇵" },
+              { id: "Corea del Sur", code: "KOR", flag: "🇰🇷" },
+              { id: "Arabia Saudita", code: "KSA", flag: "🇸🇦" },
+              { id: "Marruecos", code: "MAR", flag: "🇲🇦" },
+              { id: "México", code: "MEX", flag: "🇲🇽" },
+              { id: "Países Bajos", code: "NED", flag: "🇳🇱" },
+              { id: "Noruega", code: "NOR", flag: "🇳🇴" },
+              { id: "Nueva Zelanda", code: "NZL", flag: "🇳🇿" },
+              { id: "Panamá", code: "PAN", flag: "🇵🇦" },
+              { id: "Paraguay", code: "PAR", flag: "🇵🇾" },
+              { id: "Portugal", code: "POR", flag: "🇵🇹" },
+              { id: "Qatar", code: "QAT", flag: "🇶🇦" },
+              { id: "Sudáfrica", code: "RSA", flag: "🇿🇦" },
+              { id: "Escocia", code: "SCO", flag: "🏴󠁧󠁢󠁳󠁣󠁴󠁿" },
+              { id: "Senegal", code: "SEN", flag: "🇸🇳" },
+              { id: "Suiza", code: "SUI", flag: "🇨🇭" },
+              { id: "Suecia", code: "SWE", flag: "🇸🇪" },
+              { id: "Uruguay", code: "URU", flag: "🇺🇾" },
+              { id: "USA", code: "USA", flag: "🇺🇸" },
             ].map((country) => (
               <button
                 key={country.id}
                 className="filter-btn"
                 onClick={() => toggleCountryFilter(country.id)}
                 style={{
-                  height: '42px',
-                  padding: '0 1.25rem',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  boxSizing: 'border-box',
-                  borderRadius: '1.1rem',
-                  background: selectedCountries.includes(country.id) ? 'rgba(168, 85, 247, 0.2)' : 'rgba(255, 255, 255, 0.05)',
-                  border: selectedCountries.includes(country.id) ? '1.5px solid #a855f7' : '1px solid rgba(255, 255, 255, 0.1)',
-                  color: selectedCountries.includes(country.id) ? '#fff' : 'rgba(255, 255, 255, 0.6)',
-                  fontWeight: selectedCountries.includes(country.id) ? 'bold' : 'normal',
-                  boxShadow: selectedCountries.includes(country.id) ? '0 0 10px rgba(168, 85, 247, 0.2)' : 'none',
-                  whiteSpace: 'nowrap',
-                  cursor: 'pointer'
+                  height: "42px",
+                  padding: "0 1.25rem",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  boxSizing: "border-box",
+                  borderRadius: "1.1rem",
+                  background: selectedCountries.includes(country.id)
+                    ? "rgba(168, 85, 247, 0.2)"
+                    : "rgba(255, 255, 255, 0.05)",
+                  border: selectedCountries.includes(country.id)
+                    ? "1.5px solid #a855f7"
+                    : "1px solid rgba(255, 255, 255, 0.1)",
+                  color: selectedCountries.includes(country.id)
+                    ? "#fff"
+                    : "rgba(255, 255, 255, 0.6)",
+                  fontWeight: selectedCountries.includes(country.id)
+                    ? "bold"
+                    : "normal",
+                  boxShadow: selectedCountries.includes(country.id)
+                    ? "0 0 10px rgba(168, 85, 247, 0.2)"
+                    : "none",
+                  whiteSpace: "nowrap",
+                  cursor: "pointer",
                 }}
               >
-                <span style={{ marginRight: '0.4rem' }}>{country.flag}</span> {country.code}
+                <span style={{ marginRight: "0.4rem" }}>{country.flag}</span>{" "}
+                {country.code}
               </button>
             ))}
           </div>
@@ -1017,7 +1325,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
 
       {/* LOADER */}
       {loading ? (
-        <div style={{ width: '100%' }}>
+        <div style={{ width: "100%" }}>
           <style>{`
             @keyframes shimmer {
               0% { transform: translateX(-150%); }
@@ -1038,154 +1346,226 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
           `}</style>
 
           {/* Central Concentric Neon Loader */}
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '1.5rem 0 4rem 0',
-            gap: '1.25rem'
-          }}>
-            <div style={{ position: 'relative', width: '60px', height: '60px' }}>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "1.5rem 0 4rem 0",
+              gap: "1.25rem",
+            }}
+          >
+            <div
+              style={{ position: "relative", width: "60px", height: "60px" }}
+            >
               {/* Outer Yellow Ring */}
-              <div style={{
-                position: 'absolute',
-                inset: 0,
-                border: '4px solid transparent',
-                borderTopColor: '#ffdf00',
-                borderRadius: '50%',
-                animation: 'spin-clockwise 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite',
-                boxShadow: '0 0 15px rgba(255, 223, 0, 0.45)'
-              }} />
+              <div
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  border: "4px solid transparent",
+                  borderTopColor: "#ffdf00",
+                  borderRadius: "50%",
+                  animation:
+                    "spin-clockwise 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite",
+                  boxShadow: "0 0 15px rgba(255, 223, 0, 0.45)",
+                }}
+              />
               {/* Inner Yellow Ring */}
-              <div style={{
-                position: 'absolute',
-                inset: '6px',
-                border: '4px solid transparent',
-                borderTopColor: '#ffdf00',
-                borderRadius: '50%',
-                animation: 'spin-counter 0.8s cubic-bezier(0.5, 0, 0.5, 1) infinite',
-                boxShadow: '0 0 10px rgba(255, 223, 0, 0.35)'
-              }} />
+              <div
+                style={{
+                  position: "absolute",
+                  inset: "6px",
+                  border: "4px solid transparent",
+                  borderTopColor: "#ffdf00",
+                  borderRadius: "50%",
+                  animation:
+                    "spin-counter 0.8s cubic-bezier(0.5, 0, 0.5, 1) infinite",
+                  boxShadow: "0 0 10px rgba(255, 223, 0, 0.35)",
+                }}
+              />
             </div>
-            <p style={{
-              margin: 0,
-              fontSize: '0.95rem',
-              fontWeight: 800,
-              letterSpacing: '0.05em',
-              color: '#ffdf00',
-              textShadow: '0 0 8px rgba(255, 223, 0, 0.2)',
-              animation: 'pulse-soft 1.5s ease-in-out infinite'
-            }}>
-              {t('loading_votes')}
+            <p
+              style={{
+                margin: 0,
+                fontSize: "0.95rem",
+                fontWeight: 800,
+                letterSpacing: "0.05em",
+                color: "#ffdf00",
+                textShadow: "0 0 8px rgba(255, 223, 0, 0.2)",
+                animation: "pulse-soft 1.5s ease-in-out infinite",
+              }}
+            >
+              {t("loading_votes")}
             </p>
           </div>
 
           {/* Skeleton Stickers Grid */}
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-            gap: '2.5rem',
-            width: '100%'
-          }}>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+              gap: "2.5rem",
+              width: "100%",
+            }}
+          >
             {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
               <div
                 key={`skeleton-${i}`}
                 style={{
-                  background: 'rgba(255, 255, 255, 0.02)',
-                  border: '1px solid rgba(255, 255, 255, 0.06)',
-                  borderRadius: '2.25rem',
-                  padding: '1.5rem',
-                  height: '370px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  position: 'relative',
-                  overflow: 'hidden',
-                  boxShadow: '0 12px 30px rgba(0,0,0,0.1)',
-                  backdropFilter: 'blur(8px)',
-                  animation: 'pulse-soft 1.8s ease-in-out infinite',
-                  animationDelay: `${i * 0.15}s`
+                  background: "rgba(255, 255, 255, 0.02)",
+                  border: "1px solid rgba(255, 255, 255, 0.06)",
+                  borderRadius: "2.25rem",
+                  padding: "1.5rem",
+                  height: "370px",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  position: "relative",
+                  overflow: "hidden",
+                  boxShadow: "0 12px 30px rgba(0,0,0,0.1)",
+                  backdropFilter: "blur(8px)",
+                  animation: "pulse-soft 1.8s ease-in-out infinite",
+                  animationDelay: `${i * 0.15}s`,
                 }}
               >
                 {/* Diagonal Shimmer Shimmer */}
-                <div style={{
-                  position: 'absolute',
-                  inset: 0,
-                  background: 'linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.04), transparent)',
-                  transform: 'skewX(-20deg)',
-                  width: '200%',
-                  height: '100%',
-                  animation: 'shimmer 1.8s infinite',
-                  animationDelay: `${i * 0.1}s`
-                }} />
+                <div
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    background:
+                      "linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.04), transparent)",
+                    transform: "skewX(-20deg)",
+                    width: "200%",
+                    height: "100%",
+                    animation: "shimmer 1.8s infinite",
+                    animationDelay: `${i * 0.1}s`,
+                  }}
+                />
 
                 {/* Skeleton Top Left Badge */}
-                <div style={{
-                  position: 'absolute',
-                  top: '-15px',
-                  left: '20px',
-                  background: 'rgba(255,255,255,0.06)',
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: '50%'
-                }} />
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "-15px",
+                    left: "20px",
+                    background: "rgba(255,255,255,0.06)",
+                    width: "36px",
+                    height: "36px",
+                    borderRadius: "50%",
+                  }}
+                />
 
                 {/* Skeleton Top Right Badge */}
-                <div style={{
-                  position: 'absolute',
-                  top: '-15px',
-                  right: '20px',
-                  background: 'rgba(255,255,255,0.06)',
-                  width: '60px',
-                  height: '24px',
-                  borderRadius: '1rem'
-                }} />
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "-15px",
+                    right: "20px",
+                    background: "rgba(255,255,255,0.06)",
+                    width: "60px",
+                    height: "24px",
+                    borderRadius: "1rem",
+                  }}
+                />
 
                 {/* Skeleton Sticker Box */}
-                <div style={{
-                  width: '130px',
-                  height: '180px',
-                  backgroundImage: 'url("/card-loading.png")',
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center',
-                  borderRadius: '1rem',
-                  border: '3px solid rgba(255, 255, 255, 0.4)',
-                  boxShadow: '0 8px 16px rgba(0,0,0,0.3)',
-                  margin: '1rem 0 1.25rem 0'
-                }} />
+                <div
+                  style={{
+                    width: "130px",
+                    height: "180px",
+                    backgroundImage: 'url("/card-loading.png")',
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                    borderRadius: "1rem",
+                    border: "3px solid rgba(255, 255, 255, 0.4)",
+                    boxShadow: "0 8px 16px rgba(0,0,0,0.3)",
+                    margin: "1rem 0 1.25rem 0",
+                  }}
+                />
 
                 {/* Skeleton Player details */}
-                <div style={{ width: '80%', height: '16px', background: 'rgba(255,255,255,0.05)', borderRadius: '4px', marginBottom: '0.6rem' }} />
-                <div style={{ width: '60%', height: '12px', background: 'rgba(255,255,255,0.03)', borderRadius: '3px', marginBottom: '1.25rem' }} />
+                <div
+                  style={{
+                    width: "80%",
+                    height: "16px",
+                    background: "rgba(255,255,255,0.05)",
+                    borderRadius: "4px",
+                    marginBottom: "0.6rem",
+                  }}
+                />
+                <div
+                  style={{
+                    width: "60%",
+                    height: "12px",
+                    background: "rgba(255,255,255,0.03)",
+                    borderRadius: "3px",
+                    marginBottom: "1.25rem",
+                  }}
+                />
 
                 {/* Skeleton Equivalence Badge */}
-                <div style={{ width: '70%', height: '28px', background: 'rgba(255,255,255,0.03)', borderRadius: '10px' }} />
+                <div
+                  style={{
+                    width: "70%",
+                    height: "28px",
+                    background: "rgba(255,255,255,0.03)",
+                    borderRadius: "10px",
+                  }}
+                />
               </div>
             ))}
           </div>
         </div>
       ) : filteredPlayers.length === 0 ? (
         <EmptyState
-          icon={showOnlyMyVotes ? '⭐' : '🔍'}
-          title={showOnlyMyVotes ? t("no_votes_yet_title", "Aún no has votado") : t("no_results")}
-          description={showOnlyMyVotes
-            ? t("no_votes_yet_desc", "No le has dado ninguna estrella a ninguna carta todavía. ¡Desactivá el filtro y empezá a votar por tus jugadores favoritos!")
-            : t("no_results_deck_desc")}
-          actionText={(showOnlyMyVotes || search || selectedCountries.length > 0) ? t("clear_filters", "Limpiar filtros") : undefined}
-          onAction={(showOnlyMyVotes || search || selectedCountries.length > 0) ? () => {
-            setShowOnlyMyVotes(false);
-            setSearch('');
-            setSelectedCountries([]);
-            setVisibleCount(20);
-          } : undefined}
+          icon={showOnlyMyVotes ? "⭐" : "🔍"}
+          title={
+            showOnlyMyVotes
+              ? t("no_votes_yet_title", "Aún no has votado")
+              : t("no_results")
+          }
+          description={
+            showOnlyMyVotes
+              ? t(
+                  "no_votes_yet_desc",
+                  "No le has dado ninguna estrella a ninguna carta todavía. ¡Desactivá el filtro y empezá a votar por tus jugadores favoritos!",
+                )
+              : t("no_results_deck_desc")
+          }
+          actionText={
+            showOnlyMyVotes || search || selectedCountries.length > 0
+              ? t("clear_filters", "Limpiar filtros")
+              : undefined
+          }
+          onAction={
+            showOnlyMyVotes || search || selectedCountries.length > 0
+              ? () => {
+                  setShowOnlyMyVotes(false);
+                  setSearch("");
+                  setSelectedCountries([]);
+                  setVisibleCount(20);
+                }
+              : undefined
+          }
           color="#a855f7"
         />
       ) : (
         /* DYNAMIC STICKERS GRID */
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '2.5rem', width: '100%' }}>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+            gap: "2.5rem",
+            width: "100%",
+          }}
+        >
           {filteredPlayers.slice(0, visibleCount).map((player, index) => {
-            const hasCardUnsavedChanges = (myVotes[player.id] ?? 0) !== (lastSavedVotesRef.current[player.id] ?? 0);
+            const hasCardUnsavedChanges =
+              (myVotes[player.id] ?? 0) !==
+              (lastSavedVotesRef.current[player.id] ?? 0);
             return (
               <motion.div
                 key={player.id}
@@ -1193,132 +1573,201 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
                 layout
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.3, delay: Math.min(index * 0.03, 0.5) }}
+                transition={{
+                  duration: 0.3,
+                  delay: Math.min(index * 0.03, 0.5),
+                }}
                 style={{
-                  background: (isOrderChanging && lastVotedCardIdRef.current === player.id)
-                    ? (lastVoteActionRef.current === 'add' ? 'rgba(168, 85, 247, 0.08)' : 'rgba(255, 255, 255, 0.08)')
-                    : 'rgba(255, 255, 255, 0.03)',
-                  border: (isOrderChanging && lastVotedCardIdRef.current === player.id)
-                    ? (lastVoteActionRef.current === 'add' ? '1.5px solid rgba(168, 85, 247, 0.8)' : '1.5px solid rgba(255, 255, 255, 0.8)')
-                    : '1px solid rgba(255, 255, 255, 0.08)',
-                  borderRadius: '2.25rem',
-                  padding: '1.5rem',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  position: 'relative',
-                  boxShadow: (isOrderChanging && lastVotedCardIdRef.current === player.id)
-                    ? (lastVoteActionRef.current === 'add' ? '0 0 30px rgba(168, 85, 247, 0.6), 0 12px 30px rgba(0,0,0,0.2)' : '0 0 30px rgba(255, 255, 255, 0.6), 0 12px 30px rgba(0,0,0,0.2)')
-                    : '0 12px 30px rgba(0,0,0,0.15)',
-                  backdropFilter: 'blur(8px)',
-                  filter: (isOrderChanging && lastVotedCardIdRef.current === player.id)
-                    ? 'brightness(1.3)'
-                    : 'none',
-                  transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)'
+                  background:
+                    isOrderChanging && lastVotedCardIdRef.current === player.id
+                      ? lastVoteActionRef.current === "add"
+                        ? "rgba(168, 85, 247, 0.08)"
+                        : "rgba(255, 255, 255, 0.08)"
+                      : "rgba(255, 255, 255, 0.03)",
+                  border:
+                    isOrderChanging && lastVotedCardIdRef.current === player.id
+                      ? lastVoteActionRef.current === "add"
+                        ? "1.5px solid rgba(168, 85, 247, 0.8)"
+                        : "1.5px solid rgba(255, 255, 255, 0.8)"
+                      : "1px solid rgba(255, 255, 255, 0.08)",
+                  borderRadius: "2.25rem",
+                  padding: "1.5rem",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  position: "relative",
+                  boxShadow:
+                    isOrderChanging && lastVotedCardIdRef.current === player.id
+                      ? lastVoteActionRef.current === "add"
+                        ? "0 0 30px rgba(168, 85, 247, 0.6), 0 12px 30px rgba(0,0,0,0.2)"
+                        : "0 0 30px rgba(255, 255, 255, 0.6), 0 12px 30px rgba(0,0,0,0.2)"
+                      : "0 12px 30px rgba(0,0,0,0.15)",
+                  backdropFilter: "blur(8px)",
+                  filter:
+                    isOrderChanging && lastVotedCardIdRef.current === player.id
+                      ? "brightness(1.3)"
+                      : "none",
+                  transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
                 }}
               >
                 {/* RANK TROPHY OR SHADOW BADGE */}
-                <div style={{
-                  position: 'absolute',
-                  top: '-15px',
-                  left: '20px',
-                  background: 'rgba(255, 255, 255, 0.15)',
-                  border: '1px solid rgba(168, 85, 247, 0.4)',
-                  color: '#a855f7',
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: '50%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontWeight: 900,
-                  fontSize: '1.1rem',
-                  zIndex: 10,
-                  boxShadow: '0 4px 10px rgba(0,0,0,0.3)',
-                  backdropFilter: 'blur(10px)'
-                }}>
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "-15px",
+                    left: "20px",
+                    background: "rgba(255, 255, 255, 0.15)",
+                    border: "1px solid rgba(168, 85, 247, 0.4)",
+                    color: "#a855f7",
+                    width: "36px",
+                    height: "36px",
+                    borderRadius: "50%",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontWeight: 900,
+                    fontSize: "1.1rem",
+                    zIndex: 10,
+                    boxShadow: "0 4px 10px rgba(0,0,0,0.3)",
+                    backdropFilter: "blur(10px)",
+                  }}
+                >
                   {absoluteRanks.get(player.id)}º
                 </div>
 
-
-
                 {/* THE COLLECTIBLE STICKER COMPONENT */}
-                <div style={{
-                  width: '130px',
-                  height: '180px',
-                  margin: '1rem 0 1.25rem 0'
-                }}>
-                  <Sticker card={{ ...player, stars: player.totalVotes } as any} disabled={true} />
+                <div
+                  style={{
+                    width: "130px",
+                    height: "180px",
+                    margin: "1rem 0 1.25rem 0",
+                  }}
+                >
+                  <Sticker
+                    card={{ ...player, stars: player.totalVotes } as any}
+                    disabled={true}
+                  />
                 </div>
 
                 {/* PLAYER INFO PANEL */}
-                <div style={{ width: '100%', textAlign: 'center', marginBottom: '1.25rem' }}>
-                  <h4 style={{ margin: '0 0 0.25rem 0', fontSize: '1.15rem', fontWeight: 900, letterSpacing: '0.05em' }}>
+                <div
+                  style={{
+                    width: "100%",
+                    textAlign: "center",
+                    marginBottom: "1.25rem",
+                  }}
+                >
+                  <h4
+                    style={{
+                      margin: "0 0 0.25rem 0",
+                      fontSize: "1.15rem",
+                      fontWeight: 900,
+                      letterSpacing: "0.05em",
+                    }}
+                  >
                     {player.name}
                   </h4>
-                  <p style={{ margin: 0, fontSize: '0.75rem', opacity: 0.6, textTransform: 'uppercase' }}>
-                    {t(`country_${player.country.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase()}`)} · {player.club}
+                  <p
+                    style={{
+                      margin: 0,
+                      fontSize: "0.75rem",
+                      opacity: 0.6,
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    {t(
+                      `country_${player.country
+                        .normalize("NFD")
+                        .replace(/[\u0300-\u036f]/g, "")
+                        .toLowerCase()}`,
+                    )}{" "}
+                    · {player.club}
                   </p>
                 </div>
 
-
-
                 {/* VOTING ROW BUTTONS */}
                 {user ? (
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    background: 'rgba(15, 10, 25, 0.6)',
-                    border: '1px solid rgba(255,255,255,0.06)',
-                    borderRadius: '1.25rem',
-                    padding: '4px',
-                    width: '100%',
-                    boxSizing: 'border-box'
-                  }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      background: "rgba(15, 10, 25, 0.6)",
+                      border: "1px solid rgba(255,255,255,0.06)",
+                      borderRadius: "1.25rem",
+                      padding: "4px",
+                      width: "100%",
+                      boxSizing: "border-box",
+                    }}
+                  >
                     {/* Subtract Vote */}
                     <button
                       onClick={() => handleSubVote(player.id)}
                       disabled={player.myActiveVotes <= 0 || isOrderChanging}
                       style={{
-                        background: 'transparent',
-                        border: 'none',
-                        color: (player.myActiveVotes > 0 && !isOrderChanging)
-                          ? (hasCardUnsavedChanges ? '#ffb800' : '#a855f7')
-                          : 'rgba(255,255,255,0.15)',
-                        width: '38px',
-                        height: '38px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        cursor: (player.myActiveVotes > 0 && !isOrderChanging) ? 'pointer' : 'default',
-                        borderRadius: '0.85rem'
+                        background: "transparent",
+                        border: "none",
+                        color:
+                          player.myActiveVotes > 0 && !isOrderChanging
+                            ? hasCardUnsavedChanges
+                              ? "#ffb800"
+                              : "#a855f7"
+                            : "rgba(255,255,255,0.15)",
+                        width: "38px",
+                        height: "38px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        cursor:
+                          player.myActiveVotes > 0 && !isOrderChanging
+                            ? "pointer"
+                            : "default",
+                        borderRadius: "0.85rem",
                       }}
-                      className={(player.myActiveVotes > 0 && !isOrderChanging) ? "btn-hover-dark" : ""}
+                      className={
+                        player.myActiveVotes > 0 && !isOrderChanging
+                          ? "btn-hover-dark"
+                          : ""
+                      }
                     >
                       <Minus size={18} />
                     </button>
 
                     {/* Active Vote Display */}
-                    <div style={{
-                      flex: 1,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}>
-                      <span style={{
-                        fontWeight: 950,
-                        fontSize: '1.1rem',
-                        lineHeight: '1',
-                        color: player.myActiveVotes > 0
-                          ? (hasCardUnsavedChanges ? '#ffb800' : '#a855f7')
-                          : '#ffffff',
-                        marginBottom: '2px'
-                      }}>
+                    <div
+                      style={{
+                        flex: 1,
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontWeight: 950,
+                          fontSize: "1.1rem",
+                          lineHeight: "1",
+                          color:
+                            player.myActiveVotes > 0
+                              ? hasCardUnsavedChanges
+                                ? "#ffb800"
+                                : "#a855f7"
+                              : "#ffffff",
+                          marginBottom: "2px",
+                        }}
+                      >
                         {player.myActiveVotes}
                       </span>
-                      <span style={{ fontSize: '0.55rem', opacity: 0.6, textTransform: 'uppercase', color: '#fff', letterSpacing: '0.05em' }}>
+                      <span
+                        style={{
+                          fontSize: "0.55rem",
+                          opacity: 0.6,
+                          textTransform: "uppercase",
+                          color: "#fff",
+                          letterSpacing: "0.05em",
+                        }}
+                      >
                         {t("personal_votes")}
                       </span>
                     </div>
@@ -1328,20 +1777,30 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
                       onClick={() => handleAddVote(player.id)}
                       disabled={availableVotes <= 0 || isOrderChanging}
                       style={{
-                        background: 'transparent',
-                        border: 'none',
-                        color: (availableVotes > 0 && !isOrderChanging)
-                          ? (hasCardUnsavedChanges ? '#ffb800' : '#a855f7')
-                          : 'rgba(255,255,255,0.15)',
-                        width: '38px',
-                        height: '38px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        cursor: (availableVotes > 0 && !isOrderChanging) ? 'pointer' : 'default',
-                        borderRadius: '0.85rem'
+                        background: "transparent",
+                        border: "none",
+                        color:
+                          availableVotes > 0 && !isOrderChanging
+                            ? hasCardUnsavedChanges
+                              ? "#ffb800"
+                              : "#a855f7"
+                            : "rgba(255,255,255,0.15)",
+                        width: "38px",
+                        height: "38px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        cursor:
+                          availableVotes > 0 && !isOrderChanging
+                            ? "pointer"
+                            : "default",
+                        borderRadius: "0.85rem",
                       }}
-                      className={(availableVotes > 0 && !isOrderChanging) ? "btn-hover-dark" : ""}
+                      className={
+                        availableVotes > 0 && !isOrderChanging
+                          ? "btn-hover-dark"
+                          : ""
+                      }
                     >
                       <Plus size={18} />
                     </button>
@@ -1350,24 +1809,24 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
                   <button
                     onClick={handleAuth}
                     style={{
-                      background: 'rgba(255,255,255,0.05)',
-                      border: '1px solid rgba(255,255,255,0.1)',
-                      borderRadius: '1.25rem',
-                      padding: '10px 0',
-                      width: '100%',
-                      color: 'rgba(255,255,255,0.6)',
-                      fontSize: '0.8rem',
+                      background: "rgba(255,255,255,0.05)",
+                      border: "1px solid rgba(255,255,255,0.1)",
+                      borderRadius: "1.25rem",
+                      padding: "10px 0",
+                      width: "100%",
+                      color: "rgba(255,255,255,0.6)",
+                      fontSize: "0.8rem",
                       fontWeight: 800,
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '6px'
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "6px",
                     }}
                     className="btn-hover-dark"
                   >
                     <Lock size={14} />
-                    {t('login_to_vote_btn')}
+                    {t("login_to_vote_btn")}
                   </button>
                 )}
               </motion.div>
@@ -1378,11 +1837,19 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
 
       {/* Infinite Scroll Target & Loader */}
       {filteredPlayers.length > 0 && visibleCount < filteredPlayers.length && (
-        <div ref={observerTarget} style={{ display: 'flex', justifyContent: 'center', padding: '3rem 0', width: '100%' }}>
-          <motion.div 
-            animate={{ rotate: 360 }} 
+        <div
+          ref={observerTarget}
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            padding: "3rem 0",
+            width: "100%",
+          }}
+        >
+          <motion.div
+            animate={{ rotate: 360 }}
             transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-            style={{ filter: 'drop-shadow(0 0 12px rgba(255, 223, 0, 0.4))' }}
+            style={{ filter: "drop-shadow(0 0 12px rgba(255, 223, 0, 0.4))" }}
           >
             <Loader2 size={48} color="#ffdf00" />
           </motion.div>
@@ -1400,15 +1867,15 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             style={{
-              position: 'fixed',
+              position: "fixed",
               inset: 0,
-              background: 'rgba(0, 0, 0, 0.5)',
-              backdropFilter: 'blur(5px)',
+              background: "rgba(0, 0, 0, 0.5)",
+              backdropFilter: "blur(5px)",
               zIndex: 2000,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '1.5rem'
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "1.5rem",
             }}
           >
             <motion.div
@@ -1416,70 +1883,98 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.9, y: 20 }}
               style={{
-                background: 'rgba(255, 255, 255, 0.05)',
-                border: '1.5px solid rgba(255, 255, 255, 0.1)',
-                borderRadius: '2rem',
-                padding: '2.5rem 2rem',
-                width: '100%',
-                maxWidth: '480px',
-                textAlign: 'center',
-                boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: '1.5rem'
+                background: "rgba(255, 255, 255, 0.05)",
+                border: "1.5px solid rgba(255, 255, 255, 0.1)",
+                borderRadius: "2rem",
+                padding: "2.5rem 2rem",
+                width: "100%",
+                maxWidth: "480px",
+                textAlign: "center",
+                boxShadow: "0 20px 50px rgba(0,0,0,0.5)",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: "1.5rem",
               }}
             >
               {/* Warning Icon inside a red glowing circle */}
-              <div style={{
-                width: '64px',
-                height: '64px',
-                borderRadius: '50%',
-                background: 'rgba(239, 68, 68, 0.15)',
-                border: '2.5px solid #ef4444',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 0 20px rgba(239, 68, 68, 0.45)',
-                color: '#ef4444',
-                fontSize: '2rem'
-              }}>
+              <div
+                style={{
+                  width: "64px",
+                  height: "64px",
+                  borderRadius: "50%",
+                  background: "rgba(239, 68, 68, 0.15)",
+                  border: "2.5px solid #ef4444",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  boxShadow: "0 0 20px rgba(239, 68, 68, 0.45)",
+                  color: "#ef4444",
+                  fontSize: "2rem",
+                }}
+              >
                 ⚠️
               </div>
 
-              <h3 className="text-display" style={{ fontSize: '1.5rem', margin: 0, color: '#ef4444', letterSpacing: '0.05em' }}>
-                {t('exit_without_saving')}
+              <h3
+                className="text-display"
+                style={{
+                  fontSize: "1.5rem",
+                  margin: 0,
+                  color: "#ef4444",
+                  letterSpacing: "0.05em",
+                }}
+              >
+                {t("exit_without_saving")}
               </h3>
 
-              <p style={{ margin: 0, fontSize: '0.95rem', opacity: 0.8, lineHeight: '1.5', color: '#fff' }}>
-                {t('unsaved_votes_warning')}
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: "0.95rem",
+                  opacity: 0.8,
+                  lineHeight: "1.5",
+                  color: "#fff",
+                }}
+              >
+                {t("unsaved_votes_warning")}
               </p>
 
               {/* Action Buttons */}
-              <div style={{ display: 'flex', gap: '1rem', width: '100%', marginTop: '0.5rem' }}>
+              <div
+                style={{
+                  display: "flex",
+                  gap: "1rem",
+                  width: "100%",
+                  marginTop: "0.5rem",
+                }}
+              >
                 <button
                   onClick={() => {
                     setMyVotes(lastSavedVotesRef.current);
-                    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(lastSavedVotesRef.current));
+                    localStorage.setItem(
+                      LOCAL_STORAGE_KEY,
+                      JSON.stringify(lastSavedVotesRef.current),
+                    );
                     setShowUnsavedModal(false);
                     onBack();
                   }}
                   className="btn-hover-dark"
                   style={{
                     flex: 1,
-                    height: '46px',
-                    borderRadius: '1.25rem',
-                    background: 'rgba(239, 68, 68, 0.2)',
-                    border: '1px solid #ef4444',
-                    color: '#ef4444',
+                    height: "46px",
+                    borderRadius: "1.25rem",
+                    background: "rgba(239, 68, 68, 0.2)",
+                    border: "1px solid #ef4444",
+                    color: "#ef4444",
                     fontWeight: 900,
-                    cursor: 'pointer',
-                    fontSize: '0.9rem',
-                    boxShadow: '4px 4px 0px #000',
-                    transition: 'all 0.2s'
+                    cursor: "pointer",
+                    fontSize: "0.9rem",
+                    boxShadow: "4px 4px 0px #000",
+                    transition: "all 0.2s",
                   }}
                 >
-                  {t('yes_exit')}
+                  {t("yes_exit")}
                 </button>
 
                 <button
@@ -1487,19 +1982,19 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
                   className="btn-hover-dark"
                   style={{
                     flex: 1,
-                    height: '46px',
-                    borderRadius: '1.25rem',
-                    background: 'linear-gradient(to right, #a855f7, #7c3aed)',
-                    border: 'none',
-                    color: '#fff',
+                    height: "46px",
+                    borderRadius: "1.25rem",
+                    background: "linear-gradient(to right, #a855f7, #7c3aed)",
+                    border: "none",
+                    color: "#fff",
                     fontWeight: 900,
-                    cursor: 'pointer',
-                    fontSize: '0.9rem',
-                    boxShadow: '4px 4px 0px #000',
-                    transition: 'all 0.2s'
+                    cursor: "pointer",
+                    fontSize: "0.9rem",
+                    boxShadow: "4px 4px 0px #000",
+                    transition: "all 0.2s",
                   }}
                 >
-                  {t('no_stay')}
+                  {t("no_stay")}
                 </button>
               </div>
             </motion.div>
@@ -1515,15 +2010,15 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             style={{
-              position: 'fixed',
+              position: "fixed",
               inset: 0,
-              background: 'rgba(0, 0, 0, 0.5)',
-              backdropFilter: 'blur(5px)',
+              background: "rgba(0, 0, 0, 0.5)",
+              backdropFilter: "blur(5px)",
               zIndex: 2000,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '1.5rem'
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              padding: "1.5rem",
             }}
           >
             <motion.div
@@ -1531,32 +2026,46 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.9, y: 20 }}
               style={{
-                background: 'rgba(15, 10, 25, 0.95)',
-                border: '1px solid rgba(255, 184, 0, 0.4)',
-                borderRadius: '1.5rem',
-                padding: '2rem',
-                width: '100%',
-                maxWidth: '400px',
-                textAlign: 'center',
-                boxShadow: '0 20px 40px rgba(0,0,0,0.5), inset 0 0 20px rgba(255, 184, 0, 0.05)'
+                background: "rgba(15, 10, 25, 0.95)",
+                border: "1px solid rgba(255, 184, 0, 0.4)",
+                borderRadius: "1.5rem",
+                padding: "2rem",
+                width: "100%",
+                maxWidth: "400px",
+                textAlign: "center",
+                boxShadow:
+                  "0 20px 40px rgba(0,0,0,0.5), inset 0 0 20px rgba(255, 184, 0, 0.05)",
               }}
             >
-              <h3 style={{ margin: '0 0 1rem 0', color: '#ffb800', fontSize: '1.25rem' }}>
+              <h3
+                style={{
+                  margin: "0 0 1rem 0",
+                  color: "#ffb800",
+                  fontSize: "1.25rem",
+                }}
+              >
                 {t("vote_limit_title")}
               </h3>
-              <p style={{ margin: '0 0 1.5rem 0', opacity: 0.8, fontSize: '0.9rem', lineHeight: 1.5 }}>
+              <p
+                style={{
+                  margin: "0 0 1.5rem 0",
+                  opacity: 0.8,
+                  fontSize: "0.9rem",
+                  lineHeight: 1.5,
+                }}
+              >
                 {t("vote_limit_desc")}
               </p>
               <button
                 onClick={() => setShowMaxVotesModal(false)}
                 style={{
-                  background: 'rgba(255, 255, 255, 0.1)',
-                  border: 'none',
-                  color: '#fff',
-                  padding: '0.75rem 2rem',
-                  borderRadius: '1rem',
+                  background: "rgba(255, 255, 255, 0.1)",
+                  border: "none",
+                  color: "#fff",
+                  padding: "0.75rem 2rem",
+                  borderRadius: "1rem",
                   fontWeight: 800,
-                  cursor: 'pointer'
+                  cursor: "pointer",
                 }}
               >
                 {t("understood")}

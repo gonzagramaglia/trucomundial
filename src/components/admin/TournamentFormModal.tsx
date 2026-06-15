@@ -14,7 +14,6 @@ interface TournamentFormModalProps {
   tournament: any | null;
   creatorName: string;
   onSuccess: () => void;
-  
 }
 
 export const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
@@ -27,7 +26,11 @@ export const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
   const { t } = useTranslation();
   const [formError, setFormError] = useState("");
   const [countrySearch, setCountrySearch] = useState("");
-  const cleanString = (str: string) => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  const cleanString = (str: string) =>
+    str
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase();
 
   const {
     handleSubmit,
@@ -63,7 +66,46 @@ export const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
         reset({
           ...tournament,
           prize: normalizeTournamentPrizes(tournament.prize),
-          allowed_teams: tournament.allowed_teams || ["Alemania","Arabia Saudita","Argelia","Argentina","Austria","Bélgica","Bosnia y Herz","Brasil","Cabo Verde","Canadá","Colombia","Corea del Sur","Costa de Marfil","Croacia","Ecuador","Egipto","Escocia","España","Francia","Inglaterra","Japón","Jordania","Marruecos","México","Noruega","Nueva Zelanda","Países Bajos","Panamá","Paraguay","Portugal","Qatar","República Checa","Sudáfrica","Suecia","Suiza","Uruguay","USA"],
+          allowed_teams: tournament.allowed_teams || [
+            "Alemania",
+            "Arabia Saudita",
+            "Argelia",
+            "Argentina",
+            "Austria",
+            "Bélgica",
+            "Bosnia y Herz",
+            "Brasil",
+            "Cabo Verde",
+            "Canadá",
+            "Colombia",
+            "Corea del Sur",
+            "Costa de Marfil",
+            "Croacia",
+            "Ecuador",
+            "Egipto",
+            "Senegal",
+            "Escocia",
+            "España",
+            "Francia",
+            "Inglaterra",
+            "Japón",
+            "Jordania",
+            "Marruecos",
+            "México",
+            "Noruega",
+            "Nueva Zelanda",
+            "Países Bajos",
+            "Panamá",
+            "Paraguay",
+            "Portugal",
+            "Qatar",
+            "República Checa",
+            "Sudáfrica",
+            "Suecia",
+            "Suiza",
+            "Uruguay",
+            "USA",
+          ],
         });
       } else {
         const now = new Date();
@@ -85,7 +127,46 @@ export const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
           visibility: "public",
           code_type: "single",
           codes: [],
-          allowed_teams: ["Alemania","Arabia Saudita","Argelia","Argentina","Austria","Bélgica","Bosnia y Herz","Brasil","Cabo Verde","Canadá","Colombia","Corea del Sur","Costa de Marfil","Croacia","Ecuador","Egipto","Escocia","España","Francia","Inglaterra","Japón","Jordania","Marruecos","México","Noruega","Nueva Zelanda","Países Bajos","Panamá","Paraguay","Portugal","Qatar","República Checa","Sudáfrica","Suecia","Suiza","Uruguay","USA"],
+          allowed_teams: [
+            "Alemania",
+            "Arabia Saudita",
+            "Argelia",
+            "Argentina",
+            "Austria",
+            "Bélgica",
+            "Bosnia y Herz",
+            "Brasil",
+            "Cabo Verde",
+            "Canadá",
+            "Colombia",
+            "Corea del Sur",
+            "Costa de Marfil",
+            "Croacia",
+            "Ecuador",
+            "Egipto",
+            "Senegal",
+            "Escocia",
+            "España",
+            "Francia",
+            "Inglaterra",
+            "Japón",
+            "Jordania",
+            "Marruecos",
+            "México",
+            "Noruega",
+            "Nueva Zelanda",
+            "Países Bajos",
+            "Panamá",
+            "Paraguay",
+            "Portugal",
+            "Qatar",
+            "República Checa",
+            "Sudáfrica",
+            "Suecia",
+            "Suiza",
+            "Uruguay",
+            "USA",
+          ],
         });
       }
     }
@@ -124,7 +205,9 @@ export const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
           ...payload,
           is_approved: false,
         };
-        const { error } = await supabase.from("tournaments").insert([insertPayload]);
+        const { error } = await supabase
+          .from("tournaments")
+          .insert([insertPayload]);
 
         if (error) throw error;
       }
@@ -256,7 +339,9 @@ export const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
                 <input
                   type="number"
                   value={
-                    formData.min_participants === 0 ? "" : formData.min_participants
+                    formData.min_participants === 0
+                      ? ""
+                      : formData.min_participants
                   }
                   onChange={(e) => {
                     const val = parseInt(e.target.value) || 0;
@@ -314,7 +399,8 @@ export const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
                     const nextMax = val > 32 ? 32 : val;
                     updateFormData({
                       max_participants: nextMax,
-                      min_participants: currentMin > nextMax ? nextMax : currentMin,
+                      min_participants:
+                        currentMin > nextMax ? nextMax : currentMin,
                       prize: (formData.prize || []).slice(0, nextMax),
                     });
                   }}
@@ -622,26 +708,42 @@ export const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
               >
                 Selecciones del Torneo (Elegí de 2 a 4)
               </label>
-              <div style={{ position: 'relative', width: '85%', margin: '0 auto 0.75rem auto' }}>
-                <Search size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af', pointerEvents: 'none' }} />
+              <div
+                style={{
+                  position: "relative",
+                  width: "85%",
+                  margin: "0 auto 0.75rem auto",
+                }}
+              >
+                <Search
+                  size={18}
+                  style={{
+                    position: "absolute",
+                    left: "1rem",
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    color: "#9ca3af",
+                    pointerEvents: "none",
+                  }}
+                />
                 <input
                   type="text"
                   placeholder="Buscar país..."
                   value={countrySearch}
                   onChange={(e) => setCountrySearch(e.target.value)}
                   style={{
-                    display: 'block',
-                    height: '42px',
-                    padding: '0 1.25rem 0 2.5rem',
-                    borderRadius: '1.1rem',
-                    background: 'rgba(255, 255, 255, 0.05)',
-                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                    color: '#fff',
-                    fontSize: '0.9rem',
-                    outline: 'none',
-                    width: '100%',
-                    boxSizing: 'border-box',
-                    margin: 0
+                    display: "block",
+                    height: "42px",
+                    padding: "0 1.25rem 0 2.5rem",
+                    borderRadius: "1.1rem",
+                    background: "rgba(255, 255, 255, 0.05)",
+                    border: "1px solid rgba(255, 255, 255, 0.1)",
+                    color: "#fff",
+                    fontSize: "0.9rem",
+                    outline: "none",
+                    width: "100%",
+                    boxSizing: "border-box",
+                    margin: 0,
                   }}
                 />
               </div>
@@ -654,87 +756,101 @@ export const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
                 }}
               >
                 {[
-                  { id: 'Argelia', flag: '🇩🇿', code: 'ALG' },
-                  { id: 'Argentina', flag: '🇦🇷', code: 'ARG' },
-                  { id: 'Austria', flag: '🇦🇹', code: 'AUT' },
-                  { id: 'Bélgica', flag: '🇧🇪', code: 'BEL' },
-                  { id: 'Bosnia y Herz', flag: '🇧🇦', code: 'BIH' },
-                  { id: 'Brasil', flag: '🇧🇷', code: 'BRA' },
-                  { id: 'Canadá', flag: '🇨🇦', code: 'CAN' },
-                  { id: 'Colombia', flag: '🇨🇴', code: 'COL' },
-                  { id: 'Cabo Verde', flag: '🇨🇻', code: 'CPV' },
-                  { id: 'Croacia', flag: '🇭🇷', code: 'CRO' },
-                  { id: 'República Checa', flag: '🇨🇿', code: 'CZE' },
-                  { id: 'Ecuador', flag: '🇪🇨', code: 'ECU' },
-                  { id: 'Egipto', flag: '🇪🇬', code: 'EGY' },
-                  { id: 'Inglaterra', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', code: 'ENG' },
-                  { id: 'Irán', flag: '🇮🇷', code: 'IRN' },
-                  { id: 'España', flag: '🇪🇸', code: 'ESP' },
-                  { id: 'Francia', flag: '🇫🇷', code: 'FRA' },
-                  { id: 'Alemania', flag: '🇩🇪', code: 'GER' },
-                  { id: 'Jordania', flag: '🇯🇴', code: 'JOR' },
-                  { id: 'Japón', flag: '🇯🇵', code: 'JPN' },
-                  { id: 'Corea del Sur', flag: '🇰🇷', code: 'KOR' },
-                  { id: 'Arabia Saudita', flag: '🇸🇦', code: 'KSA' },
-                  { id: 'Marruecos', flag: '🇲🇦', code: 'MAR' },
-                  { id: 'México', flag: '🇲🇽', code: 'MEX' },
-                  { id: 'Países Bajos', flag: '🇳🇱', code: 'NED' },
-                  { id: 'Noruega', flag: '🇳🇴', code: 'NOR' },
-                  { id: 'Nueva Zelanda', flag: '🇳🇿', code: 'NZL' },
-                  { id: 'Panamá', flag: '🇵🇦', code: 'PAN' },
-                  { id: 'Paraguay', flag: '🇵🇾', code: 'PAR' },
-                  { id: 'Portugal', flag: '🇵🇹', code: 'POR' },
-                  { id: 'Qatar', flag: '🇶🇦', code: 'QAT' },
-                  { id: 'Sudáfrica', flag: '🇿🇦', code: 'RSA' },
-                  { id: 'Escocia', flag: '🏴󠁧󠁢󠁳󠁣󠁴󠁿', code: 'SCO' },
-                  { id: 'Suiza', flag: '🇨🇭', code: 'SUI' },
-                  { id: 'Suecia', flag: '🇸🇪', code: 'SWE' },
-                  { id: 'Uruguay', flag: '🇺🇾', code: 'URU' },
-                  { id: 'USA', flag: '🇺🇸', code: 'USA' },
-                ].filter(c => {
-                  const q = cleanString(countrySearch);
-                  return cleanString(c.id).includes(q) || cleanString(c.code).includes(q);
-                }).map((team) => {
-                  const allowedTeams = formData.allowed_teams || [];
-                  const isChecked = allowedTeams.includes(team.id);
-                  const isLimitReached = allowedTeams.length >= 4;
-                  const isDisabled = !isChecked && isLimitReached;
+                  { id: "Argelia", flag: "🇩🇿", code: "ALG" },
+                  { id: "Argentina", flag: "🇦🇷", code: "ARG" },
+                  { id: "Austria", flag: "🇦🇹", code: "AUT" },
+                  { id: "Bélgica", flag: "🇧🇪", code: "BEL" },
+                  { id: "Bosnia y Herz", flag: "🇧🇦", code: "BIH" },
+                  { id: "Brasil", flag: "🇧🇷", code: "BRA" },
+                  { id: "Canadá", flag: "🇨🇦", code: "CAN" },
+                  { id: "Colombia", flag: "🇨🇴", code: "COL" },
+                  { id: "Cabo Verde", flag: "🇨🇻", code: "CPV" },
+                  { id: "Croacia", flag: "🇭🇷", code: "CRO" },
+                  { id: "República Checa", flag: "🇨🇿", code: "CZE" },
+                  { id: "Ecuador", flag: "🇪🇨", code: "ECU" },
+                  { id: "Egipto", flag: "🇪🇬", code: "EGY" },
+                  { id: "Inglaterra", flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", code: "ENG" },
+                  { id: "España", flag: "🇪🇸", code: "ESP" },
+                  { id: "Francia", flag: "🇫🇷", code: "FRA" },
+                  { id: "Alemania", flag: "🇩🇪", code: "GER" },
+                  { id: "Irán", flag: "🇮🇷", code: "IRN" },
+                  { id: "Jordania", flag: "🇯🇴", code: "JOR" },
+                  { id: "Japón", flag: "🇯🇵", code: "JPN" },
+                  { id: "Corea del Sur", flag: "🇰🇷", code: "KOR" },
+                  { id: "Arabia Saudita", flag: "🇸🇦", code: "KSA" },
+                  { id: "Marruecos", flag: "🇲🇦", code: "MAR" },
+                  { id: "México", flag: "🇲🇽", code: "MEX" },
+                  { id: "Países Bajos", flag: "🇳🇱", code: "NED" },
+                  { id: "Noruega", flag: "🇳🇴", code: "NOR" },
+                  { id: "Nueva Zelanda", flag: "🇳🇿", code: "NZL" },
+                  { id: "Panamá", flag: "🇵🇦", code: "PAN" },
+                  { id: "Paraguay", flag: "🇵🇾", code: "PAR" },
+                  { id: "Portugal", flag: "🇵🇹", code: "POR" },
+                  { id: "Qatar", flag: "🇶🇦", code: "QAT" },
+                  { id: "Sudáfrica", flag: "🇿🇦", code: "RSA" },
+                  { id: "Escocia", flag: "🏴󠁧󠁢󠁳󠁣󠁴󠁿", code: "SCO" },
+                  { id: "Senegal", flag: "🇸🇳", code: "SEN" },
+                  { id: "Suiza", flag: "🇨🇭", code: "SUI" },
+                  { id: "Suecia", flag: "🇸🇪", code: "SWE" },
+                  { id: "Uruguay", flag: "🇺🇾", code: "URU" },
+                  { id: "USA", flag: "🇺🇸", code: "USA" },
+                ]
+                  .filter((c) => {
+                    const q = cleanString(countrySearch);
+                    return (
+                      cleanString(c.id).includes(q) ||
+                      cleanString(c.code).includes(q)
+                    );
+                  })
+                  .map((team) => {
+                    const allowedTeams = formData.allowed_teams || [];
+                    const isChecked = allowedTeams.includes(team.id);
+                    const isLimitReached = allowedTeams.length >= 4;
+                    const isDisabled = !isChecked && isLimitReached;
 
-                  return (
-                    <button
-                      key={team.id}
-                      type="button"
-                      disabled={isDisabled}
-                      onClick={() => {
-                        const nextAllowed = isChecked
-                          ? allowedTeams.filter(t => t !== team.id)
-                          : [...allowedTeams, team.id];
-                        updateFormData({ allowed_teams: nextAllowed });
-                      }}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "0.5rem",
-                        padding: "0.5rem 1rem",
-                        background: isChecked ? "rgba(255, 120, 0, 0.15)" : "rgba(0,0,0,0.3)",
-                        border: isChecked
-                          ? "2px solid #ff7800"
-                          : "1px solid rgba(255,255,255,0.2)",
-                        borderRadius: "1rem",
-                        color: "#fff",
-                        cursor: isDisabled ? "not-allowed" : "pointer",
-                        opacity: isDisabled ? 0.5 : 1,
-                        fontSize: "0.9rem",
-                        fontWeight: isChecked ? 900 : 600,
-                        transition: "all 0.2s ease",
-                      }}
-                    >
-                      <span>{team.flag}</span>
-                      <span>{team.code}</span>
-                      {isChecked && <span style={{ color: "#ff7800", marginLeft: "0.25rem" }}>✓</span>}
-                    </button>
-                  );
-                })}
+                    return (
+                      <button
+                        key={team.id}
+                        type="button"
+                        disabled={isDisabled}
+                        onClick={() => {
+                          const nextAllowed = isChecked
+                            ? allowedTeams.filter((t) => t !== team.id)
+                            : [...allowedTeams, team.id];
+                          updateFormData({ allowed_teams: nextAllowed });
+                        }}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "0.5rem",
+                          padding: "0.5rem 1rem",
+                          background: isChecked
+                            ? "rgba(255, 120, 0, 0.15)"
+                            : "rgba(0,0,0,0.3)",
+                          border: isChecked
+                            ? "2px solid #ff7800"
+                            : "1px solid rgba(255,255,255,0.2)",
+                          borderRadius: "1rem",
+                          color: "#fff",
+                          cursor: isDisabled ? "not-allowed" : "pointer",
+                          opacity: isDisabled ? 0.5 : 1,
+                          fontSize: "0.9rem",
+                          fontWeight: isChecked ? 900 : 600,
+                          transition: "all 0.2s ease",
+                        }}
+                      >
+                        <span>{team.flag}</span>
+                        <span>{team.code}</span>
+                        {isChecked && (
+                          <span
+                            style={{ color: "#ff7800", marginLeft: "0.25rem" }}
+                          >
+                            ✓
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
               </div>
               {errors.allowed_teams && (
                 <span
