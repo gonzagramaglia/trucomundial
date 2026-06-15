@@ -21,6 +21,7 @@ const FLAG_MAP: Record<string, string> = {
   "España": "🇪🇸",
   "Francia": "🇫🇷",
   "Alemania": "🇩🇪",
+  "Ghana": "🇬🇭",
   "Inglaterra": "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
   "Japón": "🇯🇵",
   "Jordania": "🇯🇴",

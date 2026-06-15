@@ -68,6 +68,7 @@ export const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
           prize: normalizeTournamentPrizes(tournament.prize),
           allowed_teams: tournament.allowed_teams || [
             "Alemania",
+            "Ghana",
             "Arabia Saudita",
             "Argelia",
             "Argentina",
@@ -129,6 +130,7 @@ export const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
           codes: [],
           allowed_teams: [
             "Alemania",
+            "Ghana",
             "Arabia Saudita",
             "Argelia",
             "Argentina",

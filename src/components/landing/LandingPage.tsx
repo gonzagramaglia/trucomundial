@@ -750,6 +750,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
       let allowed = [
         "Alemania",
+        "Ghana",
         "Arabia Saudita",
         "Argelia",
         "Argentina",
@@ -1722,6 +1723,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   { id: "España", flag: "🇪🇸", code: "ESP" },
                   { id: "Francia", flag: "🇫🇷", code: "FRA" },
                   { id: "Alemania", code: "GER", flag: "🇩🇪" },
+                  { id: "Ghana", flag: "🇬🇭", code: "GHA" },
                   { id: "Irán", flag: "🇮🇷", code: "IRN" },
                   { id: "Iraq", flag: "🇮🇶", code: "IRQ" },
                   { id: "Jordania", flag: "🇯🇴", code: "JOR" },

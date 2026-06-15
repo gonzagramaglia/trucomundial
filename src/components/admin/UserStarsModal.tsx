@@ -31,6 +31,7 @@ const flagMap: Record<string, string> = {
   'Escocia': '🏴󠁧󠁢󠁳󠁣󠁴󠁿',
   'España': '🇪🇸',
   'Francia': '🇫🇷',
+  'Ghana': '🇬🇭',
   'Inglaterra': '🏴󠁧󠁢󠁥󠁮󠁧󠁿',
   'Iraq': '🇮🇶',
   'Japón': '🇯🇵',
