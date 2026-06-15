@@ -59,6 +59,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   const [isSelectingPoints, setIsSelectingPoints] = useState(false);
   const [isSelectingTeams, setIsSelectingTeams] = useState(false);
   const [selectedPoints, setSelectedPoints] = useState<15 | 30>(15);
+  const [countrySearch, setCountrySearch] = useState('');
+  const cleanString = (str: string) => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
   const [selectedTeams, setSelectedTeams] = useState<string[]>(() => {
     const saved = localStorage.getItem('truco_selected_teams');
     if (saved) {
@@ -697,7 +699,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         .eq("match_code", matchCode)
         .maybeSingle();
 
-      let allowed = ["Argelia","Argentina","Austria","Bélgica","Bosnia y Herz","Brasil","Canadá","Colombia","Croacia","República Checa","Ecuador","Egipto","Inglaterra","España","Francia","Alemania","Japón","Corea del Sur","Marruecos","México","Países Bajos","Noruega","Nueva Zelanda","Panamá","Paraguay","Portugal","Qatar","Sudáfrica","Suiza","Suecia","Uruguay","USA"];
+      let allowed = ["Alemania","Arabia Saudita","Argelia","Argentina","Austria","Bélgica","Bosnia y Herz","Brasil","Canadá","Colombia","Croacia","República Checa","Ecuador","Egipto","Inglaterra","España","Francia","Japón","Corea del Sur","Marruecos","México","Países Bajos","Noruega","Nueva Zelanda","Panamá","Paraguay","Portugal","Qatar","Sudáfrica","Suiza","Suecia","Uruguay","USA"];
       if (mData && mData.tournament_id) {
         const { data: tData } = await supabase
           .from("tournaments")
@@ -1592,8 +1594,10 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   { id: 'España', flag: '🇪🇸', code: 'ESP' },
                   { id: 'Francia', flag: '🇫🇷', code: 'FRA' },
               { id: 'Alemania', code: 'GER', flag: '🇩🇪' },
+                  { id: 'Jordania', flag: '🇯🇴', code: 'JOR' },
                   { id: 'Japón', flag: '🇯🇵', code: 'JPN' },
                   { id: 'Corea del Sur', flag: '🇰🇷', code: 'KOR' },
+                  { id: 'Arabia Saudita', flag: '🇸🇦', code: 'KSA' },
                   { id: 'Marruecos', flag: '🇲🇦', code: 'MAR' },
                   { id: 'México', flag: '🇲🇽', code: 'MEX' },
                   { id: 'Países Bajos', flag: '🇳🇱', code: 'NED' },
@@ -1611,8 +1615,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               { id: 'Uruguay', flag: '🇺🇾', code: 'URU' },
                   { id: 'USA', flag: '🇺🇸', code: 'USA' }
                 ];
+                
                 const pinnedTeams = ALL_TEAMS_LIST.filter(t => selectedTeams.includes(t.id));
-                const unpinnedTeams = ALL_TEAMS_LIST.filter(t => !selectedTeams.includes(t.id));
+                const unpinnedTeams = ALL_TEAMS_LIST.filter(t => !selectedTeams.includes(t.id)).filter(c => {
+                  const q = cleanString(countrySearch);
+                  return cleanString(c.id).includes(q) || cleanString(c.code).includes(q);
+                });
 
                 const renderTeamButton = (team: any) => {
                   const isChecked = selectedTeams.includes(team.id);
@@ -1665,18 +1673,40 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                       </div>
                     )}
 
+                    <input
+                      type="text"
+                      placeholder="🔍 Buscar país..."
+                      value={countrySearch}
+                      onChange={(e) => setCountrySearch(e.target.value)}
+                      style={{
+                        display: 'block',
+                        height: '42px',
+                        padding: '0 1.25rem',
+                        borderRadius: '1.1rem',
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        color: '#fff',
+                        fontSize: '0.9rem',
+                        outline: 'none',
+                        width: '85%',
+                        boxSizing: 'border-box',
+                        margin: '0 auto 0.75rem auto'
+                      }}
+                    />
+
                     {/* Unpinned Teams (Scrollable) */}
                     <div
                       className="white-scrollbar"
                       style={{
                         display: 'flex',
                         flexWrap: 'wrap',
+                        alignItems: 'flex-start',
+                        alignContent: 'flex-start',
                         overflowY: 'auto',
                         maxHeight: '22vh',
-                        minHeight: '120px',
                         gap: '0.6rem',
                         justifyContent: 'center',
-                        marginBottom: '1.5rem',
+                        marginBottom: '1rem',
                         padding: '0.5rem',
                         WebkitOverflowScrolling: 'touch',
                         borderTop: pinnedTeams.length > 0 ? '1px solid rgba(255,255,255,0.1)' : 'none',
@@ -1689,7 +1719,35 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 );
               })()}
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', alignItems: 'center' }}>
+              <div style={{ display: 'flex', flexDirection: 'row', gap: '0.75rem', width: '100%' }}>
+                <button
+                  onClick={() => {
+                    setIsSelectingTeams(false);
+                    setIsSelectingPoints(true);
+                  }}
+                  className="btn-hover-dark"
+                  style={{
+                    background: "rgba(255, 255, 255, 0.1)",
+                    border: "1px solid rgba(255, 255, 255, 0.2)",
+                    color: "white",
+                    height: "50px",
+                    borderRadius: "1rem",
+                    padding: "0 1.5rem",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "0.5rem",
+                    fontSize: "0.8rem",
+                    fontWeight: 900,
+                    cursor: "pointer",
+                    transition: "none",
+                    flexShrink: 0
+                  }}
+                >
+                  <ArrowLeft size={18} />
+                  {t("back")}
+                </button>
+
                 <button
                   disabled={selectedTeams.length !== 4}
                   onClick={() => {
@@ -1698,7 +1756,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   }}
                   className="btn-hover-dark"
                   style={{
-                    width: "100%",
+                    flex: 1,
                     height: "50px",
                     fontSize: "1.2rem",
                     fontWeight: 950,
@@ -1712,33 +1770,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   }}
                 >
                   {t("play_now")}
-                </button>
-
-                <button
-                  onClick={() => {
-                    setIsSelectingTeams(false);
-                    setIsSelectingPoints(true);
-                  }}
-                  className="btn-hover-dark"
-                  style={{
-                    background: "rgba(255, 255, 255, 0.1)",
-                    border: "1px solid rgba(255, 255, 255, 0.2)",
-                    color: "white",
-                    height: "40px",
-                    borderRadius: "1rem",
-                    padding: "0 1.5rem",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "0.5rem",
-                    fontSize: "0.8rem",
-                    fontWeight: 900,
-                    cursor: "pointer",
-                    transition: "none",
-                    marginTop: '1.25rem'
-                  }}
-                >
-                  <ArrowLeft size={18} />
-                  {t("back")}
                 </button>
               </div>
             </motion.div>

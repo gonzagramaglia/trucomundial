@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import type { Tournament, Registration } from "./types";
 
 const FLAG_MAP: Record<string, string> = {
+  "Arabia Saudita": "🇸🇦",
   "Argelia": "🇩🇿",
   "Argentina": "🇦🇷",
   "Austria": "🇦🇹",
@@ -21,6 +22,7 @@ const FLAG_MAP: Record<string, string> = {
   "Alemania": "🇩🇪",
   "Inglaterra": "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
   "Japón": "🇯🇵",
+  "Jordania": "🇯🇴",
   "Marruecos": "🇲🇦",
   "México": "🇲🇽",
   "Noruega": "🇳🇴",

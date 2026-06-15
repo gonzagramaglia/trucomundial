@@ -894,6 +894,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
           width: '100%'
         }}>
           {/* Nationality Filters (Pills) */}
+
           <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', flex: 1 }}>
             <button
               onClick={() => {
@@ -947,6 +948,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
             </button>
 
             {[
+              { id: 'Arabia Saudita', code: 'KSA', flag: '🇸🇦' },
               { id: 'Argelia', code: 'ALG', flag: '🇩🇿' },
               { id: 'Argentina', code: 'ARG', flag: '🇦🇷' },
               { id: 'Austria', code: 'AUT', flag: '🇦🇹' },
@@ -965,6 +967,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
               { id: 'Francia', code: 'FRA', flag: '🇫🇷' },
               { id: 'Alemania', code: 'GER', flag: '🇩🇪' },
               { id: 'Japón', code: 'JPN', flag: '🇯🇵' },
+              { id: 'Jordania', code: 'JOR', flag: '🇯🇴' },
               { id: 'Corea del Sur', code: 'KOR', flag: '🇰🇷' },
               { id: 'Marruecos', code: 'MAR', flag: '🇲🇦' },
               { id: 'México', code: 'MEX', flag: '🇲🇽' },

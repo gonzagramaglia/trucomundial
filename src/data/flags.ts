@@ -1,5 +1,6 @@
 export const FLAG_MAP: Record<string, string> = {
   'Alemania': '🇩🇪',
+  'Arabia Saudita': '🇸🇦',
   'Argelia': '🇩🇿',
   'Argentina': '🇦🇷',
   'Austria': '🇦🇹',
@@ -18,6 +19,7 @@ export const FLAG_MAP: Record<string, string> = {
   'Francia': '🇫🇷',
   'Inglaterra': '🏴󠁧󠁢󠁥󠁮󠁧󠁿',
   'Japón': '🇯🇵',
+  'Jordania': '🇯🇴',
   'Marruecos': '🇲🇦',
   'México': '🇲🇽',
   'Ninguna': '🏳️',

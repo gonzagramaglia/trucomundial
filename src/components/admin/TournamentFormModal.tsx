@@ -26,6 +26,8 @@ export const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
 }) => {
   const { t } = useTranslation();
   const [formError, setFormError] = useState("");
+  const [countrySearch, setCountrySearch] = useState("");
+  const cleanString = (str: string) => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
   const {
     handleSubmit,
@@ -61,7 +63,7 @@ export const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
         reset({
           ...tournament,
           prize: normalizeTournamentPrizes(tournament.prize),
-          allowed_teams: tournament.allowed_teams || ["Alemania","Argelia","Argentina","Austria","Bélgica","Bosnia y Herz","Brasil","Canadá","Colombia","Corea del Sur","Costa de Marfil","Croacia","Ecuador","Egipto","Escocia","España","Francia","Inglaterra","Japón","Marruecos","México","Noruega","Nueva Zelanda","Países Bajos","Panamá","Paraguay","Portugal","Qatar","República Checa","Sudáfrica","Suecia","Suiza","Uruguay","USA"],
+          allowed_teams: tournament.allowed_teams || ["Alemania","Arabia Saudita","Argelia","Argentina","Austria","Bélgica","Bosnia y Herz","Brasil","Canadá","Colombia","Corea del Sur","Costa de Marfil","Croacia","Ecuador","Egipto","Escocia","España","Francia","Inglaterra","Japón","Marruecos","México","Noruega","Nueva Zelanda","Países Bajos","Panamá","Paraguay","Portugal","Qatar","República Checa","Sudáfrica","Suecia","Suiza","Uruguay","USA"],
         });
       } else {
         const now = new Date();
@@ -83,7 +85,7 @@ export const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
           visibility: "public",
           code_type: "single",
           codes: [],
-          allowed_teams: ["Alemania","Argelia","Argentina","Austria","Bélgica","Bosnia y Herz","Brasil","Canadá","Colombia","Corea del Sur","Croacia","Ecuador","Egipto","Escocia","España","Francia","Inglaterra","Japón","Marruecos","México","Noruega","Nueva Zelanda","Países Bajos","Panamá","Paraguay","Portugal","Qatar","República Checa","Sudáfrica","Suecia","Suiza","Uruguay","USA"],
+          allowed_teams: ["Alemania","Arabia Saudita","Argelia","Argentina","Austria","Bélgica","Bosnia y Herz","Brasil","Canadá","Colombia","Corea del Sur","Croacia","Ecuador","Egipto","Escocia","España","Francia","Inglaterra","Japón","Marruecos","México","Noruega","Nueva Zelanda","Países Bajos","Panamá","Paraguay","Portugal","Qatar","República Checa","Sudáfrica","Suecia","Suiza","Uruguay","USA"],
         });
       }
     }
@@ -620,12 +622,31 @@ export const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
               >
                 Selecciones del Torneo (Elegí de 2 a 4)
               </label>
+              <input
+                type="text"
+                placeholder="🔍 Buscar país..."
+                value={countrySearch}
+                onChange={(e) => setCountrySearch(e.target.value)}
+                style={{
+                  display: 'block',
+                  height: '42px',
+                  padding: '0 1.25rem',
+                  borderRadius: '1.1rem',
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  color: '#fff',
+                  fontSize: '0.9rem',
+                  outline: 'none',
+                  width: '85%',
+                  boxSizing: 'border-box',
+                  margin: '0 auto 0.75rem auto'
+                }}
+              />
               <div
                 style={{
                   display: "flex",
                   gap: "0.5rem",
                   flexWrap: "wrap",
-                  marginTop: "0.5rem",
                   marginBottom: "0.5rem",
                 }}
               >
@@ -646,8 +667,10 @@ export const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
                   { id: 'España', flag: '🇪🇸', code: 'ESP' },
                   { id: 'Francia', flag: '🇫🇷', code: 'FRA' },
                   { id: 'Alemania', flag: '🇩🇪', code: 'GER' },
+                  { id: 'Jordania', flag: '🇯🇴', code: 'JOR' },
                   { id: 'Japón', flag: '🇯🇵', code: 'JPN' },
                   { id: 'Corea del Sur', flag: '🇰🇷', code: 'KOR' },
+                  { id: 'Arabia Saudita', flag: '🇸🇦', code: 'KSA' },
                   { id: 'Marruecos', flag: '🇲🇦', code: 'MAR' },
                   { id: 'México', flag: '🇲🇽', code: 'MEX' },
                   { id: 'Países Bajos', flag: '🇳🇱', code: 'NED' },
@@ -662,8 +685,11 @@ export const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
                   { id: 'Suiza', flag: '🇨🇭', code: 'SUI' },
                   { id: 'Suecia', flag: '🇸🇪', code: 'SWE' },
                   { id: 'Uruguay', flag: '🇺🇾', code: 'URU' },
-                  { id: 'USA', flag: '🇺🇸', code: 'USA' }
-                ].map((team) => {
+                  { id: 'USA', flag: '🇺🇸', code: 'USA' },
+                ].filter(c => {
+                  const q = cleanString(countrySearch);
+                  return cleanString(c.id).includes(q) || cleanString(c.code).includes(q);
+                }).map((team) => {
                   const allowedTeams = formData.allowed_teams || [];
                   const isChecked = allowedTeams.includes(team.id);
                   const isLimitReached = allowedTeams.length >= 4;

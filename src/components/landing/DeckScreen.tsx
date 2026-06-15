@@ -26,6 +26,7 @@ const TOP_CARDS = [
 export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack }) => {
   const { t } = useTranslation();
   const [search, setSearch] = useState('');
+  const cleanString = (str: string): string => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
   const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
 
   const [loading, setLoading] = useState(true);
@@ -325,7 +326,6 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
     }, 300);
   };
 
-  const cleanString = (str: string): string => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
   const unlockedCountries = Array.from(new Set(
     CARDS.filter(c => unlockedCards.includes(c.id)).map(c => c.country)
@@ -570,8 +570,10 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
         </div>
 
         {unlockedCountries.length > 0 && (
-          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', width: '100%' }}>
-            <button
+          <>
+
+            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', width: '100%' }}>
+              <button
               onClick={() => setSelectedCountries([])}
               style={{
                 height: '42px',
@@ -596,6 +598,7 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
             </button>
 
             {[
+              { id: 'Arabia Saudita', code: 'KSA', flag: '🇸🇦' },
               { id: 'Argelia', code: 'ALG', flag: '🇩🇿' },
               { id: 'Argentina', code: 'ARG', flag: '🇦🇷' },
               { id: 'Austria', code: 'AUT', flag: '🇦🇹' },
@@ -614,6 +617,7 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
               { id: 'Francia', code: 'FRA', flag: '🇫🇷' },
               { id: 'Alemania', code: 'GER', flag: '🇩🇪' },
               { id: 'Japón', code: 'JPN', flag: '🇯🇵' },
+              { id: 'Jordania', code: 'JOR', flag: '🇯🇴' },
               { id: 'Corea del Sur', code: 'KOR', flag: '🇰🇷' },
               { id: 'Marruecos', code: 'MAR', flag: '🇲🇦' },
               { id: 'México', code: 'MEX', flag: '🇲🇽' },
@@ -655,6 +659,7 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
               </button>
             ))}
           </div>
+          </>
         )}
       </div>
 

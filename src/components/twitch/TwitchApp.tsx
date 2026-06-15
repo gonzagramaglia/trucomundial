@@ -17,6 +17,8 @@ export function TwitchApp() {
   const [channel, setChannel] = useState<string>("");
   const [points, setPoints] = useState<number>(30);
   const [opponentMode, setOpponentMode] = useState<"cpu" | "streamer">("cpu");
+  const [countrySearch, setCountrySearch] = useState('');
+  const cleanString = (str: string) => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
   const [selectedTeams, setSelectedTeams] = useState<string[]>(() => {
     const saved = localStorage.getItem('truco_selected_teams_twitch');
     if (saved) {
@@ -360,7 +362,7 @@ export function TwitchApp() {
               borderRadius: "1rem",
               boxShadow: "0 0 30px rgba(145, 70, 255, 0.3)",
               border: "1px solid #9146FF",
-              maxWidth: "550px",
+              maxWidth: "600px",
               width: "100%",
               textAlign: "center"
             }}>
@@ -472,50 +474,54 @@ export function TwitchApp() {
 
                 <div style={{ marginBottom: "1.5rem", textAlign: "left" }}>
                   <label style={{ display: "block", marginBottom: "0.5rem", fontSize: "0.9rem", color: "#ccc" }}>Conformación del Mazo (Elegí 4 selecciones)</label>
-                  <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
-                    {[
-                  { id: 'Argelia', flag: '🇩🇿', code: 'ALG' },
-                  { id: 'Argentina', flag: '🇦🇷', code: 'ARG' },
-                  { id: 'Austria', flag: '🇦🇹', code: 'AUT' },
-                  { id: 'Bélgica', code: 'BEL', flag: '🇧🇪' },
-              { id: 'Bosnia y Herz', flag: '🇧🇦', code: 'BIH' },
-                  { id: 'Brasil', flag: '🇧🇷', code: 'BRA' },
-                  { id: 'Canadá', flag: '🇨🇦', code: 'CAN' },
-                  { id: 'Costa de Marfil', code: 'CIV', flag: '🇨🇮' },
-                  { id: 'Colombia', flag: '🇨🇴', code: 'COL' },
-                  { id: 'Croacia', flag: '🇭🇷', code: 'CRO' },
-                  { id: 'República Checa', flag: '🇨🇿', code: 'CZE' },
-                  { id: 'Ecuador', flag: '🇪🇨', code: 'ECU' },
-                  { id: 'Egipto', flag: '🇪🇬', code: 'EGY' },
-                  { id: 'Inglaterra', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', code: 'ENG' },
-                  { id: 'España', flag: '🇪🇸', code: 'ESP' },
-                  { id: 'Francia', flag: '🇫🇷', code: 'FRA' },
-              { id: 'Alemania', code: 'GER', flag: '🇩🇪' },
-                  { id: 'Japón', flag: '🇯🇵', code: 'JPN' },
-                  { id: 'Corea del Sur', flag: '🇰🇷', code: 'KOR' },
-                  { id: 'Marruecos', flag: '🇲🇦', code: 'MAR' },
-                  { id: 'México', flag: '🇲🇽', code: 'MEX' },
-                  { id: 'Países Bajos', flag: '🇳🇱', code: 'NED' },
-                  { id: 'Noruega', flag: '🇳🇴', code: 'NOR' },
-                  { id: 'Nueva Zelanda', flag: '🇳🇿', code: 'NZL' },
-                  { id: 'Panamá', flag: '🇵🇦', code: 'PAN' },
-                  { id: 'Paraguay', flag: '🇵🇾', code: 'PAR' },
-                  { id: 'Portugal', flag: '🇵🇹', code: 'POR' },
-                  { id: 'Qatar', flag: '🇶🇦', code: 'QAT' },
-                  { id: 'Sudáfrica', flag: '🇿🇦', code: 'RSA' },
-                  { id: 'Escocia', code: 'SCO', flag: '🏴󠁧󠁢󠁳󠁣󠁴󠁿' },
                   
-                  { id: 'Suiza', flag: '🇨🇭', code: 'SUI' },
-                  { id: 'Suecia', code: 'SWE', flag: '🇸🇪' },
-              { id: 'Uruguay', flag: '🇺🇾', code: 'URU' },
-                  { id: 'USA', flag: '🇺🇸', code: 'USA' }
-                    ].sort((a, b) => {
-                      const aSelected = selectedTeams.includes(a.id);
-                      const bSelected = selectedTeams.includes(b.id);
-                      if (aSelected && !bSelected) return -1;
-                      if (!aSelected && bSelected) return 1;
-                      return a.code.localeCompare(b.code);
-                    }).map(team => {
+                  {(() => {
+                    const ALL_TEAMS_LIST = [
+                      { id: 'Argelia', flag: '🇩🇿', code: 'ALG' },
+                      { id: 'Argentina', flag: '🇦🇷', code: 'ARG' },
+                      { id: 'Austria', flag: '🇦🇹', code: 'AUT' },
+                      { id: 'Bélgica', code: 'BEL', flag: '🇧🇪' },
+                      { id: 'Bosnia y Herz', flag: '🇧🇦', code: 'BIH' },
+                      { id: 'Brasil', flag: '🇧🇷', code: 'BRA' },
+                      { id: 'Canadá', flag: '🇨🇦', code: 'CAN' },
+                      { id: 'Costa de Marfil', code: 'CIV', flag: '🇨🇮' },
+                      { id: 'Colombia', flag: '🇨🇴', code: 'COL' },
+                      { id: 'Croacia', flag: '🇭🇷', code: 'CRO' },
+                      { id: 'República Checa', flag: '🇨🇿', code: 'CZE' },
+                      { id: 'Ecuador', flag: '🇪🇨', code: 'ECU' },
+                      { id: 'Egipto', flag: '🇪🇬', code: 'EGY' },
+                      { id: 'Inglaterra', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', code: 'ENG' },
+                      { id: 'España', flag: '🇪🇸', code: 'ESP' },
+                      { id: 'Francia', flag: '🇫🇷', code: 'FRA' },
+                      { id: 'Alemania', code: 'GER', flag: '🇩🇪' },
+                      { id: 'Jordania', flag: '🇯🇴', code: 'JOR' },
+                      { id: 'Japón', flag: '🇯🇵', code: 'JPN' },
+                      { id: 'Corea del Sur', flag: '🇰🇷', code: 'KOR' },
+                      { id: 'Arabia Saudita', flag: '🇸🇦', code: 'KSA' },
+                      { id: 'Marruecos', flag: '🇲🇦', code: 'MAR' },
+                      { id: 'México', flag: '🇲🇽', code: 'MEX' },
+                      { id: 'Países Bajos', flag: '🇳🇱', code: 'NED' },
+                      { id: 'Noruega', flag: '🇳🇴', code: 'NOR' },
+                      { id: 'Nueva Zelanda', flag: '🇳🇿', code: 'NZL' },
+                      { id: 'Panamá', flag: '🇵🇦', code: 'PAN' },
+                      { id: 'Paraguay', flag: '🇵🇾', code: 'PAR' },
+                      { id: 'Portugal', flag: '🇵🇹', code: 'POR' },
+                      { id: 'Qatar', flag: '🇶🇦', code: 'QAT' },
+                      { id: 'Sudáfrica', flag: '🇿🇦', code: 'RSA' },
+                      { id: 'Escocia', code: 'SCO', flag: '🏴󠁧󠁢󠁳󠁣󠁴󠁿' },
+                      { id: 'Suiza', flag: '🇨🇭', code: 'SUI' },
+                      { id: 'Suecia', code: 'SWE', flag: '🇸🇪' },
+                      { id: 'Uruguay', flag: '🇺🇾', code: 'URU' },
+                      { id: 'USA', flag: '🇺🇸', code: 'USA' }
+                    ];
+
+                    const pinnedTeams = ALL_TEAMS_LIST.filter(t => selectedTeams.includes(t.id));
+                    const unpinnedTeams = ALL_TEAMS_LIST.filter(t => !selectedTeams.includes(t.id)).filter(c => {
+                      const q = cleanString(countrySearch);
+                      return cleanString(c.id).includes(q) || cleanString(c.code).includes(q);
+                    });
+
+                    const renderTeamButton = (team: any) => {
                       const isSelected = selectedTeams.includes(team.id);
                       return (
                         <button
@@ -547,9 +553,44 @@ export function TwitchApp() {
                           {team.flag} {team.code}
                         </button>
                       );
-                    })}
-                  </div>
-                </div>
+                    };
+
+                    return (
+                      <>
+                        {/* Pinned Teams (Always Visible) */}
+                        {pinnedTeams.length > 0 && (
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.6rem', marginBottom: '0.8rem' }}>
+                            {pinnedTeams.map(renderTeamButton)}
+                          </div>
+                        )}
+
+                        <input
+                          type="text"
+                          placeholder="🔍 Buscar país..."
+                          value={countrySearch}
+                          onChange={(e) => setCountrySearch(e.target.value)}
+                          style={{
+                      display: 'block',
+                      height: '42px',
+                      padding: '0 1.25rem',
+                      borderRadius: '1.1rem',
+                      background: 'rgba(255, 255, 255, 0.05)',
+                      border: '1px solid rgba(255, 255, 255, 0.1)',
+                      color: '#fff',
+                      fontSize: '0.9rem',
+                      outline: 'none',
+                          width: '100%',
+                          boxSizing: 'border-box',
+                          margin: '0 0 0.75rem 0'
+                        }}
+                      />
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", alignItems: "flex-start", alignContent: "flex-start" }}>
+                        {unpinnedTeams.map(renderTeamButton)}
+                      </div>
+                    </>
+                  );
+                })()}
+              </div>
 
                 <button
                   type="submit"
