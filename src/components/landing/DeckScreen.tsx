@@ -321,7 +321,7 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
         setTimeout(() => {
           setHighlightingCards(false);
           setNewCardsRevealed([]);
-        }, 1500);
+        }, 2000);
       }
     }, 300);
   };
@@ -614,6 +614,7 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
               { id: 'Ecuador', code: 'ECU', flag: '🇪🇨' },
               { id: 'Egipto', code: 'EGY', flag: '🇪🇬' },
               { id: 'Inglaterra', code: 'ENG', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿' },
+              { id: 'Irán', code: 'IRN', flag: '🇮🇷' },
               { id: 'España', code: 'ESP', flag: '🇪🇸' },
               { id: 'Francia', code: 'FRA', flag: '🇫🇷' },
               { id: 'Alemania', code: 'GER', flag: '🇩🇪' },
