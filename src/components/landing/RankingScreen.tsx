@@ -791,8 +791,16 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
         width: '100%',
         marginBottom: '2rem'
       }}>
-        {/* Search Input */}
-        <div style={{ position: 'relative', width: '100%' }}>
+        {/* Top Row: Search + Sort */}
+        <div style={{
+          display: 'flex',
+          flexDirection: isMobile ? 'column' : 'row',
+          gap: '1rem',
+          width: '100%',
+          alignItems: isMobile ? 'stretch' : 'center'
+        }}>
+          {/* Search Input */}
+          <div style={{ position: 'relative', flex: 1 }}>
           <div style={{
             position: 'absolute',
             top: '50%',
@@ -826,10 +834,60 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
           />
         </div>
 
-        {/* Filters and Sort Row */}
+          {/* Sort Selector moved here for desktop */}
+          <div className="ranking-sort-container" style={{ 
+            display: 'flex', 
+            flexDirection: isMobile ? 'column' : 'row', 
+            alignItems: isMobile ? 'flex-start' : 'center', 
+            gap: isMobile ? '0.3rem' : '0.8rem',
+            flexShrink: 0
+          }}>
+            <span style={{ fontSize: '0.8rem', opacity: 0.6, marginLeft: isMobile ? '0.5rem' : '0' }}>{t('sort_by', 'Ordenar por')}:</span>
+            <div className="ranking-sort-inner" style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
+              <select
+                value={sortBy}
+                onChange={e => setSortBy(e.target.value as any)}
+                style={{
+                  height: '44px',
+                  padding: '0 2.2rem 0 1.1rem',
+                  borderRadius: '1.1rem',
+                  background: 'rgba(0, 0, 0, 0.3)',
+                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                  color: '#fff',
+                  fontSize: '0.85rem',
+                  fontWeight: 700,
+                  outline: 'none',
+                  cursor: 'pointer',
+                  appearance: 'none',
+                  WebkitAppearance: 'none',
+                  MozAppearance: 'none',
+                  transition: 'all 0.2s',
+                  boxSizing: 'border-box'
+                }}
+              >
+                <option value="most_voted">📈 {t('most_voted', 'Más Votados')}</option>
+                <option value="least_voted">📉 {t('least_voted', 'Menos Votados')}</option>
+              </select>
+              <span style={{
+                position: 'absolute',
+                right: '1.1rem',
+                pointerEvents: 'none',
+                fontSize: '0.5rem',
+                opacity: 0.7,
+                display: 'flex',
+                alignItems: 'center',
+                color: '#fff'
+              }}>
+                ▼
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Filters Row */}
         <div style={{
           display: 'flex',
-          justifyContent: 'space-between',
+          justifyContent: 'flex-start',
           alignItems: 'center',
           gap: '1rem',
           flexWrap: 'wrap',
@@ -901,6 +959,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
               { id: 'Croacia', code: 'CRO', flag: '🇭🇷' },
               { id: 'República Checa', code: 'CZE', flag: '🇨🇿' },
               { id: 'Ecuador', code: 'ECU', flag: '🇪🇨' },
+              { id: 'Egipto', code: 'EGY', flag: '🇪🇬' },
               { id: 'Inglaterra', code: 'ENG', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿' },
               { id: 'España', code: 'ESP', flag: '🇪🇸' },
               { id: 'Francia', code: 'FRA', flag: '🇫🇷' },
@@ -947,49 +1006,6 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({ user, handleAuth, 
                 <span style={{ marginRight: '0.4rem' }}>{country.flag}</span> {country.code}
               </button>
             ))}
-          </div>
-
-          {/* Sort Selector */}
-          <div className="ranking-sort-container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '0.3rem' }}>
-            <span style={{ fontSize: '0.8rem', opacity: 0.6, marginLeft: '0.5rem' }}>{t('sort_by', 'Ordenar por')}:</span>
-            <div className="ranking-sort-inner" style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
-              <select
-                value={sortBy}
-                onChange={e => setSortBy(e.target.value as any)}
-                style={{
-                  height: '44px',
-                  padding: '0 2.2rem 0 1.1rem',
-                  borderRadius: '1.1rem',
-                  background: 'rgba(0, 0, 0, 0.3)',
-                  border: '1px solid rgba(255, 255, 255, 0.15)',
-                  color: '#fff',
-                  fontSize: '0.85rem',
-                  fontWeight: 700,
-                  outline: 'none',
-                  cursor: 'pointer',
-                  appearance: 'none',
-                  WebkitAppearance: 'none',
-                  MozAppearance: 'none',
-                  transition: 'all 0.2s',
-                  boxSizing: 'border-box'
-                }}
-              >
-                <option value="most_voted">📈 {t('most_voted', 'Más Votados')}</option>
-                <option value="least_voted">📉 {t('least_voted', 'Menos Votados')}</option>
-              </select>
-              <span style={{
-                position: 'absolute',
-                right: '1.1rem',
-                pointerEvents: 'none',
-                fontSize: '0.5rem',
-                opacity: 0.7,
-                display: 'flex',
-                alignItems: 'center',
-                color: '#fff'
-              }}>
-                ▼
-              </span>
-            </div>
           </div>
         </div>
       </div>

@@ -61,7 +61,7 @@ export const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
         reset({
           ...tournament,
           prize: normalizeTournamentPrizes(tournament.prize),
-          allowed_teams: tournament.allowed_teams || ["Alemania","Argelia","Argentina","Austria","Bélgica","Bosnia y Herz","Brasil","Canadá","Colombia","Corea del Sur","Costa de Marfil","Croacia","Ecuador","Escocia","España","Francia","Inglaterra","Japón","Marruecos","México","Noruega","Nueva Zelanda","Países Bajos","Panamá","Paraguay","Portugal","Qatar","República Checa","Sudáfrica","Suecia","Suiza","Uruguay","USA"],
+          allowed_teams: tournament.allowed_teams || ["Alemania","Argelia","Argentina","Austria","Bélgica","Bosnia y Herz","Brasil","Canadá","Colombia","Corea del Sur","Costa de Marfil","Croacia","Ecuador","Egipto","Escocia","España","Francia","Inglaterra","Japón","Marruecos","México","Noruega","Nueva Zelanda","Países Bajos","Panamá","Paraguay","Portugal","Qatar","República Checa","Sudáfrica","Suecia","Suiza","Uruguay","USA"],
         });
       } else {
         const now = new Date();
@@ -83,7 +83,7 @@ export const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
           visibility: "public",
           code_type: "single",
           codes: [],
-          allowed_teams: ["Alemania","Argelia","Argentina","Austria","Bélgica","Bosnia y Herz","Brasil","Canadá","Colombia","Corea del Sur","Croacia","Ecuador","Escocia","España","Francia","Inglaterra","Japón","Marruecos","México","Noruega","Nueva Zelanda","Países Bajos","Panamá","Paraguay","Portugal","Qatar","República Checa","Sudáfrica","Suecia","Suiza","Uruguay","USA"],
+          allowed_teams: ["Alemania","Argelia","Argentina","Austria","Bélgica","Bosnia y Herz","Brasil","Canadá","Colombia","Corea del Sur","Croacia","Ecuador","Egipto","Escocia","España","Francia","Inglaterra","Japón","Marruecos","México","Noruega","Nueva Zelanda","Países Bajos","Panamá","Paraguay","Portugal","Qatar","República Checa","Sudáfrica","Suecia","Suiza","Uruguay","USA"],
         });
       }
     }
@@ -641,6 +641,7 @@ export const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
                   { id: 'Croacia', flag: '🇭🇷', code: 'CRO' },
                   { id: 'República Checa', flag: '🇨🇿', code: 'CZE' },
                   { id: 'Ecuador', flag: '🇪🇨', code: 'ECU' },
+                  { id: 'Egipto', flag: '🇪🇬', code: 'EGY' },
                   { id: 'Inglaterra', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', code: 'ENG' },
                   { id: 'España', flag: '🇪🇸', code: 'ESP' },
                   { id: 'Francia', flag: '🇫🇷', code: 'FRA' },

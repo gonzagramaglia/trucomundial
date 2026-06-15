@@ -819,9 +819,32 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
             <h3 style={{ fontSize: '1.5rem', fontWeight: 800, margin: '0 0 0.5rem 0', color: 'rgba(255,255,255,0.6)' }}>
               Etapa por Definir
             </h3>
-            <p style={{ opacity: 0.5, fontSize: '0.9rem', maxWidth: '400px', margin: '0 auto' }}>
+            <p style={{ opacity: 0.5, fontSize: '0.9rem', maxWidth: '400px', margin: '0 auto 1.5rem auto' }}>
               Los partidos de esta etapa se definirán al concluir la etapa anterior.
             </p>
+            <a 
+              href="https://www.fifa.com/es/tournaments/mens/worldcup/canadamexicousa2026/standings" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                background: 'rgba(255, 255, 255, 0.1)',
+                color: '#fff',
+                padding: '0.6rem 1.25rem',
+                borderRadius: '1rem',
+                textDecoration: 'none',
+                fontWeight: 800,
+                fontSize: '0.9rem',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
+                transition: 'all 0.2s ease'
+              }}
+              className="btn-hover-dark"
+            >
+              <ExternalLink size={16} />
+              Ver posiciones en FIFA.com
+            </a>
           </div>
         )}
       </div>

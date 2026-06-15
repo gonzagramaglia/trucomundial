@@ -486,6 +486,7 @@ export function TwitchApp() {
                   { id: 'Croacia', flag: '🇭🇷', code: 'CRO' },
                   { id: 'República Checa', flag: '🇨🇿', code: 'CZE' },
                   { id: 'Ecuador', flag: '🇪🇨', code: 'ECU' },
+                  { id: 'Egipto', flag: '🇪🇬', code: 'EGY' },
                   { id: 'Inglaterra', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', code: 'ENG' },
                   { id: 'España', flag: '🇪🇸', code: 'ESP' },
                   { id: 'Francia', flag: '🇫🇷', code: 'FRA' },
