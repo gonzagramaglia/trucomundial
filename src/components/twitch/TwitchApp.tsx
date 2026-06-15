@@ -639,6 +639,7 @@ export function TwitchApp() {
                       { id: "Francia", flag: "🇫🇷", code: "FRA" },
                       { id: "Alemania", code: "GER", flag: "🇩🇪" },
                       { id: "Irán", flag: "🇮🇷", code: "IRN" },
+                      { id: "Iraq", flag: "🇮🇶", code: "IRQ" },
                       { id: "Jordania", flag: "🇯🇴", code: "JOR" },
                       { id: "Japón", flag: "🇯🇵", code: "JPN" },
                       { id: "Corea del Sur", flag: "🇰🇷", code: "KOR" },

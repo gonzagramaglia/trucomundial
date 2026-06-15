@@ -1567,11 +1567,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               zIndex: 2000,
               padding: "2rem",
             }}
+            onClick={() => setIsSelectingPoints(false)}
           >
             <motion.div
               initial={{ scale: 0.9, y: 20 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.9, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
               style={{
                 background: "rgba(255, 255, 255, 0.05)",
                 border: "1px solid rgba(255, 255, 255, 0.1)",
@@ -1670,11 +1672,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               zIndex: 2000,
               padding: "2rem",
             }}
+            onClick={() => setIsSelectingTeams(false)}
           >
             <motion.div
               initial={{ scale: 0.9, y: 20 }}
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.9, y: 20 }}
+              onClick={(e) => e.stopPropagation()}
               className="team-selection-card"
             >
               <h2
@@ -1719,6 +1723,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   { id: "Francia", flag: "🇫🇷", code: "FRA" },
                   { id: "Alemania", code: "GER", flag: "🇩🇪" },
                   { id: "Irán", flag: "🇮🇷", code: "IRN" },
+                  { id: "Iraq", flag: "🇮🇶", code: "IRQ" },
                   { id: "Jordania", flag: "🇯🇴", code: "JOR" },
                   { id: "Japón", flag: "🇯🇵", code: "JPN" },
                   { id: "Corea del Sur", flag: "🇰🇷", code: "KOR" },
@@ -1981,10 +1986,17 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 zIndex: 2000,
                 padding: "2rem",
               }}
+              onClick={() => {
+                setSelectedMode(null);
+                setInputCode("");
+                setIsJoining(false);
+                setJoinError("");
+              }}
             >
               <motion.div
                 initial={{ scale: 0.9, y: 20 }}
                 animate={{ scale: 1, y: 0 }}
+                onClick={(e) => e.stopPropagation()}
                 style={{
                   background: "rgba(255, 255, 255, 0.05)",
                   border: "1px solid rgba(255, 255, 255, 0.1)",

@@ -32,6 +32,7 @@ const flagMap: Record<string, string> = {
   'España': '🇪🇸',
   'Francia': '🇫🇷',
   'Inglaterra': '🏴󠁧󠁢󠁥󠁮󠁧󠁿',
+  'Iraq': '🇮🇶',
   'Japón': '🇯🇵',
   'Jordania': '🇯🇴',
   'Marruecos': '🇲🇦',

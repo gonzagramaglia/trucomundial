@@ -774,6 +774,7 @@ export const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
                   { id: "Francia", flag: "🇫🇷", code: "FRA" },
                   { id: "Alemania", flag: "🇩🇪", code: "GER" },
                   { id: "Irán", flag: "🇮🇷", code: "IRN" },
+                  { id: "Iraq", flag: "🇮🇶", code: "IRQ" },
                   { id: "Jordania", flag: "🇯🇴", code: "JOR" },
                   { id: "Japón", flag: "🇯🇵", code: "JPN" },
                   { id: "Corea del Sur", flag: "🇰🇷", code: "KOR" },
