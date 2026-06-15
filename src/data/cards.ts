@@ -9,6 +9,18 @@ export interface Card {
 }
 
 export const CARDS: Card[] = [
+  // Cabo Verde
+  { id: 'vozinha', name: 'VOZINHA', env: 1, country: 'Cabo Verde', club: 'GD Chaves', image: '/stickers/cape-verde/figu-de-vozinha-1.jpeg', stickerNumber: 'CPV 1' },
+  { id: 'pico', name: 'PICO', env: 4, country: 'Cabo Verde', club: 'Shamrock Rovers', image: '/stickers/cape-verde/figu-de-pico-4.jpeg', stickerNumber: 'CPV 4' },
+  { id: 'logan_costa', name: 'LOGAN COSTA', env: 5, country: 'Cabo Verde', club: 'Villarreal', image: '/stickers/cape-verde/figu-de-logan-costa-5.jpeg', stickerNumber: 'CPV 5' },
+  { id: 'kevin_pina', name: 'KEVIN PINA', env: 6, country: 'Cabo Verde', club: 'Krasnodar', image: '/stickers/cape-verde/figu-de-kevin-pina-6.jpeg', stickerNumber: 'CPV 6' },
+  { id: 'jovane_cabral', name: 'JOVANE CABRAL', env: 7, country: 'Cabo Verde', club: 'Estrela da Amadora', image: '/stickers/cape-verde/figu-de-jovane-cabral-7.jpeg', stickerNumber: 'CPV 7' },
+  { id: 'joao_paulo', name: 'JOÃO PAULO', env: 8, country: 'Cabo Verde', club: 'Sheriff', image: '/stickers/cape-verde/figu-de-joao-paulo-8.jpeg', stickerNumber: 'CPV 8' },
+  { id: 'jamiro_monteiro', name: 'JAMIRO MONTEIRO', env: 10, country: 'Cabo Verde', club: 'PEC Zwolle', image: '/stickers/cape-verde/figu-de-jamiro-monteiro-10.jpeg', stickerNumber: 'CPV 10' },
+  { id: 'yannick_semedo', name: 'YANNICK SEMEDO', env: 16, country: 'Cabo Verde', club: 'Vizela', image: '/stickers/cape-verde/figu-de-yannick-semedo-16.jpeg', stickerNumber: 'CPV 16' },
+  { id: 'dailon_livramento', name: 'DAILON LIVRAMENTO', env: 19, country: 'Cabo Verde', club: 'Hellas Verona', image: '/stickers/cape-verde/figu-de-dailon-livramento-19.jpeg', stickerNumber: 'CPV 19' },
+  { id: 'ryan_mendes', name: 'RYAN MENDES', env: 20, country: 'Cabo Verde', club: 'Kocaelispor', image: '/stickers/cape-verde/figu-de-ryan-mendes-20.jpeg', stickerNumber: 'CPV 20' },
+  { id: 'steven_moreira', name: 'STEVEN MOREIRA', env: 22, country: 'Cabo Verde', club: 'Columbus Crew', image: '/stickers/cape-verde/figu-de-steven-moreira-22.jpeg', stickerNumber: 'CPV 22' },
   { id: 'guendouz', name: 'ALEXIS GUENDOUZ', env: 1, country: 'Argelia', club: 'Persepolis', image: '/stickers/algeria/figu-de-alexis-guendouz-1.jpeg', stickerNumber: 'ALG 1' },
   { id: 'mandi', name: 'AÏSSA MANDI', env: 2, country: 'Argelia', club: 'Lille', image: '/stickers/algeria/figu-de-aissa-mandi-2.jpeg', stickerNumber: 'ALG 2' },
   { id: 'mahrez', name: 'RIYAD MAHREZ', env: 7, country: 'Argelia', club: 'Al Ahli', image: '/stickers/algeria/figu-de-riyad-mahrez-7.jpeg', stickerNumber: 'ALG 7' },

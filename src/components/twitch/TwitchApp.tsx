@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Home, BookOpen } from "lucide-react";
+import { Home, BookOpen, Search } from "lucide-react";
 import { VolumeControl } from "../shared/VolumeControl";
 import { audioManager } from "../../lib/audio";
 import { useTrucoGame } from "../../hooks/useTrucoGame";
@@ -486,6 +486,7 @@ export function TwitchApp() {
                       { id: 'Canadá', flag: '🇨🇦', code: 'CAN' },
                       { id: 'Costa de Marfil', code: 'CIV', flag: '🇨🇮' },
                       { id: 'Colombia', flag: '🇨🇴', code: 'COL' },
+                      { id: 'Cabo Verde', flag: '🇨🇻', code: 'CPV' },
                       { id: 'Croacia', flag: '🇭🇷', code: 'CRO' },
                       { id: 'República Checa', flag: '🇨🇿', code: 'CZE' },
                       { id: 'Ecuador', flag: '🇪🇨', code: 'ECU' },
@@ -564,26 +565,29 @@ export function TwitchApp() {
                           </div>
                         )}
 
-                        <input
-                          type="text"
-                          placeholder="🔍 Buscar país..."
-                          value={countrySearch}
-                          onChange={(e) => setCountrySearch(e.target.value)}
-                          style={{
-                      display: 'block',
-                      height: '42px',
-                      padding: '0 1.25rem',
-                      borderRadius: '1.1rem',
-                      background: 'rgba(255, 255, 255, 0.05)',
-                      border: '1px solid rgba(255, 255, 255, 0.1)',
-                      color: '#fff',
-                      fontSize: '0.9rem',
-                      outline: 'none',
-                          width: '100%',
-                          boxSizing: 'border-box',
-                          margin: '0 0 0.75rem 0'
-                        }}
-                      />
+                        <div style={{ position: 'relative', width: '100%', marginBottom: '0.75rem' }}>
+                          <Search size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af', pointerEvents: 'none' }} />
+                          <input
+                            type="text"
+                            placeholder="Buscar país..."
+                            value={countrySearch}
+                            onChange={(e) => setCountrySearch(e.target.value)}
+                            style={{
+                              display: 'block',
+                              height: '42px',
+                              padding: '0 1.25rem 0 2.5rem',
+                              borderRadius: '1.1rem',
+                              background: 'rgba(255, 255, 255, 0.05)',
+                              border: '1px solid rgba(255, 255, 255, 0.1)',
+                              color: '#fff',
+                              fontSize: '0.9rem',
+                              outline: 'none',
+                              width: '100%',
+                              boxSizing: 'border-box',
+                              margin: 0
+                            }}
+                          />
+                        </div>
                       <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", alignItems: "flex-start", alignContent: "flex-start" }}>
                         {unpinnedTeams.map(renderTeamButton)}
                       </div>

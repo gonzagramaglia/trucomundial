@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import { Home, User, ArrowLeft, Trophy, ShieldAlert, BookOpen, Layers } from "lucide-react";
+import { Home, User, ArrowLeft, Trophy, ShieldAlert, BookOpen, Layers, Search } from "lucide-react";
 import { supabase } from "../../lib/supabase";
 import { audioManager } from "../../lib/audio";
 import { UtilityButtons } from "../shared/UtilityButtons";
@@ -699,7 +699,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         .eq("match_code", matchCode)
         .maybeSingle();
 
-      let allowed = ["Alemania","Arabia Saudita","Argelia","Argentina","Austria","Bélgica","Bosnia y Herz","Brasil","Canadá","Colombia","Croacia","República Checa","Ecuador","Egipto","Inglaterra","España","Francia","Japón","Corea del Sur","Marruecos","México","Países Bajos","Noruega","Nueva Zelanda","Panamá","Paraguay","Portugal","Qatar","Sudáfrica","Suiza","Suecia","Uruguay","USA"];
+      let allowed = ["Alemania","Arabia Saudita","Argelia","Argentina","Austria","Bélgica","Bosnia y Herz","Brasil","Cabo Verde","Canadá","Colombia","Costa de Marfil","Croacia","República Checa","Ecuador","Egipto","Inglaterra","España","Francia","Japón","Jordania","Corea del Sur","Marruecos","México","Países Bajos","Noruega","Nueva Zelanda","Panamá","Paraguay","Portugal","Qatar","Sudáfrica","Suiza","Suecia","Uruguay","USA"];
       if (mData && mData.tournament_id) {
         const { data: tData } = await supabase
           .from("tournaments")
@@ -1586,6 +1586,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   { id: 'Canadá', flag: '🇨🇦', code: 'CAN' },
                   { id: 'Costa de Marfil', code: 'CIV', flag: '🇨🇮' },
                   { id: 'Colombia', flag: '🇨🇴', code: 'COL' },
+                  { id: 'Cabo Verde', flag: '🇨🇻', code: 'CPV' },
                   { id: 'Croacia', flag: '🇭🇷', code: 'CRO' },
                   { id: 'República Checa', flag: '🇨🇿', code: 'CZE' },
                   { id: 'Ecuador', flag: '🇪🇨', code: 'ECU' },
@@ -1673,26 +1674,29 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                       </div>
                     )}
 
-                    <input
-                      type="text"
-                      placeholder="🔍 Buscar país..."
-                      value={countrySearch}
-                      onChange={(e) => setCountrySearch(e.target.value)}
-                      style={{
-                        display: 'block',
-                        height: '42px',
-                        padding: '0 1.25rem',
-                        borderRadius: '1.1rem',
-                        background: 'rgba(255, 255, 255, 0.05)',
-                        border: '1px solid rgba(255, 255, 255, 0.1)',
-                        color: '#fff',
-                        fontSize: '0.9rem',
-                        outline: 'none',
-                        width: '85%',
-                        boxSizing: 'border-box',
-                        margin: '0 auto 0.75rem auto'
-                      }}
-                    />
+                    <div style={{ position: 'relative', width: '85%', margin: '0 auto 0.75rem auto' }}>
+                      <Search size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: '#9ca3af', pointerEvents: 'none' }} />
+                      <input
+                        type="text"
+                        placeholder="Buscar país..."
+                        value={countrySearch}
+                        onChange={(e) => setCountrySearch(e.target.value)}
+                        style={{
+                          display: 'block',
+                          height: '42px',
+                          padding: '0 1.25rem 0 2.5rem',
+                          borderRadius: '1.1rem',
+                          background: 'rgba(255, 255, 255, 0.05)',
+                          border: '1px solid rgba(255, 255, 255, 0.1)',
+                          color: '#fff',
+                          fontSize: '0.9rem',
+                          outline: 'none',
+                          width: '100%',
+                          boxSizing: 'border-box',
+                          margin: 0
+                        }}
+                      />
+                    </div>
 
                     {/* Unpinned Teams (Scrollable) */}
                     <div
@@ -1764,7 +1768,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                     color: selectedTeams.length !== 4 ? "rgba(255,255,255,0.3)" : "#000",
                     border: "none",
                     borderRadius: "1rem",
-                    boxShadow: "4px 4px 0px #000",
+                    boxShadow: selectedTeams.length !== 4 ? "none" : "4px 4px 0px #000",
                     fontStyle: "italic",
                     cursor: selectedTeams.length !== 4 ? "default" : "pointer"
                   }}

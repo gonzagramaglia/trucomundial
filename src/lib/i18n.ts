@@ -783,7 +783,7 @@ const resources = {
       "votes_saved": "¡VOTOS GUARDADOS!",
       "login_to_vote_title": "Iniciá Sesión para Votar",
       "login_to_vote_desc": "Los usuarios registrados con Google pueden distribuir <strong>78 votos/estrellas</strong> entre sus cartas favoritas.",
-      "login_with_google": "INICIAR SESIÓN CON GOOGLE",
+      "login_with_google": "INICIÁ SESIÓN CON GOOGLE",
       "search_placeholder": "Buscar por jugador, club o selección...",
       "loading_votes": "CARGANDO VOTOS GLOBALES...",
       "equivalent_to": "Equivale al",

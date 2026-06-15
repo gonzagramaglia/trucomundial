@@ -18,7 +18,7 @@ export const CreatorsApplicationScreen: React.FC<CreatorsApplicationScreenProps>
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
   const [loading, setLoading] = useState(true);
   const [applicationStatus, setApplicationStatus] = useState<'none' | 'pending' | 'approved' | 'rejected'>('none');
-  
+
   const { register, handleSubmit, formState: { errors } } = useForm<CreatorApplicationFormData>({
     resolver: zodResolver(creatorApplicationSchema),
     defaultValues: {
@@ -41,7 +41,7 @@ export const CreatorsApplicationScreen: React.FC<CreatorsApplicationScreenProps>
         setLoading(false);
         return;
       }
-      
+
       try {
         const { data } = await supabase
           .from('creator_applications')
@@ -60,13 +60,13 @@ export const CreatorsApplicationScreen: React.FC<CreatorsApplicationScreenProps>
         setLoading(false);
       }
     };
-    
+
     fetchApplication();
   }, [user]);
 
   const onSubmit = async (data: CreatorApplicationFormData) => {
     if (!user || !data.channel_name) return;
-    
+
     setSubmitting(true);
     try {
       const { error } = await supabase.from('creator_applications').insert([{
@@ -80,7 +80,7 @@ export const CreatorsApplicationScreen: React.FC<CreatorsApplicationScreenProps>
       }]);
 
       if (error) throw error;
-      
+
       setApplicationStatus('pending');
     } catch (err: any) {
       alert('Error enviando la solicitud: ' + err.message);
@@ -243,7 +243,7 @@ export const CreatorsApplicationScreen: React.FC<CreatorsApplicationScreenProps>
                 boxShadow: '4px 4px 0px #000'
               }}
             >
-              Iniciar sesión con Google
+              Iniciá sesión con Google
             </button>
           </div>
         </div>
@@ -309,7 +309,7 @@ export const CreatorsApplicationScreen: React.FC<CreatorsApplicationScreenProps>
 
             <div style={{ marginBottom: '1.5rem' }}>
               <label style={{ marginBottom: '0.75rem', fontSize: '0.9rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <User size={16} style={{ color: '#10b981' }}/> Nombre público
+                <User size={16} style={{ color: '#10b981' }} /> Nombre público
               </label>
               <input
                 type="text"
@@ -327,7 +327,7 @@ export const CreatorsApplicationScreen: React.FC<CreatorsApplicationScreenProps>
 
             <div style={{ marginBottom: '1.5rem' }}>
               <label style={{ marginBottom: '0.75rem', fontSize: '0.9rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Link size={16} style={{ color: '#10b981' }}/> Link a tu red social principal
+                <Link size={16} style={{ color: '#10b981' }} /> Link a tu red social principal
               </label>
               <input
                 type="text"
@@ -345,7 +345,7 @@ export const CreatorsApplicationScreen: React.FC<CreatorsApplicationScreenProps>
 
             <div style={{ marginBottom: '2.5rem' }}>
               <label style={{ marginBottom: '0.75rem', fontSize: '0.9rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Link size={16} style={{ color: '#10b981' }}/> Link a tu Canal de Streaming
+                <Link size={16} style={{ color: '#10b981' }} /> Link a tu Canal de Streaming
               </label>
               <input
                 type="text"
@@ -363,7 +363,7 @@ export const CreatorsApplicationScreen: React.FC<CreatorsApplicationScreenProps>
 
             <div style={{ marginBottom: '2.5rem' }}>
               <label style={{ marginBottom: '0.75rem', fontSize: '0.9rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <MessageSquare size={16} style={{ color: '#10b981' }}/> ¿Por qué querés ser creador?
+                <MessageSquare size={16} style={{ color: '#10b981' }} /> ¿Por qué querés ser creador?
               </label>
               <textarea
                 {...register('motivation')}

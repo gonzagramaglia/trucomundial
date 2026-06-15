@@ -608,6 +608,7 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({ user, handleAuth, onBack
               { id: 'Canadá', code: 'CAN', flag: '🇨🇦' },
                   { id: 'Costa de Marfil', code: 'CIV', flag: '🇨🇮' },
               { id: 'Colombia', code: 'COL', flag: '🇨🇴' },
+              { id: 'Cabo Verde', code: 'CPV', flag: '🇨🇻' },
               { id: 'Croacia', code: 'CRO', flag: '🇭🇷' },
               { id: 'República Checa', code: 'CZE', flag: '🇨🇿' },
               { id: 'Ecuador', code: 'ECU', flag: '🇪🇨' },
