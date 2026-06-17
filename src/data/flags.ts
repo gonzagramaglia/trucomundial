@@ -44,6 +44,7 @@ export const FLAG_MAP: Record<string, string> = {
   'Túnez': '🇹🇳',
   'Uruguay': '🇺🇾',
   'USA': '🇺🇸',
+  'Uzbekistán': '🇺🇿',
 };
 
 export const getFlag = (country: string) => FLAG_MAP[country] || '🌍';

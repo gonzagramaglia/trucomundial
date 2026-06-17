@@ -665,6 +665,7 @@ export function TwitchApp() {
                       { id: "Túnez", flag: "🇹🇳", code: "TUN" },
                       { id: "Uruguay", flag: "🇺🇾", code: "URU" },
                       { id: "USA", flag: "🇺🇸", code: "USA" },
+                      { id: "Uzbekistán", flag: "🇺🇿", code: "UZB" },
                     ];
 
                     const pinnedTeams = ALL_TEAMS_LIST.filter((t) =>

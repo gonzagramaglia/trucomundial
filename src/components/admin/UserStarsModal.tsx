@@ -54,7 +54,8 @@ const flagMap: Record<string, string> = {
   'Suiza': '🇨🇭',
   'Túnez': '🇹🇳',
   'Uruguay': '🇺🇾',
-  'USA': '🇺🇸'
+  'USA': '🇺🇸',
+  'Uzbekistán': '🇺🇿'
 };
 
 export const UserStarsModal: React.FC<UserStarsModalProps> = ({

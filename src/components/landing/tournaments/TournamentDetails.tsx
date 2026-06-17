@@ -44,6 +44,7 @@ const FLAG_MAP: Record<string, string> = {
   "Túnez": "🇹🇳",
   "Uruguay": "🇺🇾",
   "USA": "🇺🇸",
+  "Uzbekistán": "🇺🇿",
 };
 
 interface Props {

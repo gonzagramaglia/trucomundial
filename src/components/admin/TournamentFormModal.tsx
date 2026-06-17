@@ -110,6 +110,7 @@ export const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
             "Túnez",
             "Uruguay",
             "USA",
+            "Uzbekistán",
           ],
         });
       } else {
@@ -176,6 +177,7 @@ export const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
             "Túnez",
             "Uruguay",
             "USA",
+            "Uzbekistán",
           ],
         });
       }
@@ -809,6 +811,7 @@ export const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
                   { id: "Túnez", flag: "🇹🇳", code: "TUN" },
                   { id: "Uruguay", flag: "🇺🇾", code: "URU" },
                   { id: "USA", flag: "🇺🇸", code: "USA" },
+                  { id: "Uzbekistán", flag: "🇺🇿", code: "UZB" },
                 ]
                   .filter((c) => {
                     const q = cleanString(countrySearch);

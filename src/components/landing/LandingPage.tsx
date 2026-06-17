@@ -791,6 +791,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         "Túnez",
         "Uruguay",
         "USA",
+        "Uzbekistán",
       ];
       if (mData && mData.tournament_id) {
         const { data: tData } = await supabase
@@ -1754,6 +1755,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                   { id: "Túnez", flag: "🇹🇳", code: "TUN" },
                   { id: "Uruguay", flag: "🇺🇾", code: "URU" },
                   { id: "USA", flag: "🇺🇸", code: "USA" },
+                  { id: "Uzbekistán", flag: "🇺🇿", code: "UZB" },
                 ];
 
                 const pinnedTeams = ALL_TEAMS_LIST.filter((t) =>
