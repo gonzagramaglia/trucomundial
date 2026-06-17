@@ -755,6 +755,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         "Arabia Saudita",
         "Argelia",
         "Argentina",
+        "Australia",
         "Austria",
         "Bélgica",
         "Bosnia y Herz",
@@ -1712,6 +1713,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 const ALL_TEAMS_LIST = [
                   { id: "Argelia", flag: "🇩🇿", code: "ALG" },
                   { id: "Argentina", flag: "🇦🇷", code: "ARG" },
+                  { id: "Australia", flag: "🇦🇺", code: "AUS" },
                   { id: "Austria", flag: "🇦🇹", code: "AUT" },
                   { id: "Bélgica", code: "BEL", flag: "🇧🇪" },
                   { id: "Bosnia y Herz", flag: "🇧🇦", code: "BIH" },

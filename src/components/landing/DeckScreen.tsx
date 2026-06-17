@@ -1034,6 +1034,7 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({
               {[
                 { id: "Argelia", code: "ALG", flag: "🇩🇿" },
                 { id: "Argentina", code: "ARG", flag: "🇦🇷" },
+                { id: "Australia", code: "AUS", flag: "🇦🇺" },
                 { id: "Austria", code: "AUT", flag: "🇦🇹" },
                 { id: "Bélgica", code: "BEL", flag: "🇧🇪" },
                 { id: "Bosnia y Herz", code: "BIH", flag: "🇧🇦" },

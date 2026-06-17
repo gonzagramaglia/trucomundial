@@ -73,6 +73,7 @@ export const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
             "Arabia Saudita",
             "Argelia",
             "Argentina",
+            "Australia",
             "Austria",
             "Bélgica",
             "Bosnia y Herz",
@@ -140,6 +141,7 @@ export const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
             "Arabia Saudita",
             "Argelia",
             "Argentina",
+            "Australia",
             "Austria",
             "Bélgica",
             "Bosnia y Herz",
@@ -770,6 +772,7 @@ export const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
                 {[
                   { id: "Argelia", flag: "🇩🇿", code: "ALG" },
                   { id: "Argentina", flag: "🇦🇷", code: "ARG" },
+                  { id: "Australia", flag: "🇦🇺", code: "AUS" },
                   { id: "Austria", flag: "🇦🇹", code: "AUT" },
                   { id: "Bélgica", flag: "🇧🇪", code: "BEL" },
                   { id: "Bosnia y Herz", flag: "🇧🇦", code: "BIH" },

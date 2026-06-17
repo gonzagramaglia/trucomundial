@@ -16,6 +16,7 @@ const flagMap: Record<string, string> = {
   'Arabia Saudita': '🇸🇦',
   'Argelia': '🇩🇿',
   'Argentina': '🇦🇷',
+  'Australia': '🇦🇺',
   'Austria': '🇦🇹',
   'Bélgica': '🇧🇪',
   'Bosnia y Herz': '🇧🇦',
