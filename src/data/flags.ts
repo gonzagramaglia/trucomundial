@@ -40,6 +40,7 @@ export const FLAG_MAP: Record<string, string> = {
   'Sudáfrica': '🇿🇦',
   'Suecia': '🇸🇪',
   'Suiza': '🇨🇭',
+  'Túnez': '🇹🇳',
   'Uruguay': '🇺🇾',
   'USA': '🇺🇸',
 };
