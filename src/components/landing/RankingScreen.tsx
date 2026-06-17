@@ -1288,6 +1288,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({
               { id: "Suiza", code: "SUI", flag: "🇨🇭" },
               { id: "Suecia", code: "SWE", flag: "🇸🇪" },
               { id: "Túnez", code: "TUN", flag: "🇹🇳" },
+              { id: "Türkiye", code: "TUR", flag: "🇹🇷" },
               { id: "Uruguay", code: "URU", flag: "🇺🇾" },
               { id: "USA", code: "USA", flag: "🇺🇸" },
               { id: "Uzbekistán", code: "UZB", flag: "🇺🇿" },

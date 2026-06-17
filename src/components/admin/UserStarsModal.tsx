@@ -54,6 +54,7 @@ const flagMap: Record<string, string> = {
   'Suecia': '🇸🇪',
   'Suiza': '🇨🇭',
   'Túnez': '🇹🇳',
+  'Türkiye': '🇹🇷',
   'Uruguay': '🇺🇾',
   'USA': '🇺🇸',
   'Uzbekistán': '🇺🇿'

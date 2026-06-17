@@ -664,6 +664,7 @@ export function TwitchApp() {
                       { id: "Suiza", flag: "🇨🇭", code: "SUI" },
                       { id: "Suecia", code: "SWE", flag: "🇸🇪" },
                       { id: "Túnez", flag: "🇹🇳", code: "TUN" },
+                      { id: "Türkiye", flag: "🇹🇷", code: "TUR" },
                       { id: "Uruguay", flag: "🇺🇾", code: "URU" },
                       { id: "USA", flag: "🇺🇸", code: "USA" },
                       { id: "Uzbekistán", flag: "🇺🇿", code: "UZB" },

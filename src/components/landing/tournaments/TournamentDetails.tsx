@@ -43,6 +43,7 @@ const FLAG_MAP: Record<string, string> = {
   "Suiza": "🇨🇭",
   "Suecia": "🇸🇪",
   "Túnez": "🇹🇳",
+  "Türkiye": "🇹🇷",
   "Uruguay": "🇺🇾",
   "USA": "🇺🇸",
   "Uzbekistán": "🇺🇿",
