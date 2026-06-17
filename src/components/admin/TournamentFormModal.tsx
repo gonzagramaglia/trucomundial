@@ -69,6 +69,7 @@ export const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
           allowed_teams: tournament.allowed_teams || [
             "Alemania",
             "Ghana",
+            "Haití",
             "Arabia Saudita",
             "Argelia",
             "Argentina",
@@ -131,6 +132,7 @@ export const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
           allowed_teams: [
             "Alemania",
             "Ghana",
+            "Haití",
             "Arabia Saudita",
             "Argelia",
             "Argentina",
