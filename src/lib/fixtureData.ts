@@ -235,7 +235,7 @@ export const fixtureMatches: FixtureMatch[] = [
   },
   {
     "id": "21",
-    "date": "martes 16 de junio",
+    "date": "miércoles 17 de junio",
     "time": "02:00 p. m.",
     "group": "Group K",
     "teamA": "Portugal",
@@ -246,7 +246,7 @@ export const fixtureMatches: FixtureMatch[] = [
   },
   {
     "id": "22",
-    "date": "martes 16 de junio",
+    "date": "miércoles 17 de junio",
     "time": "05:00 p. m.",
     "group": "Group L",
     "teamA": "Inglaterra",
@@ -257,7 +257,7 @@ export const fixtureMatches: FixtureMatch[] = [
   },
   {
     "id": "23",
-    "date": "martes 16 de junio",
+    "date": "miércoles 17 de junio",
     "time": "08:00 p. m.",
     "group": "Group L",
     "teamA": "Ghana",
@@ -279,7 +279,7 @@ export const fixtureMatches: FixtureMatch[] = [
   },
   {
     "id": "25",
-    "date": "miércoles 17 de junio",
+    "date": "jueves 18 de junio",
     "time": "01:00 p. m.",
     "group": "Group A",
     "teamA": "República Checa",
@@ -290,7 +290,7 @@ export const fixtureMatches: FixtureMatch[] = [
   },
   {
     "id": "26",
-    "date": "miércoles 17 de junio",
+    "date": "jueves 18 de junio",
     "time": "04:00 p. m.",
     "group": "Group B",
     "teamA": "Suiza",
@@ -301,7 +301,7 @@ export const fixtureMatches: FixtureMatch[] = [
   },
   {
     "id": "27",
-    "date": "miércoles 17 de junio",
+    "date": "jueves 18 de junio",
     "time": "07:00 p. m.",
     "group": "Group B",
     "teamA": "Canadá",
@@ -323,7 +323,7 @@ export const fixtureMatches: FixtureMatch[] = [
   },
   {
     "id": "29",
-    "date": "jueves 18 de junio",
+    "date": "viernes 19 de junio",
     "time": "04:00 p. m.",
     "group": "Group D",
     "teamA": "Estados Unidos",
@@ -334,7 +334,7 @@ export const fixtureMatches: FixtureMatch[] = [
   },
   {
     "id": "30",
-    "date": "jueves 18 de junio",
+    "date": "viernes 19 de junio",
     "time": "07:00 p. m.",
     "group": "Group C",
     "teamA": "Escocia",
@@ -367,7 +367,7 @@ export const fixtureMatches: FixtureMatch[] = [
   },
   {
     "id": "33",
-    "date": "viernes 19 de junio",
+    "date": "sábado 20 de junio",
     "time": "02:00 p. m.",
     "group": "Group F",
     "teamA": "Países Bajos",
@@ -378,7 +378,7 @@ export const fixtureMatches: FixtureMatch[] = [
   },
   {
     "id": "34",
-    "date": "viernes 19 de junio",
+    "date": "sábado 20 de junio",
     "time": "05:00 p. m.",
     "group": "Group E",
     "teamA": "Alemania",
@@ -400,7 +400,7 @@ export const fixtureMatches: FixtureMatch[] = [
   },
   {
     "id": "36",
-    "date": "sábado 20 de junio",
+    "date": "domingo 21 de junio",
     "time": "01:00 a. m.",
     "group": "Group F",
     "teamA": "Túnez",
@@ -411,7 +411,7 @@ export const fixtureMatches: FixtureMatch[] = [
   },
   {
     "id": "37",
-    "date": "sábado 20 de junio",
+    "date": "domingo 21 de junio",
     "time": "01:00 p. m.",
     "group": "Group H",
     "teamA": "España",
@@ -422,7 +422,7 @@ export const fixtureMatches: FixtureMatch[] = [
   },
   {
     "id": "38",
-    "date": "sábado 20 de junio",
+    "date": "domingo 21 de junio",
     "time": "04:00 p. m.",
     "group": "Group G",
     "teamA": "Bélgica",
@@ -433,7 +433,7 @@ export const fixtureMatches: FixtureMatch[] = [
   },
   {
     "id": "39",
-    "date": "sábado 20 de junio",
+    "date": "domingo 21 de junio",
     "time": "07:00 p. m.",
     "group": "Group H",
     "teamA": "Uruguay",
@@ -455,7 +455,7 @@ export const fixtureMatches: FixtureMatch[] = [
   },
   {
     "id": "41",
-    "date": "domingo 21 de junio",
+    "date": "lunes 22 de junio",
     "time": "02:00 p. m.",
     "group": "Group J",
     "teamA": "Argentina",
@@ -466,7 +466,7 @@ export const fixtureMatches: FixtureMatch[] = [
   },
   {
     "id": "42",
-    "date": "domingo 21 de junio",
+    "date": "lunes 22 de junio",
     "time": "06:00 p. m.",
     "group": "Group I",
     "teamA": "Francia",
@@ -499,7 +499,7 @@ export const fixtureMatches: FixtureMatch[] = [
   },
   {
     "id": "45",
-    "date": "lunes 22 de junio",
+    "date": "martes 23 de junio",
     "time": "02:00 p. m.",
     "group": "Group K",
     "teamA": "Portugal",
@@ -510,7 +510,7 @@ export const fixtureMatches: FixtureMatch[] = [
   },
   {
     "id": "46",
-    "date": "lunes 22 de junio",
+    "date": "martes 23 de junio",
     "time": "05:00 p. m.",
     "group": "Group L",
     "teamA": "Inglaterra",
@@ -521,7 +521,7 @@ export const fixtureMatches: FixtureMatch[] = [
   },
   {
     "id": "47",
-    "date": "lunes 22 de junio",
+    "date": "martes 23 de junio",
     "time": "08:00 p. m.",
     "group": "Group L",
     "teamA": "Panamá",
@@ -543,7 +543,7 @@ export const fixtureMatches: FixtureMatch[] = [
   },
   {
     "id": "49",
-    "date": "martes 23 de junio",
+    "date": "miércoles 24 de junio",
     "time": "04:00 p. m.",
     "group": "Group B",
     "teamA": "Bosnia & Herzegovina",
@@ -554,7 +554,7 @@ export const fixtureMatches: FixtureMatch[] = [
   },
   {
     "id": "50",
-    "date": "martes 23 de junio",
+    "date": "miércoles 24 de junio",
     "time": "04:00 p. m.",
     "group": "Group B",
     "teamA": "Suiza",
@@ -565,7 +565,7 @@ export const fixtureMatches: FixtureMatch[] = [
   },
   {
     "id": "51",
-    "date": "martes 23 de junio",
+    "date": "miércoles 24 de junio",
     "time": "07:00 p. m.",
     "group": "Group C",
     "teamA": "Marruecos",
@@ -576,7 +576,7 @@ export const fixtureMatches: FixtureMatch[] = [
   },
   {
     "id": "52",
-    "date": "martes 23 de junio",
+    "date": "miércoles 24 de junio",
     "time": "07:00 p. m.",
     "group": "Group C",
     "teamA": "Escocia",
