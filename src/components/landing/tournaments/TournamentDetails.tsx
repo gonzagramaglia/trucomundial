@@ -13,6 +13,7 @@ const FLAG_MAP: Record<string, string> = {
   "Brasil": "🇧🇷",
   "Canadá": "🇨🇦",
   "Colombia": "🇨🇴",
+  "DR Congo": "🇨🇩",
   "Corea del Sur": "🇰🇷",
   "Croacia": "🇭🇷",
   "Curaçao": "🇨🇼",

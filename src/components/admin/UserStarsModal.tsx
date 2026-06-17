@@ -23,6 +23,7 @@ const flagMap: Record<string, string> = {
   'Canadá': '🇨🇦',
   'Colombia': '🇨🇴',
   'Costa de Marfil': '🇨🇮',
+  'DR Congo': '🇨🇩',
   'Corea del Sur': '🇰🇷',
   'Croacia': '🇭🇷',
   'Curaçao': '🇨🇼',

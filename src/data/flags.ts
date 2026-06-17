@@ -11,6 +11,7 @@ export const FLAG_MAP: Record<string, string> = {
   'Colombia': '🇨🇴',
   'Corea del Sur': '🇰🇷',
   'Costa de Marfil': '🇨🇮',
+  'DR Congo': '🇨🇩',
   'Croacia': '🇭🇷',
   'Curaçao': '🇨🇼',
   'Ecuador': '🇪🇨',

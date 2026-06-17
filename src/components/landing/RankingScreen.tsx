@@ -1252,6 +1252,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({
               { id: "Brasil", code: "BRA", flag: "🇧🇷" },
               { id: "Canadá", code: "CAN", flag: "🇨🇦" },
               { id: "Costa de Marfil", code: "CIV", flag: "🇨🇮" },
+              { id: "DR Congo", code: "COD", flag: "🇨🇩" },
               { id: "Colombia", code: "COL", flag: "🇨🇴" },
               { id: "Cabo Verde", code: "CPV", flag: "🇨🇻" },
               { id: "Croacia", code: "CRO", flag: "🇭🇷" },
