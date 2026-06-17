@@ -631,6 +631,7 @@ export function TwitchApp() {
                       { id: "Colombia", flag: "🇨🇴", code: "COL" },
                       { id: "Cabo Verde", flag: "🇨🇻", code: "CPV" },
                       { id: "Croacia", flag: "🇭🇷", code: "CRO" },
+                      { id: "Curaçao", flag: "🇨🇼", code: "CUW" },
                       { id: "República Checa", flag: "🇨🇿", code: "CZE" },
                       { id: "Ecuador", flag: "🇪🇨", code: "ECU" },
                       { id: "Egipto", flag: "🇪🇬", code: "EGY" },
