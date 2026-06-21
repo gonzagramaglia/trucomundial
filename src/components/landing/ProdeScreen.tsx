@@ -136,6 +136,7 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
   const [inputs, setInputs] = useState<Record<string, { scoreA: string, scoreB: string }>>({});
   const [isSaving, setIsSaving] = useState<Record<string, boolean>>({});
   const [rewardCodesModal, setRewardCodesModal] = useState<{ codes: { code: string, used: boolean }[], matchDesc: string, packs: number } | null>(null);
+  const [usedCodesStatus, setUsedCodesStatus] = useState<Record<string, { total: number, used: number }>>({});
 
   const hideSpinnersCSS = `
     input[type=number]::-webkit-inner-spin-button, 
@@ -186,6 +187,26 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
       } catch (e) { }
     };
     fetchPredictions();
+  }, [user]);
+
+  useEffect(() => {
+    const fetchCodes = async () => {
+      if (!user) return;
+      try {
+        const { data, error } = await supabase.from('reward_codes').select('source, used').eq('user_id', user.id).like('source', 'prode_match_%');
+        if (data && !error) {
+           const statusMap: Record<string, { total: number, used: number }> = {};
+           data.forEach(c => {
+              const matchId = c.source.replace('prode_match_', '');
+              if (!statusMap[matchId]) statusMap[matchId] = { total: 0, used: 0 };
+              statusMap[matchId].total += 1;
+              if (c.used) statusMap[matchId].used += 1;
+           });
+           setUsedCodesStatus(statusMap);
+        }
+      } catch (e) {}
+    }
+    fetchCodes();
   }, [user]);
 
   useEffect(() => {
@@ -281,6 +302,8 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
     if (!error) {
       await supabase.from('prode_predictions').update({ rewarded: true }).eq('user_id', user.id).eq('match_id', matchId);
       setPredictions(prev => ({ ...prev, [matchId]: { ...prev[matchId], rewarded: true } }));
+
+      setUsedCodesStatus(prev => ({ ...prev, [matchId]: { total: packs, used: 0 } }));
 
       setRewardCodesModal({
         codes: generatedCodes.map(c => ({ code: c, used: false })),
@@ -618,6 +641,9 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
                   if (exactMatch) { packsWon = 3; wonExact = true; }
                   else if (predWinner === resWinner) packsWon = 1;
                 }
+                
+                const codeStatus = usedCodesStatus[match.id];
+                const allCodesUsed = codeStatus && codeStatus.total > 0 && codeStatus.total === codeStatus.used;
 
                 return (
                   <div key={match.id} style={{
@@ -710,11 +736,18 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
                           ) : packsWon > 0 && isRewarded ? (
                             <button
                               key="btn-claimed"
-                              onClick={() => handleViewRewards(match.id, packsWon, match.teamA, match.teamB)}
-                              className="btn-hover-dark"
-                              style={{ background: 'rgba(255, 140, 0, 0.2)', color: '#ff8c00', border: '1px solid rgba(255, 140, 0, 0.5)', padding: '0.5rem 1rem', borderRadius: '0.5rem', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                              onClick={() => { if (!allCodesUsed) handleViewRewards(match.id, packsWon, match.teamA, match.teamB); }}
+                              className={allCodesUsed ? "" : "btn-hover-dark"}
+                              disabled={allCodesUsed}
+                              style={{ 
+                                background: allCodesUsed ? 'rgba(255, 140, 0, 0.05)' : 'rgba(255, 140, 0, 0.2)', 
+                                color: allCodesUsed ? 'rgba(255, 140, 0, 0.5)' : '#ff8c00', 
+                                border: allCodesUsed ? '1px solid rgba(255, 140, 0, 0.2)' : '1px solid rgba(255, 140, 0, 0.5)', 
+                                padding: '0.5rem 1rem', borderRadius: '0.5rem', fontWeight: 800, 
+                                cursor: allCodesUsed ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' 
+                              }}
                             >
-                              <Layers size={16} /> <span>Reclamado</span>
+                              <Layers size={16} /> <span>{t('claimed', 'Reclamado')}</span>
                             </button>
                           ) : (
                             <div key="div-final" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -766,11 +799,18 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
                       ) : packsWon > 0 && isRewarded ? (
                         <button
                           key="m-btn-claimed"
-                          onClick={() => handleViewRewards(match.id, packsWon, match.teamA, match.teamB)}
-                          className="btn-hover-dark"
-                          style={{ background: 'rgba(255, 140, 0, 0.2)', color: '#ff8c00', border: '1px solid rgba(255, 140, 0, 0.5)', padding: '0.5rem 1rem', borderRadius: '0.5rem', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', width: '100%', marginTop: '1rem' }}
+                          onClick={() => { if (!allCodesUsed) handleViewRewards(match.id, packsWon, match.teamA, match.teamB); }}
+                          className={allCodesUsed ? "" : "btn-hover-dark"}
+                          disabled={allCodesUsed}
+                          style={{ 
+                            background: allCodesUsed ? 'rgba(255, 140, 0, 0.05)' : 'rgba(255, 140, 0, 0.2)', 
+                            color: allCodesUsed ? 'rgba(255, 140, 0, 0.5)' : '#ff8c00', 
+                            border: allCodesUsed ? '1px solid rgba(255, 140, 0, 0.2)' : '1px solid rgba(255, 140, 0, 0.5)', 
+                            padding: '0.5rem 1rem', borderRadius: '0.5rem', fontWeight: 800, 
+                            cursor: allCodesUsed ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', width: '100%', marginTop: '1rem' 
+                          }}
                         >
-                          <Layers size={16} /> <span>Reclamado</span>
+                          <Layers size={16} /> <span>{t('claimed', 'Reclamado')}</span>
                         </button>
                       ) : (
                         <div key="m-div-final" style={{ marginTop: '1rem', color: '#00f2ff', fontSize: '1rem', fontWeight: 900, textTransform: 'uppercase', textAlign: 'center', width: '100%' }}>
@@ -817,10 +857,10 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
           <div style={{ textAlign: 'center', padding: '4rem 1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '1.5rem', border: '1px dashed rgba(255,255,255,0.1)' }}>
             <Trophy size={48} style={{ color: 'rgba(255,255,255,0.2)', marginBottom: '1rem' }} />
             <h3 style={{ fontSize: '1.5rem', fontWeight: 800, margin: '0 0 0.5rem 0', color: 'rgba(255,255,255,0.6)' }}>
-              Etapa por Definir
+              {t('prode_stage_tbd')}
             </h3>
             <p style={{ opacity: 0.5, fontSize: '0.9rem', maxWidth: '400px', margin: '0 auto 1.5rem auto' }}>
-              Los partidos de esta etapa se definirán al concluir la etapa anterior.
+              {t('prode_stage_tbd_desc')}
             </p>
             <a 
               href="https://www.fifa.com/es/tournaments/mens/worldcup/canadamexicousa2026/standings" 
@@ -843,7 +883,7 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
               className="btn-hover-dark"
             >
               <ExternalLink size={16} />
-              Ver posiciones en FIFA.com
+              {t('prode_view_standings')} FIFA.com
             </a>
           </div>
         )}
@@ -854,22 +894,22 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
       {rewardCodesModal && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)', padding: '1rem' }}>
           <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} style={{ background: 'rgba(26, 26, 46, 0.85)', backdropFilter: 'blur(16px)', padding: '2.5rem', borderRadius: '1.5rem', maxWidth: '600px', width: '100%', textAlign: 'center', border: '1px solid rgba(255, 140, 0, 0.3)', boxShadow: '0 0 30px rgba(255, 140, 0, 0.15)' }}>
-            <h2 style={{ color: '#ff8c00', marginTop: 0, marginBottom: '0.5rem', fontSize: '2rem', textTransform: 'uppercase', textShadow: '0 0 10px rgba(255, 140, 0, 0.5)' }}>¡Felicidades!</h2>
+            <h2 style={{ color: '#ff8c00', marginTop: 0, marginBottom: '0.5rem', fontSize: '2rem', textTransform: 'uppercase', textShadow: '0 0 10px rgba(255, 140, 0, 0.5)' }}>{t('prode_congratulations')}</h2>
             <p style={{ color: '#fff', fontSize: '1.1rem', marginBottom: '0.75rem' }}>
-              Acertaste tu predicción del partido <strong>{rewardCodesModal.matchDesc}</strong> y ganaste <strong>{rewardCodesModal.packs} {rewardCodesModal.packs === 1 ? 'sobre' : 'sobres'}</strong> para el mazo.
+              {t('prode_prediction_success')} <strong>{rewardCodesModal.matchDesc}</strong> {t('prode_prediction_packs_won')} <strong>{rewardCodesModal.packs} {rewardCodesModal.packs === 1 ? t('prode_prediction_pack_single') : t('prode_prediction_packs_plural')}</strong> {t('prode_prediction_for_deck')}
             </p>
             <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.9rem', marginBottom: '1rem' }}>
               {rewardCodesModal.packs === 1 ? (
-                <>Este es tu código de recompensa. ¡Anotalo y canjealo en la <a href="/mazo" target="_blank" rel="noopener noreferrer" style={{ color: '#ff8c00', textDecoration: 'none', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '0.2rem', verticalAlign: 'middle' }} className="hover-underline"><ExternalLink size={14} />pantalla de Mazo</a>!</>
+                <>{t('prode_reward_code_single')} <a href="/mazo" target="_blank" rel="noopener noreferrer" style={{ color: '#ff8c00', textDecoration: 'none', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '0.2rem', verticalAlign: 'middle' }} className="hover-underline"><ExternalLink size={14} />{t('prode_deck_screen')}</a>!</>
               ) : (
-                <>Estos son tus códigos de recompensa. ¡Anotalos y canjealos en la <a href="/mazo" target="_blank" rel="noopener noreferrer" style={{ color: '#ff8c00', textDecoration: 'none', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '0.2rem', verticalAlign: 'middle' }} className="hover-underline"><ExternalLink size={14} />pantalla de Mazo</a>!</>
+                <>{t('prode_reward_code_plural')} <a href="/mazo" target="_blank" rel="noopener noreferrer" style={{ color: '#ff8c00', textDecoration: 'none', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '0.2rem', verticalAlign: 'middle' }} className="hover-underline"><ExternalLink size={14} />{t('prode_deck_screen')}</a>!</>
               )}
             </p>
             <div style={{ display: 'grid', gridTemplateColumns: rewardCodesModal.codes.length === 1 ? 'minmax(180px, 250px)' : 'repeat(3, 1fr)', justifyContent: 'center', gap: '0.75rem', marginBottom: '2rem' }}>
               {rewardCodesModal.codes.map((item, idx) => (
                 <div key={idx} style={{ background: 'rgba(0,0,0,0.5)', padding: isMobile ? '0.75rem 0.25rem' : '1rem 0.5rem', borderRadius: '0.75rem', border: '1px dashed rgba(255, 140, 0, 0.4)', fontSize: isMobile ? '1.1rem' : '1.35rem', fontWeight: 900, letterSpacing: isMobile ? '0.05em' : '0.1em', color: item.used ? 'rgba(255,255,255,0.3)' : '#fff', textDecoration: item.used ? 'line-through' : 'none', position: 'relative' }}>
                   {item.code}
-                  {item.used && <div style={{ position: 'absolute', top: '-8px', right: '-8px', background: '#ff4444', color: '#fff', fontSize: '0.6rem', padding: '0.2rem 0.4rem', borderRadius: '0.5rem', fontWeight: 'bold' }}>USADO</div>}
+                  {item.used && <div style={{ position: 'absolute', top: '-8px', right: '-8px', background: '#ff4444', color: '#fff', fontSize: '0.6rem', padding: '0.2rem 0.4rem', borderRadius: '0.5rem', fontWeight: 'bold' }}>{t('prode_used')}</div>}
                 </div>
               ))}
             </div>
@@ -879,7 +919,7 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
               style={{ width: '100%', background: '#ff8c00', color: '#000', border: 'none', padding: '1rem', borderRadius: '1rem', fontSize: '1.1rem', fontWeight: 900, cursor: 'pointer', textTransform: 'uppercase', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
             >
               <Layers size={20} />
-              ¡Entendido!
+              {t('prode_understood')}
             </button>
           </motion.div>
         </div>

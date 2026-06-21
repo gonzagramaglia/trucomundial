@@ -80,7 +80,7 @@ export const LandingHeader: React.FC<LandingHeaderProps> = ({ user }) => {
             fontWeight: 700
           }}>
             <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#00f2ff' }} />
-            <span className="desktop-only">¡Hola</span>
+            <span className="desktop-only">{t('hello')}</span>
             <strong>{user.user_metadata?.custom_username || user.email?.split('@')[0]}!</strong>
           </div>
         )}

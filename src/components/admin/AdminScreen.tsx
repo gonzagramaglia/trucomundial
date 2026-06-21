@@ -846,11 +846,11 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
                     textShadow: "0 0 8px rgba(168, 85, 247, 0.1)",
                   }}
                 >
-                  PANEL DE ADMIN
+                  {t('admin_panel')}
                 </h2>
               </div>
               <div style={{ fontSize: "0.75rem", opacity: 0.6 }}>
-                Gestión de jugadores, torneos, creadores y soporte
+                {t('admin_panel_desc')}
               </div>
             </div>
           </>
@@ -890,11 +890,11 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
                     textShadow: "0 0 15px rgba(168, 85, 247, 0.2)",
                   }}
                 >
-                  PANEL DE ADMIN
+                  {t('admin_panel')}
                 </h2>
               </div>
               <div style={{ fontSize: "0.9rem", opacity: 0.6 }}>
-                Gestión de jugadores, torneos, creadores y soporte técnico
+                {t('admin_panel_desc')}
               </div>
             </div>
           </>
@@ -960,7 +960,7 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
             transition: "all 0.2s",
           }}
         >
-          <Users size={18} /> Jugadores ({playerStats.length})
+          <Users size={18} /> {t('admin_player_management')} ({playerStats.length})
         </button>
         <button
           onClick={() => setActiveTab("matches")}

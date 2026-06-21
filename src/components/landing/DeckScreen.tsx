@@ -13,7 +13,7 @@ import {
   ExternalLink,
   Star,
 } from "lucide-react";
-import { isTopCard } from "../../lib/votesStore";
+import { isTopCard, getCardVotes } from "../../lib/votesStore";
 import { useTranslation } from "react-i18next";
 import { CARDS } from "../../data/cards";
 import { Sticker } from "../shared/Sticker";
@@ -28,36 +28,6 @@ interface DeckScreenProps {
   onBack: () => void;
 }
 
-const TOP_CARDS = [
-  "messi",
-  "dibu",
-  "mbappe",
-  "vinicius_jr",
-  "lautaro",
-  "rodri",
-  "yamal",
-  "pedri",
-  "macallister",
-  "alisson",
-  "estevao",
-  "maignan",
-  "barcola",
-  "ekitike",
-  "doue",
-  "james_rodriguez",
-  "luis_diaz",
-  "cristiano_ronaldo",
-  "rafael_leao",
-  "moises_caicedo",
-  "kendry_paez",
-  "julio_enciso",
-  "ramon_sosa",
-  "christian_pulisic",
-  "alphonso_davies",
-  "xavi_simons",
-  "frenkie_de_jong",
-  "son_heung_min",
-];
 
 export const DeckScreen: React.FC<DeckScreenProps> = ({
   user,
@@ -305,7 +275,7 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({
     if (openingPack) return;
 
     const lockedCards = CARDS.map((c) => c.id).filter(
-      (id) => !unlockedCards.includes(id) && !TOP_CARDS.includes(id),
+      (id) => !unlockedCards.includes(id)
     );
     if (lockedCards.length === 0) {
       alert(t("alert_all_cards_unlocked"));
@@ -314,14 +284,36 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({
 
     setOpeningPack(true);
 
-    // Pick up to 3 random cards
+    // Sort all cards by votes to determine rank
+    const allRanked = CARDS.map(c => ({ id: c.id, votes: getCardVotes(c.id) })).sort((a, b) => b.votes - a.votes);
+
+    // Calculate weight for each locked card
+    const availableLockedWithWeights = lockedCards.map(id => {
+      let weight = 100;
+      if (isTopCard(id)) {
+        const rank = allRanked.findIndex(c => c.id === id); // 0 is top 1
+        weight = Math.max(60, 60 + rank * 5); // Rank 0 -> 60, Rank 1 -> 65, etc.
+      }
+      return { id, weight };
+    });
+
+    // Pick up to 3 random cards based on weights
     const cardsToUnlock: string[] = [];
-    const availableLocked = [...lockedCards];
     for (let i = 0; i < 3; i++) {
-      if (availableLocked.length === 0) break;
-      const randomIndex = Math.floor(Math.random() * availableLocked.length);
-      cardsToUnlock.push(availableLocked[randomIndex]);
-      availableLocked.splice(randomIndex, 1);
+      if (availableLockedWithWeights.length === 0) break;
+      
+      const totalWeight = availableLockedWithWeights.reduce((sum, item) => sum + item.weight, 0);
+      let randomVal = Math.random() * totalWeight;
+      let selectedIndex = 0;
+      for (let j = 0; j < availableLockedWithWeights.length; j++) {
+        randomVal -= availableLockedWithWeights[j].weight;
+        if (randomVal <= 0) {
+          selectedIndex = j;
+          break;
+        }
+      }
+      cardsToUnlock.push(availableLockedWithWeights[selectedIndex].id);
+      availableLockedWithWeights.splice(selectedIndex, 1);
     }
 
     const newUnlocked = [...unlockedCards, ...cardsToUnlock];

@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { creatorApplicationSchema, type CreatorApplicationFormData } from '../../lib/schemas';
 import { TwitchButton } from '../shared/TwitchButton';
+import { useTranslation } from 'react-i18next';
 
 
 interface CreatorsApplicationScreenProps {
@@ -18,6 +19,7 @@ export const CreatorsApplicationScreen: React.FC<CreatorsApplicationScreenProps>
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
   const [loading, setLoading] = useState(true);
   const [applicationStatus, setApplicationStatus] = useState<'none' | 'pending' | 'approved' | 'rejected'>('none');
+  const { t } = useTranslation();
 
   const { register, handleSubmit, formState: { errors } } = useForm<CreatorApplicationFormData>({
     resolver: zodResolver(creatorApplicationSchema),
@@ -269,7 +271,7 @@ export const CreatorsApplicationScreen: React.FC<CreatorsApplicationScreenProps>
             {applicationStatus === 'approved' && (
               <>
                 <ShieldCheck size={48} style={{ color: '#10b981', margin: '0 auto 1.5rem auto' }} />
-                <h3 style={{ margin: '0 0 1rem 0', color: '#10b981', fontSize: '1.5rem', fontWeight: 900 }}>¡FELICIDADES!</h3>
+                <h3 style={{ margin: '0 0 1rem 0', color: '#10b981', fontSize: '1.5rem', fontWeight: 900 }}>{t('prode_congratulations')}</h3>
                 <p style={{ margin: '0 0 2rem 0', opacity: 0.8, lineHeight: 1.5 }}>Sos parte del programa de creadores oficiales.</p>
                 <button
                   onClick={() => window.location.href = window.location.pathname.startsWith('/en') ? '/en/creador' : '/creador'}

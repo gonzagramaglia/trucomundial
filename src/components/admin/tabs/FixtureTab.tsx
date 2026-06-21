@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { supabase } from '../../../lib/supabase';
 import { fixtureMatches } from '../../../lib/fixtureData';
 import { Search, Save, Check } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export const FixtureTab: React.FC = () => {
   const [results, setResults] = useState<Record<string, { scoreA?: number; scoreB?: number; status: string }>>({});
@@ -10,6 +11,7 @@ export const FixtureTab: React.FC = () => {
   const [savedMap, setSavedMap] = useState<Record<string, boolean>>({});
   const [searchQuery, setSearchQuery] = useState('');
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -104,7 +106,7 @@ export const FixtureTab: React.FC = () => {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h3 className="text-display" style={{ fontSize: '1.5rem', margin: 0, color: '#fff' }}>Resultados del Mundial</h3>
+        <h3 className="text-display" style={{ fontSize: '1.5rem', margin: 0, color: '#fff' }}>{t('admin_world_cup_results')}</h3>
       </div>
       
       {/* Search Bar */}
@@ -120,7 +122,7 @@ export const FixtureTab: React.FC = () => {
         <Search size={18} style={{ opacity: 0.5 }} />
         <input 
           type="text" 
-          placeholder="Buscar equipo, grupo o fecha..." 
+          placeholder={t('admin_search_placeholder')} 
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           style={{
@@ -251,7 +253,7 @@ export const FixtureTab: React.FC = () => {
                 ) : (
                   <Save key="icon" size={16} />
                 )}
-                <span>{savedMap[match.id] ? 'Guardado' : 'Guardar'}</span>
+                <span>{savedMap[match.id] ? t('admin_saved') : t('admin_save')}</span>
               </button>
             </div>
           </div>

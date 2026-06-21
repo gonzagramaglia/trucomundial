@@ -1006,7 +1006,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               backdropFilter: "blur(12px)",
               transition: "none",
             }}
-            title="Panel de Admin"
+            title={t("admin_panel")}
           >
             <ShieldAlert size={18} style={{ color: "#ffffff" }} />
           </button>
