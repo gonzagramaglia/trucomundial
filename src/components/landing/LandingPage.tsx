@@ -23,7 +23,6 @@ import { TournamentScreen } from "./TournamentScreen";
 import { DeckScreen } from "./DeckScreen";
 import TournamentEventPage from "./tournaments/TournamentEventPage";
 import { RoadmapScreen } from "./RoadmapScreen";
-import { FixtureScreen } from "./FixtureScreen";
 import { ProdeScreen } from "./ProdeScreen";
 import { NationalityModal } from "./NationalityModal";
 import { ProfileScreen } from "./ProfileScreen";
@@ -116,18 +115,16 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       (window.location.pathname === "/ruta" ||
         window.location.pathname === "/en/ruta"),
   );
-  const [showFixture, setShowFixture] = useState(
-    () =>
-      typeof window !== "undefined" &&
-      (window.location.pathname === "/fixture" ||
-        window.location.pathname === "/en/fixture"),
-  );
-  const [showProde, setShowProde] = useState(
-    () =>
-      typeof window !== "undefined" &&
-      (window.location.pathname === "/prode" ||
-        window.location.pathname === "/en/prode"),
-  );
+  const [showProde, setShowProde] = useState(() => {
+    if (typeof window === "undefined") return false;
+    const p = window.location.pathname;
+    if (p === "/fixture" || p === "/en/fixture") {
+      const isEn = p.startsWith("/en");
+      window.history.replaceState({}, "", isEn ? "/en/prode" : "/prode");
+      return true;
+    }
+    return p === "/prode" || p === "/en/prode";
+  });
   const [showDeck, setShowDeck] = useState(
     () =>
       typeof window !== "undefined" &&
@@ -136,7 +133,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   );
 
   useEffect(() => {
-    // Only play theme if not in voting or fixture, which handle it themselves,
+    // Only play theme if not in voting, which handles it itself,
     // actually LandingPage mounts first, so it can just play it.
     // audioManager will not restart if already playing.
     audioManager.playTheme();
@@ -334,22 +331,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         "twitter:description",
         "Conocé la hoja de ruta de Truco Mundial. Descubrí el futuro competitivo, torneos con sponsors, personalizaciones y el juego cooperativo 2v2.",
       );
-    } else if (showFixture) {
-      document.title = "Fixture del Mundial 2026";
-      updateMetaTag(
-        "description",
-        "Fixture del Mundial 2026 de Truco Mundial.",
-      );
-      updateMetaTag("og:title", "Fixture del Mundial 2026");
-      updateMetaTag(
-        "og:description",
-        "Fixture del Mundial 2026 de Truco Mundial.",
-      );
-      updateMetaTag("twitter:title", "Fixture del Mundial 2026");
-      updateMetaTag(
-        "twitter:description",
-        "Fixture del Mundial 2026 de Truco Mundial.",
-      );
+
     } else if (showTournament) {
       document.title = "Torneos de Truco Mundial";
       updateMetaTag(
@@ -408,7 +390,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   }, [
     showRanking,
     showRoadmap,
-    showFixture,
     showProde,
     showTournament,
     showProfile,
@@ -438,8 +419,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         p.startsWith("/torneos/") || p.startsWith("/en/torneos/"),
       );
       setShowRoadmap(p === "/ruta" || p === "/en/ruta");
-      setShowFixture(p === "/fixture" || p === "/en/fixture");
-      setShowProde(p === "/prode" || p === "/en/prode");
+      setShowProde(p === "/prode" || p === "/en/prode" || p === "/fixture" || p === "/en/fixture");
       setShowDeck(p === "/mazo" || p === "/en/mazo");
       setShowProfile(p === "/perfil" || p === "/en/perfil");
       setShowAdmin(p === "/admin" || p === "/en/admin");
@@ -886,7 +866,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   };
 
   const renderLeftNav = (offset = false) => {
-    const hideRulesBtn = showRanking || showFixture || showDeck || showProde;
+    const hideRulesBtn = showRanking || showDeck || showProde;
     return (
       <div
         style={{
@@ -1222,33 +1202,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     );
   }
 
-  if (showFixture) {
-    return (
-      <div
-        style={{
-          position: "fixed",
-          inset: 0,
-          background: "transparent",
-          width: "100%",
-          height: "100vh",
-          overflowY: "auto",
-          zIndex: 1500,
-        }}
-      >
-        {renderLeftNav(true)}
-        <FixtureScreen
-          user={user}
-          onBack={() => {
-            setShowFixture(false);
-            if (typeof window !== "undefined") {
-              const isEn = window.location.pathname.startsWith("/en");
-              window.history.pushState({}, "", isEn ? "/en" : "/");
-            }
-          }}
-        />
-      </div>
-    );
-  }
 
   if (showAdmin) {
     return (
@@ -1509,13 +1462,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 return;
               }
               if ((mode as string) === "fixture") {
-                setShowFixture(true);
+                setShowProde(true);
                 if (typeof window !== "undefined") {
                   const isEn = window.location.pathname.startsWith("/en");
                   window.history.pushState(
                     {},
                     "",
-                    isEn ? "/en/fixture" : "/fixture",
+                    isEn ? "/en/prode" : "/prode",
                   );
                 }
                 return;
