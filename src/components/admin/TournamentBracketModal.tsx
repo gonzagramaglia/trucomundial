@@ -93,7 +93,7 @@ export const TournamentBracketModal: React.FC<TournamentBracketModalProps> = ({
 
   const bracketSize = nextPow2(registrations.length);
   const rounds = buildBracket(slots);
-  const roundNames = ["Octavos", "Cuartos", "Semis", "Final"];
+  const roundNames = ["16vos", "Octavos", "Cuartos", "Semis", "Final"];
 
   useEffect(() => {
     if (isOpen) {

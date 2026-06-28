@@ -2,6 +2,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Calendar, Globe, Search, Home, Trophy, Save, AlertCircle, Layers, Star, ExternalLink } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { WorldCupBracket } from './WorldCupBracket';
+import { GroupStandings } from './GroupStandings';
 import { TwitchButton } from '../shared/TwitchButton';
 import { fixtureMatches } from '../../lib/fixtureData';
 import type { FixtureMatch } from '../../lib/fixtureData';
@@ -9,7 +11,7 @@ import { supabase } from '../../lib/supabase';
 import { audioManager } from '../../lib/audio';
 import { UtilityButtons } from '../shared/UtilityButtons';
 
-type TabType = 'groups' | 'round_16' | 'quarterfinals' | 'semifinals' | 'final';
+type TabType = 'groups' | 'round_32' | 'round_16' | 'quarterfinals' | 'semifinals' | 'final';
 
 interface ProdeScreenProps {
   user?: any;
@@ -126,7 +128,7 @@ export const formatMatchTime = (dateStr: string, timeStr: string, language: stri
 export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBack }) => {
   const { t, i18n } = useTranslation();
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
-  const [activeTab, setActiveTab] = useState<TabType>('groups');
+  const [activeTab, setActiveTab] = useState<TabType>('round_32');
   const [searchQuery, setSearchQuery] = useState('');
   const [showFinishedOnly, setShowFinishedOnly] = useState(false);
   const [liveResults, setLiveResults] = useState<Record<string, { scoreA: number, scoreB: number, status: string }>>({});
@@ -343,6 +345,14 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
       return m;
     });
 
+    if (activeTab === 'groups') {
+      filtered = filtered.filter(m => m.group.startsWith('Group'));
+    } else if (activeTab === 'round_32') {
+      filtered = filtered.filter(m => m.group === '16vos de final');
+    } else {
+      filtered = [];
+    }
+
     if (searchQuery) {
       const removeAccents = (str: string) => str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
       const q = removeAccents(searchQuery.toLowerCase());
@@ -379,7 +389,7 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
       date,
       matches: groups[date]
     }));
-  }, [searchQuery, liveResults, showFinishedOnly]);
+  }, [searchQuery, liveResults, showFinishedOnly, activeTab]);
 
   const renderTab = (id: TabType, label: string, Icon: any) => (
     <button
@@ -461,9 +471,10 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
         </div>
       </div>
 
-      <div style={{ display: 'flex', justifyContent: isMobile ? 'flex-start' : 'center', gap: '0.75rem', marginBottom: '1rem', overflowX: 'auto', paddingBottom: '0.5rem', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-        <div style={{ display: 'flex', gap: '0.5rem', width: 'max-content' }}>
+      <div style={{ display: 'flex', justifyContent: 'flex-start', gap: '0.75rem', marginBottom: '1rem', overflowX: 'auto', paddingBottom: '0.5rem', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+        <div style={{ display: 'flex', gap: '0.5rem', width: 'max-content', margin: '0 auto', padding: '0 2px' }}>
           {renderTab('groups', t('group_stage'), Globe)}
+          {renderTab('round_32', t('round_of_32'), Trophy)}
           {renderTab('round_16', t('round_of_16'), Trophy)}
           {renderTab('quarterfinals', t('quarterfinals'), Trophy)}
           {renderTab('semifinals', t('semifinals'), Trophy)}
@@ -571,7 +582,7 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
       </div>
 
 
-      {activeTab === 'groups' && (
+      {(activeTab === 'groups' || activeTab === 'round_32') && (
         <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: '1rem', marginBottom: '2rem', width: '100%', boxSizing: 'border-box' }}>
           <div style={{ flex: 1, position: 'relative', display: 'flex', alignItems: 'center' }}>
             <Search size={18} style={{ position: 'absolute', left: '1rem', color: 'rgba(255,255,255,0.4)' }} />
@@ -611,7 +622,7 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
       )}
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
-        {activeTab === 'groups' && groupedMatches.length > 0 && groupedMatches.map((dayGroup, dIndex) => (
+        {(activeTab === 'groups' || activeTab === 'round_32') && groupedMatches.length > 0 && groupedMatches.map((dayGroup, dIndex) => (
           <motion.div key={dIndex} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: dIndex * 0.05 }} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#fff', fontSize: '1rem', fontWeight: 700, paddingBottom: '0.5rem', borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
               <Calendar size={18} />
@@ -620,7 +631,7 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               {dayGroup.matches.map((match) => {
-                const userNationality = user?.user_metadata?.nationality;
+                const userNationality = user?.user_metadata?.nationality || 'Argentina';
                 const isMyTeam = userNationality && (match.teamA === userNationality || match.teamB === userNationality);
                 const started = isMatchStarted(match.date, match.time, match.status);
                 const finishedAuto = isMatchFinishedAuto(match.date, match.time);
@@ -841,7 +852,7 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
           </motion.div>
         ))}
 
-        {activeTab === 'groups' && groupedMatches.length === 0 && (
+        {(activeTab === 'groups' || activeTab === 'round_32') && groupedMatches.length === 0 && (
           <div style={{ textAlign: 'center', padding: '4rem 1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '1.5rem', border: '1px dashed rgba(255,255,255,0.1)' }}>
             <Search size={48} style={{ color: 'rgba(255,255,255,0.2)', marginBottom: '1rem' }} />
             <h3 style={{ fontSize: '1.5rem', fontWeight: 800, margin: '0 0 0.5rem 0', color: 'rgba(255,255,255,0.6)' }}>
@@ -853,7 +864,7 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
           </div>
         )}
 
-        {activeTab !== 'groups' && (
+        {activeTab !== 'groups' && activeTab !== 'round_32' && (
           <div style={{ textAlign: 'center', padding: '4rem 1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '1.5rem', border: '1px dashed rgba(255,255,255,0.1)' }}>
             <Trophy size={48} style={{ color: 'rgba(255,255,255,0.2)', marginBottom: '1rem' }} />
             <h3 style={{ fontSize: '1.5rem', fontWeight: 800, margin: '0 0 0.5rem 0', color: 'rgba(255,255,255,0.6)' }}>
@@ -924,6 +935,14 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
           </motion.div>
         </div>
       )}
+
+      {/* World Cup Bracket or Standings visualization at the very bottom */}
+      {activeTab === 'groups' ? (
+        <GroupStandings searchQuery={searchQuery} />
+      ) : (
+        <WorldCupBracket fixtureMatches={fixtureMatches} liveResults={liveResults} />
+      )}
+
     </div>
   );
 };

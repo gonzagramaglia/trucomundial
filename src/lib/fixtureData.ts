@@ -805,4 +805,181 @@ export const fixtureMatches: FixtureMatch[] = [
     "flagB": "🇦🇷",
     "status": "upcoming"
   }
+,
+{
+    "id": "73",
+    "date": "domingo 28 de junio",
+    "time": "04:00 p. m.",
+    "group": "16vos de final",
+    "teamA": "Sudáfrica",
+    "teamB": "Canadá",
+    "flagA": "🇿🇦",
+    "flagB": "🇨🇦",
+    "status": "upcoming"
+  },
+  {
+    "id": "74",
+    "date": "lunes 29 de junio",
+    "time": "05:30 p. m.",
+    "group": "16vos de final",
+    "teamA": "Alemania",
+    "teamB": "Paraguay",
+    "flagA": "🇩🇪",
+    "flagB": "🇵🇾",
+    "status": "upcoming"
+  },
+  {
+    "id": "75",
+    "date": "lunes 29 de junio",
+    "time": "10:00 p. m.",
+    "group": "16vos de final",
+    "teamA": "Países Bajos",
+    "teamB": "Marruecos",
+    "flagA": "🇳🇱",
+    "flagB": "🇲🇦",
+    "status": "upcoming"
+  },
+  {
+    "id": "76",
+    "date": "lunes 29 de junio",
+    "time": "02:00 p. m.",
+    "group": "16vos de final",
+    "teamA": "Brasil",
+    "teamB": "Japón",
+    "flagA": "🇧🇷",
+    "flagB": "🇯🇵",
+    "status": "upcoming"
+  },
+  {
+    "id": "77",
+    "date": "martes 30 de junio",
+    "time": "06:00 p. m.",
+    "group": "16vos de final",
+    "teamA": "Francia",
+    "teamB": "Suecia",
+    "flagA": "🇫🇷",
+    "flagB": "🇸🇪",
+    "status": "upcoming"
+  },
+  {
+    "id": "78",
+    "date": "martes 30 de junio",
+    "time": "02:00 p. m.",
+    "group": "16vos de final",
+    "teamA": "Costa de Marfil",
+    "teamB": "Noruega",
+    "flagA": "🇨🇮",
+    "flagB": "🇳🇴",
+    "status": "upcoming"
+  },
+  {
+    "id": "79",
+    "date": "martes 30 de junio",
+    "time": "10:00 p. m.",
+    "group": "16vos de final",
+    "teamA": "México",
+    "teamB": "Ecuador",
+    "flagA": "🇲🇽",
+    "flagB": "🇪🇨",
+    "status": "upcoming"
+  },
+  {
+    "id": "80",
+    "date": "miércoles 1 de julio",
+    "time": "01:00 p. m.",
+    "group": "16vos de final",
+    "teamA": "Inglaterra",
+    "teamB": "DR Congo",
+    "flagA": "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
+    "flagB": "🇨🇩",
+    "status": "upcoming"
+  },
+  {
+    "id": "81",
+    "date": "miércoles 1 de julio",
+    "time": "09:00 p. m.",
+    "group": "16vos de final",
+    "teamA": "Estados Unidos",
+    "teamB": "Bosnia & Herzegovina",
+    "flagA": "🇺🇸",
+    "flagB": "🇧🇦",
+    "status": "upcoming"
+  },
+  {
+    "id": "82",
+    "date": "miércoles 1 de julio",
+    "time": "05:00 p. m.",
+    "group": "16vos de final",
+    "teamA": "Bélgica",
+    "teamB": "Senegal",
+    "flagA": "🇧🇪",
+    "flagB": "🇸🇳",
+    "status": "upcoming"
+  },
+  {
+    "id": "83",
+    "date": "jueves 2 de julio",
+    "time": "08:00 p. m.",
+    "group": "16vos de final",
+    "teamA": "Portugal",
+    "teamB": "Croacia",
+    "flagA": "🇵🇹",
+    "flagB": "🇭🇷",
+    "status": "upcoming"
+  },
+  {
+    "id": "84",
+    "date": "jueves 2 de julio",
+    "time": "04:00 p. m.",
+    "group": "16vos de final",
+    "teamA": "España",
+    "teamB": "Austria",
+    "flagA": "🇪🇸",
+    "flagB": "🇦🇹",
+    "status": "upcoming"
+  },
+  {
+    "id": "85",
+    "date": "viernes 3 de julio",
+    "time": "12:00 a. m.",
+    "group": "16vos de final",
+    "teamA": "Suiza",
+    "teamB": "Argelia",
+    "flagA": "🇨🇭",
+    "flagB": "🇩🇿",
+    "status": "upcoming"
+  },
+  {
+    "id": "86",
+    "date": "viernes 3 de julio",
+    "time": "07:00 p. m.",
+    "group": "16vos de final",
+    "teamA": "Argentina",
+    "teamB": "Cabo Verde",
+    "flagA": "🇦🇷",
+    "flagB": "🇨🇻",
+    "status": "upcoming"
+  },
+  {
+    "id": "87",
+    "date": "viernes 3 de julio",
+    "time": "10:30 p. m.",
+    "group": "16vos de final",
+    "teamA": "Colombia",
+    "teamB": "Ghana",
+    "flagA": "🇨🇴",
+    "flagB": "🇬🇭",
+    "status": "upcoming"
+  },
+  {
+    "id": "88",
+    "date": "viernes 3 de julio",
+    "time": "03:00 p. m.",
+    "group": "16vos de final",
+    "teamA": "Australia",
+    "teamB": "Egipto",
+    "flagA": "🇦🇺",
+    "flagB": "🇪🇬",
+    "status": "upcoming"
+  }
 ];
