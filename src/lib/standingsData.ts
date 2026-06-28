@@ -1,0 +1,775 @@
+export interface GroupStanding {
+  rank: number;
+  team: string;
+  pj: number;
+  g: number;
+  e: number;
+  p: number;
+  gf: number;
+  gc: number;
+  dg: number;
+  pts: number;
+  group?: string; // only for third place
+}
+
+export const groupStandings: Record<string, GroupStanding[]> = {
+  "A": [
+    {
+      "rank": 1,
+      "team": "México",
+      "pj": 3,
+      "g": 3,
+      "e": 0,
+      "p": 0,
+      "gf": 6,
+      "gc": 0,
+      "dg": 6,
+      "pts": 9
+    },
+    {
+      "rank": 2,
+      "team": "Sudáfrica",
+      "pj": 3,
+      "g": 1,
+      "e": 1,
+      "p": 1,
+      "gf": 2,
+      "gc": 3,
+      "dg": -1,
+      "pts": 4
+    },
+    {
+      "rank": 3,
+      "team": "República de Corea",
+      "pj": 3,
+      "g": 1,
+      "e": 0,
+      "p": 2,
+      "gf": 2,
+      "gc": 3,
+      "dg": -1,
+      "pts": 3
+    },
+    {
+      "rank": 4,
+      "team": "Chequia",
+      "pj": 3,
+      "g": 0,
+      "e": 1,
+      "p": 2,
+      "gf": 2,
+      "gc": 6,
+      "dg": -4,
+      "pts": 1
+    }
+  ],
+  "B": [
+    {
+      "rank": 1,
+      "team": "Suiza",
+      "pj": 3,
+      "g": 2,
+      "e": 1,
+      "p": 0,
+      "gf": 7,
+      "gc": 3,
+      "dg": 4,
+      "pts": 7
+    },
+    {
+      "rank": 2,
+      "team": "Canadá",
+      "pj": 3,
+      "g": 1,
+      "e": 1,
+      "p": 1,
+      "gf": 8,
+      "gc": 3,
+      "dg": 5,
+      "pts": 4
+    },
+    {
+      "rank": 3,
+      "team": "Bosnia y Herzegovina",
+      "pj": 3,
+      "g": 1,
+      "e": 1,
+      "p": 1,
+      "gf": 5,
+      "gc": 6,
+      "dg": -1,
+      "pts": 4
+    },
+    {
+      "rank": 4,
+      "team": "Catar",
+      "pj": 3,
+      "g": 0,
+      "e": 1,
+      "p": 2,
+      "gf": 2,
+      "gc": 10,
+      "dg": -8,
+      "pts": 1
+    }
+  ],
+  "C": [
+    {
+      "rank": 1,
+      "team": "Brasil",
+      "pj": 3,
+      "g": 2,
+      "e": 1,
+      "p": 0,
+      "gf": 7,
+      "gc": 1,
+      "dg": 6,
+      "pts": 7
+    },
+    {
+      "rank": 2,
+      "team": "Marruecos",
+      "pj": 3,
+      "g": 2,
+      "e": 1,
+      "p": 0,
+      "gf": 6,
+      "gc": 3,
+      "dg": 3,
+      "pts": 7
+    },
+    {
+      "rank": 3,
+      "team": "Escocia",
+      "pj": 3,
+      "g": 1,
+      "e": 0,
+      "p": 2,
+      "gf": 1,
+      "gc": 4,
+      "dg": -3,
+      "pts": 3
+    },
+    {
+      "rank": 4,
+      "team": "Haití",
+      "pj": 3,
+      "g": 0,
+      "e": 0,
+      "p": 3,
+      "gf": 2,
+      "gc": 8,
+      "dg": -6,
+      "pts": 0
+    }
+  ],
+  "D": [
+    {
+      "rank": 1,
+      "team": "EE. UU.",
+      "pj": 3,
+      "g": 2,
+      "e": 0,
+      "p": 1,
+      "gf": 8,
+      "gc": 4,
+      "dg": 4,
+      "pts": 6
+    },
+    {
+      "rank": 2,
+      "team": "Australia",
+      "pj": 3,
+      "g": 1,
+      "e": 1,
+      "p": 1,
+      "gf": 2,
+      "gc": 2,
+      "dg": 0,
+      "pts": 4
+    },
+    {
+      "rank": 3,
+      "team": "Paraguay",
+      "pj": 3,
+      "g": 1,
+      "e": 1,
+      "p": 1,
+      "gf": 2,
+      "gc": 4,
+      "dg": -2,
+      "pts": 4
+    },
+    {
+      "rank": 4,
+      "team": "Turquía",
+      "pj": 3,
+      "g": 1,
+      "e": 0,
+      "p": 2,
+      "gf": 3,
+      "gc": 5,
+      "dg": -2,
+      "pts": 3
+    }
+  ],
+  "E": [
+    {
+      "rank": 1,
+      "team": "Alemania",
+      "pj": 3,
+      "g": 2,
+      "e": 0,
+      "p": 1,
+      "gf": 10,
+      "gc": 4,
+      "dg": 6,
+      "pts": 6
+    },
+    {
+      "rank": 2,
+      "team": "Costa de Marfil",
+      "pj": 3,
+      "g": 2,
+      "e": 0,
+      "p": 1,
+      "gf": 4,
+      "gc": 2,
+      "dg": 2,
+      "pts": 6
+    },
+    {
+      "rank": 3,
+      "team": "Ecuador",
+      "pj": 3,
+      "g": 1,
+      "e": 1,
+      "p": 1,
+      "gf": 2,
+      "gc": 2,
+      "dg": 0,
+      "pts": 4
+    },
+    {
+      "rank": 4,
+      "team": "Curazao",
+      "pj": 3,
+      "g": 0,
+      "e": 1,
+      "p": 2,
+      "gf": 1,
+      "gc": 9,
+      "dg": -8,
+      "pts": 1
+    }
+  ],
+  "F": [
+    {
+      "rank": 1,
+      "team": "Países Bajos",
+      "pj": 3,
+      "g": 2,
+      "e": 1,
+      "p": 0,
+      "gf": 10,
+      "gc": 4,
+      "dg": 6,
+      "pts": 7
+    },
+    {
+      "rank": 2,
+      "team": "Japón",
+      "pj": 3,
+      "g": 1,
+      "e": 2,
+      "p": 0,
+      "gf": 7,
+      "gc": 3,
+      "dg": 4,
+      "pts": 5
+    },
+    {
+      "rank": 3,
+      "team": "Suecia",
+      "pj": 3,
+      "g": 1,
+      "e": 1,
+      "p": 1,
+      "gf": 7,
+      "gc": 7,
+      "dg": 0,
+      "pts": 4
+    },
+    {
+      "rank": 4,
+      "team": "Túnez",
+      "pj": 3,
+      "g": 0,
+      "e": 0,
+      "p": 3,
+      "gf": 2,
+      "gc": 12,
+      "dg": -10,
+      "pts": 0
+    }
+  ],
+  "G": [
+    {
+      "rank": 1,
+      "team": "Bélgica",
+      "pj": 3,
+      "g": 1,
+      "e": 2,
+      "p": 0,
+      "gf": 6,
+      "gc": 2,
+      "dg": 4,
+      "pts": 5
+    },
+    {
+      "rank": 2,
+      "team": "Egipto",
+      "pj": 3,
+      "g": 1,
+      "e": 2,
+      "p": 0,
+      "gf": 5,
+      "gc": 3,
+      "dg": 2,
+      "pts": 5
+    },
+    {
+      "rank": 3,
+      "team": "RI de Irán",
+      "pj": 3,
+      "g": 0,
+      "e": 3,
+      "p": 0,
+      "gf": 3,
+      "gc": 3,
+      "dg": 0,
+      "pts": 3
+    },
+    {
+      "rank": 4,
+      "team": "Nueva Zelanda",
+      "pj": 3,
+      "g": 0,
+      "e": 1,
+      "p": 2,
+      "gf": 4,
+      "gc": 10,
+      "dg": -6,
+      "pts": 1
+    }
+  ],
+  "H": [
+    {
+      "rank": 1,
+      "team": "España",
+      "pj": 3,
+      "g": 2,
+      "e": 1,
+      "p": 0,
+      "gf": 5,
+      "gc": 0,
+      "dg": 5,
+      "pts": 7
+    },
+    {
+      "rank": 2,
+      "team": "Islas de Cabo Verde",
+      "pj": 3,
+      "g": 0,
+      "e": 3,
+      "p": 0,
+      "gf": 2,
+      "gc": 2,
+      "dg": 0,
+      "pts": 3
+    },
+    {
+      "rank": 3,
+      "team": "Uruguay",
+      "pj": 3,
+      "g": 0,
+      "e": 2,
+      "p": 1,
+      "gf": 3,
+      "gc": 4,
+      "dg": -1,
+      "pts": 2
+    },
+    {
+      "rank": 4,
+      "team": "Arabia Saudí",
+      "pj": 3,
+      "g": 0,
+      "e": 2,
+      "p": 1,
+      "gf": 1,
+      "gc": 5,
+      "dg": -4,
+      "pts": 2
+    }
+  ],
+  "I": [
+    {
+      "rank": 1,
+      "team": "Francia",
+      "pj": 3,
+      "g": 3,
+      "e": 0,
+      "p": 0,
+      "gf": 10,
+      "gc": 2,
+      "dg": 8,
+      "pts": 9
+    },
+    {
+      "rank": 2,
+      "team": "Noruega",
+      "pj": 3,
+      "g": 2,
+      "e": 0,
+      "p": 1,
+      "gf": 8,
+      "gc": 7,
+      "dg": 1,
+      "pts": 6
+    },
+    {
+      "rank": 3,
+      "team": "Senegal",
+      "pj": 3,
+      "g": 1,
+      "e": 0,
+      "p": 2,
+      "gf": 8,
+      "gc": 6,
+      "dg": 2,
+      "pts": 3
+    },
+    {
+      "rank": 4,
+      "team": "Irak",
+      "pj": 3,
+      "g": 0,
+      "e": 0,
+      "p": 3,
+      "gf": 1,
+      "gc": 12,
+      "dg": -11,
+      "pts": 0
+    }
+  ],
+  "J": [
+    {
+      "rank": 1,
+      "team": "Argentina",
+      "pj": 3,
+      "g": 3,
+      "e": 0,
+      "p": 0,
+      "gf": 8,
+      "gc": 1,
+      "dg": 7,
+      "pts": 9
+    },
+    {
+      "rank": 2,
+      "team": "Austria",
+      "pj": 3,
+      "g": 1,
+      "e": 1,
+      "p": 1,
+      "gf": 6,
+      "gc": 6,
+      "dg": 0,
+      "pts": 4
+    },
+    {
+      "rank": 3,
+      "team": "Argelia",
+      "pj": 3,
+      "g": 1,
+      "e": 1,
+      "p": 1,
+      "gf": 5,
+      "gc": 7,
+      "dg": -2,
+      "pts": 4
+    },
+    {
+      "rank": 4,
+      "team": "Jordania",
+      "pj": 3,
+      "g": 0,
+      "e": 0,
+      "p": 3,
+      "gf": 3,
+      "gc": 8,
+      "dg": -5,
+      "pts": 0
+    }
+  ],
+  "K": [
+    {
+      "rank": 1,
+      "team": "Colombia",
+      "pj": 3,
+      "g": 2,
+      "e": 1,
+      "p": 0,
+      "gf": 4,
+      "gc": 1,
+      "dg": 3,
+      "pts": 7
+    },
+    {
+      "rank": 2,
+      "team": "Portugal",
+      "pj": 3,
+      "g": 1,
+      "e": 2,
+      "p": 0,
+      "gf": 6,
+      "gc": 1,
+      "dg": 5,
+      "pts": 5
+    },
+    {
+      "rank": 3,
+      "team": "RD Congo",
+      "pj": 3,
+      "g": 1,
+      "e": 1,
+      "p": 1,
+      "gf": 4,
+      "gc": 3,
+      "dg": 1,
+      "pts": 4
+    },
+    {
+      "rank": 4,
+      "team": "Uzbekistán",
+      "pj": 3,
+      "g": 0,
+      "e": 0,
+      "p": 3,
+      "gf": 2,
+      "gc": 11,
+      "dg": -9,
+      "pts": 0
+    }
+  ],
+  "L": [
+    {
+      "rank": 1,
+      "team": "Inglaterra",
+      "pj": 3,
+      "g": 2,
+      "e": 1,
+      "p": 0,
+      "gf": 6,
+      "gc": 2,
+      "dg": 4,
+      "pts": 7
+    },
+    {
+      "rank": 2,
+      "team": "Croacia",
+      "pj": 3,
+      "g": 2,
+      "e": 0,
+      "p": 1,
+      "gf": 5,
+      "gc": 5,
+      "dg": 0,
+      "pts": 6
+    },
+    {
+      "rank": 3,
+      "team": "Ghana",
+      "pj": 3,
+      "g": 1,
+      "e": 1,
+      "p": 1,
+      "gf": 2,
+      "gc": 2,
+      "dg": 0,
+      "pts": 4
+    },
+    {
+      "rank": 4,
+      "team": "Panamá",
+      "pj": 3,
+      "g": 0,
+      "e": 0,
+      "p": 3,
+      "gf": 0,
+      "gc": 4,
+      "dg": -4,
+      "pts": 0
+    }
+  ]
+};
+
+export const thirdPlaceStandings: GroupStanding[] = [
+  {
+    "rank": 1,
+    "team": "RD Congo",
+    "group": "Grupo K",
+    "pj": 3,
+    "g": 1,
+    "e": 1,
+    "p": 1,
+    "gf": 4,
+    "gc": 3,
+    "dg": 1,
+    "pts": 4
+  },
+  {
+    "rank": 2,
+    "team": "Suecia",
+    "group": "Grupo F",
+    "pj": 3,
+    "g": 1,
+    "e": 1,
+    "p": 1,
+    "gf": 7,
+    "gc": 7,
+    "dg": 0,
+    "pts": 4
+  },
+  {
+    "rank": 3,
+    "team": "Ghana",
+    "group": "Grupo L",
+    "pj": 3,
+    "g": 1,
+    "e": 1,
+    "p": 1,
+    "gf": 2,
+    "gc": 2,
+    "dg": 0,
+    "pts": 4
+  },
+  {
+    "rank": 4,
+    "team": "Ecuador",
+    "group": "Grupo E",
+    "pj": 3,
+    "g": 1,
+    "e": 1,
+    "p": 1,
+    "gf": 2,
+    "gc": 2,
+    "dg": 0,
+    "pts": 4
+  },
+  {
+    "rank": 5,
+    "team": "Bosnia y Herzegovina",
+    "group": "Grupo B",
+    "pj": 3,
+    "g": 1,
+    "e": 1,
+    "p": 1,
+    "gf": 5,
+    "gc": 6,
+    "dg": -1,
+    "pts": 4
+  },
+  {
+    "rank": 6,
+    "team": "Argelia",
+    "group": "Grupo J",
+    "pj": 3,
+    "g": 1,
+    "e": 1,
+    "p": 1,
+    "gf": 5,
+    "gc": 7,
+    "dg": -2,
+    "pts": 4
+  },
+  {
+    "rank": 7,
+    "team": "Paraguay",
+    "group": "Grupo D",
+    "pj": 3,
+    "g": 1,
+    "e": 1,
+    "p": 1,
+    "gf": 2,
+    "gc": 4,
+    "dg": -2,
+    "pts": 4
+  },
+  {
+    "rank": 8,
+    "team": "Senegal",
+    "group": "Grupo I",
+    "pj": 3,
+    "g": 1,
+    "e": 0,
+    "p": 2,
+    "gf": 8,
+    "gc": 6,
+    "dg": 2,
+    "pts": 3
+  },
+  {
+    "rank": 9,
+    "team": "RI de Irán",
+    "group": "Grupo G",
+    "pj": 3,
+    "g": 0,
+    "e": 3,
+    "p": 0,
+    "gf": 3,
+    "gc": 3,
+    "dg": 0,
+    "pts": 3
+  },
+  {
+    "rank": 10,
+    "team": "República de Corea",
+    "group": "Grupo A",
+    "pj": 3,
+    "g": 1,
+    "e": 0,
+    "p": 2,
+    "gf": 2,
+    "gc": 3,
+    "dg": -1,
+    "pts": 3
+  },
+  {
+    "rank": 11,
+    "team": "Escocia",
+    "group": "Grupo C",
+    "pj": 3,
+    "g": 1,
+    "e": 0,
+    "p": 2,
+    "gf": 1,
+    "gc": 4,
+    "dg": -3,
+    "pts": 3
+  },
+  {
+    "rank": 12,
+    "team": "Uruguay",
+    "group": "Grupo H",
+    "pj": 3,
+    "g": 0,
+    "e": 2,
+    "p": 1,
+    "gf": 3,
+    "gc": 4,
+    "dg": -1,
+    "pts": 2
+  }
+];
