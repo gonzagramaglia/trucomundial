@@ -19,10 +19,15 @@ export const useBaseStars = () => {
           const starsMap: Record<string, number> = {};
           data.forEach(r => {
             const match = fixtureMatches.find(m => m.id === r.match_id);
-            if (match && r.status === 'finished') {
+            if (match && r.status?.startsWith('finished')) {
               const teamA = normalizeCountry(match.teamA);
               const teamB = normalizeCountry(match.teamB);
-              if (r.score_a > r.score_b) {
+              
+              if (r.status ?.startsWith('finished_penalties_A')) {
+                starsMap[teamA] = (starsMap[teamA] || 0) + 2;
+              } else if (r.status ?.startsWith('finished_penalties_B')) {
+                starsMap[teamB] = (starsMap[teamB] || 0) + 2;
+              } else if (r.score_a > r.score_b) {
                 starsMap[teamA] = (starsMap[teamA] || 0) + 2;
               } else if (r.score_b > r.score_a) {
                 starsMap[teamB] = (starsMap[teamB] || 0) + 2;

@@ -218,7 +218,7 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
       for (const matchId in predictions) {
         const pred = predictions[matchId];
         const res = liveResults[matchId];
-        if (res && res.status === 'finished' && !pred.rewarded) {
+        if (res && res.status?.startsWith('finished') && !pred.rewarded) {
           const exactMatch = pred.scoreA === res.scoreA && pred.scoreB === res.scoreB;
           const predWinner = pred.scoreA > pred.scoreB ? 'A' : (pred.scoreA < pred.scoreB ? 'B' : 'Draw');
           const resWinner = res.scoreA > res.scoreB ? 'A' : (res.scoreA < res.scoreB ? 'B' : 'Draw');
@@ -367,12 +367,12 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
     }
 
     if (showFinishedOnly) {
-      filtered = filtered.filter(m => m.status === 'finished');
+      filtered = filtered.filter(m => m.status?.startsWith('finished'));
     }
 
     filtered.sort((a, b) => {
-      const aFinished = a.status === 'finished' ? 1 : 0;
-      const bFinished = b.status === 'finished' ? 1 : 0;
+      const aFinished = a.status?.startsWith('finished') ? 1 : 0;
+      const bFinished = b.status?.startsWith('finished') ? 1 : 0;
       return aFinished - bFinished;
     });
 
@@ -645,7 +645,7 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
 
                 let packsWon = 0;
                 let wonExact = false;
-                if (match.status === 'finished' && hasPrediction) {
+                if (match.status?.startsWith('finished') && hasPrediction) {
                   const exactMatch = pScoreA === match.scoreA! && pScoreB === match.scoreB!;
                   const predWinner = pScoreA > pScoreB ? 'A' : (pScoreA < pScoreB ? 'B' : 'Draw');
                   const resWinner = match.scoreA! > match.scoreB! ? 'A' : (match.scoreA! < match.scoreB! ? 'B' : 'Draw');
@@ -672,12 +672,12 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
                       </div>
 
                       <div style={{ padding: '0 1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minWidth: '80px', gap: '0.25rem' }}>
-                        {match.status === 'finished' && packsWon > 0 && (
+                        {match.status?.startsWith('finished') && packsWon > 0 && (
                           <div style={{ color: '#00e676', fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', textAlign: 'center', whiteSpace: 'nowrap' }}>
                             {wonExact ? t("exact_result_won") : t("winner_result_won")}
                           </div>
                         )}
-                        {match.status !== 'finished' && started && hasPrediction && (
+                        {!match.status?.startsWith('finished') && started && hasPrediction && (
                           <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', textAlign: 'center', whiteSpace: 'nowrap' }}>
                             {t("waiting_result")}
                           </div>
@@ -703,12 +703,12 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
                             style={{ width: '40px', height: '40px', textAlign: 'center', padding: 0, background: (locked || !user) ? 'transparent' : 'rgba(0,0,0,0.5)', border: (locked || !user) ? 'none' : '1px solid rgba(255,255,255,0.2)', color: '#fff', borderRadius: '0.5rem', fontWeight: 800, fontSize: '1.2rem' }}
                           />
                         </div>
-                        {match.status === 'finished' && packsWon > 0 && (
+                        {match.status?.startsWith('finished') && packsWon > 0 && (
                           <div style={{ color: '#ff8c00', fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', textAlign: 'center', whiteSpace: 'nowrap' }}>
                             {packsWon === 1 ? t("you_won_packs_one") : t("you_won_packs_other", { count: packsWon })}
                           </div>
                         )}
-                        {match.status !== 'finished' && started && hasPrediction && (
+                        {!match.status?.startsWith('finished') && started && hasPrediction && (
                           <div style={{ color: '#ffffff', fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', textAlign: 'center', whiteSpace: 'nowrap', marginTop: '0.25rem' }}>
                             {finishedAuto ? t("match_finished") : t("match_started")}
                           </div>
@@ -723,7 +723,7 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
 
                     {!isMobile && (
                       <div style={{ flex: '0 0 150px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
-                        {!locked && match.status !== 'finished' && (
+                        {!locked && !match.status?.startsWith('finished') && (
                           <button
                             key="btn-save"
                             disabled={!user || isSaving[match.id] || inScoreA === '' || inScoreB === ''}
@@ -734,7 +734,7 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
                           </button>
                         )}
 
-                        {match.status === 'finished' && (
+                        {match.status?.startsWith('finished') && (
                           packsWon > 0 && !isRewarded ? (
                             <button
                               key="btn-claim"
@@ -768,7 +768,7 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
                           )
                         )}
 
-                        {locked && match.status !== 'finished' && (
+                        {locked && !match.status?.startsWith('finished') && (
                           hasPrediction ? (
                             <button
                               key="btn-saved"
@@ -787,7 +787,7 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
                       </div>
                     )}
 
-                    {isMobile && !locked && match.status !== 'finished' && (
+                    {isMobile && !locked && !match.status?.startsWith('finished') && (
                       <button
                         key="m-btn-save"
                         disabled={!user || isSaving[match.id] || inScoreA === '' || inScoreB === ''}
@@ -797,7 +797,7 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
                         <Save size={16} /> <span>{t("save_prediction")}</span>
                       </button>
                     )}
-                    {isMobile && match.status === 'finished' && (
+                    {isMobile && match.status?.startsWith('finished') && (
                       packsWon > 0 && !isRewarded ? (
                         <button
                           key="m-btn-claim"
@@ -829,7 +829,7 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
                         </div>
                       )
                     )}
-                    {isMobile && locked && match.status !== 'finished' && (
+                    {isMobile && locked && !match.status?.startsWith('finished') && (
                       hasPrediction ? (
                         <button
                           key="m-btn-saved"

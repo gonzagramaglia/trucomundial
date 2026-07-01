@@ -131,7 +131,7 @@ export const UserProdeModal: React.FC<UserProdeModalProps> = ({
                 let points = 0;
                 let wonExact = false;
                 let wonResult = false;
-                if (result && result.status === 'finished') {
+                if (result && result.status?.startsWith('finished')) {
                   wonExact = pred.score_a === result.scoreA && pred.score_b === result.scoreB;
                   const predWinner = pred.score_a > pred.score_b ? 'A' : (pred.score_a < pred.score_b ? 'B' : 'Draw');
                   const resWinner = result.scoreA > result.scoreB ? 'A' : (result.scoreA < result.scoreB ? 'B' : 'Draw');
@@ -175,7 +175,7 @@ export const UserProdeModal: React.FC<UserProdeModalProps> = ({
                     </div>
 
                     <div style={{ minWidth: '80px', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'center', gap: '0.25rem' }}>
-                      {result?.status === 'finished' ? (
+                      {result?.status?.startsWith('finished') ? (
                         <>
                            {points > 0 ? (
                              <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: '#00e676', fontSize: '0.75rem', fontWeight: 800 }}>

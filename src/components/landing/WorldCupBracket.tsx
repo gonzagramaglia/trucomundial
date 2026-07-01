@@ -30,10 +30,25 @@ export const WorldCupBracket: React.FC<WorldCupBracketProps> = ({ fixtureMatches
   const getWinner = (matchId: string | undefined, teamA: string, teamB: string, flagA: string, flagB: string) => {
     if (!matchId) return { team: "?", flag: "" };
     const res = liveResults[matchId];
-    if (res && res.status === 'finished') {
+    if (res && res.status?.startsWith('finished')) {
+      if (res.status?.startsWith('finished_penalties_A')) return { team: teamA, flag: flagA };
+      if (res.status?.startsWith('finished_penalties_B')) return { team: teamB, flag: flagB };
       if (res.scoreA > res.scoreB) return { team: teamA, flag: flagA };
       if (res.scoreB > res.scoreA) return { team: teamB, flag: flagB };
       return { team: `${teamA}/${teamB}`, flag: "🏁" };
+    }
+    return { team: "?", flag: "" };
+  };
+
+  const getLoser = (matchId: string | undefined, teamA: string, teamB: string, flagA: string, flagB: string) => {
+    if (!matchId) return { team: "?", flag: "" };
+    const res = liveResults[matchId];
+    if (res && res.status?.startsWith('finished')) {
+      if (res.status?.startsWith('finished_penalties_A')) return { team: teamB, flag: flagB };
+      if (res.status?.startsWith('finished_penalties_B')) return { team: teamA, flag: flagA };
+      if (res.scoreA > res.scoreB) return { team: teamB, flag: flagB };
+      if (res.scoreB > res.scoreA) return { team: teamA, flag: flagA };
+      return { team: "?", flag: "" };
     }
     return { team: "?", flag: "" };
   };
@@ -51,7 +66,7 @@ export const WorldCupBracket: React.FC<WorldCupBracketProps> = ({ fixtureMatches
     for (let r = 0; r < 4; r++) { // 4 iterations to build 5 rounds
       // Populate scores for current round
       currentRoundMatches.forEach(match => {
-         if (match.id && liveResults[match.id]?.status === 'finished') {
+         if (match.id && liveResults[match.id]?.status?.startsWith('finished')) {
            match.p1.score = liveResults[match.id].scoreA;
            match.p2.score = liveResults[match.id].scoreB;
          }
@@ -83,7 +98,7 @@ export const WorldCupBracket: React.FC<WorldCupBracketProps> = ({ fixtureMatches
     
     // Process final match scores
     currentRoundMatches.forEach(match => {
-      if (match.id && liveResults[match.id]?.status === 'finished') {
+      if (match.id && liveResults[match.id]?.status?.startsWith('finished')) {
         match.p1.score = liveResults[match.id].scoreA;
         match.p2.score = liveResults[match.id].scoreB;
       }
@@ -97,6 +112,17 @@ export const WorldCupBracket: React.FC<WorldCupBracketProps> = ({ fixtureMatches
   const finalMatch = rounds[4][0];
   const champion = getWinner(finalMatch.id, finalMatch.p1.name, finalMatch.p2.name, finalMatch.p1.flag, finalMatch.p2.flag);
 
+  const semi1 = rounds[3][0];
+  const semi2 = rounds[3][1];
+  const thirdPlaceParticipant1 = getLoser(semi1.id, semi1.p1.name, semi1.p2.name, semi1.p1.flag, semi1.p2.flag);
+  const thirdPlaceParticipant2 = getLoser(semi2.id, semi2.p1.name, semi2.p2.name, semi2.p1.flag, semi2.p2.flag);
+  
+  const thirdPlaceMatch = {
+    id: "103",
+    p1: { name: thirdPlaceParticipant1.team, flag: thirdPlaceParticipant1.flag, score: liveResults["103"]?.scoreA },
+    p2: { name: thirdPlaceParticipant2.team, flag: thirdPlaceParticipant2.flag, score: liveResults["103"]?.scoreB }
+  };
+
   // Divide the first 4 rounds into Left (0 to half) and Right (half to end)
   const leftRounds = rounds.slice(0, 4).map(r => r.slice(0, r.length / 2));
   const rightRounds = rounds.slice(0, 4).map(r => r.slice(r.length / 2));
@@ -106,14 +132,14 @@ export const WorldCupBracket: React.FC<WorldCupBracketProps> = ({ fixtureMatches
   const reversedRightRounds = [...rightRounds].reverse();
   const reversedRoundNames = [...roundNames].reverse();
 
-  const renderMatchBox = (match: any, isRight: boolean, isFinal: boolean = false) => (
+  const renderMatchBox = (match: any, isRight: boolean, isFinal: boolean = false, isThirdPlace: boolean = false) => (
     <div style={{
-      border: isFinal ? "2px solid rgba(251, 191, 36, 0.5)" : "1px solid rgba(255, 255, 255, 0.08)",
+      border: isFinal ? "2px solid rgba(251, 191, 36, 0.5)" : (isThirdPlace ? "1px solid rgba(161, 161, 170, 0.5)" : "1px solid rgba(255, 255, 255, 0.08)"),
       borderRadius: "0.75rem",
       overflow: "hidden",
-      background: isFinal ? "rgba(251, 191, 36, 0.1)" : "rgba(255,255,255,0.02)",
+      background: isFinal ? "rgba(251, 191, 36, 0.1)" : (isThirdPlace ? "rgba(161, 161, 170, 0.1)" : "rgba(255,255,255,0.02)"),
       position: "relative",
-      boxShadow: isFinal ? "0 0 20px rgba(251, 191, 36, 0.2)" : "none",
+      boxShadow: isFinal ? "0 0 20px rgba(251, 191, 36, 0.2)" : (isThirdPlace ? "0 0 20px rgba(161, 161, 170, 0.3)" : "none"),
       width: "100%",
     }}>
       {[match.p1, match.p2].map((p: any, pIdx: number) => (
@@ -127,7 +153,7 @@ export const WorldCupBracket: React.FC<WorldCupBracketProps> = ({ fixtureMatches
           gap: "0.5rem",
           fontSize: "0.85rem",
           fontWeight: p.name !== "?" ? 700 : 500,
-          color: p.name !== "?" ? (isFinal ? "#fbbf24" : "#fff") : "rgba(255,255,255,0.3)",
+          color: p.name !== "?" ? (isFinal ? "#fbbf24" : (isThirdPlace ? "#a1a1aa" : "#fff")) : "rgba(255,255,255,0.3)",
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", overflow: "hidden" }}>
             {p.flag && <span style={{ fontSize: "1rem" }}>{p.flag}</span>}
@@ -138,7 +164,7 @@ export const WorldCupBracket: React.FC<WorldCupBracketProps> = ({ fixtureMatches
           {p.score !== undefined && (
             <div style={{
               fontWeight: 900,
-              color: isFinal ? "#fbbf24" : "#00f2ff",
+              color: isFinal ? "#fbbf24" : (isThirdPlace ? "#a1a1aa" : "#00f2ff"),
               marginLeft: isRight ? "0" : "0.5rem",
               marginRight: isRight ? "0.5rem" : "0",
             }}>
@@ -230,7 +256,8 @@ export const WorldCupBracket: React.FC<WorldCupBracketProps> = ({ fixtureMatches
                 background: "rgba(251, 191, 36, 0.1)", border: "2px solid rgba(251, 191, 36, 0.4)",
                 borderRadius: "1rem", padding: "1rem", display: "flex", flexDirection: "column",
                 alignItems: "center", justifyContent: "center", gap: "0.5rem",
-                boxShadow: champion.team !== "?" ? "0 0 20px rgba(251, 191, 36, 0.2)" : "none"
+                boxShadow: champion.team !== "?" ? "0 0 20px rgba(251, 191, 36, 0.2)" : "none",
+                marginBottom: "2rem"
              }}>
                 <Trophy size={28} color="#fbbf24" />
                 {champion.team !== "?" ? (
@@ -241,6 +268,13 @@ export const WorldCupBracket: React.FC<WorldCupBracketProps> = ({ fixtureMatches
                 ) : (
                   <span style={{ color: "#fbbf24", fontWeight: 800, fontSize: "1rem" }}>?</span>
                 )}
+             </div>
+
+             <div style={{ fontSize: "0.8rem", fontWeight: 900, color: "#a1a1aa", textAlign: "center", marginBottom: "0.75rem", textTransform: "uppercase" }}>
+               {t("third_place", "3er y 4to Puesto")}
+             </div>
+             <div style={{ marginBottom: "1.5rem" }}>
+               {renderMatchBox(thirdPlaceMatch, false, false, true)}
              </div>
           </div>
 
