@@ -1,4 +1,6 @@
 import React from "react";
+
+import { EmptyState } from "../../shared/EmptyState";
 import { Check, RefreshCw, Trash2 } from "lucide-react";
 
 import type { Ticket, Profile } from "./types";
@@ -196,9 +198,12 @@ export const TicketsTab: React.FC<TicketsTabProps> = ({
         </h3>
         <div style={{ display: "grid", gap: "1rem" }}>
           {openTickets.length === 0 && (
-            <div style={{ textAlign: "center", padding: "1rem 0", opacity: 0.5 }}>
-              No hay registros abiertos.
-            </div>
+            <EmptyState
+              icon="🎫"
+              title="Sin registros"
+              description="No hay registros abiertos."
+              color="#ef4444"
+            />
           )}
           {openTickets.map(renderTicket)}
         </div>
@@ -211,9 +216,12 @@ export const TicketsTab: React.FC<TicketsTabProps> = ({
         </h3>
         <div style={{ display: "grid", gap: "1rem" }}>
           {closedTickets.length === 0 && (
-            <div style={{ textAlign: "center", padding: "1rem 0", opacity: 0.5 }}>
-              No hay registros cerrados.
-            </div>
+            <EmptyState
+              icon="✅"
+              title="Sin registros"
+              description="No hay registros cerrados."
+              color="#10b981"
+            />
           )}
           {closedTickets.map(renderTicket)}
         </div>

@@ -128,7 +128,7 @@ export const formatMatchTime = (dateStr: string, timeStr: string, language: stri
 export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBack }) => {
   const { t, i18n } = useTranslation();
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
-  const [activeTab, setActiveTab] = useState<TabType>('round_32');
+  const [activeTab, setActiveTab] = useState<TabType>('round_16');
   const [searchQuery, setSearchQuery] = useState('');
   const [showFinishedOnly, setShowFinishedOnly] = useState(false);
   const [liveResults, setLiveResults] = useState<Record<string, { scoreA: number, scoreB: number, status: string }>>({});
@@ -349,6 +349,8 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
       filtered = filtered.filter(m => m.group.startsWith('Group'));
     } else if (activeTab === 'round_32') {
       filtered = filtered.filter(m => m.group === '16vos de final');
+    } else if (activeTab === 'round_16') {
+      filtered = filtered.filter(m => m.group === 'Octavos de final');
     } else {
       filtered = [];
     }
@@ -582,7 +584,7 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
       </div>
 
 
-      {(activeTab === 'groups' || activeTab === 'round_32') && (
+      {(activeTab === 'groups' || activeTab === 'round_32' || activeTab === 'round_16') && (
         <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: '1rem', marginBottom: '2rem', width: '100%', boxSizing: 'border-box' }}>
           <div style={{ flex: 1, position: 'relative', display: 'flex', alignItems: 'center' }}>
             <Search size={18} style={{ position: 'absolute', left: '1rem', color: 'rgba(255,255,255,0.4)' }} />
@@ -622,7 +624,7 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
       )}
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
-        {(activeTab === 'groups' || activeTab === 'round_32') && groupedMatches.length > 0 && groupedMatches.map((dayGroup, dIndex) => (
+        {(activeTab === 'groups' || activeTab === 'round_32' || activeTab === 'round_16') && groupedMatches.length > 0 && groupedMatches.map((dayGroup, dIndex) => (
           <motion.div key={dIndex} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: dIndex * 0.05 }} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#fff', fontSize: '1rem', fontWeight: 700, paddingBottom: '0.5rem', borderBottom: '1px solid rgba(255, 255, 255, 0.1)' }}>
               <Calendar size={18} />
@@ -636,7 +638,7 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
                 const started = isMatchStarted(match.date, match.time, match.status);
                 const finishedAuto = isMatchFinishedAuto(match.date, match.time);
                 const hasPrediction = !!predictions[match.id];
-                const locked = started || hasPrediction;
+                const locked = started || hasPrediction || match.group === '16vos de final';
                 const pScoreA = predictions[match.id]?.scoreA;
                 const pScoreB = predictions[match.id]?.scoreB;
                 const isRewarded = predictions[match.id]?.rewarded;
@@ -852,7 +854,7 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
           </motion.div>
         ))}
 
-        {(activeTab === 'groups' || activeTab === 'round_32') && groupedMatches.length === 0 && (
+        {(activeTab === 'groups' || activeTab === 'round_32' || activeTab === 'round_16') && groupedMatches.length === 0 && (
           <div style={{ textAlign: 'center', padding: '4rem 1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '1.5rem', border: '1px dashed rgba(255,255,255,0.1)' }}>
             <Search size={48} style={{ color: 'rgba(255,255,255,0.2)', marginBottom: '1rem' }} />
             <h3 style={{ fontSize: '1.5rem', fontWeight: 800, margin: '0 0 0.5rem 0', color: 'rgba(255,255,255,0.6)' }}>
@@ -864,7 +866,7 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
           </div>
         )}
 
-        {activeTab !== 'groups' && activeTab !== 'round_32' && (
+        {activeTab !== 'groups' && activeTab !== 'round_32' && activeTab !== 'round_16' && (
           <div style={{ textAlign: 'center', padding: '4rem 1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '1.5rem', border: '1px dashed rgba(255,255,255,0.1)' }}>
             <Trophy size={48} style={{ color: 'rgba(255,255,255,0.2)', marginBottom: '1rem' }} />
             <h3 style={{ fontSize: '1.5rem', fontWeight: 800, margin: '0 0 0.5rem 0', color: 'rgba(255,255,255,0.6)' }}>

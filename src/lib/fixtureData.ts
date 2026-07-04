@@ -981,5 +981,93 @@ export const fixtureMatches: FixtureMatch[] = [
     "flagA": "🇦🇺",
     "flagB": "🇪🇬",
     "status": "upcoming"
+  },
+  {
+    "id": "89",
+    "date": "sábado 4 de julio",
+    "time": "02:00 p. m.",
+    "group": "Octavos de final",
+    "teamA": "Canadá",
+    "teamB": "Marruecos",
+    "flagA": "🇨🇦",
+    "flagB": "🇲🇦",
+    "status": "upcoming"
+  },
+  {
+    "id": "90",
+    "date": "sábado 4 de julio",
+    "time": "06:00 p. m.",
+    "group": "Octavos de final",
+    "teamA": "Paraguay",
+    "teamB": "Francia",
+    "flagA": "🇵🇾",
+    "flagB": "🇫🇷",
+    "status": "upcoming"
+  },
+  {
+    "id": "91",
+    "date": "domingo 5 de julio",
+    "time": "05:00 p. m.",
+    "group": "Octavos de final",
+    "teamA": "Brasil",
+    "teamB": "Noruega",
+    "flagA": "🇧🇷",
+    "flagB": "🇳🇴",
+    "status": "upcoming"
+  },
+  {
+    "id": "92",
+    "date": "domingo 5 de julio",
+    "time": "09:00 p. m.",
+    "group": "Octavos de final",
+    "teamA": "México",
+    "teamB": "Inglaterra",
+    "flagA": "🇲🇽",
+    "flagB": "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
+    "status": "upcoming"
+  },
+  {
+    "id": "93",
+    "date": "lunes 6 de julio",
+    "time": "04:00 p. m.",
+    "group": "Octavos de final",
+    "teamA": "Portugal",
+    "teamB": "España",
+    "flagA": "🇵🇹",
+    "flagB": "🇪🇸",
+    "status": "upcoming"
+  },
+  {
+    "id": "94",
+    "date": "lunes 6 de julio",
+    "time": "09:00 p. m.",
+    "group": "Octavos de final",
+    "teamA": "Estados Unidos",
+    "teamB": "Bélgica",
+    "flagA": "🇺🇸",
+    "flagB": "🇧🇪",
+    "status": "upcoming"
+  },
+  {
+    "id": "95",
+    "date": "martes 7 de julio",
+    "time": "01:00 p. m.",
+    "group": "Octavos de final",
+    "teamA": "Argentina",
+    "teamB": "Egipto",
+    "flagA": "🇦🇷",
+    "flagB": "🇪🇬",
+    "status": "upcoming"
+  },
+  {
+    "id": "96",
+    "date": "martes 7 de julio",
+    "time": "05:00 p. m.",
+    "group": "Octavos de final",
+    "teamA": "Suiza",
+    "teamB": "Colombia",
+    "flagA": "🇨🇭",
+    "flagB": "🇨🇴",
+    "status": "upcoming"
   }
 ];

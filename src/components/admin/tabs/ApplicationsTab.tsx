@@ -1,6 +1,7 @@
 import React from "react";
 import { Check, X, Edit2 } from "lucide-react";
 import type { CreatorApplication } from "./types";
+import { EmptyState } from "../../shared/EmptyState";
 
 interface ApplicationsTabProps {
   applications: CreatorApplication[];
@@ -188,17 +189,13 @@ export const ApplicationsTab: React.FC<ApplicationsTabProps> = ({
                 </div>
               </div>
             ))}
-          {applications.filter((app) => app.status === "pending")
-            .length === 0 && (
-            <div
-              style={{
-                textAlign: "center",
-                padding: "1.5rem 0",
-                opacity: 0.5,
-              }}
-            >
-              No hay solicitudes pendientes.
-            </div>
+          {applications.filter((a) => a.status === "pending").length === 0 && (
+            <EmptyState
+              icon="📄"
+              title="Sin solicitudes"
+              description="No hay solicitudes pendientes."
+              color="#f59e0b"
+            />
           )}
         </div>
       </div>
@@ -376,17 +373,13 @@ export const ApplicationsTab: React.FC<ApplicationsTabProps> = ({
                 </div>
               </div>
             ))}
-          {applications.filter((app) => app.status === "approved")
-            .length === 0 && (
-            <div
-              style={{
-                textAlign: "center",
-                padding: "1.5rem 0",
-                opacity: 0.5,
-              }}
-            >
-              No hay creadores aprobados.
-            </div>
+          {applications.filter((a) => a.status === "approved").length === 0 && (
+            <EmptyState
+              icon="🌟"
+              title="Sin creadores"
+              description="No hay creadores aprobados."
+              color="#10b981"
+            />
           )}
         </div>
       </div>

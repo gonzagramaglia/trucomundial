@@ -3,6 +3,7 @@ import { supabase } from '../../../lib/supabase';
 import { fixtureMatches } from '../../../lib/fixtureData';
 import { Search, Save, Check } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { Loader } from '../../shared/Loader';
 
 export const FixtureTab: React.FC = () => {
   const [results, setResults] = useState<Record<string, { scoreA?: number; scoreB?: number; status: string; penaltiesA?: number; penaltiesB?: number }>>({});
@@ -141,11 +142,12 @@ export const FixtureTab: React.FC = () => {
   };
 
   const filteredMatches = useMemo(() => {
-    if (!searchQuery) return fixtureMatches;
+    const reversedFixture = [...fixtureMatches].reverse();
+    if (!searchQuery) return reversedFixture;
     const q = searchQuery.toLowerCase();
     const groupSearch = q.replace('grupo', 'group');
     
-    return fixtureMatches.filter(m => 
+    return reversedFixture.filter(m => 
       m.teamA.toLowerCase().includes(q) || 
       m.teamB.toLowerCase().includes(q) || 
       m.group.toLowerCase().includes(q) ||
@@ -155,7 +157,7 @@ export const FixtureTab: React.FC = () => {
   }, [searchQuery]);
 
   if (loading) {
-    return <div style={{ textAlign: 'center', padding: '2rem', opacity: 0.5 }}>Cargando fixture...</div>;
+    return <Loader message="Cargando fixture..." />;
   }
 
   return (
@@ -342,7 +344,7 @@ export const FixtureTab: React.FC = () => {
             {/* Actions */}
             <div style={{ flex: isMobile ? 'none' : '0 0 100px', display: 'flex', justifyContent: 'center', width: isMobile ? '100%' : 'auto' }}>
               {savedMap[match.id] ? (
-                 match.group.toLowerCase().includes('group') ? (
+                 match.group.toLowerCase().includes('group') || match.group === '16vos de final' ? (
                    <button
                      disabled
                      className="btn-hover-dark"

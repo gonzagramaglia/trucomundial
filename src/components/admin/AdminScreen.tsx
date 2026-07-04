@@ -27,6 +27,7 @@ import { TwitchButton } from '../shared/TwitchButton';
 import { UtilityButtons } from '../shared/UtilityButtons';
 import { UserStarsModal } from "./UserStarsModal";
 import { UserProdeModal } from "./UserProdeModal";
+import { Loader } from "../shared/Loader";
 import {
   normalizeTournamentPrizes,
 } from "../../lib/formatters";
@@ -1144,18 +1145,8 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
 
       {/* Content */}
       <div style={{ minHeight: "60vh" }}>
-        {loading ? (
-          <div
-            style={{
-              textAlign: "center",
-              padding: "4rem 0",
-              color: "#a855f7",
-              fontWeight: 800,
-              fontSize: "1.2rem",
-            }}
-          >
-            Cargando datos de la plataforma...
-          </div>
+        {(loading && activeTab !== "fixture" && activeTab !== "settings") ? (
+          <Loader message="Cargando datos de la plataforma..." />
         ) : activeTab === "players" ? (
           <PlayersTab
             playerStats={playerStats}

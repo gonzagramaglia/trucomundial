@@ -11,6 +11,7 @@ import { getFlag } from '../../data/flags';
 import { MessageSquare, Send, ChevronDown } from 'lucide-react';
 import { UtilityButtons } from '../shared/UtilityButtons';
 import { TwitchButton } from '../shared/TwitchButton';
+import { EmptyState } from '../shared/EmptyState';
 import { CARDS } from '../../data/cards';
 
 
@@ -794,16 +795,13 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, handleAuth, 
               {t("loading_history")}
             </div>
           ) : history.length === 0 ? (
-            <div style={{
-              background: 'rgba(255,255,255,0.02)',
-              border: '1px dashed rgba(255,255,255,0.1)',
-              borderRadius: '2rem',
-              padding: '3rem',
-              textAlign: 'center',
-              color: 'rgba(255,255,255,0.5)',
-              marginBottom: '3rem'
-            }}>
-              {t("no_matches_yet")}
+            <div style={{ marginBottom: '3rem', marginTop: '-1rem' }}>
+              <EmptyState
+                icon="🎮"
+                title={t("no_matches_yet")}
+                description={""}
+                color="#00f2ff"
+              />
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', marginBottom: '3rem' }}>

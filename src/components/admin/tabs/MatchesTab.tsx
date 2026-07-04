@@ -1,6 +1,7 @@
 import React from "react";
 import { Trophy, Calendar, Scroll } from "lucide-react";
-import type { MatchSummary } from "./types"; // Will need to define/export MatchSummary or import it
+import type { MatchSummary } from "./types";
+import { EmptyState } from "../../shared/EmptyState";
 
 interface MatchesTabProps {
   history: MatchSummary[];
@@ -143,11 +144,12 @@ export const MatchesTab: React.FC<MatchesTabProps> = ({
         );
       })}
       {history.length === 0 && (
-        <div
-          style={{ textAlign: "center", padding: "2rem 0", opacity: 0.5 }}
-        >
-          No hay partidas globales registradas.
-        </div>
+        <EmptyState
+          icon="🎮"
+          title="Sin partidas"
+          description="No hay partidas globales registradas en el sistema."
+          color="#a855f7"
+        />
       )}
     </div>
   );

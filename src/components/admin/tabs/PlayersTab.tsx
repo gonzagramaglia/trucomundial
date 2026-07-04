@@ -2,6 +2,7 @@ import React from "react";
 import { Star, Search, CalendarDays } from "lucide-react";
 
 import type { PlayerStats, UserStarsPayload, UserProdePayload } from "./types";
+import { EmptyState } from "../../shared/EmptyState";
 
 interface PlayersTabProps {
   playerStats: PlayerStats[];
@@ -332,11 +333,12 @@ export const PlayersTab: React.FC<PlayersTabProps> = ({
             </tbody>
           </table>
           {playerStats.length === 0 && (
-            <div
-              style={{ textAlign: "center", padding: "2rem 0", opacity: 0.5 }}
-            >
-              No hay jugadores registrados con partidas.
-            </div>
+            <EmptyState
+              icon="👥"
+              title="Sin jugadores"
+              description="No hay jugadores registrados con partidas en el sistema."
+              color="#a855f7"
+            />
           )}
         </div>
       </div>

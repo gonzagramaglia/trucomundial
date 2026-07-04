@@ -1,6 +1,7 @@
 import React from "react";
 import { CheckCircle2, Edit2, Trash2, Trophy } from "lucide-react";
 import { formatTournamentPrizes } from "../../../lib/formatters";
+import { EmptyState } from "../../shared/EmptyState";
 
 import type { Tournament, UsedCode } from "./types";
 
@@ -331,9 +332,12 @@ export const TournamentsTab: React.FC<TournamentsTabProps> = ({
         </h3>
         <div style={{ display: "grid", gap: "1rem" }}>
           {tournaments.filter((t) => !t.is_approved).length === 0 && (
-            <div style={{ textAlign: "center", padding: "1rem 0", opacity: 0.5 }}>
-              No hay torneos pendientes.
-            </div>
+            <EmptyState
+              icon="⏳"
+              title="Sin torneos"
+              description="No hay torneos pendientes."
+              color="#f59e0b"
+            />
           )}
           {tournaments.filter((t) => !t.is_approved).map(renderTournament)}
         </div>
@@ -346,9 +350,12 @@ export const TournamentsTab: React.FC<TournamentsTabProps> = ({
         </h3>
         <div style={{ display: "grid", gap: "1rem" }}>
           {tournaments.filter((t) => t.is_approved).length === 0 && (
-            <div style={{ textAlign: "center", padding: "1rem 0", opacity: 0.5 }}>
-              No hay torneos aprobados.
-            </div>
+            <EmptyState
+              icon="🏆"
+              title="Sin torneos"
+              description="No hay torneos aprobados."
+              color="#10b981"
+            />
           )}
           {tournaments.filter((t) => t.is_approved).map(renderTournament)}
         </div>
