@@ -7,7 +7,7 @@ export interface FixtureMatch {
   flagA: string;
   teamB: string;
   flagB: string;
-  status: 'upcoming' | 'live' | 'finished';
+  status: 'upcoming' | 'live' | 'finished' | 'finished_penalties_A' | 'finished_penalties_B';
   scoreA?: number;
   scoreB?: number;
 }
@@ -815,7 +815,9 @@ export const fixtureMatches: FixtureMatch[] = [
     "teamB": "Canadá",
     "flagA": "🇿🇦",
     "flagB": "🇨🇦",
-    "status": "upcoming"
+    "status": "finished",
+    "scoreA": 0,
+    "scoreB": 1
   },
   {
     "id": "74",
@@ -826,7 +828,9 @@ export const fixtureMatches: FixtureMatch[] = [
     "teamB": "Paraguay",
     "flagA": "🇩🇪",
     "flagB": "🇵🇾",
-    "status": "upcoming"
+    "status": "finished_penalties_B",
+    "scoreA": 1,
+    "scoreB": 1
   },
   {
     "id": "75",
@@ -837,7 +841,9 @@ export const fixtureMatches: FixtureMatch[] = [
     "teamB": "Marruecos",
     "flagA": "🇳🇱",
     "flagB": "🇲🇦",
-    "status": "upcoming"
+    "status": "finished_penalties_B",
+    "scoreA": 1,
+    "scoreB": 1
   },
   {
     "id": "76",
@@ -848,7 +854,9 @@ export const fixtureMatches: FixtureMatch[] = [
     "teamB": "Japón",
     "flagA": "🇧🇷",
     "flagB": "🇯🇵",
-    "status": "upcoming"
+    "status": "finished",
+    "scoreA": 2,
+    "scoreB": 1
   },
   {
     "id": "77",
@@ -859,7 +867,9 @@ export const fixtureMatches: FixtureMatch[] = [
     "teamB": "Suecia",
     "flagA": "🇫🇷",
     "flagB": "🇸🇪",
-    "status": "upcoming"
+    "status": "finished",
+    "scoreA": 3,
+    "scoreB": 0
   },
   {
     "id": "78",
@@ -870,7 +880,9 @@ export const fixtureMatches: FixtureMatch[] = [
     "teamB": "Noruega",
     "flagA": "🇨🇮",
     "flagB": "🇳🇴",
-    "status": "upcoming"
+    "status": "finished",
+    "scoreA": 1,
+    "scoreB": 2
   },
   {
     "id": "79",
@@ -881,7 +893,9 @@ export const fixtureMatches: FixtureMatch[] = [
     "teamB": "Ecuador",
     "flagA": "🇲🇽",
     "flagB": "🇪🇨",
-    "status": "upcoming"
+    "status": "finished",
+    "scoreA": 2,
+    "scoreB": 0
   },
   {
     "id": "80",
@@ -892,7 +906,9 @@ export const fixtureMatches: FixtureMatch[] = [
     "teamB": "DR Congo",
     "flagA": "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
     "flagB": "🇨🇩",
-    "status": "upcoming"
+    "status": "finished",
+    "scoreA": 2,
+    "scoreB": 1
   },
   {
     "id": "81",
@@ -903,7 +919,9 @@ export const fixtureMatches: FixtureMatch[] = [
     "teamB": "Bosnia & Herzegovina",
     "flagA": "🇺🇸",
     "flagB": "🇧🇦",
-    "status": "upcoming"
+    "status": "finished",
+    "scoreA": 2,
+    "scoreB": 0
   },
   {
     "id": "82",
@@ -914,7 +932,9 @@ export const fixtureMatches: FixtureMatch[] = [
     "teamB": "Senegal",
     "flagA": "🇧🇪",
     "flagB": "🇸🇳",
-    "status": "upcoming"
+    "status": "finished",
+    "scoreA": 3,
+    "scoreB": 2
   },
   {
     "id": "83",
@@ -925,7 +945,9 @@ export const fixtureMatches: FixtureMatch[] = [
     "teamB": "Croacia",
     "flagA": "🇵🇹",
     "flagB": "🇭🇷",
-    "status": "upcoming"
+    "status": "finished",
+    "scoreA": 2,
+    "scoreB": 1
   },
   {
     "id": "84",
@@ -936,7 +958,9 @@ export const fixtureMatches: FixtureMatch[] = [
     "teamB": "Austria",
     "flagA": "🇪🇸",
     "flagB": "🇦🇹",
-    "status": "upcoming"
+    "status": "finished",
+    "scoreA": 3,
+    "scoreB": 0
   },
   {
     "id": "85",
@@ -947,7 +971,9 @@ export const fixtureMatches: FixtureMatch[] = [
     "teamB": "Argelia",
     "flagA": "🇨🇭",
     "flagB": "🇩🇿",
-    "status": "upcoming"
+    "status": "finished",
+    "scoreA": 2,
+    "scoreB": 0
   },
   {
     "id": "86",
@@ -958,7 +984,9 @@ export const fixtureMatches: FixtureMatch[] = [
     "teamB": "Cabo Verde",
     "flagA": "🇦🇷",
     "flagB": "🇨🇻",
-    "status": "upcoming"
+    "status": "finished",
+    "scoreA": 3,
+    "scoreB": 2
   },
   {
     "id": "87",
@@ -969,7 +997,9 @@ export const fixtureMatches: FixtureMatch[] = [
     "teamB": "Ghana",
     "flagA": "🇨🇴",
     "flagB": "🇬🇭",
-    "status": "upcoming"
+    "status": "finished",
+    "scoreA": 1,
+    "scoreB": 0
   },
   {
     "id": "88",
@@ -980,7 +1010,9 @@ export const fixtureMatches: FixtureMatch[] = [
     "teamB": "Egipto",
     "flagA": "🇦🇺",
     "flagB": "🇪🇬",
-    "status": "upcoming"
+    "status": "finished_penalties_B",
+    "scoreA": 1,
+    "scoreB": 1
   },
   {
     "id": "89",
@@ -991,7 +1023,9 @@ export const fixtureMatches: FixtureMatch[] = [
     "teamB": "Marruecos",
     "flagA": "🇨🇦",
     "flagB": "🇲🇦",
-    "status": "upcoming"
+    "status": "finished",
+    "scoreA": 0,
+    "scoreB": 3
   },
   {
     "id": "90",
@@ -1002,7 +1036,9 @@ export const fixtureMatches: FixtureMatch[] = [
     "teamB": "Francia",
     "flagA": "🇵🇾",
     "flagB": "🇫🇷",
-    "status": "upcoming"
+    "status": "finished",
+    "scoreA": 0,
+    "scoreB": 1
   },
   {
     "id": "91",
@@ -1013,7 +1049,9 @@ export const fixtureMatches: FixtureMatch[] = [
     "teamB": "Noruega",
     "flagA": "🇧🇷",
     "flagB": "🇳🇴",
-    "status": "upcoming"
+    "status": "finished",
+    "scoreA": 1,
+    "scoreB": 2
   },
   {
     "id": "92",
@@ -1024,7 +1062,9 @@ export const fixtureMatches: FixtureMatch[] = [
     "teamB": "Inglaterra",
     "flagA": "🇲🇽",
     "flagB": "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
-    "status": "upcoming"
+    "status": "finished",
+    "scoreA": 2,
+    "scoreB": 3
   },
   {
     "id": "93",
@@ -1035,7 +1075,9 @@ export const fixtureMatches: FixtureMatch[] = [
     "teamB": "España",
     "flagA": "🇵🇹",
     "flagB": "🇪🇸",
-    "status": "upcoming"
+    "status": "finished",
+    "scoreA": 0,
+    "scoreB": 1
   },
   {
     "id": "94",
@@ -1046,7 +1088,9 @@ export const fixtureMatches: FixtureMatch[] = [
     "teamB": "Bélgica",
     "flagA": "🇺🇸",
     "flagB": "🇧🇪",
-    "status": "upcoming"
+    "status": "finished",
+    "scoreA": 1,
+    "scoreB": 4
   },
   {
     "id": "95",
@@ -1057,7 +1101,9 @@ export const fixtureMatches: FixtureMatch[] = [
     "teamB": "Egipto",
     "flagA": "🇦🇷",
     "flagB": "🇪🇬",
-    "status": "upcoming"
+    "status": "finished",
+    "scoreA": 3,
+    "scoreB": 2
   },
   {
     "id": "96",
@@ -1068,6 +1114,52 @@ export const fixtureMatches: FixtureMatch[] = [
     "teamB": "Colombia",
     "flagA": "🇨🇭",
     "flagB": "🇨🇴",
+    "status": "finished_penalties_A",
+    "scoreA": 0,
+    "scoreB": 0
+  },
+  {
+    "id": "97",
+    "date": "miércoles 9 de julio",
+    "time": "05:00 p. m.",
+    "group": "Cuartos de final",
+    "teamA": "Francia",
+    "teamB": "Marruecos",
+    "flagA": "🇫🇷",
+    "flagB": "🇲🇦",
+    "status": "upcoming"
+  },
+  {
+    "id": "98",
+    "date": "jueves 10 de julio",
+    "time": "04:00 p. m.",
+    "group": "Cuartos de final",
+    "teamA": "España",
+    "teamB": "Bélgica",
+    "flagA": "🇪🇸",
+    "flagB": "🇧🇪",
+    "status": "upcoming"
+  },
+  {
+    "id": "99",
+    "date": "viernes 11 de julio",
+    "time": "06:00 p. m.",
+    "group": "Cuartos de final",
+    "teamA": "Noruega",
+    "teamB": "Inglaterra",
+    "flagA": "🇳🇴",
+    "flagB": "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
+    "status": "upcoming"
+  },
+  {
+    "id": "100",
+    "date": "viernes 11 de julio",
+    "time": "10:00 p. m.",
+    "group": "Cuartos de final",
+    "teamA": "Argentina",
+    "teamB": "Suiza",
+    "flagA": "🇦🇷",
+    "flagB": "🇨🇭",
     "status": "upcoming"
   }
 ];

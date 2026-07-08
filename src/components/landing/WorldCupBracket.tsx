@@ -13,9 +13,18 @@ export const WorldCupBracket: React.FC<WorldCupBracketProps> = ({ fixtureMatches
   const { t } = useTranslation();
   const roundNames = [t("bracket_round_32"), t("bracket_round_16"), t("bracket_quarterfinals"), t("bracket_semifinals")];
   
-  // R1: 16 matches (73 to 88)
-  const r1Matches = Array.from({ length: 16 }, (_, i) => {
-    const id = (73 + i).toString();
+  // R1: 16 matches ordered to match the FIFA bracket structure.
+  // The bracket pairs consecutive matches to form the next round.
+  // We order them so the visual bracket (left=top, right=bottom) produces
+  // correct pairings into the knockout rounds.
+  // FIFA bracket structure:
+  //   Octavos: 89(W73 vs W75), 90(W74 vs W77), 93(W83 vs W84), 94(W81 vs W82),
+  //            91(W76 vs W78), 92(W79 vs W80), 95(W86 vs W88), 96(W85 vs W87)
+  //   Cuartos: 97(W89 vs W90), 98(W93 vs W94), 99(W91 vs W92), 100(W95 vs W96)
+  //   Semis: 101(W97 vs W98), 102(W99 vs W100)
+  const r1Order = [73, 75, 74, 77, 83, 84, 81, 82, 76, 78, 79, 80, 86, 88, 85, 87];
+  const r1Matches = r1Order.map(matchId => {
+    const id = matchId.toString();
     const match = fixtureMatches.find(m => m.id === id);
     if (!match) return { teamA: "?", teamB: "?", flagA: "", flagB: "" };
     return {
@@ -26,6 +35,14 @@ export const WorldCupBracket: React.FC<WorldCupBracketProps> = ({ fixtureMatches
       id
     };
   });
+
+  // Explicit ID mapping for each knockout round to match FIFA's bracket
+  const knockoutIds = [
+    [89, 90, 93, 94, 91, 92, 95, 96],  // Octavos de final (Round of 16)
+    [97, 98, 99, 100],                   // Cuartos de final (Quarterfinals)
+    [101, 102],                           // Semifinales
+    [104],                                // Final
+  ];
 
   const getWinner = (matchId: string | undefined, teamA: string, teamB: string, flagA: string, flagB: string) => {
     if (!matchId) return { team: "?", flag: "" };
@@ -61,8 +78,6 @@ export const WorldCupBracket: React.FC<WorldCupBracketProps> = ({ fixtureMatches
       id: m.id
     }));
 
-    let nextMatchId = 89;
-    
     for (let r = 0; r < 4; r++) { // 4 iterations to build 5 rounds
       // Populate scores for current round
       currentRoundMatches.forEach(match => {
@@ -73,6 +88,7 @@ export const WorldCupBracket: React.FC<WorldCupBracketProps> = ({ fixtureMatches
       });
       rounds.push(currentRoundMatches);
 
+      const nextRoundIds = knockoutIds[r];
       const nextRound = [];
       for (let i = 0; i < currentRoundMatches.length / 2; i++) {
         const match1 = currentRoundMatches[i * 2];
@@ -81,17 +97,12 @@ export const WorldCupBracket: React.FC<WorldCupBracketProps> = ({ fixtureMatches
         const winner1 = getWinner(match1.id, match1.p1.name, match1.p2.name, match1.p1.flag, match1.p2.flag);
         const winner2 = getWinner(match2.id, match2.p1.name, match2.p2.name, match2.p1.flag, match2.p2.flag);
         
+        const nextId = nextRoundIds[i]?.toString();
         nextRound.push({
           p1: { name: winner1.team, flag: winner1.flag, score: undefined as number | undefined },
           p2: { name: winner2.team, flag: winner2.flag, score: undefined as number | undefined },
-          id: nextMatchId <= 104 ? nextMatchId.toString() : undefined
+          id: nextId
         });
-        
-        if (nextMatchId === 102) {
-          nextMatchId = 104;
-        } else {
-          nextMatchId++;
-        }
       }
       currentRoundMatches = nextRound;
     }
@@ -182,7 +193,8 @@ export const WorldCupBracket: React.FC<WorldCupBracketProps> = ({ fixtureMatches
       border: "1px solid rgba(0, 242, 255, 0.15)",
       borderRadius: "1.5rem",
       padding: typeof window !== 'undefined' && window.innerWidth < 768 ? "1rem" : "2rem",
-      width: "100%",
+      width: typeof window !== 'undefined' && window.innerWidth < 768 ? "100%" : "calc(100% + 600px)",
+      marginLeft: typeof window !== 'undefined' && window.innerWidth < 768 ? "0" : "-300px",
       display: "flex",
       flexDirection: "column",
       gap: "1.5rem",
@@ -198,8 +210,76 @@ export const WorldCupBracket: React.FC<WorldCupBracketProps> = ({ fixtureMatches
         </div>
       </div>
 
-      <div style={{ overflowX: "auto", paddingBottom: "1rem", scrollbarWidth: "none", msOverflowStyle: "none" }}>
-        <div style={{ display: "flex", gap: "1rem", alignItems: "stretch", minWidth: "1200px", margin: "0 auto", padding: "0 1rem" }}>
+      <style>{`
+        .bracket-scroll::-webkit-scrollbar {
+          height: 6px;
+        }
+        .bracket-scroll::-webkit-scrollbar-track {
+          background: rgba(255, 255, 255, 0.05);
+          border-radius: 3px;
+        }
+        .bracket-scroll::-webkit-scrollbar-thumb {
+          background: rgba(0, 242, 255, 0.3);
+          border-radius: 3px;
+        }
+        .bracket-scroll::-webkit-scrollbar-thumb:hover {
+          background: rgba(0, 242, 255, 0.5);
+        }
+        .bracket-scroll-bottom::-webkit-scrollbar {
+          height: 6px;
+        }
+        .bracket-scroll-bottom::-webkit-scrollbar-track {
+          background: transparent;
+          border-radius: 3px;
+        }
+        .bracket-scroll-bottom::-webkit-scrollbar-thumb {
+          background: rgba(0, 242, 255, 0.3);
+          border-radius: 3px;
+        }
+        .bracket-scroll-bottom::-webkit-scrollbar-thumb:hover {
+          background: rgba(0, 242, 255, 0.5);
+        }
+        .bracket-scroll-bottom {
+          scrollbar-gutter: stable;
+        }
+      `}</style>
+
+      <div
+        className="bracket-scroll"
+        style={{
+          overflowX: "auto",
+          paddingBottom: "0.25rem",
+          scrollbarWidth: "thin",
+          scrollbarColor: "rgba(0, 242, 255, 0.3) rgba(255, 255, 255, 0.05)",
+        }}
+        data-bracket-top-scroll
+        onScroll={(e) => {
+          const bottom = e.currentTarget.parentElement?.querySelector('[data-bracket-bottom-scroll]') as HTMLElement;
+          if (bottom && bottom.scrollLeft !== e.currentTarget.scrollLeft) {
+            bottom.scrollLeft = e.currentTarget.scrollLeft;
+          }
+        }}
+      >
+        <div style={{ height: "1px", minWidth: "1600px" }} />
+      </div>
+
+      <div
+        className="bracket-scroll-bottom"
+        style={{
+          overflowX: "auto",
+          paddingBottom: "0.5rem",
+          scrollbarWidth: "thin",
+          scrollbarColor: "rgba(0, 242, 255, 0.3) transparent",
+        }}
+        data-bracket-bottom-scroll
+        onScroll={(e) => {
+          const top = e.currentTarget.parentElement?.querySelector('[data-bracket-top-scroll]') as HTMLElement;
+          if (top && top.scrollLeft !== e.currentTarget.scrollLeft) {
+            top.scrollLeft = e.currentTarget.scrollLeft;
+          }
+        }}
+      >
+        <div style={{ display: "flex", gap: "1rem", alignItems: "stretch", minWidth: "1600px", margin: "0 auto", padding: "0 1rem" }}>
           
           {/* LEFT SIDE */}
           <div style={{ display: "flex", gap: "0", flex: 1 }}>
