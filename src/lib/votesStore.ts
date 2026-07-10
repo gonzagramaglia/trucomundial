@@ -83,10 +83,14 @@ const useVotesStore = create<VotesState & VotesActions>((set, get) => ({
 /** Mutable votes reference kept in sync with the store for non-React consumers (engine.ts, etc.) */
 export const votesRegistry: Record<string, number> = {};
 
-// Keep the mutable object in sync with the store
+// Keep the mutable object in sync with the store (only when votesRegistry changes)
+let prevVotesRef: Record<string, number> = {};
 useVotesStore.subscribe((state) => {
-  Object.keys(votesRegistry).forEach(k => delete votesRegistry[k]);
-  Object.assign(votesRegistry, state.votesRegistry);
+  if (state.votesRegistry !== prevVotesRef) {
+    prevVotesRef = state.votesRegistry;
+    Object.keys(votesRegistry).forEach(k => delete votesRegistry[k]);
+    Object.assign(votesRegistry, state.votesRegistry);
+  }
 });
 
 /**

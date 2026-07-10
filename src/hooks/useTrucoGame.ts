@@ -8,7 +8,7 @@ import { audioManager } from "../lib/audio";
  * High-level game hook that combines useTrucoCore with CPU AI logic, connection
  * monitoring, pause state, and the game start flow.
  * @param sessionId - The current session identifier
- * @param onSync - Optional callback invoked with round data for multiplayer synchronization
+ * @param onSync - Optional callback invoked with generated round data whenever a game starts
  */
 export function useTrucoGame(sessionId: string | undefined, onSync?: (data: any) => void) {
   const core = useTrucoCore(sessionId || "local");
