@@ -17,14 +17,16 @@ Rules and conventions for all code in this project. Follow these without excepti
 - Commits follow Conventional Commits (enforced by Husky + Commitlint)
 - Body lines must not exceed 100 characters
 - Open a PR against `main` — CodeRabbit reviews automatically
-- All tests must pass before committing (pre-commit hook runs `tsc -b && vite build`)
+- Pre-commit hook runs `tsc -b && vite build` (type check + production build)
+- Run `yarn test` separately before committing — tests are not part of the hook
 
 ## TypeScript
 
 - Avoid `any` — use `unknown` with narrowing, or proper types
 - All exports should have JSDoc documentation
 - Use `interface` for component props, `type` for everything else
-- Async functions must have try/catch — never let promises float
+- Async functions: always await, return, or explicitly handle promises — never let them float
+- Use try/catch at recovery boundaries (hooks, event handlers) — not in every utility function
 
 ## File Naming
 

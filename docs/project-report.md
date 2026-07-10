@@ -83,9 +83,11 @@ Football fans and Truco enthusiasts (primarily Argentine/LATAM) who enjoy compet
 └─────────────────────────────────────────────────────┘
 
 Data Flow:
-  Vote → Update game_sync → votesStore recalculates → Card values change live
-  Match result → fixture_results → Base stars recalculated → Cards buffed
+  Vote → Update game_sync → votesStore recalculates → Values apply to next game
+  Match result → fixture_results → Base stars recalculated → Buffs apply to next game
   Multiplayer → Realtime broadcast → Opponent receives move → State synced
+
+Note: Active matches use a frozen snapshot taken at game start.
 ```
 
 ---
@@ -105,7 +107,7 @@ Data Flow:
 | Fixture Data — JSON integrity | 6 cases (loading, fields, status, IDs, scores) | ✅ |
 | Standings Data — structure & math | 11 cases (groups, teams, pts formula, GD) | ✅ |
 
-**Total: 56 unit tests, all passing.**
+**Total: 54 unit tests documented, all passing.**
 
 ---
 
