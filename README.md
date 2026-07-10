@@ -10,33 +10,57 @@ The game includes the complete Truco experience, featuring **Truco**, **Retruco*
 **Envido Mechanics:** Unlike traditional Truco (which uses suits and a +20 base bonus), Envido points in Truco Mundial are calculated by summing the envido values of two cards that share the same **Country** or **Club**. The standard +20 base bonus is omitted, making the calculations direct and unique to the players' stats!
 
 ## 🎮 Features
-- **Custom Deck Building (`/mazo`)**: Players can open 22 free welcome packs to unlock their starting collection of cards. Select exactly 4 national teams to build your competitive deck.
-- **Real-Time Multiplayer**: Play online with friends using a 4-letter private room code. *Note: You must have unlocked your 22 free cards and built your deck to enter multiplayer mode!*
-- **Host/Guest Architecture**: Robust real-time synchronization with seamless reconnection if a player drops.
-- **Local Play**: Play locally against the CPU.
-- **Custom Matches**: Choose between short (15 points) or long (30 points) matches.
-- **Google Authentication**: Quick and easy login via Supabase for multiplayer access. Anonymous play is also supported.
-- **Bilingual Experience (i18n)**: Full support for both English and Spanish throughout the entire application.
-- **Twitch Integration**: Interactive chat overlay and features specifically designed for streamers, allowing viewers to participate in deck selection and game interactions directly from the broadcast.
-- **World Cup Fixture Integration (`/fixture`)**: An interactive visual fixture of the 2026 World Cup, showing upcoming games, results, and tying game outcomes to card buffs and power levels.
-- **Interactive Card Voting (`/votar`)**: An interactive voting system for the community to rank the best cards. Users can distribute up to 78 daily stars to bump up their favorite players.
-- **Streamer & Rapper Tournaments (`/torneos`)**: An elegant dedicated screen showing custom 1vs1 qualifying tournaments hosted by community streamers and rappers.
-- **Interactive Roadmap (`/ruta`)**: A gorgeous vertical timeline detailing upcoming project milestones.
-- **Dynamic SPA Routing & SEO**: Zero-dependency URL mapping and client-side history navigation support for all paths with real-time dynamic SEO title and Open Graph metadata updates.
+- **Custom Deck Building (`/mazo`)**: Open packs, unlock 500+ player cards, and select 4 national teams to build your competitive deck.
+- **Real-Time Multiplayer**: Play online with friends using a 4-letter private room code with seamless reconnection.
+- **Local Play**: Play against the CPU in 1v1 or 2v2 mode. Choose between 15 or 30 point matches.
+- **World Cup Prode (`/prode`)**: Predict match results, view the interactive knockout bracket with live progression, and earn reward codes for correct predictions. Real results buff card power levels.
+- **Interactive Card Voting (`/votar`)**: Distribute up to 78 daily stars to rank cards. Community votes directly determine card strength in-game.
+- **Twitch Integration**: Interactive chat overlay for streamers — viewers participate in deck selection and game interactions live.
+- **Google Authentication**: Quick login via Supabase for multiplayer. Anonymous play also supported.
+- **Bilingual (i18n)**: Full English and Spanish support throughout.
 
 ## 🛠️ Tech Stack
-- **Frontend**: React + Vite (TypeScript)
+- **Frontend**: React 19 + Vite 8 (TypeScript)
 - **Package Manager**: Yarn
-- **Styling**: Vanilla CSS + Framer Motion (for premium animations and responsive design)
+- **Styling**: Vanilla CSS + Framer Motion
 - **State Management**: Zustand
 - **Backend/DB**: Supabase (Realtime, Postgres & Auth)
-- **Code Quality**: Husky + Commitlint (Conventional Commits)
+- **Testing**: Vitest + @testing-library/react
+- **Code Quality**: Husky + Commitlint (Conventional Commits) + CodeRabbit
+
+## 🧪 Testing & Code Quality
+
+| Tool | Purpose |
+|------|---------|
+| [Vitest](vitest.config.ts) | Unit test runner (56 tests, all passing) |
+| [CodeRabbit](.coderabbit.yaml) | Automated AI code review on PRs to main |
+| Husky + Commitlint | Conventional Commits enforcement on every commit |
+| TypeScript strict | Full type checking, build fails on errors |
+
+```bash
+yarn test              # Run all tests (single run)
+yarn test:watch        # Watch mode
+yarn test:coverage     # With V8 coverage report
+yarn build             # Type check + production build
+```
 
 ## 🎨 Look & Feel
 - **Urban Freestyle** Aesthetics: Bold typography, high contrast, and vibrant colors.
 - Inspired by the **2026 World Cup Album**.
 - **Football stadium** style digital scoreboard.
 - Optimized for both mobile and desktop screens with a premium interface.
+
+## 📚 Documentation
+
+| Document | Description |
+|----------|-------------|
+| [docs/project-report.md](docs/project-report.md) | Full project report (architecture, testing, stack) |
+| [context/architecture.md](context/architecture.md) | Technical architecture & data flows |
+| [context/code-standards.md](context/code-standards.md) | Engineering conventions & rules |
+| [context/game-logic.md](context/game-logic.md) | Truco game rules & engine reference |
+| [context/ui-guide.md](context/ui-guide.md) | Design tokens, colors, component patterns |
+| [AGENTS.md](AGENTS.md) | AI agent instructions & available skills |
+| [PR_STANDARDS.md](PR_STANDARDS.md) | Pull request format, branch naming & checklist |
 
 ## 🤝 Contribution and License
 This project is developed openly (Open development — collaboration inquiries welcome).
