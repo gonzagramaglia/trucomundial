@@ -11,6 +11,10 @@ vi.mock('../../../lib/votesStore', () => ({
       'bellingham': 80,
       'yamal': 70,
       'kane': 60,
+      'tied_player': 50,
+      'tied_cpu': 50,
+      'tied_hero1': 50,
+      'tied_hero2': 50,
     };
     return votes[id.replace(/(_rem|_cpu)?_\d+$/, '')] || 0;
   }),
@@ -35,8 +39,8 @@ describe('calculateEnvido', () => {
   });
 
   it('returns 0 for null/undefined hand', () => {
-    expect(calculateEnvido(null as any)).toBe(0);
-    expect(calculateEnvido(undefined as any)).toBe(0);
+    expect(calculateEnvido(null as unknown as Card[])).toBe(0);
+    expect(calculateEnvido(undefined as unknown as Card[])).toBe(0);
   });
 
   it('returns single card env value', () => {
@@ -109,21 +113,20 @@ describe('determineWinner', () => {
 
   it('returns draw when tied across different teams', () => {
     const played: PlayedCard[] = [
-      { ...makeCard({ id: 'unknown1' }), owner: 'player', rotation: 0, x: 0, y: 0 },
-      { ...makeCard({ id: 'unknown2' }), owner: 'cpu', rotation: 0, x: 0, y: 0 },
+      { ...makeCard({ id: 'tied_player' }), owner: 'player', rotation: 0, x: 0, y: 0 },
+      { ...makeCard({ id: 'tied_cpu' }), owner: 'cpu', rotation: 0, x: 0, y: 0 },
     ];
-    // Both have 0 votes = tie between different teams
+    // Both have 50 votes = tie between different teams
     expect(determineWinner(played)).toBe('draw');
   });
 
-  it('returns winner when tied within same team', () => {
+  it('returns same-team winner when tied within same team', () => {
     const played: PlayedCard[] = [
-      { ...makeCard({ id: 'unknown1' }), owner: 'player', rotation: 0, x: 0, y: 0 },
-      { ...makeCard({ id: 'unknown2' }), owner: 'partner', rotation: 0, x: 0, y: 0 },
-      { ...makeCard({ id: 'kane' }), owner: 'cpu', rotation: 0, x: 0, y: 0 },
+      { ...makeCard({ id: 'tied_hero1' }), owner: 'player', rotation: 0, x: 0, y: 0 },
+      { ...makeCard({ id: 'tied_hero2' }), owner: 'partner', rotation: 0, x: 0, y: 0 },
     ];
-    // unknown1=0, unknown2=0 (tie between player+partner = same team "hero") vs kane=60
-    expect(determineWinner(played)).toBe('cpu'); // kane wins
+    // Both have 50 votes, both on "hero" team — same team tie returns first winner's owner
+    expect(determineWinner(played)).toBe('player');
   });
 
   it('handles single card played', () => {

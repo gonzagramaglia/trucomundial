@@ -14,7 +14,7 @@ describe('standingsData', () => {
     });
 
     it('each group has 4 teams', () => {
-      Object.entries(groupStandings).forEach(([_group, teams]) => {
+      Object.values(groupStandings).forEach((teams) => {
         expect(teams.length).toBe(4);
       });
     });
