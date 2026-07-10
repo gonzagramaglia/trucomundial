@@ -10,6 +10,7 @@ import type { FixtureMatch } from '../../lib/fixtureData';
 import { supabase } from '../../lib/supabase';
 import { audioManager } from '../../lib/audio';
 import { UtilityButtons } from '../shared/UtilityButtons';
+import { isMatchStarted, isMatchFinishedAuto, formatMatchTime } from '../../lib/matchTime';
 
 type TabType = 'groups' | 'round_32' | 'round_16' | 'quarterfinals' | 'semifinals' | 'final';
 
@@ -18,112 +19,6 @@ interface ProdeScreenProps {
   handleAuth: () => void;
   onBack: () => void;
 }
-
-const months: Record<string, number> = {
-  "enero": 0, "febrero": 1, "marzo": 2, "abril": 3, "mayo": 4, "junio": 5,
-  "julio": 6, "agosto": 7, "septiembre": 8, "octubre": 9, "noviembre": 10, "diciembre": 11
-};
-
-export const isMatchStarted = (dateStr: string, timeStr: string, matchStatus: string): boolean => {
-  if (matchStatus === 'live' || matchStatus === 'finished') return true;
-  const dateParts = dateStr.split(" ");
-  if (dateParts.length >= 4) {
-    const day = parseInt(dateParts[1]);
-    const monthStr = dateParts[3].toLowerCase();
-    const month = months[monthStr];
-    if (!isNaN(day) && month !== undefined) {
-      const timeParts = timeStr.split(" ");
-      let hour = 0;
-      let min = 0;
-      if (timeStr.includes("hs")) {
-        const [h, m] = timeParts[0].split(":");
-        hour = parseInt(h);
-        min = parseInt(m || "0");
-      } else {
-        const [h, m] = timeParts[0].split(":");
-        hour = parseInt(h);
-        min = parseInt(m);
-        const ampm = timeParts[1]?.toLowerCase() + " " + timeParts[2]?.toLowerCase();
-        if (ampm.includes("p. m.") && hour < 12) hour += 12;
-        if (ampm.includes("a. m.") && hour === 12) hour = 0;
-      }
-      // Parse as UTC-3 (Argentina time) by adding 3 hours to get UTC
-      const matchDate = new Date(Date.UTC(2026, month, day, hour + 3, min, 0));
-      return new Date() >= matchDate;
-    }
-  }
-  return false;
-};
-
-export const isMatchFinishedAuto = (dateStr: string, timeStr: string): boolean => {
-  const dateParts = dateStr.split(" ");
-  if (dateParts.length >= 4) {
-    const day = parseInt(dateParts[1]);
-    const monthStr = dateParts[3].toLowerCase();
-    const month = months[monthStr];
-    if (!isNaN(day) && month !== undefined) {
-      const timeParts = timeStr.split(" ");
-      let hour = 0;
-      let min = 0;
-      if (timeStr.includes("hs")) {
-        const [h, m] = timeParts[0].split(":");
-        hour = parseInt(h);
-        min = parseInt(m || "0");
-      } else {
-        const [h, m] = timeParts[0].split(":");
-        hour = parseInt(h);
-        min = parseInt(m);
-        const ampm = timeParts[1]?.toLowerCase() + " " + timeParts[2]?.toLowerCase();
-        if (ampm.includes("p. m.") && hour < 12) hour += 12;
-        if (ampm.includes("a. m.") && hour === 12) hour = 0;
-      }
-      // Parse as UTC-3 (Argentina time) by adding 3 hours to get UTC
-      const matchDate = new Date(Date.UTC(2026, month, day, hour + 3, min, 0));
-      const finishedDate = new Date(matchDate.getTime() + 2 * 60 * 60 * 1000);
-      return new Date() >= finishedDate;
-    }
-  }
-  return false;
-};
-
-export const formatMatchTime = (dateStr: string, timeStr: string, language: string = 'es') => {
-  const dateParts = dateStr.split(" ");
-  if (dateParts.length < 4) return { localDate: dateStr, localTime: timeStr };
-
-  const day = parseInt(dateParts[1]);
-  const monthStr = dateParts[3].toLowerCase();
-  const month = months[monthStr];
-
-  if (isNaN(day) || month === undefined) return { localDate: dateStr, localTime: timeStr };
-
-  const timeParts = timeStr.split(" ");
-  let hour = 0;
-  let min = 0;
-
-  if (timeStr.includes("hs")) {
-    const [h, m] = timeParts[0].split(":");
-    hour = parseInt(h);
-    min = parseInt(m || "0");
-  } else {
-    const [h, m] = timeParts[0].split(":");
-    hour = parseInt(h);
-    min = parseInt(m);
-    const ampm = timeParts[1]?.toLowerCase() + " " + timeParts[2]?.toLowerCase();
-    if (ampm.includes("p. m.") && hour < 12) hour += 12;
-    if (ampm.includes("a. m.") && hour === 12) hour = 0;
-  }
-
-  // Create Date object assuming original time is UTC-3
-  const matchDate = new Date(Date.UTC(2026, month, day, hour + 3, min, 0));
-
-  const localeStr = language === 'en' ? 'en-US' : 'es-ES';
-  let localDateStr = matchDate.toLocaleDateString(localeStr, { weekday: 'short', day: 'numeric', month: 'short' });
-  localDateStr = localDateStr.charAt(0).toUpperCase() + localDateStr.slice(1).replace('.', ',');
-  const localTimeSuffix = language === 'en' ? '' : ' hs';
-  const localTimeStr = matchDate.toLocaleTimeString(localeStr, { hour: '2-digit', minute: '2-digit' }) + localTimeSuffix;
-
-  return { localDate: localDateStr, localTime: localTimeStr };
-};
 
 export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBack }) => {
   const { t, i18n } = useTranslation();
