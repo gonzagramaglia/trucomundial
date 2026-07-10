@@ -3,11 +3,17 @@ import { Save, Layers } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { FixtureMatch } from '../../lib/fixtureData';
 import { isMatchStarted, isMatchFinishedAuto, formatMatchTime } from '../../lib/matchTime';
+import { calculateRewardPacks } from '../../lib/prodeRewards';
+
+interface ProdeUser {
+  id: string;
+  user_metadata?: { nationality?: string };
+}
 
 interface ProdeMatchCardProps {
   match: FixtureMatch;
   isMobile: boolean;
-  user: any;
+  user: ProdeUser | null;
   prediction?: { scoreA: number; scoreB: number; rewarded?: boolean };
   inputScoreA: string;
   inputScoreB: string;
@@ -40,11 +46,9 @@ export const ProdeMatchCard: React.FC<ProdeMatchCardProps> = ({
   let packsWon = 0;
   let wonExact = false;
   if (match.status?.startsWith('finished') && hasPrediction) {
-    const exactMatch = pScoreA === match.scoreA! && pScoreB === match.scoreB!;
-    const predWinner = pScoreA! > pScoreB! ? 'A' : (pScoreA! < pScoreB! ? 'B' : 'Draw');
-    const resWinner = match.scoreA! > match.scoreB! ? 'A' : (match.scoreA! < match.scoreB! ? 'B' : 'Draw');
-    if (exactMatch) { packsWon = 3; wonExact = true; }
-    else if (predWinner === resWinner) packsWon = 1;
+    const result = calculateRewardPacks(pScoreA!, pScoreB!, match.scoreA!, match.scoreB!);
+    packsWon = result.packs;
+    wonExact = result.wonExact;
   }
 
   const allCodesUsed = codeStatus && codeStatus.total > 0 && codeStatus.total === codeStatus.used;
@@ -70,7 +74,7 @@ export const ProdeMatchCard: React.FC<ProdeMatchCardProps> = ({
             className="btn-hover-dark"
             style={{ background: '#ff8c00', color: '#000', border: 'none', padding: '0.5rem 1rem', borderRadius: '0.5rem', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', ...(isMobile ? { justifyContent: 'center', width: '100%', marginTop: '1rem' } : {}) }}
           >
-            <Layers size={16} /> <span>Reclamar{isMobile ? ' Recompensa' : ''}</span>
+            <Layers size={16} /> <span>{isMobile ? t('claim_reward', 'Reclamar Recompensa') : t('claim', 'Reclamar')}</span>
           </button>
         );
       }
@@ -116,7 +120,7 @@ export const ProdeMatchCard: React.FC<ProdeMatchCardProps> = ({
           disabled
           style={{ background: 'rgba(0, 230, 118, 0.2)', color: '#00e676', border: '1px solid rgba(0, 230, 118, 0.5)', padding: '0.5rem 1rem', borderRadius: '0.5rem', fontWeight: 800, cursor: 'not-allowed', display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: 0.8, ...(isMobile ? { width: '100%', justifyContent: 'center', marginTop: '1rem' } : {}) }}
         >
-          <Save size={16} /> <span>Guardado</span>
+          <Save size={16} /> <span>{t('saved', 'Guardado')}</span>
         </button>
       );
     }
@@ -160,6 +164,7 @@ export const ProdeMatchCard: React.FC<ProdeMatchCardProps> = ({
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <input
               type="text" inputMode="numeric" maxLength={1} disabled={locked || !user}
+              aria-label={`${match.teamA} score`}
               value={hasPrediction ? pScoreA : inScoreA}
               onChange={(e) => onInputChange(match.id, 'scoreA', e.target.value.replace(/[^0-9]/g, '').slice(0, 1))}
               style={{ width: '40px', height: '40px', textAlign: 'center', padding: 0, background: (locked || !user) ? 'transparent' : 'rgba(0,0,0,0.5)', border: (locked || !user) ? 'none' : '1px solid rgba(255,255,255,0.2)', color: '#fff', borderRadius: '0.5rem', fontWeight: 800, fontSize: '1.2rem' }}
@@ -167,6 +172,7 @@ export const ProdeMatchCard: React.FC<ProdeMatchCardProps> = ({
             <span style={{ fontWeight: 800, color: 'rgba(255,255,255,0.4)' }}>-</span>
             <input
               type="text" inputMode="numeric" maxLength={1} disabled={locked || !user}
+              aria-label={`${match.teamB} score`}
               value={hasPrediction ? pScoreB : inScoreB}
               onChange={(e) => onInputChange(match.id, 'scoreB', e.target.value.replace(/[^0-9]/g, '').slice(0, 1))}
               style={{ width: '40px', height: '40px', textAlign: 'center', padding: 0, background: (locked || !user) ? 'transparent' : 'rgba(0,0,0,0.5)', border: (locked || !user) ? 'none' : '1px solid rgba(255,255,255,0.2)', color: '#fff', borderRadius: '0.5rem', fontWeight: 800, fontSize: '1.2rem' }}

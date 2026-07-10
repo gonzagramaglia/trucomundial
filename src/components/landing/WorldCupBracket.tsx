@@ -3,6 +3,7 @@ import { Trophy } from 'lucide-react';
 import type { FixtureMatch } from '../../lib/fixtureData';
 import { useTranslation } from 'react-i18next';
 import { ExternalLink } from 'lucide-react';
+import { buildBracketRounds, getMatchWinner, getMatchLoser } from '../../lib/bracketLogic';
 
 interface WorldCupBracketProps {
   fixtureMatches: FixtureMatch[];
@@ -12,133 +13,15 @@ interface WorldCupBracketProps {
 export const WorldCupBracket: React.FC<WorldCupBracketProps> = ({ fixtureMatches, liveResults }) => {
   const { t } = useTranslation();
   const roundNames = [t("bracket_round_32"), t("bracket_round_16"), t("bracket_quarterfinals"), t("bracket_semifinals")];
-  
-  // R1: 16 matches ordered to match the FIFA bracket structure.
-  // The bracket pairs consecutive matches to form the next round.
-  // We order them so the visual bracket (left=top, right=bottom) produces
-  // correct pairings into the knockout rounds.
-  // FIFA bracket structure:
-  //   Octavos: 89(W73 vs W75), 90(W74 vs W77), 93(W83 vs W84), 94(W81 vs W82),
-  //            91(W76 vs W78), 92(W79 vs W80), 95(W86 vs W88), 96(W85 vs W87)
-  //   Cuartos: 97(W89 vs W90), 98(W93 vs W94), 99(W91 vs W92), 100(W95 vs W96)
-  //   Semis: 101(W97 vs W98), 102(W99 vs W100)
-  const r1Order = [73, 75, 74, 77, 83, 84, 81, 82, 76, 78, 79, 80, 86, 88, 85, 87];
-  const r1Matches = r1Order.map(matchId => {
-    const id = matchId.toString();
-    const match = fixtureMatches.find(m => m.id === id);
-    if (!match) return { teamA: "?", teamB: "?", flagA: "", flagB: "" };
-    return {
-      teamA: match.teamA,
-      teamB: match.teamB,
-      flagA: match.flagA,
-      flagB: match.flagB,
-      id
-    };
-  });
 
-  // Explicit ID mapping for each knockout round to match FIFA's bracket
-  const knockoutIds = [
-    [89, 90, 93, 94, 91, 92, 95, 96],  // Octavos de final (Round of 16)
-    [97, 98, 99, 100],                   // Cuartos de final (Quarterfinals)
-    [101, 102],                           // Semifinales
-    [104],                                // Final
-  ];
-
-  const getWinner = (matchId: string | undefined, teamA: string, teamB: string, flagA: string, flagB: string) => {
-    if (!matchId) return { team: "?", flag: "" };
-    const res = liveResults[matchId];
-    if (res && res.status?.startsWith('finished')) {
-      if (res.status?.startsWith('finished_penalties_A')) return { team: teamA, flag: flagA };
-      if (res.status?.startsWith('finished_penalties_B')) return { team: teamB, flag: flagB };
-      if (res.scoreA > res.scoreB) return { team: teamA, flag: flagA };
-      if (res.scoreB > res.scoreA) return { team: teamB, flag: flagB };
-      return { team: `${teamA}/${teamB}`, flag: "🏁" };
-    }
-    return { team: "?", flag: "" };
-  };
-
-  const getLoser = (matchId: string | undefined, teamA: string, teamB: string, flagA: string, flagB: string) => {
-    if (!matchId) return { team: "?", flag: "" };
-    const res = liveResults[matchId];
-    if (res && res.status?.startsWith('finished')) {
-      if (res.status?.startsWith('finished_penalties_A')) return { team: teamB, flag: flagB };
-      if (res.status?.startsWith('finished_penalties_B')) return { team: teamA, flag: flagA };
-      if (res.scoreA > res.scoreB) return { team: teamB, flag: flagB };
-      if (res.scoreB > res.scoreA) return { team: teamA, flag: flagA };
-      return { team: "?", flag: "" };
-    }
-    return { team: "?", flag: "" };
-  };
-
-  const buildRounds = () => {
-    const rounds = [];
-    let currentRoundMatches = r1Matches.map(m => ({
-      p1: { name: m.teamA, flag: m.flagA, score: undefined as number | undefined },
-      p2: { name: m.teamB, flag: m.flagB, score: undefined as number | undefined },
-      id: m.id
-    }));
-
-    for (let r = 0; r < 4; r++) { // 4 iterations to build 5 rounds
-      // Populate scores for current round
-      currentRoundMatches.forEach(match => {
-         if (match.id && liveResults[match.id]?.status?.startsWith('finished')) {
-           match.p1.score = liveResults[match.id].scoreA;
-           match.p2.score = liveResults[match.id].scoreB;
-         }
-      });
-      rounds.push(currentRoundMatches);
-
-      const nextRoundIds = knockoutIds[r];
-      const nextRound = [];
-      for (let i = 0; i < currentRoundMatches.length / 2; i++) {
-        const match1 = currentRoundMatches[i * 2];
-        const match2 = currentRoundMatches[i * 2 + 1];
-        
-        const winner1 = getWinner(match1.id, match1.p1.name, match1.p2.name, match1.p1.flag, match1.p2.flag);
-        const winner2 = getWinner(match2.id, match2.p1.name, match2.p2.name, match2.p1.flag, match2.p2.flag);
-        
-        const nextId = nextRoundIds[i]?.toString();
-
-        // If the next match exists in fixtureMatches, use its teamA/teamB order
-        // so that scores from liveResults (scoreA/scoreB) align correctly.
-        const nextFixture = nextId ? fixtureMatches.find(m => m.id === nextId) : undefined;
-        if (nextFixture) {
-          nextRound.push({
-            p1: { name: nextFixture.teamA, flag: nextFixture.flagA, score: undefined as number | undefined },
-            p2: { name: nextFixture.teamB, flag: nextFixture.flagB, score: undefined as number | undefined },
-            id: nextId
-          });
-        } else {
-          nextRound.push({
-            p1: { name: winner1.team, flag: winner1.flag, score: undefined as number | undefined },
-            p2: { name: winner2.team, flag: winner2.flag, score: undefined as number | undefined },
-            id: nextId
-          });
-        }
-      }
-      currentRoundMatches = nextRound;
-    }
-    
-    // Process final match scores
-    currentRoundMatches.forEach(match => {
-      if (match.id && liveResults[match.id]?.status?.startsWith('finished')) {
-        match.p1.score = liveResults[match.id].scoreA;
-        match.p2.score = liveResults[match.id].scoreB;
-      }
-    });
-    rounds.push(currentRoundMatches);
-    
-    return rounds;
-  };
-
-  const rounds = buildRounds();
+  const rounds = buildBracketRounds(fixtureMatches, liveResults);
   const finalMatch = rounds[4][0];
-  const champion = getWinner(finalMatch.id, finalMatch.p1.name, finalMatch.p2.name, finalMatch.p1.flag, finalMatch.p2.flag);
+  const champion = getMatchWinner(finalMatch.id, finalMatch.p1.name, finalMatch.p2.name, finalMatch.p1.flag, finalMatch.p2.flag, liveResults);
 
   const semi1 = rounds[3][0];
   const semi2 = rounds[3][1];
-  const thirdPlaceParticipant1 = getLoser(semi1.id, semi1.p1.name, semi1.p2.name, semi1.p1.flag, semi1.p2.flag);
-  const thirdPlaceParticipant2 = getLoser(semi2.id, semi2.p1.name, semi2.p2.name, semi2.p1.flag, semi2.p2.flag);
+  const thirdPlaceParticipant1 = getMatchLoser(semi1.id, semi1.p1.name, semi1.p2.name, semi1.p1.flag, semi1.p2.flag, liveResults);
+  const thirdPlaceParticipant2 = getMatchLoser(semi2.id, semi2.p1.name, semi2.p2.name, semi2.p1.flag, semi2.p2.flag, liveResults);
   
   const thirdPlaceMatch = {
     id: "103",

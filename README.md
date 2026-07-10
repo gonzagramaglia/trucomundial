@@ -10,6 +10,7 @@ The game includes the complete Truco experience, featuring **Truco**, **Retruco*
 **Envido Mechanics:** Unlike traditional Truco (which uses suits and a +20 base bonus), Envido points in Truco Mundial are calculated by summing the envido values of two cards that share the same **Country** or **Club**. The standard +20 base bonus is omitted, making the calculations direct and unique to the players' stats!
 
 ## 🎮 Features
+
 - **Custom Deck Building ([`/mazo`](https://trucomundial.com/mazo))**: Open packs, unlock 500+ player cards, and select 4 national teams to build your competitive deck.
 - **Real-Time Multiplayer**: Play online with friends using a 4-letter private room code with seamless reconnection.
 - **Local Play**: Play against the CPU in 1v1 or 2v2 mode. Choose between 15 or 30 point matches.
