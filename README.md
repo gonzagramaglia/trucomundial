@@ -4,17 +4,18 @@
 *Note: The project is currently in its Beta phase, undergoing continuous updates, new features, and polish.*
 
 ## 🚀 Concept
-A fresh take on the classic card game featuring custom-designed stickers of football players (inspired by World Cup albums, but not using real/official stickers). Each player has a power level that respects the traditional hierarchy of Argentine Truco (e.g., Messi is the Ace of Swords, CR7 is the Ace of Clubs, etc.).
+A fresh take on the classic card game featuring custom-designed stickers of football players (inspired by World Cup albums, but not using real/official stickers). Each player's power level is determined by the community through daily voting — naturally, Messi tends to reign as the Ace of Swords, but the hierarchy shifts every day based on who the community decides to buff.
 
 The game includes the complete Truco experience, featuring **Truco**, **Retruco**, **Vale Cuatro**, and the full **Envido** system (Envido, Real Envido, Falta Envido). 
 **Envido Mechanics:** Unlike traditional Truco (which uses suits and a +20 base bonus), Envido points in Truco Mundial are calculated by summing the envido values of two cards that share the same **Country** or **Club**. The standard +20 base bonus is omitted, making the calculations direct and unique to the players' stats!
 
 ## 🎮 Features
-- **Custom Deck Building (`/mazo`)**: Open packs, unlock 500+ player cards, and select 4 national teams to build your competitive deck.
+
+- **Custom Deck Building ([`/mazo`](https://trucomundial.com/mazo))**: Open packs, unlock 500+ player cards, and select 4 national teams to build your competitive deck.
 - **Real-Time Multiplayer**: Play online with friends using a 4-letter private room code with seamless reconnection.
 - **Local Play**: Play against the CPU in 1v1 or 2v2 mode. Choose between 15 or 30 point matches.
-- **World Cup Prode (`/prode`)**: Predict match results, view the interactive knockout bracket with live progression, and earn reward codes for correct predictions. Real results buff card power levels.
-- **Interactive Card Voting (`/votar`)**: Distribute up to 78 daily stars to rank cards. Community votes directly determine card strength in-game.
+- **World Cup Prode ([`/prode`](https://trucomundial.com/prode))**: Predict match results, view the interactive knockout bracket with live progression, and earn reward codes for correct predictions. Real results buff card power levels.
+- **Interactive Card Voting ([`/votar`](https://trucomundial.com/votar))**: Distribute up to 78 daily stars to rank cards. Community votes directly determine card strength in-game.
 - **Twitch Integration**: Interactive chat overlay for streamers — viewers participate in deck selection and game interactions live.
 - **Google Authentication**: Quick login via Supabase for multiplayer. Anonymous play also supported.
 - **Bilingual (i18n)**: Full English and Spanish support throughout.
@@ -54,13 +55,13 @@ yarn build             # Type check + production build
 
 | Document | Description |
 |----------|-------------|
-| [docs/project-report.md](docs/project-report.md) | Full project report (architecture, testing, stack) |
-| [context/architecture.md](context/architecture.md) | Technical architecture & data flows |
-| [context/code-standards.md](context/code-standards.md) | Engineering conventions & rules |
-| [context/game-logic.md](context/game-logic.md) | Truco game rules & engine reference |
-| [context/ui-guide.md](context/ui-guide.md) | Design tokens, colors, component patterns |
-| [AGENTS.md](AGENTS.md) | AI agent instructions & available skills |
-| [PR_STANDARDS.md](PR_STANDARDS.md) | Pull request format, branch naming & checklist |
+| **[docs/project-report.md](docs/project-report.md)** | Full project report (architecture, testing, stack) |
+| **[context/architecture.md](context/architecture.md)** | Technical architecture & data flows |
+| **[context/code-standards.md](context/code-standards.md)** | Engineering conventions & rules |
+| **[context/game-logic.md](context/game-logic.md)** | Truco game rules & engine reference |
+| **[context/ui-guide.md](context/ui-guide.md)** | Design tokens, colors, component patterns |
+| **[AGENTS.md](AGENTS.md)** | AI agent instructions & available skills |
+| **[PR_STANDARDS.md](PR_STANDARDS.md)** | Pull request format, branch naming & checklist |
 
 ## 🤝 Contribution and License
 This project is developed openly (Open development — collaboration inquiries welcome).

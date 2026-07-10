@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Calendar, Globe, Search, Home, Trophy, Save, AlertCircle, Layers, Star, ExternalLink } from 'lucide-react';
+import { Calendar, Globe, Search, Home, Trophy, ExternalLink, AlertCircle, Star } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { WorldCupBracket } from './WorldCupBracket';
 import { GroupStandings } from './GroupStandings';
@@ -10,6 +10,10 @@ import type { FixtureMatch } from '../../lib/fixtureData';
 import { supabase } from '../../lib/supabase';
 import { audioManager } from '../../lib/audio';
 import { UtilityButtons } from '../shared/UtilityButtons';
+import { ProdeMatchCard } from './ProdeMatchCard';
+import { ProdeRewardModal } from './ProdeRewardModal';
+import { formatMatchTime } from '../../lib/matchTime';
+import { calculateRewardPacks } from '../../lib/prodeRewards';
 
 type TabType = 'groups' | 'round_32' | 'round_16' | 'quarterfinals' | 'semifinals' | 'final';
 
@@ -18,112 +22,6 @@ interface ProdeScreenProps {
   handleAuth: () => void;
   onBack: () => void;
 }
-
-const months: Record<string, number> = {
-  "enero": 0, "febrero": 1, "marzo": 2, "abril": 3, "mayo": 4, "junio": 5,
-  "julio": 6, "agosto": 7, "septiembre": 8, "octubre": 9, "noviembre": 10, "diciembre": 11
-};
-
-export const isMatchStarted = (dateStr: string, timeStr: string, matchStatus: string): boolean => {
-  if (matchStatus === 'live' || matchStatus === 'finished') return true;
-  const dateParts = dateStr.split(" ");
-  if (dateParts.length >= 4) {
-    const day = parseInt(dateParts[1]);
-    const monthStr = dateParts[3].toLowerCase();
-    const month = months[monthStr];
-    if (!isNaN(day) && month !== undefined) {
-      const timeParts = timeStr.split(" ");
-      let hour = 0;
-      let min = 0;
-      if (timeStr.includes("hs")) {
-        const [h, m] = timeParts[0].split(":");
-        hour = parseInt(h);
-        min = parseInt(m || "0");
-      } else {
-        const [h, m] = timeParts[0].split(":");
-        hour = parseInt(h);
-        min = parseInt(m);
-        const ampm = timeParts[1]?.toLowerCase() + " " + timeParts[2]?.toLowerCase();
-        if (ampm.includes("p. m.") && hour < 12) hour += 12;
-        if (ampm.includes("a. m.") && hour === 12) hour = 0;
-      }
-      // Parse as UTC-3 (Argentina time) by adding 3 hours to get UTC
-      const matchDate = new Date(Date.UTC(2026, month, day, hour + 3, min, 0));
-      return new Date() >= matchDate;
-    }
-  }
-  return false;
-};
-
-export const isMatchFinishedAuto = (dateStr: string, timeStr: string): boolean => {
-  const dateParts = dateStr.split(" ");
-  if (dateParts.length >= 4) {
-    const day = parseInt(dateParts[1]);
-    const monthStr = dateParts[3].toLowerCase();
-    const month = months[monthStr];
-    if (!isNaN(day) && month !== undefined) {
-      const timeParts = timeStr.split(" ");
-      let hour = 0;
-      let min = 0;
-      if (timeStr.includes("hs")) {
-        const [h, m] = timeParts[0].split(":");
-        hour = parseInt(h);
-        min = parseInt(m || "0");
-      } else {
-        const [h, m] = timeParts[0].split(":");
-        hour = parseInt(h);
-        min = parseInt(m);
-        const ampm = timeParts[1]?.toLowerCase() + " " + timeParts[2]?.toLowerCase();
-        if (ampm.includes("p. m.") && hour < 12) hour += 12;
-        if (ampm.includes("a. m.") && hour === 12) hour = 0;
-      }
-      // Parse as UTC-3 (Argentina time) by adding 3 hours to get UTC
-      const matchDate = new Date(Date.UTC(2026, month, day, hour + 3, min, 0));
-      const finishedDate = new Date(matchDate.getTime() + 2 * 60 * 60 * 1000);
-      return new Date() >= finishedDate;
-    }
-  }
-  return false;
-};
-
-export const formatMatchTime = (dateStr: string, timeStr: string, language: string = 'es') => {
-  const dateParts = dateStr.split(" ");
-  if (dateParts.length < 4) return { localDate: dateStr, localTime: timeStr };
-
-  const day = parseInt(dateParts[1]);
-  const monthStr = dateParts[3].toLowerCase();
-  const month = months[monthStr];
-
-  if (isNaN(day) || month === undefined) return { localDate: dateStr, localTime: timeStr };
-
-  const timeParts = timeStr.split(" ");
-  let hour = 0;
-  let min = 0;
-
-  if (timeStr.includes("hs")) {
-    const [h, m] = timeParts[0].split(":");
-    hour = parseInt(h);
-    min = parseInt(m || "0");
-  } else {
-    const [h, m] = timeParts[0].split(":");
-    hour = parseInt(h);
-    min = parseInt(m);
-    const ampm = timeParts[1]?.toLowerCase() + " " + timeParts[2]?.toLowerCase();
-    if (ampm.includes("p. m.") && hour < 12) hour += 12;
-    if (ampm.includes("a. m.") && hour === 12) hour = 0;
-  }
-
-  // Create Date object assuming original time is UTC-3
-  const matchDate = new Date(Date.UTC(2026, month, day, hour + 3, min, 0));
-
-  const localeStr = language === 'en' ? 'en-US' : 'es-ES';
-  let localDateStr = matchDate.toLocaleDateString(localeStr, { weekday: 'short', day: 'numeric', month: 'short' });
-  localDateStr = localDateStr.charAt(0).toUpperCase() + localDateStr.slice(1).replace('.', ',');
-  const localTimeSuffix = language === 'en' ? '' : ' hs';
-  const localTimeStr = matchDate.toLocaleTimeString(localeStr, { hour: '2-digit', minute: '2-digit' }) + localTimeSuffix;
-
-  return { localDate: localDateStr, localTime: localTimeStr };
-};
 
 export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBack }) => {
   const { t, i18n } = useTranslation();
@@ -219,14 +117,7 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
         const pred = predictions[matchId];
         const res = liveResults[matchId];
         if (res && res.status?.startsWith('finished') && !pred.rewarded) {
-          const exactMatch = pred.scoreA === res.scoreA && pred.scoreB === res.scoreB;
-          const predWinner = pred.scoreA > pred.scoreB ? 'A' : (pred.scoreA < pred.scoreB ? 'B' : 'Draw');
-          const resWinner = res.scoreA > res.scoreB ? 'A' : (res.scoreA < res.scoreB ? 'B' : 'Draw');
-          const normalMatch = predWinner === resWinner;
-
-          let packs = 0;
-          if (exactMatch) packs = 3;
-          else if (normalMatch) packs = 1;
+          const { packs } = calculateRewardPacks(pred.scoreA, pred.scoreB, res.scoreA, res.scoreB);
 
           // If packs is 0, we can mark it as rewarded so we don't check again.
           // If packs > 0, we wait for the user to manually claim it!
@@ -638,224 +529,25 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              {dayGroup.matches.map((match) => {
-                const userNationality = user?.user_metadata?.nationality || 'Argentina';
-                const isMyTeam = userNationality && (match.teamA === userNationality || match.teamB === userNationality);
-                const started = isMatchStarted(match.date, match.time, match.status);
-                const finishedAuto = isMatchFinishedAuto(match.date, match.time);
-                const hasPrediction = !!predictions[match.id];
-                const locked = started || hasPrediction || match.group === '16vos de final';
-                const pScoreA = predictions[match.id]?.scoreA;
-                const pScoreB = predictions[match.id]?.scoreB;
-                const isRewarded = predictions[match.id]?.rewarded;
-                const inScoreA = inputs[match.id]?.scoreA ?? '';
-                const inScoreB = inputs[match.id]?.scoreB ?? '';
-
-                let packsWon = 0;
-                let wonExact = false;
-                if (match.status?.startsWith('finished') && hasPrediction) {
-                  const exactMatch = pScoreA === match.scoreA! && pScoreB === match.scoreB!;
-                  const predWinner = pScoreA > pScoreB ? 'A' : (pScoreA < pScoreB ? 'B' : 'Draw');
-                  const resWinner = match.scoreA! > match.scoreB! ? 'A' : (match.scoreA! < match.scoreB! ? 'B' : 'Draw');
-                  if (exactMatch) { packsWon = 3; wonExact = true; }
-                  else if (predWinner === resWinner) packsWon = 1;
-                }
-                
-                const codeStatus = usedCodesStatus[match.id];
-                const allCodesUsed = codeStatus && codeStatus.total > 0 && codeStatus.total === codeStatus.used;
-
-                return (
-                  <div key={match.id} style={{
-                    background: 'rgba(20, 20, 25, 0.8)', border: isMyTeam ? '2px solid #00f2ff' : '1px solid rgba(255, 255, 255, 0.05)', boxShadow: isMyTeam ? '0 0 15px rgba(0, 242, 255, 0.2)' : 'none', borderRadius: '1rem', padding: '1.25rem 1.5rem', display: 'flex', flexDirection: isMobile ? 'column' : 'row', gap: isMobile ? '1rem' : '2rem', alignItems: isMobile ? 'flex-start' : 'center', transition: 'all 0.2s ease', cursor: 'default'
-                  }}>
-                    <div style={{ flex: isMobile ? 'none' : '0 0 120px', display: 'flex', flexDirection: isMobile ? 'row' : 'column', gap: isMobile ? '0.75rem' : '0.25rem', alignItems: isMobile ? 'center' : 'flex-start', justifyContent: isMobile ? 'space-between' : 'flex-start', width: isMobile ? '100%' : 'auto', opacity: 0.8 }}>
-                      <span style={{ fontSize: '1rem', fontWeight: 800 }}>{formatMatchTime(match.date, match.time, i18n.language).localTime}</span>
-                      <span style={{ fontSize: '0.8rem', opacity: 0.6 }}>{match.group.replace('Group', t('group'))}</span>
-                    </div>
-
-                    <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: isMobile ? '100%' : 'auto' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1, justifyContent: 'flex-end' }}>
-                        <span style={{ fontWeight: 700, fontSize: isMobile ? '0.9rem' : '1.1rem', textAlign: 'right' }}>{t("country_" + match.teamA.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase(), match.teamA)}</span>
-                        <span style={{ fontSize: '1.5rem', width: '32px', textAlign: 'center' }}>{match.flagA}</span>
-                      </div>
-
-                      <div style={{ padding: '0 1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minWidth: '80px', gap: '0.25rem' }}>
-                        {match.status?.startsWith('finished') && packsWon > 0 && (
-                          <div style={{ color: '#00e676', fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', textAlign: 'center', whiteSpace: 'nowrap' }}>
-                            {wonExact ? t("exact_result_won") : t("winner_result_won")}
-                          </div>
-                        )}
-                        {!match.status?.startsWith('finished') && started && hasPrediction && (
-                          <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', textAlign: 'center', whiteSpace: 'nowrap' }}>
-                            {t("waiting_result")}
-                          </div>
-                        )}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                          <input
-                            type="text" inputMode="numeric" maxLength={1} disabled={locked || !user}
-                            value={hasPrediction ? pScoreA : inScoreA}
-                            onChange={(e) => {
-                              const val = e.target.value.replace(/[^0-9]/g, '').slice(0, 1);
-                              setInputs(prev => ({ ...prev, [match.id]: { ...prev[match.id], scoreA: val } }))
-                            }}
-                            style={{ width: '40px', height: '40px', textAlign: 'center', padding: 0, background: (locked || !user) ? 'transparent' : 'rgba(0,0,0,0.5)', border: (locked || !user) ? 'none' : '1px solid rgba(255,255,255,0.2)', color: '#fff', borderRadius: '0.5rem', fontWeight: 800, fontSize: '1.2rem' }}
-                          />
-                          <span style={{ fontWeight: 800, color: 'rgba(255,255,255,0.4)' }}>-</span>
-                          <input
-                            type="text" inputMode="numeric" maxLength={1} disabled={locked || !user}
-                            value={hasPrediction ? pScoreB : inScoreB}
-                            onChange={(e) => {
-                              const val = e.target.value.replace(/[^0-9]/g, '').slice(0, 1);
-                              setInputs(prev => ({ ...prev, [match.id]: { ...prev[match.id], scoreB: val } }))
-                            }}
-                            style={{ width: '40px', height: '40px', textAlign: 'center', padding: 0, background: (locked || !user) ? 'transparent' : 'rgba(0,0,0,0.5)', border: (locked || !user) ? 'none' : '1px solid rgba(255,255,255,0.2)', color: '#fff', borderRadius: '0.5rem', fontWeight: 800, fontSize: '1.2rem' }}
-                          />
-                        </div>
-                        {match.status?.startsWith('finished') && packsWon > 0 && (
-                          <div style={{ color: '#ff8c00', fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', textAlign: 'center', whiteSpace: 'nowrap' }}>
-                            {packsWon === 1 ? t("you_won_packs_one") : t("you_won_packs_other", { count: packsWon })}
-                          </div>
-                        )}
-                        {!match.status?.startsWith('finished') && started && hasPrediction && (
-                          <div style={{ color: '#ffffff', fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', textAlign: 'center', whiteSpace: 'nowrap', marginTop: '0.25rem' }}>
-                            {finishedAuto ? t("match_finished") : t("match_started")}
-                          </div>
-                        )}
-                      </div>
-
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1, justifyContent: 'flex-start' }}>
-                        <span style={{ fontSize: '1.5rem', width: '32px', textAlign: 'center' }}>{match.flagB}</span>
-                        <span style={{ fontWeight: 700, fontSize: isMobile ? '0.9rem' : '1.1rem', textAlign: 'left' }}>{t("country_" + match.teamB.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase(), match.teamB)}</span>
-                      </div>
-                    </div>
-
-                    {!isMobile && (
-                      <div style={{ flex: '0 0 150px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
-                        {!locked && !match.status?.startsWith('finished') && (
-                          <button
-                            key="btn-save"
-                            disabled={!user || isSaving[match.id] || inScoreA === '' || inScoreB === ''}
-                            onClick={() => handleSavePrediction(match.id)}
-                            style={{ background: '#00f2ff', color: '#000', border: 'none', padding: '0.5rem 1rem', borderRadius: '0.5rem', fontWeight: 800, cursor: (!user || isSaving[match.id] || inScoreA === '' || inScoreB === '') ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: (!user || isSaving[match.id] || inScoreA === '' || inScoreB === '') ? 0.5 : 1 }}
-                          >
-                            <Save size={16} /> <span>{t("save")}</span>
-                          </button>
-                        )}
-
-                        {match.status?.startsWith('finished') && (
-                          packsWon > 0 && !isRewarded ? (
-                            <button
-                              key="btn-claim"
-                              onClick={() => handleClaimReward(match.id, packsWon, match.teamA, match.teamB)}
-                              className="btn-hover-dark"
-                              style={{ background: '#ff8c00', color: '#000', border: 'none', padding: '0.5rem 1rem', borderRadius: '0.5rem', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
-                            >
-                              <Layers size={16} /> <span>Reclamar</span>
-                            </button>
-                          ) : packsWon > 0 && isRewarded ? (
-                            <button
-                              key="btn-claimed"
-                              onClick={() => { if (!allCodesUsed) handleViewRewards(match.id, packsWon, match.teamA, match.teamB); }}
-                              className={allCodesUsed ? "" : "btn-hover-dark"}
-                              disabled={allCodesUsed}
-                              style={{ 
-                                background: allCodesUsed ? 'rgba(255, 140, 0, 0.05)' : 'rgba(255, 140, 0, 0.2)', 
-                                color: allCodesUsed ? 'rgba(255, 140, 0, 0.5)' : '#ff8c00', 
-                                border: allCodesUsed ? '1px solid rgba(255, 140, 0, 0.2)' : '1px solid rgba(255, 140, 0, 0.5)', 
-                                padding: '0.5rem 1rem', borderRadius: '0.5rem', fontWeight: 800, 
-                                cursor: allCodesUsed ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' 
-                              }}
-                            >
-                              <Layers size={16} /> <span>{t('claimed', 'Reclamado')}</span>
-                            </button>
-                          ) : (
-                            <div key="div-final" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                              <span style={{ fontSize: '0.7rem', textTransform: 'uppercase', opacity: 0.5, fontWeight: 700 }}>{t("final_result")}</span>
-                              <span style={{ fontSize: '1.25rem', fontWeight: 900, color: '#00f2ff' }}>{match.scoreA} - {match.scoreB}</span>
-                            </div>
-                          )
-                        )}
-
-                        {locked && !match.status?.startsWith('finished') && (
-                          hasPrediction ? (
-                            <button
-                              key="btn-saved"
-                              disabled
-                              style={{ background: 'rgba(0, 230, 118, 0.2)', color: '#00e676', border: '1px solid rgba(0, 230, 118, 0.5)', padding: '0.5rem 1rem', borderRadius: '0.5rem', fontWeight: 800, cursor: 'not-allowed', display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: 0.8 }}
-                            >
-                              <Save size={16} /> <span>Guardado</span>
-                            </button>
-                          ) : (
-                            <div key="div-started" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', marginTop: '-0.25rem' }}>
-                              <span style={{ fontSize: '1rem', fontWeight: 900, color: '#ffffff', textAlign: 'center', textTransform: 'uppercase', lineHeight: 1.1, marginBottom: '0.25rem' }}>{finishedAuto ? t("match_finished") : t("match_started")}</span>
-                              <span style={{ fontSize: '0.7rem', textTransform: 'uppercase', opacity: 0.5, fontWeight: 700, textAlign: 'center' }}>{t("waiting_result")}</span>
-                            </div>
-                          )
-                        )}
-                      </div>
-                    )}
-
-                    {isMobile && !locked && !match.status?.startsWith('finished') && (
-                      <button
-                        key="m-btn-save"
-                        disabled={!user || isSaving[match.id] || inScoreA === '' || inScoreB === ''}
-                        onClick={() => handleSavePrediction(match.id)}
-                        style={{ background: '#00f2ff', color: '#000', border: 'none', padding: '0.5rem 1rem', borderRadius: '0.5rem', fontWeight: 800, cursor: (!user || isSaving[match.id] || inScoreA === '' || inScoreB === '') ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: (!user || isSaving[match.id] || inScoreA === '' || inScoreB === '') ? 0.5 : 1, width: '100%', justifyContent: 'center', marginTop: '1rem' }}
-                      >
-                        <Save size={16} /> <span>{t("save_prediction")}</span>
-                      </button>
-                    )}
-                    {isMobile && match.status?.startsWith('finished') && (
-                      packsWon > 0 && !isRewarded ? (
-                        <button
-                          key="m-btn-claim"
-                          onClick={() => handleClaimReward(match.id, packsWon, match.teamA, match.teamB)}
-                          className="btn-hover-dark"
-                          style={{ background: '#ff8c00', color: '#000', border: 'none', padding: '0.5rem 1rem', borderRadius: '0.5rem', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', width: '100%', marginTop: '1rem' }}
-                        >
-                          <Layers size={16} /> <span>Reclamar Recompensa</span>
-                        </button>
-                      ) : packsWon > 0 && isRewarded ? (
-                        <button
-                          key="m-btn-claimed"
-                          onClick={() => { if (!allCodesUsed) handleViewRewards(match.id, packsWon, match.teamA, match.teamB); }}
-                          className={allCodesUsed ? "" : "btn-hover-dark"}
-                          disabled={allCodesUsed}
-                          style={{ 
-                            background: allCodesUsed ? 'rgba(255, 140, 0, 0.05)' : 'rgba(255, 140, 0, 0.2)', 
-                            color: allCodesUsed ? 'rgba(255, 140, 0, 0.5)' : '#ff8c00', 
-                            border: allCodesUsed ? '1px solid rgba(255, 140, 0, 0.2)' : '1px solid rgba(255, 140, 0, 0.5)', 
-                            padding: '0.5rem 1rem', borderRadius: '0.5rem', fontWeight: 800, 
-                            cursor: allCodesUsed ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', width: '100%', marginTop: '1rem' 
-                          }}
-                        >
-                          <Layers size={16} /> <span>{t('claimed', 'Reclamado')}</span>
-                        </button>
-                      ) : (
-                        <div key="m-div-final" style={{ marginTop: '1rem', color: '#00f2ff', fontSize: '1rem', fontWeight: 900, textTransform: 'uppercase', textAlign: 'center', width: '100%' }}>
-                          {t("final_result").toUpperCase()}: {match.scoreA} - {match.scoreB}
-                        </div>
-                      )
-                    )}
-                    {isMobile && locked && !match.status?.startsWith('finished') && (
-                      hasPrediction ? (
-                        <button
-                          key="m-btn-saved"
-                          disabled
-                          style={{ background: 'rgba(0, 230, 118, 0.2)', color: '#00e676', border: '1px solid rgba(0, 230, 118, 0.5)', padding: '0.5rem 1rem', borderRadius: '0.5rem', fontWeight: 800, cursor: 'not-allowed', display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: 0.8, width: '100%', justifyContent: 'center', marginTop: '1rem' }}
-                        >
-                          <Save size={16} /> <span>Guardado</span>
-                        </button>
-                      ) : (
-                        <div key="m-div-started" style={{ marginTop: '0.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
-                          <span style={{ color: '#ffffff', fontSize: '0.85rem', fontWeight: 900, textTransform: 'uppercase', textAlign: 'center', lineHeight: 1.1, marginBottom: '0.25rem' }}>{finishedAuto ? t("match_finished") : t("match_started")}</span>
-                          <span style={{ fontSize: '0.7rem', textTransform: 'uppercase', opacity: 0.5, fontWeight: 700, textAlign: 'center' }}>{t("waiting_result")}</span>
-                        </div>
-                      )
-                    )}
-                  </div>
-                );
-              })}
+              {dayGroup.matches.map((match) => (
+                <ProdeMatchCard
+                  key={match.id}
+                  match={match}
+                  isMobile={isMobile}
+                  user={user}
+                  prediction={predictions[match.id]}
+                  inputScoreA={inputs[match.id]?.scoreA ?? ''}
+                  inputScoreB={inputs[match.id]?.scoreB ?? ''}
+                  isSaving={!!isSaving[match.id]}
+                  codeStatus={usedCodesStatus[match.id]}
+                  onInputChange={(matchId, field, value) => {
+                    setInputs(prev => ({ ...prev, [matchId]: { ...prev[matchId], [field]: value } }));
+                  }}
+                  onSave={handleSavePrediction}
+                  onClaim={handleClaimReward}
+                  onViewRewards={handleViewRewards}
+                />
+              ))}
             </div>
           </motion.div>
         ))}
@@ -911,37 +603,13 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
       <TwitchButton />
 
       {rewardCodesModal && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)', padding: '1rem' }}>
-          <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} style={{ background: 'rgba(26, 26, 46, 0.85)', backdropFilter: 'blur(16px)', padding: '2.5rem', borderRadius: '1.5rem', maxWidth: '600px', width: '100%', textAlign: 'center', border: '1px solid rgba(255, 140, 0, 0.3)', boxShadow: '0 0 30px rgba(255, 140, 0, 0.15)' }}>
-            <h2 style={{ color: '#ff8c00', marginTop: 0, marginBottom: '0.5rem', fontSize: '2rem', textTransform: 'uppercase', textShadow: '0 0 10px rgba(255, 140, 0, 0.5)' }}>{t('prode_congratulations')}</h2>
-            <p style={{ color: '#fff', fontSize: '1.1rem', marginBottom: '0.75rem' }}>
-              {t('prode_prediction_success')} <strong>{rewardCodesModal.matchDesc}</strong> {t('prode_prediction_packs_won')} <strong>{rewardCodesModal.packs} {rewardCodesModal.packs === 1 ? t('prode_prediction_pack_single') : t('prode_prediction_packs_plural')}</strong> {t('prode_prediction_for_deck')}
-            </p>
-            <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.9rem', marginBottom: '1rem' }}>
-              {rewardCodesModal.packs === 1 ? (
-                <>{t('prode_reward_code_single')} <a href="/mazo" target="_blank" rel="noopener noreferrer" style={{ color: '#ff8c00', textDecoration: 'none', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '0.2rem', verticalAlign: 'middle' }} className="hover-underline"><ExternalLink size={14} />{t('prode_deck_screen')}</a>!</>
-              ) : (
-                <>{t('prode_reward_code_plural')} <a href="/mazo" target="_blank" rel="noopener noreferrer" style={{ color: '#ff8c00', textDecoration: 'none', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '0.2rem', verticalAlign: 'middle' }} className="hover-underline"><ExternalLink size={14} />{t('prode_deck_screen')}</a>!</>
-              )}
-            </p>
-            <div style={{ display: 'grid', gridTemplateColumns: rewardCodesModal.codes.length === 1 ? 'minmax(180px, 250px)' : 'repeat(3, 1fr)', justifyContent: 'center', gap: '0.75rem', marginBottom: '2rem' }}>
-              {rewardCodesModal.codes.map((item, idx) => (
-                <div key={idx} style={{ background: 'rgba(0,0,0,0.5)', padding: isMobile ? '0.75rem 0.25rem' : '1rem 0.5rem', borderRadius: '0.75rem', border: '1px dashed rgba(255, 140, 0, 0.4)', fontSize: isMobile ? '1.1rem' : '1.35rem', fontWeight: 900, letterSpacing: isMobile ? '0.05em' : '0.1em', color: item.used ? 'rgba(255,255,255,0.3)' : '#fff', textDecoration: item.used ? 'line-through' : 'none', position: 'relative' }}>
-                  {item.code}
-                  {item.used && <div style={{ position: 'absolute', top: '-8px', right: '-8px', background: '#ff4444', color: '#fff', fontSize: '0.6rem', padding: '0.2rem 0.4rem', borderRadius: '0.5rem', fontWeight: 'bold' }}>{t('prode_used')}</div>}
-                </div>
-              ))}
-            </div>
-            <button
-              onClick={() => setRewardCodesModal(null)}
-              className="btn-hover-dark"
-              style={{ width: '100%', background: '#ff8c00', color: '#000', border: 'none', padding: '1rem', borderRadius: '1rem', fontSize: '1.1rem', fontWeight: 900, cursor: 'pointer', textTransform: 'uppercase', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}
-            >
-              <Layers size={20} />
-              {t('prode_understood')}
-            </button>
-          </motion.div>
-        </div>
+        <ProdeRewardModal
+          codes={rewardCodesModal.codes}
+          matchDesc={rewardCodesModal.matchDesc}
+          packs={rewardCodesModal.packs}
+          isMobile={isMobile}
+          onClose={() => setRewardCodesModal(null)}
+        />
       )}
 
       {/* World Cup Bracket or Standings visualization at the very bottom */}
