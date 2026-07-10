@@ -8,4 +8,5 @@ if (!supabaseUrl || !supabaseAnonKey) {
   console.warn('Supabase credentials are missing. Check your .env file.');
 }
 
+/** Configured Supabase client instance for database and auth operations. */
 export const supabase = createClient(supabaseUrl || '', supabaseAnonKey || '');

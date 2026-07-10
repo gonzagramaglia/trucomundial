@@ -26,6 +26,10 @@ interface UseTrucoCPUProps {
   isPaused?: boolean;
 }
 
+/**
+ * CPU AI hook that handles automated card plays, truco/envido calls, and responses
+ * for all non-human seats. Only active in non-multiplayer game modes.
+ */
 export const useTrucoCPU = ({
   gameState,
   gameMode,

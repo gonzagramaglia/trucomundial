@@ -5,6 +5,10 @@ import { useMatchmakingHandlers } from "./matchmaking/useMatchmakingHandlers";
 import { useMatchmakingNetwork } from "./matchmaking/useMatchmakingNetwork";
 import { useMatchmakingEffects } from "./matchmaking/useMatchmakingEffects";
 
+/**
+ * Hook that manages real-time multiplayer communication: broadcasting moves,
+ * receiving remote moves, syncing game state, and handling score/round effects.
+ */
 export const useMatchmaking = (props: MatchmakingProps) => {
   const { sessionId, rivalId, matchId: propMatchId, gameMode } = props;
   
