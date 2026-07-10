@@ -98,11 +98,23 @@ export const WorldCupBracket: React.FC<WorldCupBracketProps> = ({ fixtureMatches
         const winner2 = getWinner(match2.id, match2.p1.name, match2.p2.name, match2.p1.flag, match2.p2.flag);
         
         const nextId = nextRoundIds[i]?.toString();
-        nextRound.push({
-          p1: { name: winner1.team, flag: winner1.flag, score: undefined as number | undefined },
-          p2: { name: winner2.team, flag: winner2.flag, score: undefined as number | undefined },
-          id: nextId
-        });
+
+        // If the next match exists in fixtureMatches, use its teamA/teamB order
+        // so that scores from liveResults (scoreA/scoreB) align correctly.
+        const nextFixture = nextId ? fixtureMatches.find(m => m.id === nextId) : undefined;
+        if (nextFixture) {
+          nextRound.push({
+            p1: { name: nextFixture.teamA, flag: nextFixture.flagA, score: undefined as number | undefined },
+            p2: { name: nextFixture.teamB, flag: nextFixture.flagB, score: undefined as number | undefined },
+            id: nextId
+          });
+        } else {
+          nextRound.push({
+            p1: { name: winner1.team, flag: winner1.flag, score: undefined as number | undefined },
+            p2: { name: winner2.team, flag: winner2.flag, score: undefined as number | undefined },
+            id: nextId
+          });
+        }
       }
       currentRoundMatches = nextRound;
     }
