@@ -7,8 +7,9 @@ import { useTrucoHandlers } from "./truco/useTrucoHandlers";
 import { useTrucoEffects } from "./truco/useTrucoEffects";
 
 /**
- * Main Game Engine Hook (Modularized)
- * Orchestrates state, turn calculation, logic, and effects.
+ * Main game engine hook that orchestrates state, turns, logic, handlers, and effects.
+ * Provides the unified API surface consumed by game UI components.
+ * @param _sessionId - The current session/match identifier
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const useTrucoCore = (_sessionId: string | null) => {

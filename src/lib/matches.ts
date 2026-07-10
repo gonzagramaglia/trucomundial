@@ -8,6 +8,7 @@ function genCode(len = 8) {
   return out;
 }
 
+/** Represents a tournament match row in the database. */
 export type MatchRow = {
   id?: string;
   tournament_id: string;
@@ -21,6 +22,11 @@ export type MatchRow = {
   log?: any;
 };
 
+/**
+ * Generates unique match codes and inserts match records for a tournament bracket.
+ * @param tournamentId - The tournament to create matches for
+ * @param rows - Array of match definitions (round, position, players)
+ */
 export async function generateMatchCodes(
   tournamentId: string,
   rows: MatchRow[],
@@ -41,6 +47,7 @@ export async function generateMatchCodes(
   return data;
 }
 
+/** Saves a game log and marks a match as ended by match ID. */
 export async function saveMatchLog(matchId: string, log: unknown) {
   const { data, error } = await supabase
     .from("tournament_matches")
@@ -50,6 +57,15 @@ export async function saveMatchLog(matchId: string, log: unknown) {
   return data;
 }
 
+/**
+ * Saves a match result by code, advances the winner to the next bracket round,
+ * and updates global leaderboard stats.
+ * @param matchCode - The unique match code
+ * @param log - Game log data to persist
+ * @param winnerId - ID of the winning user (if determined)
+ * @param myUserId - Current user's ID for leaderboard calculation
+ * @returns Match data with placement, points earned, and prizes
+ */
 export async function saveMatchLogByCode(matchCode: string, log: unknown, winnerId?: string, myUserId?: string) {
   const { data: currentMatch, error: fetchError } = await supabase
     .from("tournament_matches")
@@ -209,6 +225,7 @@ export async function saveMatchLogByCode(matchCode: string, log: unknown, winner
   return { ...data, finalPlacement, pointsEarned, prizes, tournamentName: tName };
 }
 
+/** Fetches all matches for a tournament, ordered by round and position. */
 export async function getMatchesByTournament(tournamentId: string) {
   const { data, error } = await supabase
     .from("tournament_matches")

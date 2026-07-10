@@ -1,6 +1,7 @@
 
 import { supabase } from './supabase';
 
+/** Service object for matchmaking operations (OAuth sign-in, queue management). */
 export const matchmakingService = {
   async signInWithGoogle() {
     const { error } = await supabase.auth.signInWithOAuth({

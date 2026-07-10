@@ -1,24 +1,34 @@
-import { useState, useEffect } from "react";
+import { create } from 'zustand';
+import { CARDS } from '../data/cards';
 
-import { CARDS } from "../data/cards";
+// --- Types ---
 
-// Store the aggregate votes per card ID (live database status)
-export const votesRegistry: Record<string, number> = {};
+interface VotesState {
+  votesRegistry: Record<string, number>;
+  gameVotesRegistry: Record<string, number>;
+  topCardsSet: Set<string>;
+  tournamentVotesSnapshot: Record<string, number> | null;
+  isGameActive: boolean;
+}
 
-// Store the snapshot of votes taken when the match starts
-export const gameVotesRegistry: Record<string, number> = {};
+interface VotesActions {
+  updateVotesRegistry: (newVotes: Record<string, number>) => void;
+  snapshotVotesForGame: () => void;
+  setGameActive: (active: boolean) => void;
+  setTournamentVotesSnapshot: (snapshot: Record<string, number> | null) => void;
+}
 
-export let topCardsSet: Set<string> = new Set();
+// --- Helpers ---
 
-
-function calculateTopCards(registry: Record<string, number>) {
-  const allTotals = CARDS.map(c => {
-    const total = registry[c.id] || 0;
-    return { id: c.id, total };
-  });
+function calculateTopCards(registry: Record<string, number>): Set<string> {
+  const allTotals = CARDS.map(c => ({
+    id: c.id,
+    total: registry[c.id] || 0,
+  }));
 
   const sorted = allTotals.sort((a, b) => b.total - a.total);
-  if (sorted.length === 0) return new Set<string>();
+  if (sorted.length === 0) return new Set();
+
   const cutoffIndex = Math.min(5, sorted.length - 1);
   const cutoffValue = sorted[cutoffIndex].total;
   const set = new Set<string>();
@@ -29,91 +39,126 @@ function calculateTopCards(registry: Record<string, number>) {
   return set;
 }
 
-export let tournamentVotesSnapshot: Record<string, number> | null = null;
-
-export function setTournamentVotesSnapshot(snapshot: Record<string, number> | null) {
-  tournamentVotesSnapshot = snapshot;
-  listeners.forEach(l => l());
+function stripCardSuffix(cardId: string): string {
+  return cardId.replace(/(_rem|_cpu)?_\d+$/, '');
 }
 
-let isGameActive = false;
+// --- Store ---
 
-export function setGameActive(active: boolean) {
-  isGameActive = active;
-  listeners.forEach(l => l());
-}
+const useVotesStore = create<VotesState & VotesActions>((set, get) => ({
+  votesRegistry: {},
+  gameVotesRegistry: {},
+  topCardsSet: new Set(),
+  tournamentVotesSnapshot: null,
+  isGameActive: false,
 
-export function snapshotVotesForGame() {
-  Object.keys(gameVotesRegistry).forEach(key => {
-    delete gameVotesRegistry[key];
-  });
-  Object.assign(gameVotesRegistry, votesRegistry);
-}
+  updateVotesRegistry: (newVotes) => {
+    const gameVotesRegistry = get().gameVotesRegistry;
+    const updatedGameVotes = Object.keys(gameVotesRegistry).length === 0
+      ? { ...newVotes }
+      : gameVotesRegistry;
 
-const listeners = new Set<() => void>();
+    set({
+      votesRegistry: { ...newVotes },
+      gameVotesRegistry: updatedGameVotes,
+      topCardsSet: calculateTopCards(newVotes),
+    });
+  },
 
-export function subscribeToVotes(listener: () => void) {
-  listeners.add(listener);
-  return () => {
-    listeners.delete(listener);
-  };
-}
+  snapshotVotesForGame: () => {
+    set({ gameVotesRegistry: { ...get().votesRegistry } });
+  },
 
-export function updateVotesRegistry(newVotes: Record<string, number>) {
-  Object.keys(votesRegistry).forEach(key => {
-    delete votesRegistry[key];
-  });
-  Object.assign(votesRegistry, newVotes);
-  
-  // Also initialize gameVotesRegistry if it's empty
-  if (Object.keys(gameVotesRegistry).length === 0) {
-    Object.assign(gameVotesRegistry, votesRegistry);
+  setGameActive: (active) => {
+    set({ isGameActive: active });
+  },
+
+  setTournamentVotesSnapshot: (snapshot) => {
+    set({ tournamentVotesSnapshot: snapshot });
+  },
+}));
+
+// --- Backward-compatible exports ---
+
+/** Mutable votes reference kept in sync with the store for non-React consumers (engine.ts, etc.) */
+export const votesRegistry: Record<string, number> = {};
+
+// Keep the mutable object in sync with the store (only when votesRegistry changes)
+let prevVotesRef: Record<string, number> = {};
+useVotesStore.subscribe((state) => {
+  if (state.votesRegistry !== prevVotesRef) {
+    prevVotesRef = state.votesRegistry;
+    Object.keys(votesRegistry).forEach(k => delete votesRegistry[k]);
+    Object.assign(votesRegistry, state.votesRegistry);
   }
+});
 
-  topCardsSet = calculateTopCards(votesRegistry);
-
-  listeners.forEach(l => l());
-}
-
+/**
+ * Returns the current vote count for a card, accounting for game/tournament state.
+ * @param cardId - The card identifier (suffix is stripped automatically)
+ * @returns The resolved vote count for the card
+ */
 export function getCardVotes(cardId: string): number {
-  // Strip instance suffixes added when playing a card: "_rem_TIMESTAMP" or "_TIMESTAMP"
-  // Card IDs themselves may contain underscores (e.g. "nico_williams"), so we cannot
-  // use split('_')[0] — instead we remove only the trailing numeric/remote suffix.
-  const baseId = cardId.replace(/(_rem|_cpu)?_\d+$/, '');
+  const baseId = stripCardSuffix(cardId);
+  const { isGameActive, tournamentVotesSnapshot, gameVotesRegistry, votesRegistry } = useVotesStore.getState();
 
   if (isGameActive && tournamentVotesSnapshot) {
-    return (tournamentVotesSnapshot[baseId] || 0);
+    return tournamentVotesSnapshot[baseId] || 0;
   }
   return (isGameActive ? gameVotesRegistry[baseId] : votesRegistry[baseId]) || 0;
 }
 
+/** Checks whether a card is among the top-voted cards. */
 export function isTopCard(cardId: string): boolean {
-  const baseId = cardId.replace(/(_rem|_cpu)?_\d+$/, '');
-  return topCardsSet.has(baseId);
+  const baseId = stripCardSuffix(cardId);
+  return useVotesStore.getState().topCardsSet.has(baseId);
 }
 
+/** Replaces the global votes registry with new vote data. */
+export function updateVotesRegistry(newVotes: Record<string, number>): void {
+  useVotesStore.getState().updateVotesRegistry(newVotes);
+}
+
+/** Snapshots current votes into the game registry so in-game values remain stable. */
+export function snapshotVotesForGame(): void {
+  useVotesStore.getState().snapshotVotesForGame();
+}
+
+/** Toggles the game-active flag, which controls which registry is used for vote lookups. */
+export function setGameActive(active: boolean): void {
+  useVotesStore.getState().setGameActive(active);
+}
+
+/** Sets or clears the tournament-specific votes snapshot used during tournament matches. */
+export function setTournamentVotesSnapshot(snapshot: Record<string, number> | null): void {
+  useVotesStore.getState().setTournamentVotesSnapshot(snapshot);
+}
+
+/**
+ * Subscribes a listener to vote store changes (for non-React consumers).
+ * @returns An unsubscribe function
+ */
+export function subscribeToVotes(listener: () => void): () => void {
+  return useVotesStore.subscribe(listener);
+}
+
+// --- React Hooks ---
+
+/** React hook that returns the reactive vote count for a given card. */
 export function useCardVotes(cardId: string): number {
-  const [votes, setVotes] = useState(() => getCardVotes(cardId));
-
-  useEffect(() => {
-    setVotes(getCardVotes(cardId));
-    return subscribeToVotes(() => {
-      setVotes(getCardVotes(cardId));
-    });
-  }, [cardId]);
-
-  return votes;
+  return useVotesStore((state) => {
+    const baseId = stripCardSuffix(cardId);
+    if (state.isGameActive && state.tournamentVotesSnapshot) {
+      return state.tournamentVotesSnapshot[baseId] || 0;
+    }
+    return (state.isGameActive ? state.gameVotesRegistry[baseId] : state.votesRegistry[baseId]) || 0;
+  });
 }
 
+/** React hook that returns whether a card is among the top-voted cards. */
 export function useIsTopCard(cardId: string): boolean {
-  const [isTop, setIsTop] = useState(() => isTopCard(cardId));
-
-  useEffect(() => {
-    setIsTop(isTopCard(cardId));
-    return subscribeToVotes(() => {
-      setIsTop(isTopCard(cardId));
-    });
-  }, [cardId]);
-
-  return isTop;
+  return useVotesStore((state) => {
+    const baseId = stripCardSuffix(cardId);
+    return state.topCardsSet.has(baseId);
+  });
 }

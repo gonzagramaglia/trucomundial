@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+/** Zod validation schema for tournament creation/editing form data. */
 export const tournamentSchema = z
   .object({
     name: z.string().min(3, "El nombre debe tener al menos 3 caracteres"),
@@ -39,8 +40,10 @@ export const tournamentSchema = z
     path: ["prize"],
   });
 
+/** Inferred TypeScript type from the tournament validation schema. */
 export type TournamentFormData = z.infer<typeof tournamentSchema>;
 
+/** Zod validation schema for content creator application form. */
 export const creatorApplicationSchema = z.object({
   channel_name: z.string().min(2, "El nombre del canal es obligatorio"),
   social_link: z
@@ -59,10 +62,12 @@ export const creatorApplicationSchema = z.object({
     .max(500, "El texto es muy largo."),
 });
 
+/** Inferred TypeScript type from the creator application schema. */
 export type CreatorApplicationFormData = z.infer<
   typeof creatorApplicationSchema
 >;
 
+/** Zod validation schema for support ticket submission form. */
 export const ticketSchema = z.object({
   subject: z
     .string()
@@ -74,4 +79,5 @@ export const ticketSchema = z.object({
     .max(1000, "El mensaje es muy largo"),
 });
 
+/** Inferred TypeScript type from the ticket validation schema. */
 export type TicketFormData = z.infer<typeof ticketSchema>;

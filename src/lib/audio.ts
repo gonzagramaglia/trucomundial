@@ -1,5 +1,9 @@
 import type { PlayerRole } from "./truco/types";
 
+/**
+ * Singleton audio manager that handles all game sounds, theme music, and voice lines.
+ * Manages browser autoplay restrictions, volume control, and caching.
+ */
 class AudioManager {
   private static instance: AudioManager;
   private isMuted: boolean = false;
@@ -68,6 +72,7 @@ class AudioManager {
     }
   }
 
+  /** Returns the singleton AudioManager instance, creating it if necessary. */
   public static getInstance(): AudioManager {
     if (!AudioManager.instance) {
       AudioManager.instance = new AudioManager();
@@ -75,16 +80,19 @@ class AudioManager {
     return AudioManager.instance;
   }
 
+  /** Preloads all audio elements into cache to avoid playback delays. */
   public preloadAll() {
     Object.keys(this.soundMap).forEach(key => {
       this.getAudioElement(key);
     });
   }
 
+  /** Returns whether audio is currently muted. */
   public getIsMuted(): boolean {
     return this.isMuted;
   }
 
+  /** Toggles mute state, persists to localStorage, and returns the new muted state. */
   public toggleMute(): boolean {
     this.isMuted = !this.isMuted;
     localStorage.setItem('truco-audio-muted', this.isMuted.toString());
@@ -103,6 +111,7 @@ class AudioManager {
     return this.isMuted;
   }
 
+  /** Starts (or resumes) the background theme music, respecting mute and autoplay policies. */
   public playTheme() {
     this.isThemeActive = true;
     if (this.isMuted) return;
@@ -138,6 +147,10 @@ class AudioManager {
     }
   }
 
+  /**
+   * Sets the master volume and syncs mute state when volume reaches 0.
+   * @param vol - Volume level between 0 and 1
+   */
   public setVolume(vol: number) {
     this.volume = vol;
     
@@ -166,10 +179,12 @@ class AudioManager {
     }
   }
 
+  /** Returns the current master volume (0–1). */
   public getVolume() {
     return this.volume;
   }
 
+  /** Stops the background theme music. */
   public stopTheme() {
     this.isThemeActive = false;
     if (this.currentTheme) {
@@ -188,6 +203,10 @@ class AudioManager {
     return this.audioCache.get(key) || null;
   }
 
+  /**
+   * Plays a sound effect by key. Resets playback if already playing.
+   * @param key - Sound identifier from the internal sound map
+   */
   public play(key: string) {
     if (this.isMuted) return;
 
@@ -210,6 +229,11 @@ class AudioManager {
     }
   }
 
+  /**
+   * Plays the voice line for a truco/envido call.
+   * @param type - The call type (e.g. "truco", "envido", "falta envido")
+   * @param rawCaller - Who made the call
+   */
   public playCall(type: string, rawCaller: PlayerRole | 'rival') {
     let caller = (rawCaller === 'partner' || rawCaller === 'player') ? 'player' : 'cpu';
 
@@ -230,6 +254,11 @@ class AudioManager {
     }
   }
 
+  /**
+   * Plays the "quiero" or "no quiero" response audio.
+   * @param wants - Whether the call was accepted
+   * @param rawCaller - Who responded
+   */
   public playResponse(wants: boolean, rawCaller: PlayerRole | 'rival') {
     let caller = (rawCaller === 'partner' || rawCaller === 'player') ? 'player' : 'cpu';
     const responseType = wants ? 'quiero' : 'no-quiero';
@@ -241,6 +270,7 @@ class AudioManager {
     }
   }
 
+  /** Plays the "me voy al mazo" (fold) voice line. */
   public playAlMazo(rawCaller: PlayerRole | 'rival') {
     let caller = (rawCaller === 'partner' || rawCaller === 'player') ? 'player' : 'cpu';
     const key = caller === 'cpu' ? 'cpu-me-voy-al-mazo' : 'player-al-mazo';
@@ -250,6 +280,7 @@ class AudioManager {
     this.play(key);
   }
 
+  /** Plays the "tengo X" envido points announcement voice line. */
   public playTengo(points: number, rawCaller: PlayerRole | 'rival') {
     let caller = (rawCaller === 'partner' || rawCaller === 'player') ? 'player' : 'cpu';
     const key = `${caller}-tengo-${points}`;
@@ -259,6 +290,7 @@ class AudioManager {
     this.play(key);
   }
 
+  /** Plays the "son buenas" (conceding envido) voice line. */
   public playSonBuenas(rawCaller: PlayerRole | 'rival') {
     let caller = (rawCaller === 'partner' || rawCaller === 'player') ? 'player' : 'cpu';
     const key = `${caller}-son-buenas`;
@@ -268,6 +300,7 @@ class AudioManager {
     this.play(key);
   }
 
+  /** Plays the "son mejores X" (winning envido) voice line. */
   public playSonMejores(points: number, rawCaller: PlayerRole | 'rival') {
     let caller = (rawCaller === 'partner' || rawCaller === 'player') ? 'player' : 'cpu';
 
@@ -278,6 +311,7 @@ class AudioManager {
     this.play(key);
   }
 
+  /** Plays a system UI sound effect (win/loss jingles, card placement, etc.). */
   public playSystemSound(key: "ganaste" | "perdiste" | "parda-la-mejor" | "proxima-ronda" | "aplausos" | "card-placement" | "ganaste-la-ronda" | "perdiste-la-ronda" | "sonido-de-carta-ganadora" | "rewarding-card" | "rare-rewarding-card") {
     if (!this.soundMap[key]) {
       this.soundMap[key] = `/audios/${key}.mp3`;
@@ -286,4 +320,5 @@ class AudioManager {
   }
 }
 
+/** Global singleton instance of the audio manager. */
 export const audioManager = AudioManager.getInstance();

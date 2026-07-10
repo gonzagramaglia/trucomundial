@@ -8,6 +8,12 @@ const normalizeCountry = (teamName: string) => {
   return teamName;
 };
 
+/**
+ * Hook that fetches match results from Supabase's fixture_results table and
+ * cross-references them with the local fixtureMatches data (from fixtureData.ts)
+ * to compute base star values per country (win = 2 stars, draw = 1 star each).
+ * @returns A record mapping country names to their accumulated base stars
+ */
 export const useBaseStars = () => {
   const [baseStarsByCountry, setBaseStarsByCountry] = useState<Record<string, number>>({});
 

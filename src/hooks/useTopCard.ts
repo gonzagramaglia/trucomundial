@@ -3,6 +3,12 @@ import { supabase } from '../lib/supabase';
 import { CARDS } from '../data/cards';
 import { useBaseStars } from './useBaseStars';
 
+/**
+ * Hook that finds the top-voted card for a given nationality by aggregating
+ * user votes, fixture-based base stars, and hardcoded World Cup bonus stars.
+ * @param nationality - The country/nationality to find the top card for
+ * @returns The highest-voted card for the nationality, or null
+ */
 export const useTopCard = (nationality: string | undefined): any | null => {
   const [topCard, setTopCard] = useState<any | null>(null);
   const baseStarsByCountry = useBaseStars();

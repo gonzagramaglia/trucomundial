@@ -3,6 +3,12 @@ import type { PlayedCard, PlayerRole } from "./types";
 
 import { getCardVotes } from "../votesStore";
 
+/**
+ * Calculates the envido score for a hand of cards.
+ * Finds the best pair (same country or club) and returns the highest envido value.
+ * @param hand - The player's current hand
+ * @returns The highest envido score achievable with the hand
+ */
 export const calculateEnvido = (hand: Card[]) => {
   if (!hand || hand.length === 0) return 0;
 
@@ -25,11 +31,20 @@ export const calculateEnvido = (hand: Card[]) => {
   return bestScore;
 };
 
+/**
+ * Returns the card's value based on community votes (stars).
+ * Higher votes = stronger card in Truco Mundial.
+ */
 export const getCardValue = (card: Card): number => {
   // Truco Mundial uses 'votes' (community stars) where HIGHER is BETTER.
   return getCardVotes(card.id);
 };
 
+/**
+ * Determines the winner of a set of played cards based on vote values.
+ * @param playedCards - Cards played in the current hand
+ * @returns The winning player role, or "draw" if tied across teams
+ */
 export const determineWinner = (playedCards: PlayedCard[]): PlayerRole | "draw" => {
   if (playedCards.length === 0) return "draw";
 
