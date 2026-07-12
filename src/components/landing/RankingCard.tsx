@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Plus, Minus, Lock } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Sticker } from "../shared/Sticker";
+import type { Card } from "../../data/cards";
 
 interface RankingPlayer {
   id: string;
@@ -25,7 +26,7 @@ interface RankingCardProps {
   isLastVoted: boolean;
   lastVoteAction: "add" | "sub" | null;
   hasUnsavedChanges: boolean;
-  availableVotes: number;
+  isAddDisabled: boolean;
   onAdd: (cardId: string) => void;
   onSub: (cardId: string) => void;
   onAuth: () => void;
@@ -33,7 +34,7 @@ interface RankingCardProps {
 
 export const RankingCard: React.FC<RankingCardProps> = ({
   player, index, rank, isUser, isOrderChanging, isLastVoted, lastVoteAction,
-  hasUnsavedChanges, availableVotes, onAdd, onSub, onAuth,
+  hasUnsavedChanges, isAddDisabled, onAdd, onSub, onAuth,
 }) => {
   const { t } = useTranslation();
 
@@ -83,7 +84,7 @@ export const RankingCard: React.FC<RankingCardProps> = ({
 
       {/* Sticker */}
       <div style={{ width: "130px", height: "180px", margin: "1rem 0 1.25rem 0" }}>
-        <Sticker card={{ ...player, stars: player.totalVotes } as any} disabled={true} />
+        <Sticker card={{ ...player, stars: player.totalVotes } as Card} disabled={true} />
       </div>
 
       {/* Info */}
@@ -106,6 +107,7 @@ export const RankingCard: React.FC<RankingCardProps> = ({
           <button
             onClick={() => onSub(player.id)}
             disabled={player.myActiveVotes <= 0 || isOrderChanging}
+            aria-label={t("decrement_votes")}
             className={player.myActiveVotes > 0 && !isOrderChanging ? "btn-hover-dark" : ""}
             style={{
               background: "transparent", border: "none",
@@ -129,13 +131,14 @@ export const RankingCard: React.FC<RankingCardProps> = ({
 
           <button
             onClick={() => onAdd(player.id)}
-            disabled={availableVotes <= 0 || isOrderChanging}
-            className={availableVotes > 0 && !isOrderChanging ? "btn-hover-dark" : ""}
+            disabled={isAddDisabled}
+            aria-label={t("increment_votes")}
+            className={!isAddDisabled ? "btn-hover-dark" : ""}
             style={{
               background: "transparent", border: "none",
-              color: availableVotes > 0 && !isOrderChanging ? accentColor : "rgba(255,255,255,0.15)",
+              color: !isAddDisabled ? accentColor : "rgba(255,255,255,0.15)",
               width: "38px", height: "38px", display: "flex", alignItems: "center", justifyContent: "center",
-              cursor: availableVotes > 0 && !isOrderChanging ? "pointer" : "default",
+              cursor: !isAddDisabled ? "pointer" : "default",
               borderRadius: "0.85rem",
             }}
           >

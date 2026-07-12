@@ -22,12 +22,19 @@ const BASE_PLAYERS = CARDS.map((card) => ({
   randomOffset: Math.random(),
 }));
 
+interface GameSyncRow {
+  match_id: string;
+  last_move?: {
+    votes?: Record<string, number>;
+  };
+}
+
 /** Hook that manages the voting system: fetch, aggregate, save, and rank. */
 export function useRankingVotes(user: RankingUser | null, isAdmin: boolean) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
-  const [dbVotesData, setDbVotesData] = useState<any[]>([]);
+  const [dbVotesData, setDbVotesData] = useState<GameSyncRow[]>([]);
   const [myVotes, setMyVotes] = useState<Record<string, number>>({});
   const lastSavedVotesRef = useRef<Record<string, number>>({});
   const baseStarsByCountry = useBaseStars();
@@ -43,9 +50,21 @@ export function useRankingVotes(user: RankingUser | null, isAdmin: boolean) {
     if (cached) {
       try {
         const parsed = JSON.parse(cached);
-        setMyVotes(parsed);
-        lastSavedVotesRef.current = parsed;
+        if (
+          parsed &&
+          typeof parsed === 'object' &&
+          !Array.isArray(parsed) &&
+          Object.values(parsed).every((v) => typeof v === 'number')
+        ) {
+          setMyVotes(parsed);
+          lastSavedVotesRef.current = parsed;
+        } else {
+          localStorage.removeItem(LOCAL_STORAGE_KEY);
+          setMyVotes({});
+          lastSavedVotesRef.current = {};
+        }
       } catch {
+        localStorage.removeItem(LOCAL_STORAGE_KEY);
         setMyVotes({});
         lastSavedVotesRef.current = {};
       }
@@ -55,8 +74,11 @@ export function useRankingVotes(user: RankingUser | null, isAdmin: boolean) {
     }
   }, [user, LOCAL_STORAGE_KEY]);
 
+  const activeFetchRef = useRef(0);
+
   // Fetch global votes from Supabase
   const fetchGlobalVotes = async () => {
+    const fetchId = ++activeFetchRef.current;
     setLoading(true);
     try {
       const { data, error } = await supabase
@@ -66,7 +88,7 @@ export function useRankingVotes(user: RankingUser | null, isAdmin: boolean) {
 
       if (error) {
         console.error('Error fetching votes:', error);
-      } else if (data) {
+      } else if (data && fetchId === activeFetchRef.current) {
         setDbVotesData(data);
 
         if (user) {
@@ -86,11 +108,15 @@ export function useRankingVotes(user: RankingUser | null, isAdmin: boolean) {
     } catch (err) {
       console.error('Unexpected error fetching votes:', err);
     } finally {
-      setLoading(false);
+      if (fetchId === activeFetchRef.current) {
+        setLoading(false);
+      }
     }
   };
 
-  useEffect(() => { fetchGlobalVotes(); }, [user]);
+  useEffect(() => {
+    fetchGlobalVotes();
+  }, [user?.id, LOCAL_STORAGE_KEY]);
 
   // Update global votes registry whenever local or DB data changes
   useEffect(() => {
@@ -165,7 +191,18 @@ export function useRankingVotes(user: RankingUser | null, isAdmin: boolean) {
     if (player && player.totalVotes >= 999) return false;
 
     setMyVotes((prev) => {
-      const updated = { ...prev, [cardId]: (prev[cardId] ?? 0) + 1 };
+      const currentTotal = Object.values(prev).reduce((sum, v) => sum + v, 0);
+      if (currentTotal >= maxTotalVotes) return prev;
+
+      const prevMyVotes = prev[cardId] ?? 0;
+      if (!isAdmin && prevMyVotes >= 3) return prev;
+
+      if (player) {
+        const trueTotal = player.totalVotes - player.myActiveVotes + prevMyVotes;
+        if (trueTotal >= 999) return prev;
+      }
+
+      const updated = { ...prev, [cardId]: prevMyVotes + 1 };
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updated));
       return updated;
     });

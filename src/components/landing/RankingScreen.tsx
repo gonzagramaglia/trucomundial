@@ -1062,7 +1062,12 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({
               isLastVoted={lastVotedCardIdRef.current === player.id}
               lastVoteAction={lastVoteActionRef.current}
               hasUnsavedChanges={(myVotes[player.id] ?? 0) !== (savedVotes[player.id] ?? 0)}
-              availableVotes={availableVotes}
+              isAddDisabled={
+                availableVotes <= 0 ||
+                isOrderChanging ||
+                (!isAdmin && (myVotes[player.id] ?? 0) >= 3) ||
+                player.totalVotes >= 999
+              }
               onAdd={handleAddVote}
               onSub={handleSubVote}
               onAuth={handleAuth}
