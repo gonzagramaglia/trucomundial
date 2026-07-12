@@ -109,6 +109,14 @@ Branches follow the pattern:
 
 ---
 
+## PR Draft Generation
+
+Whenever a PR is prepared, the AI assistant must generate a local markdown file containing both the **Description Template** and the **Extended Description** for the user to review or copy.
+- **Path:** `docs/prs/pr-[number]-[slug].md`
+- **Note:** The `docs/prs/` directory is git-ignored, so these drafts won't be pushed.
+
+---
+
 ## PR History Reference
 
 | PR | Branch | Description | Status |
