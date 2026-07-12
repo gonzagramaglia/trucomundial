@@ -115,5 +115,6 @@ Branches follow the pattern:
 |----|--------|-------------|--------|
 | #1 | `refactor/cleanup` | Extract data to JSON, Zustand migration, docstrings | ✅ Merged |
 | #2 | `feat/unit-tests` | Vitest setup & 56 unit tests for core logic | 🟡 Open |
+| #3 | `refactor/ranking-screen` | Extract RankingScreen logic into components and hook | 🟡 Open |
 
 *(Update this table every time a PR is opened or merged.)*
