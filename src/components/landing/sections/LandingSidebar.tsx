@@ -1,0 +1,161 @@
+import React from "react";
+import { BookOpen, User, Trophy, ShieldAlert } from "lucide-react";
+import { useTranslation } from "react-i18next";
+
+interface LandingSidebarProps {
+  offset?: boolean;
+  user: any;
+  isSuperAdmin: boolean;
+  isApprovedCreator: boolean;
+  showRanking: boolean;
+  showDeck: boolean;
+  showProde: boolean;
+  showProfile: boolean;
+  showAdmin: boolean;
+  showCreator: boolean;
+  setShowRules: (show: boolean) => void;
+}
+
+export const LandingSidebar: React.FC<LandingSidebarProps> = ({
+  offset = false,
+  user,
+  isSuperAdmin,
+  isApprovedCreator,
+  showRanking,
+  showDeck,
+  showProde,
+  showProfile,
+  showAdmin,
+  showCreator,
+  setShowRules,
+}) => {
+  const { t } = useTranslation();
+  const hideRulesBtn = showRanking || showDeck || showProde;
+
+  return (
+    <div
+      style={{
+        position: "fixed",
+        top: offset ? "4.5rem" : "1.5rem",
+        left: "1.5rem",
+        display: "flex",
+        flexDirection: "column",
+        gap: "0.5rem",
+        zIndex: 6000,
+      }}
+    >
+      {!hideRulesBtn && (
+        <button
+          onClick={() => setShowRules(true)}
+          className="btn-hover-dark"
+          style={{
+            background: "rgba(255, 255, 255, 0.1)",
+            border: "1px solid rgba(255, 255, 255, 0.2)",
+            color: "white",
+            height: "40px",
+            width: "40px",
+            borderRadius: "50%",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backdropFilter: "blur(12px)",
+            transition: "none",
+          }}
+          title={t("rules")}
+        >
+          <BookOpen size={20} />
+        </button>
+      )}
+
+      {user && !showProfile && !showAdmin && (
+        <button
+          onClick={() => {
+            const isEn = window.location.pathname.startsWith("/en");
+            const target = isEn ? "/en/perfil" : "/perfil";
+            if (window.location.pathname !== target) {
+              window.history.pushState({}, "", target);
+              window.dispatchEvent(new PopStateEvent("popstate"));
+            }
+          }}
+          className="btn-hover-dark"
+          style={{
+            background: "rgba(255, 255, 255, 0.1)",
+            border: "1px solid rgba(255, 255, 255, 0.2)",
+            color: "white",
+            height: "40px",
+            width: "40px",
+            borderRadius: "50%",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backdropFilter: "blur(12px)",
+            transition: "none",
+          }}
+          title={t("profile")}
+        >
+          <User size={20} style={{ color: "#ffffff" }} />
+        </button>
+      )}
+
+      {isApprovedCreator && !showCreator && !showAdmin && (
+        <button
+          onClick={() => {
+            const isEn = window.location.pathname.startsWith("/en");
+            const path = isEn ? "/en/creador" : "/creador";
+            window.history.pushState({}, "", path);
+            window.dispatchEvent(new PopStateEvent("popstate"));
+          }}
+          className="btn-hover-dark"
+          style={{
+            background: "rgba(255, 255, 255, 0.1)",
+            border: "1px solid rgba(255, 255, 255, 0.2)",
+            color: "white",
+            height: "40px",
+            width: "40px",
+            borderRadius: "50%",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backdropFilter: "blur(12px)",
+            transition: "none",
+          }}
+          title="Panel de Creador"
+        >
+          <Trophy size={18} style={{ color: "#ffffff" }} />
+        </button>
+      )}
+
+      {isSuperAdmin && !showAdmin && (
+        <button
+          onClick={() => {
+            const isEn = window.location.pathname.startsWith("/en");
+            const path = isEn ? "/en/admin" : "/admin";
+            window.history.pushState({}, "", path);
+            window.dispatchEvent(new PopStateEvent("popstate"));
+          }}
+          className="btn-hover-dark"
+          style={{
+            background: "rgba(255, 255, 255, 0.1)",
+            border: "1px solid rgba(255, 255, 255, 0.2)",
+            color: "white",
+            height: "40px",
+            width: "40px",
+            borderRadius: "50%",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backdropFilter: "blur(12px)",
+            transition: "none",
+          }}
+          title={t("admin_panel")}
+        >
+          <ShieldAlert size={18} style={{ color: "#ffffff" }} />
+        </button>
+      )}
+    </div>
+  );
+};
