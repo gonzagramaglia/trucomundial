@@ -1,13 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
-  Save,
-  Plus,
-  Minus,
   Search,
-  Trophy,
-  Lock,
-  Check,
   Home,
   Star,
   Calendar,
@@ -15,33 +9,22 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { CARDS } from "../../data/cards";
-import { Sticker } from "../shared/Sticker";
 import { EmptyState } from "../shared/EmptyState";
-import { supabase } from "../../lib/supabase";
 import { TwitchButton } from "../shared/TwitchButton";
-import { updateVotesRegistry } from "../../lib/votesStore";
-import { useBaseStars } from "../../hooks/useBaseStars";
 import { audioManager } from "../../lib/audio";
 import { UtilityButtons } from "../shared/UtilityButtons";
+import { useRankingVotes } from "../../hooks/useRankingVotes";
+import type { RankingUser } from "../../hooks/useRankingVotes";
+import { RankingCard } from "./RankingCard";
+import { VotingHUD } from "./VotingHUD";
+import { UnsavedChangesModal } from "./UnsavedChangesModal";
+import { MaxVotesModal } from "./MaxVotesModal";
 
 interface RankingScreenProps {
-  user: any;
+  user: RankingUser | null;
   handleAuth: () => void;
   onBack: () => void;
 }
-
-const BASE_PLAYERS = CARDS.map((card) => ({
-  id: card.id,
-  name: card.name,
-  country: card.country,
-  club: card.club,
-  stars: 0,
-  env: card.env,
-  image: card.image,
-  stickerNumber: card.stickerNumber,
-  randomOffset: Math.random(),
-}));
 
 export const RankingScreen: React.FC<RankingScreenProps> = ({
   user,
@@ -64,27 +47,55 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({
   const [sortBy, setSortBy] = useState<"most_voted" | "least_voted">(
     "most_voted",
   );
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [dbVotesData, setDbVotesData] = useState<any[]>([]);
-  const [myVotes, setMyVotes] = useState<Record<string, number>>({});
-  const [saveSuccess, setSaveSuccess] = useState(false);
   const [isOrderChanging, setIsOrderChanging] = useState(false);
   const [showUnsavedModal, setShowUnsavedModal] = useState(false);
+  const [showMaxVotesModal, setShowMaxVotesModal] = useState(false);
   const lastOrderRef = useRef<string>("");
   const lastVotedCardIdRef = useRef<string | null>(null);
   const lastVoteActionRef = useRef<"add" | "sub" | null>(null);
-  const lastSavedVotesRef = useRef<Record<string, number>>({});
   const [isMobile, setIsMobile] = useState(
     typeof window !== "undefined" ? window.innerWidth < 768 : false,
   );
-  const baseStarsByCountry = useBaseStars();
-  const isAdmin =
-    user?.email &&
-    ["gonzagramaglia@gmail.com", "ciberportero@gmail.com"].includes(user.email);
-  const [showMaxVotesModal, setShowMaxVotesModal] = useState(false);
   const [visibleCount, setVisibleCount] = useState(12);
   const observerTarget = useRef<HTMLDivElement>(null);
+
+  const isAdmin = Boolean(
+    user?.email &&
+    ["gonzagramaglia@gmail.com", "ciberportero@gmail.com"].includes(user.email)
+  );
+
+  const {
+    loading, saving, saveSuccess, myVotes, availableVotes, maxTotalVotes,
+    totalMyVotes, sortedPlayers: rawSortedPlayers, absoluteRanks,
+    savedVotes, handleAddVote: rawAddVote, handleSubVote: rawSubVote,
+    handleSaveVotes, hasUnsavedChanges, handleRestoreSavedVotes
+  } = useRankingVotes(user, isAdmin);
+
+  // Sort players according to current sort preference
+  const sortedPlayers = [...rawSortedPlayers].sort((a, b) => {
+    if (b.totalVotes !== a.totalVotes) {
+      return sortBy === "least_voted" ? a.totalVotes - b.totalVotes : b.totalVotes - a.totalVotes;
+    }
+    return a.randomOffset - b.randomOffset;
+  });
+
+  const handleAddVote = (cardId: string) => {
+    const success = rawAddVote(cardId);
+    if (!success && !isAdmin && (myVotes[cardId] ?? 0) >= 3) {
+      setShowMaxVotesModal(true);
+      return;
+    }
+    if (success) {
+      lastVotedCardIdRef.current = cardId;
+      lastVoteActionRef.current = "add";
+    }
+  };
+
+  const handleSubVote = (cardId: string) => {
+    lastVotedCardIdRef.current = cardId;
+    lastVoteActionRef.current = "sub";
+    rawSubVote(cardId);
+  };
 
   // Reset visible count when filters change
   useEffect(() => {
@@ -103,320 +114,12 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const LOCAL_STORAGE_KEY = `trucomundial-uservotes-${user?.id || "anonymous"}`;
-
-  // 1. Fetch user's local/cached votes on mount or when user changes
-  useEffect(() => {
-    const cached = localStorage.getItem(LOCAL_STORAGE_KEY);
-    if (cached) {
-      try {
-        const parsed = JSON.parse(cached);
-        setMyVotes(parsed);
-        lastSavedVotesRef.current = parsed;
-      } catch (e) {
-        setMyVotes({});
-        lastSavedVotesRef.current = {};
-      }
-    } else {
-      setMyVotes({});
-      lastSavedVotesRef.current = {};
-    }
-  }, [user, LOCAL_STORAGE_KEY]);
-
-  // 2. Fetch global votes from Supabase game_sync table
-  const fetchGlobalVotes = async () => {
-    setLoading(true);
-    try {
-      // Fetch all records whose match_id starts with user_votes_
-      const { data, error } = await supabase
-        .from("game_sync")
-        .select("match_id, last_move")
-        .like("match_id", "user_votes_%");
-
-      if (error) {
-        console.error("Error fetching votes from Supabase:", error);
-      } else if (data) {
-        setDbVotesData(data);
-
-        // If logged in, also try to restore our official votes from the DB
-        if (user) {
-          const myDbRecord = data.find(
-            (item) => item.match_id === `user_votes_${user.id}`,
-          );
-          if (
-            myDbRecord &&
-            myDbRecord.last_move &&
-            myDbRecord.last_move.votes
-          ) {
-            lastSavedVotesRef.current = myDbRecord.last_move.votes;
-
-            // Only overwrite myVotes if local storage was empty
-            const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
-            if (!stored) {
-              setMyVotes(myDbRecord.last_move.votes);
-              localStorage.setItem(
-                LOCAL_STORAGE_KEY,
-                JSON.stringify(myDbRecord.last_move.votes),
-              );
-            }
-          } else {
-            lastSavedVotesRef.current = {};
-          }
-        }
-      }
-    } catch (err) {
-      console.error("Unexpected error fetching global votes:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchGlobalVotes();
-  }, [user]);
-
-  // Reactively aggregate and update the global votes registry whenever local myVotes or dbVotesData change
-  useEffect(() => {
-    const aggregate: Record<string, number> = {};
-
-    // 1. Add other users' votes from DB
-    dbVotesData.forEach((item) => {
-      if (user && item.match_id === `user_votes_${user.id}`) return;
-      const recordVotes = item.last_move?.votes;
-      if (recordVotes && typeof recordVotes === "object") {
-        Object.entries(recordVotes).forEach(([cardId, count]) => {
-          if (typeof count === "number") {
-            aggregate[cardId] = (aggregate[cardId] || 0) + count;
-          }
-        });
-      }
-    });
-
-    // 2. Add current user's local myVotes
-    Object.entries(myVotes).forEach(([cardId, count]) => {
-      if (typeof count === "number") {
-        aggregate[cardId] = (aggregate[cardId] || 0) + count;
-      }
-    });
-
-    // 3. Add base stars and fixture results stars
-    CARDS.forEach((c) => {
-      const base =
-        c.country === "Argentina"
-          ? 3
-          : c.country === "Francia"
-            ? 2
-            : c.country === "Croacia"
-              ? 1
-              : 0;
-      const fix = baseStarsByCountry[c.country] || 0;
-      aggregate[c.id] = Math.min(999, (aggregate[c.id] || 0) + base + fix);
-    });
-
-    updateVotesRegistry(aggregate);
-  }, [myVotes, dbVotesData, user, baseStarsByCountry]);
-
-  // Calculate current user's distributed votes
-  const maxTotalVotes = 78;
-  const totalMyVotes = Object.values(myVotes).reduce((sum, v) => sum + v, 0);
-  const availableVotes = maxTotalVotes - totalMyVotes;
-
-  // Handle subtracting a vote
-  const handleSubVote = (cardId: string) => {
-    if (!user) return;
-
-    lastVotedCardIdRef.current = cardId;
-    lastVoteActionRef.current = "sub";
-    setMyVotes((prev) => {
-      const current = prev[cardId] ?? 0;
-      if (current <= 0) return prev;
-      const updated = { ...prev, [cardId]: current - 1 };
-      if (updated[cardId] === 0) {
-        delete updated[cardId];
-      }
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updated));
-      return updated;
-    });
-  };
-
-  // Save/Sync votes to Supabase
-  const handleSaveVotes = async () => {
-    if (!user) return;
-    setSaving(true);
-    setSaveSuccess(false);
-
-    try {
-      const { error } = await supabase.from("game_sync").upsert(
-        {
-          match_id: `user_votes_${user.id}`,
-          last_move: {
-            type: "user_votes",
-            userId: user.id,
-            userName:
-              user.user_metadata?.full_name?.split(" ")[0] ||
-              user.email?.split("@")[0] ||
-              "Usuario",
-            votes: myVotes,
-            updatedAt: new Date().toISOString(),
-          },
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: "match_id" },
-      );
-
-      if (error) {
-        throw error;
-      }
-
-      setSaveSuccess(true);
-      setTimeout(() => setSaveSuccess(false), 2000);
-      lastSavedVotesRef.current = myVotes;
-
-      // Refresh global list to show new calculations
-      await fetchGlobalVotes();
-    } catch (err) {
-      console.error("Error saving votes to Supabase:", err);
-      alert(t("save_error"));
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  // Check if current local votes differ from the last cloud-saved/synced state
-  const hasUnsavedChanges = () => {
-    const currentKeys = Object.keys(myVotes);
-    const savedKeys = Object.keys(lastSavedVotesRef.current);
-
-    if (currentKeys.length !== savedKeys.length) return true;
-
-    for (const key of currentKeys) {
-      if (myVotes[key] !== lastSavedVotesRef.current[key]) {
-        return true;
-      }
-    }
-    return false;
-  };
-
   const handleBackRequest = () => {
     if (user && hasUnsavedChanges()) {
       setShowUnsavedModal(true);
     } else {
       onBack();
     }
-  };
-
-  // 3. Compile aggregate votes
-  // Aggregate all other users' votes from DB
-  const aggregateOtherVotes: Record<string, number> = {};
-  dbVotesData.forEach((item) => {
-    // Skip current user's DB record to avoid double counting (we use current user's local state instead)
-    if (user && item.match_id === `user_votes_${user.id}`) return;
-
-    const recordVotes = item.last_move?.votes;
-    if (recordVotes && typeof recordVotes === "object") {
-      Object.entries(recordVotes).forEach(([cardId, count]) => {
-        if (typeof count === "number") {
-          aggregateOtherVotes[cardId] =
-            (aggregateOtherVotes[cardId] ?? 0) + count;
-        }
-      });
-    }
-  });
-
-  // Calculate absolute ranks (always based on most voted to least voted, sharing ranks for ties)
-  const absoluteRanks = new Map<string, number>();
-  const rankedList = [...BASE_PLAYERS]
-    .map((player) => {
-      const otherVotes = aggregateOtherVotes[player.id] ?? 0;
-      const myActiveVotes = myVotes[player.id] ?? 0;
-      const fixtureStars = baseStarsByCountry[player.country] || 0;
-      const hardcodedBaseStars =
-        player.country === "Argentina"
-          ? 3
-          : player.country === "Francia"
-            ? 2
-            : player.country === "Croacia"
-              ? 1
-              : 0;
-      const totalVotes = Math.min(
-        999,
-        hardcodedBaseStars + fixtureStars + otherVotes + myActiveVotes,
-      );
-      return { id: player.id, totalVotes };
-    })
-    .sort((a, b) => b.totalVotes - a.totalVotes);
-
-  let currentRank = 1;
-  rankedList.forEach((p, idx) => {
-    if (idx > 0 && p.totalVotes < rankedList[idx - 1].totalVotes) {
-      currentRank = idx + 1;
-    }
-    absoluteRanks.set(p.id, currentRank);
-  });
-
-  // Combine: baseVotes + other users' votes + current user's active local votes
-  const sortedPlayers = [...BASE_PLAYERS]
-    .map((player) => {
-      const otherVotes = aggregateOtherVotes[player.id] ?? 0;
-      const myActiveVotes = myVotes[player.id] ?? 0;
-      const fixtureStars = baseStarsByCountry[player.country] || 0;
-      const hardcodedBaseStars =
-        player.country === "Argentina"
-          ? 3
-          : player.country === "Francia"
-            ? 2
-            : player.country === "Croacia"
-              ? 1
-              : 0;
-      const totalVotes = Math.min(
-        999,
-        hardcodedBaseStars + fixtureStars + otherVotes + myActiveVotes,
-      );
-
-      return {
-        ...player,
-        otherVotes,
-        myActiveVotes,
-        totalVotes,
-      };
-    })
-    .sort((a, b) => {
-      if (b.totalVotes !== a.totalVotes) {
-        if (sortBy === "least_voted") {
-          return a.totalVotes - b.totalVotes;
-        }
-        return b.totalVotes - a.totalVotes;
-      }
-      return a.randomOffset - b.randomOffset;
-    });
-
-  // Handle adding a vote
-  const handleAddVote = (cardId: string) => {
-    if (!user) return;
-    if (availableVotes <= 0) return;
-
-    const currentMyVotes = myVotes[cardId] ?? 0;
-
-    // Check user 3-vote limit (if not admin)
-    if (!isAdmin && currentMyVotes >= 3) {
-      setShowMaxVotesModal(true);
-      return;
-    }
-
-    // Check global 999-vote limit
-    const player = sortedPlayers.find((p) => p.id === cardId);
-    if (player && player.totalVotes >= 999) {
-      return; // Cap global votes at 999
-    }
-
-    lastVotedCardIdRef.current = cardId;
-    lastVoteActionRef.current = "add";
-    setMyVotes((prev) => {
-      const current = prev[cardId] ?? 0;
-      const updated = { ...prev, [cardId]: current + 1 };
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updated));
-      return updated;
-    });
   };
 
   const currentOrder = sortedPlayers.map((p) => p.id).join(",");
@@ -719,241 +422,18 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({
       </div>
 
       {/* VOTING CONTROL BLOCK (STICKY HUD) */}
-      <AnimatePresence mode="wait">
-        {user ? (
-          <motion.div
-            initial={{ y: -30, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            style={{
-              position: "sticky",
-              top: "1rem",
-              zIndex: 100,
-              background: "rgba(15, 10, 25, 0.9)",
-              border: unsaved
-                ? "2px solid rgba(255, 184, 0, 0.45)"
-                : availableVotes === 0
-                  ? "2px solid rgba(16, 185, 129, 0.45)"
-                  : "2px solid rgba(168, 85, 247, 0.25)",
-              borderRadius: "2rem",
-              padding: "1.25rem 2rem",
-              marginBottom: "2rem",
-              display: "flex",
-              flexWrap: "wrap",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: "1.5rem",
-              boxShadow: unsaved
-                ? "0 10px 30px rgba(255, 184, 0, 0.05), inset 0 0 20px rgba(255, 184, 0, 0.05)"
-                : availableVotes === 0
-                  ? "0 10px 30px rgba(16, 185, 129, 0.05), inset 0 0 20px rgba(16, 185, 129, 0.05)"
-                  : "0 10px 30px rgba(168, 85, 247, 0.05), inset 0 0 20px rgba(168, 85, 247, 0.05)",
-              backdropFilter: "blur(16px)",
-            }}
-          >
-            <div style={{ flex: "1 1 300px" }}>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  marginBottom: "0.5rem",
-                  fontSize: "0.9rem",
-                  fontWeight: 800,
-                }}
-              >
-                <span
-                  style={{
-                    color: unsaved
-                      ? "#ffb800"
-                      : availableVotes === 0
-                        ? "#10b981"
-                        : "#a855f7",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "0.5rem",
-                  }}
-                >
-                  <Trophy size={18} />
-                  {t("your_votes_distributed")}
-                </span>
-                <span
-                  style={{
-                    color: unsaved
-                      ? "#ffb800"
-                      : availableVotes === 0
-                        ? "#10b981"
-                        : "#fff",
-                  }}
-                >
-                  {totalMyVotes} / {maxTotalVotes} {t("votes_label")}
-                </span>
-              </div>
-
-              {/* Progress bar */}
-              <div
-                style={{
-                  width: "100%",
-                  height: "8px",
-                  background: "rgba(255,255,255,0.1)",
-                  borderRadius: "4px",
-                  overflow: "hidden",
-                }}
-              >
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{
-                    width: `${(totalMyVotes / maxTotalVotes) * 100}%`,
-                  }}
-                  style={{
-                    height: "100%",
-                    background: unsaved
-                      ? "linear-gradient(to right, #ffb800, #f59e0b)"
-                      : availableVotes === 0
-                        ? "linear-gradient(to right, #10b981, #059669)"
-                        : "linear-gradient(to right, #a855f7, #7c3aed)",
-                    boxShadow: unsaved
-                      ? "0 0 8px rgba(255, 184, 0, 0.8)"
-                      : availableVotes === 0
-                        ? "0 0 8px rgba(16, 185, 129, 0.8)"
-                        : "0 0 8px rgba(168, 85, 247, 0.8)",
-                  }}
-                />
-              </div>
-
-              <div
-                style={{
-                  fontSize: "0.75rem",
-                  opacity: 0.5,
-                  marginTop: "0.4rem",
-                }}
-              >
-                {availableVotes > 0
-                  ? t("votes_available_hint", { count: availableVotes })
-                  : t("votes_all_used")}
-              </div>
-            </div>
-
-            {/* Save Button */}
-            <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-              <button
-                onClick={handleSaveVotes}
-                disabled={saving || saveSuccess}
-                className="btn-hover-dark"
-                style={{
-                  background: saveSuccess
-                    ? "#10b981"
-                    : unsaved
-                      ? "#ffb800"
-                      : availableVotes === 0
-                        ? "#10b981"
-                        : "#a855f7",
-                  border: "none",
-                  color: "#fff",
-                  height: "48px",
-                  borderRadius: "1.25rem",
-                  padding: "0 2rem",
-                  fontSize: "1rem",
-                  fontWeight: 950,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.75rem",
-                  cursor: saving || saveSuccess ? "default" : "pointer",
-                  boxShadow: "4px 4px 0px #000",
-                  transition: "all 0.2s ease",
-                  opacity: saving ? 0.7 : 1,
-                }}
-              >
-                {saveSuccess ? <Check size={18} /> : <Save size={18} />}
-                {saveSuccess
-                  ? t("votes_saved")
-                  : saving
-                    ? t("saving")
-                    : t("save_to_cloud")}
-              </button>
-            </div>
-          </motion.div>
-        ) : (
-          <motion.div
-            initial={{ y: -30, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            style={{
-              position: "sticky",
-              top: "1rem",
-              zIndex: 100,
-              background: "rgba(145, 70, 255, 0.05)",
-              border: "2px dashed rgba(145, 70, 255, 0.45)",
-              borderRadius: "2rem",
-              padding: "1.5rem 2rem",
-              marginBottom: "2rem",
-              display: "flex",
-              flexWrap: "wrap",
-              alignItems: "center",
-              justifyContent: "space-between",
-              gap: "1.5rem",
-              backdropFilter: "blur(16px)",
-            }}
-          >
-            <div style={{ flex: "1 1 300px" }}>
-              <h3
-                style={{
-                  margin: "0 0 0.5rem 0",
-                  color: "#a855f7",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.6rem",
-                  fontSize: "1.1rem",
-                  fontWeight: 900,
-                }}
-              >
-                <Lock size={18} />
-                {t("login_to_vote_title")}
-              </h3>
-              <p
-                style={{
-                  margin: 0,
-                  fontSize: "0.8rem",
-                  opacity: 0.7,
-                  lineHeight: 1.4,
-                }}
-                dangerouslySetInnerHTML={{ __html: t("login_to_vote_desc") }}
-              />
-            </div>
-
-            <button
-              onClick={handleAuth}
-              className="btn-hover-dark"
-              style={{
-                background: "#9146ff",
-                border: "none",
-                color: "#fff",
-                height: "46px",
-                borderRadius: "1.25rem",
-                padding: "0 1.5rem",
-                fontSize: "0.9rem",
-                fontWeight: 950,
-                display: "flex",
-                alignItems: "center",
-                gap: "0.6rem",
-                cursor: "pointer",
-                boxShadow: "4px 4px 0px #000",
-                marginTop: isMobile ? "-0.5rem" : 0,
-              }}
-            >
-              <svg
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                style={{ fill: "currentColor" }}
-              >
-                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
-                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
-              </svg>
-              {t("login_with_google")}
-            </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <VotingHUD
+        user={user}
+        unsaved={unsaved}
+        availableVotes={availableVotes}
+        totalMyVotes={totalMyVotes}
+        maxTotalVotes={maxTotalVotes}
+        saving={saving}
+        saveSuccess={saveSuccess}
+        handleSaveVotes={handleSaveVotes}
+        handleAuth={handleAuth}
+        isMobile={isMobile}
+      />
 
       {/* INFO BOX */}
       <div
@@ -1110,7 +590,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({
             >
               <select
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as any)}
+                onChange={(e) => setSortBy(e.target.value as "most_voted" | "least_voted")}
                 style={{
                   height: "44px",
                   padding: "0 2.2rem 0 1.1rem",
@@ -1571,276 +1051,28 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({
             width: "100%",
           }}
         >
-          {filteredPlayers.slice(0, visibleCount).map((player, index) => {
-            const hasCardUnsavedChanges =
-              (myVotes[player.id] ?? 0) !==
-              (lastSavedVotesRef.current[player.id] ?? 0);
-            return (
-              <motion.div
-                key={player.id}
-                id={`ranking-card-${player.id}`}
-                layout
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{
-                  duration: 0.3,
-                  delay: Math.min(index * 0.03, 0.5),
-                }}
-                style={{
-                  background:
-                    isOrderChanging && lastVotedCardIdRef.current === player.id
-                      ? lastVoteActionRef.current === "add"
-                        ? "rgba(168, 85, 247, 0.08)"
-                        : "rgba(255, 255, 255, 0.08)"
-                      : "rgba(255, 255, 255, 0.03)",
-                  border:
-                    isOrderChanging && lastVotedCardIdRef.current === player.id
-                      ? lastVoteActionRef.current === "add"
-                        ? "1.5px solid rgba(168, 85, 247, 0.8)"
-                        : "1.5px solid rgba(255, 255, 255, 0.8)"
-                      : "1px solid rgba(255, 255, 255, 0.08)",
-                  borderRadius: "2.25rem",
-                  padding: "1.5rem",
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  position: "relative",
-                  boxShadow:
-                    isOrderChanging && lastVotedCardIdRef.current === player.id
-                      ? lastVoteActionRef.current === "add"
-                        ? "0 0 30px rgba(168, 85, 247, 0.6), 0 12px 30px rgba(0,0,0,0.2)"
-                        : "0 0 30px rgba(255, 255, 255, 0.6), 0 12px 30px rgba(0,0,0,0.2)"
-                      : "0 12px 30px rgba(0,0,0,0.15)",
-                  backdropFilter: "blur(8px)",
-                  filter:
-                    isOrderChanging && lastVotedCardIdRef.current === player.id
-                      ? "brightness(1.3)"
-                      : "none",
-                  transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
-                }}
-              >
-                {/* RANK TROPHY OR SHADOW BADGE */}
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "-15px",
-                    left: "20px",
-                    background: "rgba(255, 255, 255, 0.15)",
-                    border: "1px solid rgba(168, 85, 247, 0.4)",
-                    color: "#a855f7",
-                    width: "36px",
-                    height: "36px",
-                    borderRadius: "50%",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontWeight: 900,
-                    fontSize: "1.1rem",
-                    zIndex: 10,
-                    boxShadow: "0 4px 10px rgba(0,0,0,0.3)",
-                    backdropFilter: "blur(10px)",
-                  }}
-                >
-                  {absoluteRanks.get(player.id)}º
-                </div>
-
-                {/* THE COLLECTIBLE STICKER COMPONENT */}
-                <div
-                  style={{
-                    width: "130px",
-                    height: "180px",
-                    margin: "1rem 0 1.25rem 0",
-                  }}
-                >
-                  <Sticker
-                    card={{ ...player, stars: player.totalVotes } as any}
-                    disabled={true}
-                  />
-                </div>
-
-                {/* PLAYER INFO PANEL */}
-                <div
-                  style={{
-                    width: "100%",
-                    textAlign: "center",
-                    marginBottom: "1.25rem",
-                  }}
-                >
-                  <h4
-                    style={{
-                      margin: "0 0 0.25rem 0",
-                      fontSize: "1.15rem",
-                      fontWeight: 900,
-                      letterSpacing: "0.05em",
-                    }}
-                  >
-                    {player.name}
-                  </h4>
-                  <p
-                    style={{
-                      margin: 0,
-                      fontSize: "0.75rem",
-                      opacity: 0.6,
-                      textTransform: "uppercase",
-                    }}
-                  >
-                    {t(
-                      `country_${player.country
-                        .normalize("NFD")
-                        .replace(/[\u0300-\u036f]/g, "")
-                        .toLowerCase()}`,
-                    )}{" "}
-                    · {player.club}
-                  </p>
-                </div>
-
-                {/* VOTING ROW BUTTONS */}
-                {user ? (
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      background: "rgba(15, 10, 25, 0.6)",
-                      border: "1px solid rgba(255,255,255,0.06)",
-                      borderRadius: "1.25rem",
-                      padding: "4px",
-                      width: "100%",
-                      boxSizing: "border-box",
-                    }}
-                  >
-                    {/* Subtract Vote */}
-                    <button
-                      onClick={() => handleSubVote(player.id)}
-                      disabled={player.myActiveVotes <= 0 || isOrderChanging}
-                      style={{
-                        background: "transparent",
-                        border: "none",
-                        color:
-                          player.myActiveVotes > 0 && !isOrderChanging
-                            ? hasCardUnsavedChanges
-                              ? "#ffb800"
-                              : "#a855f7"
-                            : "rgba(255,255,255,0.15)",
-                        width: "38px",
-                        height: "38px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        cursor:
-                          player.myActiveVotes > 0 && !isOrderChanging
-                            ? "pointer"
-                            : "default",
-                        borderRadius: "0.85rem",
-                      }}
-                      className={
-                        player.myActiveVotes > 0 && !isOrderChanging
-                          ? "btn-hover-dark"
-                          : ""
-                      }
-                    >
-                      <Minus size={18} />
-                    </button>
-
-                    {/* Active Vote Display */}
-                    <div
-                      style={{
-                        flex: 1,
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      <span
-                        style={{
-                          fontWeight: 950,
-                          fontSize: "1.1rem",
-                          lineHeight: "1",
-                          color:
-                            player.myActiveVotes > 0
-                              ? hasCardUnsavedChanges
-                                ? "#ffb800"
-                                : "#a855f7"
-                              : "#ffffff",
-                          marginBottom: "2px",
-                        }}
-                      >
-                        {player.myActiveVotes}
-                      </span>
-                      <span
-                        style={{
-                          fontSize: "0.55rem",
-                          opacity: 0.6,
-                          textTransform: "uppercase",
-                          color: "#fff",
-                          letterSpacing: "0.05em",
-                        }}
-                      >
-                        {t("personal_votes")}
-                      </span>
-                    </div>
-
-                    {/* Add Vote */}
-                    <button
-                      onClick={() => handleAddVote(player.id)}
-                      disabled={availableVotes <= 0 || isOrderChanging}
-                      style={{
-                        background: "transparent",
-                        border: "none",
-                        color:
-                          availableVotes > 0 && !isOrderChanging
-                            ? hasCardUnsavedChanges
-                              ? "#ffb800"
-                              : "#a855f7"
-                            : "rgba(255,255,255,0.15)",
-                        width: "38px",
-                        height: "38px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        cursor:
-                          availableVotes > 0 && !isOrderChanging
-                            ? "pointer"
-                            : "default",
-                        borderRadius: "0.85rem",
-                      }}
-                      className={
-                        availableVotes > 0 && !isOrderChanging
-                          ? "btn-hover-dark"
-                          : ""
-                      }
-                    >
-                      <Plus size={18} />
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    onClick={handleAuth}
-                    style={{
-                      background: "rgba(255,255,255,0.05)",
-                      border: "1px solid rgba(255,255,255,0.1)",
-                      borderRadius: "1.25rem",
-                      padding: "10px 0",
-                      width: "100%",
-                      color: "rgba(255,255,255,0.6)",
-                      fontSize: "0.8rem",
-                      fontWeight: 800,
-                      cursor: "pointer",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      gap: "6px",
-                    }}
-                    className="btn-hover-dark"
-                  >
-                    <Lock size={14} />
-                    {t("login_to_vote_btn")}
-                  </button>
-                )}
-              </motion.div>
-            );
-          })}
+          {filteredPlayers.slice(0, visibleCount).map((player, index) => (
+            <RankingCard
+              key={player.id}
+              player={player}
+              index={index}
+              rank={absoluteRanks.get(player.id) ?? index + 1}
+              isUser={!!user}
+              isOrderChanging={isOrderChanging}
+              isLastVoted={lastVotedCardIdRef.current === player.id}
+              lastVoteAction={lastVoteActionRef.current}
+              hasUnsavedChanges={(myVotes[player.id] ?? 0) !== (savedVotes[player.id] ?? 0)}
+              isAddDisabled={
+                availableVotes <= 0 ||
+                isOrderChanging ||
+                (!isAdmin && (myVotes[player.id] ?? 0) >= 3) ||
+                player.totalVotes >= 999
+              }
+              onAdd={handleAddVote}
+              onSub={handleSubVote}
+              onAuth={handleAuth}
+            />
+          ))}
         </div>
       )}
 
@@ -1869,220 +1101,21 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({
       <TwitchButton />
 
       {/* UNSAVED CHANGES WARNING MODAL */}
-      <AnimatePresence>
-        {showUnsavedModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            style={{
-              position: "fixed",
-              inset: 0,
-              background: "rgba(0, 0, 0, 0.5)",
-              backdropFilter: "blur(5px)",
-              zIndex: 2000,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              padding: "1.5rem",
-            }}
-          >
-            <motion.div
-              initial={{ scale: 0.9, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.9, y: 20 }}
-              style={{
-                background: "rgba(255, 255, 255, 0.05)",
-                border: "1.5px solid rgba(255, 255, 255, 0.1)",
-                borderRadius: "2rem",
-                padding: "2.5rem 2rem",
-                width: "100%",
-                maxWidth: "480px",
-                textAlign: "center",
-                boxShadow: "0 20px 50px rgba(0,0,0,0.5)",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: "1.5rem",
-              }}
-            >
-              {/* Warning Icon inside a red glowing circle */}
-              <div
-                style={{
-                  width: "64px",
-                  height: "64px",
-                  borderRadius: "50%",
-                  background: "rgba(239, 68, 68, 0.15)",
-                  border: "2.5px solid #ef4444",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  boxShadow: "0 0 20px rgba(239, 68, 68, 0.45)",
-                  color: "#ef4444",
-                  fontSize: "2rem",
-                }}
-              >
-                ⚠️
-              </div>
-
-              <h3
-                className="text-display"
-                style={{
-                  fontSize: "1.5rem",
-                  margin: 0,
-                  color: "#ef4444",
-                  letterSpacing: "0.05em",
-                }}
-              >
-                {t("exit_without_saving")}
-              </h3>
-
-              <p
-                style={{
-                  margin: 0,
-                  fontSize: "0.95rem",
-                  opacity: 0.8,
-                  lineHeight: "1.5",
-                  color: "#fff",
-                }}
-              >
-                {t("unsaved_votes_warning")}
-              </p>
-
-              {/* Action Buttons */}
-              <div
-                style={{
-                  display: "flex",
-                  gap: "1rem",
-                  width: "100%",
-                  marginTop: "0.5rem",
-                }}
-              >
-                <button
-                  onClick={() => {
-                    setMyVotes(lastSavedVotesRef.current);
-                    localStorage.setItem(
-                      LOCAL_STORAGE_KEY,
-                      JSON.stringify(lastSavedVotesRef.current),
-                    );
-                    setShowUnsavedModal(false);
-                    onBack();
-                  }}
-                  className="btn-hover-dark"
-                  style={{
-                    flex: 1,
-                    height: "46px",
-                    borderRadius: "1.25rem",
-                    background: "rgba(239, 68, 68, 0.2)",
-                    border: "1px solid #ef4444",
-                    color: "#ef4444",
-                    fontWeight: 900,
-                    cursor: "pointer",
-                    fontSize: "0.9rem",
-                    boxShadow: "4px 4px 0px #000",
-                    transition: "all 0.2s",
-                  }}
-                >
-                  {t("yes_exit")}
-                </button>
-
-                <button
-                  onClick={() => setShowUnsavedModal(false)}
-                  className="btn-hover-dark"
-                  style={{
-                    flex: 1,
-                    height: "46px",
-                    borderRadius: "1.25rem",
-                    background: "linear-gradient(to right, #a855f7, #7c3aed)",
-                    border: "none",
-                    color: "#fff",
-                    fontWeight: 900,
-                    cursor: "pointer",
-                    fontSize: "0.9rem",
-                    boxShadow: "4px 4px 0px #000",
-                    transition: "all 0.2s",
-                  }}
-                >
-                  {t("no_stay")}
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <UnsavedChangesModal
+        isOpen={showUnsavedModal}
+        onClose={() => setShowUnsavedModal(false)}
+        onConfirm={() => {
+          handleRestoreSavedVotes();
+          setShowUnsavedModal(false);
+          onBack();
+        }}
+      />
 
       {/* MAX VOTES PER CARD MODAL */}
-      <AnimatePresence>
-        {showMaxVotesModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            style={{
-              position: "fixed",
-              inset: 0,
-              background: "rgba(0, 0, 0, 0.5)",
-              backdropFilter: "blur(5px)",
-              zIndex: 2000,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              padding: "1.5rem",
-            }}
-          >
-            <motion.div
-              initial={{ scale: 0.9, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.9, y: 20 }}
-              style={{
-                background: "rgba(15, 10, 25, 0.95)",
-                border: "1px solid rgba(255, 184, 0, 0.4)",
-                borderRadius: "1.5rem",
-                padding: "2rem",
-                width: "100%",
-                maxWidth: "400px",
-                textAlign: "center",
-                boxShadow:
-                  "0 20px 40px rgba(0,0,0,0.5), inset 0 0 20px rgba(255, 184, 0, 0.05)",
-              }}
-            >
-              <h3
-                style={{
-                  margin: "0 0 1rem 0",
-                  color: "#ffb800",
-                  fontSize: "1.25rem",
-                }}
-              >
-                {t("vote_limit_title")}
-              </h3>
-              <p
-                style={{
-                  margin: "0 0 1.5rem 0",
-                  opacity: 0.8,
-                  fontSize: "0.9rem",
-                  lineHeight: 1.5,
-                }}
-              >
-                {t("vote_limit_desc")}
-              </p>
-              <button
-                onClick={() => setShowMaxVotesModal(false)}
-                style={{
-                  background: "rgba(255, 255, 255, 0.1)",
-                  border: "none",
-                  color: "#fff",
-                  padding: "0.75rem 2rem",
-                  borderRadius: "1rem",
-                  fontWeight: 800,
-                  cursor: "pointer",
-                }}
-              >
-                {t("understood")}
-              </button>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <MaxVotesModal
+        isOpen={showMaxVotesModal}
+        onClose={() => setShowMaxVotesModal(false)}
+      />
     </div>
   );
 };

@@ -109,11 +109,20 @@ Branches follow the pattern:
 
 ---
 
+## PR Draft Generation
+
+Whenever a PR is prepared, the AI assistant must generate a local markdown file containing both the **Description Template** and the **Extended Description** for the user to review or copy.
+- **Path:** `docs/prs/pr-[number]-[slug].md`
+- **Note:** The `docs/prs/` directory is git-ignored, so these drafts won't be pushed.
+
+---
+
 ## PR History Reference
 
 | PR | Branch | Description | Status |
 |----|--------|-------------|--------|
 | #1 | `refactor/cleanup` | Extract data to JSON, Zustand migration, docstrings | ✅ Merged |
 | #2 | `feat/unit-tests` | Vitest setup & 56 unit tests for core logic | 🟡 Open |
+| #3 | `refactor/ranking-screen` | Extract RankingScreen logic into components and hook | 🟡 Open |
 
 *(Update this table every time a PR is opened or merged.)*
