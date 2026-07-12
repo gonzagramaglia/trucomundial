@@ -26,7 +26,7 @@ interface ProdeScreenProps {
 export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBack }) => {
   const { t, i18n } = useTranslation();
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
-  const [activeTab, setActiveTab] = useState<TabType>('quarterfinals');
+  const [activeTab, setActiveTab] = useState<TabType>('semifinals');
   const [searchQuery, setSearchQuery] = useState('');
   const [showFinishedOnly, setShowFinishedOnly] = useState(false);
   const [liveResults, setLiveResults] = useState<Record<string, { scoreA: number, scoreB: number, status: string }>>({});
@@ -564,7 +564,7 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
           </div>
         )}
 
-        {activeTab !== 'groups' && activeTab !== 'round_32' && activeTab !== 'round_16' && activeTab !== 'quarterfinals' && (
+        {activeTab !== 'groups' && activeTab !== 'round_32' && activeTab !== 'round_16' && activeTab !== 'quarterfinals' && activeTab !== 'semifinals' && (
           <div style={{ textAlign: 'center', padding: '4rem 1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '1.5rem', border: '1px dashed rgba(255,255,255,0.1)' }}>
             <Trophy size={48} style={{ color: 'rgba(255,255,255,0.2)', marginBottom: '1rem' }} />
             <h3 style={{ fontSize: '1.5rem', fontWeight: 800, margin: '0 0 0.5rem 0', color: 'rgba(255,255,255,0.6)' }}>
