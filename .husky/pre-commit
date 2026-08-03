@@ -1,1 +1,1 @@
-yarn --ignore-engines build
+yarn build

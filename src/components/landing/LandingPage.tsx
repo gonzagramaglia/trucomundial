@@ -97,32 +97,30 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
+  let ActiveScreen = null;
   if (nav.showProfile) {
-    return (
-      <div style={{ width: "100%", height: "100vh", position: "relative" }}>
-        <LandingSidebar
-          offset={true}
-          user={user}
-          isSuperAdmin={isSuperAdmin}
-          isApprovedCreator={isApprovedCreator}
-          showRanking={nav.showRanking}
-          showDeck={nav.showDeck}
-          showProde={nav.showProde}
-          showProfile={nav.showProfile}
-          showAdmin={nav.showAdmin}
-          showCreator={nav.showCreator}
-          setShowRules={nav.setShowRules}
-        />
-        <ProfileScreen
-          onBack={nav.handleReturnHome}
-          user={user}
-          handleAuth={() => handleAuth(nav.handleReturnHome)}
-        />
-      </div>
-    );
+    ActiveScreen = <ProfileScreen onBack={nav.handleReturnHome} user={user} handleAuth={() => handleAuth(nav.handleReturnHome)} />;
+  } else if (nav.showAdmin && isSuperAdmin) {
+    ActiveScreen = <AdminScreen onBack={nav.handleReturnHome} user={user} handleAuth={() => handleAuth(nav.handleReturnHome)} />;
+  } else if (nav.showCreator && isApprovedCreator) {
+    ActiveScreen = <CreatorScreen onBack={nav.handleReturnHome} user={user} handleAuth={() => handleAuth(nav.handleReturnHome)} />;
+  } else if (nav.showCreatorsApp) {
+    ActiveScreen = <CreatorsApplicationScreen onBack={nav.handleReturnHome} user={user} handleAuth={() => handleAuth(nav.handleReturnHome)} />;
+  } else if (nav.showRanking) {
+    ActiveScreen = <RankingScreen onBack={nav.handleReturnHome} user={user} handleAuth={() => handleAuth(nav.handleReturnHome)} />;
+  } else if (nav.showRoadmap) {
+    ActiveScreen = <RoadmapScreen onBack={nav.handleReturnHome} />;
+  } else if (nav.showTournamentEvent) {
+    ActiveScreen = <TournamentEventPage onBack={nav.handleReturnHome} user={user} handleAuth={() => handleAuth(nav.handleReturnHome)} onPlayMatch={matchmaking.startTournamentMatch} />;
+  } else if (nav.showTournament) {
+    ActiveScreen = <TournamentScreen onBack={nav.handleReturnHome} user={user} handleAuth={() => handleAuth(nav.handleReturnHome)} />;
+  } else if (nav.showProde) {
+    ActiveScreen = <ProdeScreen onBack={nav.handleReturnHome} user={user} handleAuth={() => handleAuth(nav.handleReturnHome)} />;
+  } else if (nav.showDeck) {
+    ActiveScreen = <DeckScreen onBack={nav.handleReturnHome} user={user} handleAuth={() => handleAuth(nav.handleReturnHome)} />;
   }
 
-  if (nav.showAdmin && isSuperAdmin) {
+  if (ActiveScreen) {
     return (
       <div style={{ width: "100%", height: "100vh", position: "relative" }}>
         <LandingSidebar
@@ -138,183 +136,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           showCreator={nav.showCreator}
           setShowRules={nav.setShowRules}
         />
-        <AdminScreen onBack={nav.handleReturnHome} user={user} handleAuth={() => handleAuth(nav.handleReturnHome)} />
-      </div>
-    );
-  }
-
-  if (nav.showCreator && isApprovedCreator) {
-    return (
-      <div style={{ width: "100%", height: "100vh", position: "relative" }}>
-        <LandingSidebar
-          offset={true}
-          user={user}
-          isSuperAdmin={isSuperAdmin}
-          isApprovedCreator={isApprovedCreator}
-          showRanking={nav.showRanking}
-          showDeck={nav.showDeck}
-          showProde={nav.showProde}
-          showProfile={nav.showProfile}
-          showAdmin={nav.showAdmin}
-          showCreator={nav.showCreator}
-          setShowRules={nav.setShowRules}
-        />
-        <CreatorScreen onBack={nav.handleReturnHome} user={user} handleAuth={() => handleAuth(nav.handleReturnHome)} />
-      </div>
-    );
-  }
-
-  if (nav.showCreatorsApp) {
-    return (
-      <div style={{ width: "100%", height: "100vh", position: "relative" }}>
-        <LandingSidebar
-          offset={true}
-          user={user}
-          isSuperAdmin={isSuperAdmin}
-          isApprovedCreator={isApprovedCreator}
-          showRanking={nav.showRanking}
-          showDeck={nav.showDeck}
-          showProde={nav.showProde}
-          showProfile={nav.showProfile}
-          showAdmin={nav.showAdmin}
-          showCreator={nav.showCreator}
-          setShowRules={nav.setShowRules}
-        />
-        <CreatorsApplicationScreen onBack={nav.handleReturnHome} user={user} handleAuth={() => handleAuth(nav.handleReturnHome)} />
-      </div>
-    );
-  }
-
-  if (nav.showRanking) {
-    return (
-      <div style={{ width: "100%", height: "100vh", position: "relative" }}>
-        <LandingSidebar
-          offset={true}
-          user={user}
-          isSuperAdmin={isSuperAdmin}
-          isApprovedCreator={isApprovedCreator}
-          showRanking={nav.showRanking}
-          showDeck={nav.showDeck}
-          showProde={nav.showProde}
-          showProfile={nav.showProfile}
-          showAdmin={nav.showAdmin}
-          showCreator={nav.showCreator}
-          setShowRules={nav.setShowRules}
-        />
-        <RankingScreen
-          onBack={nav.handleReturnHome}
-          user={user}
-          handleAuth={() => handleAuth(nav.handleReturnHome)}
-        />
-      </div>
-    );
-  }
-
-  if (nav.showRoadmap) {
-    return (
-      <div style={{ width: "100%", height: "100vh", position: "relative" }}>
-        <LandingSidebar
-          offset={true}
-          user={user}
-          isSuperAdmin={isSuperAdmin}
-          isApprovedCreator={isApprovedCreator}
-          showRanking={nav.showRanking}
-          showDeck={nav.showDeck}
-          showProde={nav.showProde}
-          showProfile={nav.showProfile}
-          showAdmin={nav.showAdmin}
-          showCreator={nav.showCreator}
-          setShowRules={nav.setShowRules}
-        />
-        <RoadmapScreen onBack={nav.handleReturnHome} />
-      </div>
-    );
-  }
-
-  if (nav.showTournamentEvent) {
-    return (
-      <div style={{ width: "100%", height: "100vh", position: "relative" }}>
-        <LandingSidebar
-          offset={true}
-          user={user}
-          isSuperAdmin={isSuperAdmin}
-          isApprovedCreator={isApprovedCreator}
-          showRanking={nav.showRanking}
-          showDeck={nav.showDeck}
-          showProde={nav.showProde}
-          showProfile={nav.showProfile}
-          showAdmin={nav.showAdmin}
-          showCreator={nav.showCreator}
-          setShowRules={nav.setShowRules}
-        />
-        <TournamentEventPage
-          onBack={nav.handleReturnHome}
-          user={user}
-          handleAuth={() => handleAuth(nav.handleReturnHome)}
-        />
-      </div>
-    );
-  }
-
-  if (nav.showTournament) {
-    return (
-      <div style={{ width: "100%", height: "100vh", position: "relative" }}>
-        <LandingSidebar
-          offset={true}
-          user={user}
-          isSuperAdmin={isSuperAdmin}
-          isApprovedCreator={isApprovedCreator}
-          showRanking={nav.showRanking}
-          showDeck={nav.showDeck}
-          showProde={nav.showProde}
-          showProfile={nav.showProfile}
-          showAdmin={nav.showAdmin}
-          showCreator={nav.showCreator}
-          setShowRules={nav.setShowRules}
-        />
-        <TournamentScreen onBack={nav.handleReturnHome} user={user} handleAuth={() => handleAuth(nav.handleReturnHome)} />
-      </div>
-    );
-  }
-
-  if (nav.showProde) {
-    return (
-      <div style={{ width: "100%", height: "100vh", position: "relative" }}>
-        <LandingSidebar
-          offset={true}
-          user={user}
-          isSuperAdmin={isSuperAdmin}
-          isApprovedCreator={isApprovedCreator}
-          showRanking={nav.showRanking}
-          showDeck={nav.showDeck}
-          showProde={nav.showProde}
-          showProfile={nav.showProfile}
-          showAdmin={nav.showAdmin}
-          showCreator={nav.showCreator}
-          setShowRules={nav.setShowRules}
-        />
-        <ProdeScreen onBack={nav.handleReturnHome} user={user} handleAuth={() => handleAuth(nav.handleReturnHome)} />
-      </div>
-    );
-  }
-
-  if (nav.showDeck) {
-    return (
-      <div style={{ width: "100%", height: "100vh", position: "relative" }}>
-        <LandingSidebar
-          offset={true}
-          user={user}
-          isSuperAdmin={isSuperAdmin}
-          isApprovedCreator={isApprovedCreator}
-          showRanking={nav.showRanking}
-          showDeck={nav.showDeck}
-          showProde={nav.showProde}
-          showProfile={nav.showProfile}
-          showAdmin={nav.showAdmin}
-          showCreator={nav.showCreator}
-          setShowRules={nav.setShowRules}
-        />
-        <DeckScreen onBack={nav.handleReturnHome} user={user} handleAuth={() => handleAuth(nav.handleReturnHome)} />
+        {ActiveScreen}
       </div>
     );
   }
@@ -365,7 +187,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         timeLeft={matchmaking.timeLeft}
         showVersus={nav.showVersus}
         rivalData={matchmaking.rivalData}
-        userName={user?.user_metadata.full_name?.split(" ")[0] || "VOS"}
+        userName={user?.user_metadata?.full_name?.split(" ")[0] || "VOS"}
         onCancel={() => {
           matchmaking.setIsWaiting(false);
           matchmaking.setRoomCode("");

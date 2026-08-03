@@ -19,6 +19,8 @@ import { RankingCard } from "./RankingCard";
 import { VotingHUD } from "./VotingHUD";
 import { UnsavedChangesModal } from "./UnsavedChangesModal";
 import { MaxVotesModal } from "./MaxVotesModal";
+import { ADMIN_EMAILS } from "../../lib/constants";
+
 
 interface RankingScreenProps {
   user: RankingUser | null;
@@ -61,7 +63,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({
 
   const isAdmin = Boolean(
     user?.email &&
-    ["gonzagramaglia@gmail.com", "ciberportero@gmail.com"].includes(user.email)
+    ADMIN_EMAILS.includes(user.email)
   );
 
   const {

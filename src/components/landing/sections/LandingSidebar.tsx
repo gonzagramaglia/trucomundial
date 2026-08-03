@@ -1,10 +1,11 @@
+import type { User as SupabaseUser } from '@supabase/supabase-js';
 import React from "react";
 import { BookOpen, User, Trophy, ShieldAlert } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 interface LandingSidebarProps {
   offset?: boolean;
-  user: any;
+  user: SupabaseUser | null;
   isSuperAdmin: boolean;
   isApprovedCreator: boolean;
   showRanking: boolean;
@@ -46,6 +47,7 @@ export const LandingSidebar: React.FC<LandingSidebarProps> = ({
     >
       {!hideRulesBtn && (
         <button
+          type="button"
           onClick={() => setShowRules(true)}
           className="btn-hover-dark"
           style={{
@@ -122,7 +124,7 @@ export const LandingSidebar: React.FC<LandingSidebarProps> = ({
             backdropFilter: "blur(12px)",
             transition: "none",
           }}
-          title="Panel de Creador"
+          title={t("creator_panel")}
         >
           <Trophy size={18} style={{ color: "#ffffff" }} />
         </button>

@@ -1,3 +1,4 @@
+import type { User } from '@supabase/supabase-js';
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
@@ -9,7 +10,7 @@ import { PointSelector } from "../PointSelector";
 import { TwitchButton } from "../../shared/TwitchButton";
 
 interface HeroSectionProps {
-  user: any;
+  user: User | null;
   hasUnlockedDeck: boolean;
   selectedMode: "1v1" | "2v2" | "multiplayer" | null;
   setSelectedMode: (mode: "1v1" | "2v2" | "multiplayer" | null) => void;
@@ -215,6 +216,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               </div>
               <button
                 onClick={() => setIsJoining(false)}
+                type="button"
                 style={{
                   background: "transparent",
                   border: "none",

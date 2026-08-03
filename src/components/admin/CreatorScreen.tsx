@@ -34,9 +34,10 @@ import { TournamentFormModal } from "./TournamentFormModal";
 import { TournamentPlayersModal } from "./TournamentPlayersModal";
 import { TournamentBracketModal } from "./TournamentBracketModal";
 import { TwitchButton } from '../shared/TwitchButton';
+import { ADMIN_EMAILS } from "../../lib/constants";
 
 
-const ADMIN_EMAILS = ["gonzagramaglia@gmail.com", "ciberportero@gmail.com"];
+
 
 interface CreatorScreenProps {
   user: any;

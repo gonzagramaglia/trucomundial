@@ -1,5 +1,20 @@
 import { useState, useEffect } from "react";
 
+const ROUTES = {
+  ranking: ["/votar", "/en/votar"],
+  tournament: ["/torneos", "/en/torneos"],
+  roadmap: ["/ruta", "/en/ruta"],
+  prode: ["/prode", "/en/prode", "/fixture", "/en/fixture"],
+  deck: ["/mazo", "/en/mazo"],
+  profile: ["/perfil", "/en/perfil"],
+  admin: ["/admin", "/en/admin"],
+  creator: ["/creador", "/en/creador"],
+  creatorsApp: ["/creadores", "/en/creadores"],
+};
+
+const matchRoute = (path: string, routes: string[]) => routes.includes(path);
+const matchPrefix = (path: string, prefixes: string[]) => prefixes.some(p => path.startsWith(p));
+
 export const useLandingNavigation = () => {
   const [showVersus, setShowVersus] = useState(false);
   const [selectedMode, setSelectedMode] = useState<"1v1" | "2v2" | "multiplayer" | null>(null);
@@ -8,84 +23,32 @@ export const useLandingNavigation = () => {
   const [selectedPoints, setSelectedPoints] = useState<number>(15);
   const [showRules, setShowRules] = useState(false);
 
-  const [showRanking, setShowRanking] = useState(
-    () =>
-      typeof window !== "undefined" &&
-      (window.location.pathname === "/votar" ||
-        window.location.pathname === "/en/votar"),
-  );
-  const [showTournament, setShowTournament] = useState(
-    () =>
-      typeof window !== "undefined" &&
-      (window.location.pathname === "/torneos" ||
-        window.location.pathname === "/en/torneos"),
-  );
-  const [showTournamentEvent, setShowTournamentEvent] = useState(
-    () =>
-      typeof window !== "undefined" &&
-      (window.location.pathname.startsWith("/torneos/") ||
-        window.location.pathname.startsWith("/en/torneos/")),
-  );
-  const [showRoadmap, setShowRoadmap] = useState(
-    () =>
-      typeof window !== "undefined" &&
-      (window.location.pathname === "/ruta" ||
-        window.location.pathname === "/en/ruta"),
-  );
-  const [showProde, setShowProde] = useState(
-    () =>
-      typeof window !== "undefined" &&
-      (window.location.pathname === "/prode" ||
-        window.location.pathname === "/en/prode" ||
-        window.location.pathname === "/fixture" ||
-        window.location.pathname === "/en/fixture"),
-  );
-  const [showDeck, setShowDeck] = useState(
-    () =>
-      typeof window !== "undefined" &&
-      (window.location.pathname === "/mazo" ||
-        window.location.pathname === "/en/mazo"),
-  );
-  const [showProfile, setShowProfile] = useState(
-    () =>
-      typeof window !== "undefined" &&
-      (window.location.pathname === "/perfil" ||
-        window.location.pathname === "/en/perfil"),
-  );
-  const [showAdmin, setShowAdmin] = useState(
-    () =>
-      typeof window !== "undefined" &&
-      (window.location.pathname === "/admin" ||
-        window.location.pathname === "/en/admin"),
-  );
-  const [showCreator, setShowCreator] = useState(
-    () =>
-      typeof window !== "undefined" &&
-      (window.location.pathname === "/creador" ||
-        window.location.pathname === "/en/creador"),
-  );
-  const [showCreatorsApp, setShowCreatorsApp] = useState(
-    () =>
-      typeof window !== "undefined" &&
-      (window.location.pathname === "/creadores" ||
-        window.location.pathname === "/en/creadores"),
-  );
+  const getPath = () => typeof window !== "undefined" ? window.location.pathname : "";
+
+  const [showRanking, setShowRanking] = useState(() => matchRoute(getPath(), ROUTES.ranking));
+  const [showTournament, setShowTournament] = useState(() => matchRoute(getPath(), ROUTES.tournament));
+  const [showTournamentEvent, setShowTournamentEvent] = useState(() => matchPrefix(getPath(), ["/torneos/", "/en/torneos/"]));
+  const [showRoadmap, setShowRoadmap] = useState(() => matchRoute(getPath(), ROUTES.roadmap));
+  const [showProde, setShowProde] = useState(() => matchRoute(getPath(), ROUTES.prode));
+  const [showDeck, setShowDeck] = useState(() => matchRoute(getPath(), ROUTES.deck));
+  const [showProfile, setShowProfile] = useState(() => matchRoute(getPath(), ROUTES.profile));
+  const [showAdmin, setShowAdmin] = useState(() => matchRoute(getPath(), ROUTES.admin));
+  const [showCreator, setShowCreator] = useState(() => matchRoute(getPath(), ROUTES.creator));
+  const [showCreatorsApp, setShowCreatorsApp] = useState(() => matchRoute(getPath(), ROUTES.creatorsApp));
 
   useEffect(() => {
     const onPop = () => {
-      const p = window.location.pathname;
-      setShowRanking(p === "/votar" || p === "/en/votar");
-      setShowTournament(p === "/torneos" || p === "/en/torneos");
-      setShowTournamentEvent(
-        p.startsWith("/torneos/") || p.startsWith("/en/torneos/"),
-      );
-      setShowRoadmap(p === "/ruta" || p === "/en/ruta");
-      setShowProde(p === "/prode" || p === "/en/prode" || p === "/fixture" || p === "/en/fixture");
-      setShowDeck(p === "/mazo" || p === "/en/mazo");
-      setShowProfile(p === "/perfil" || p === "/en/perfil");
-      setShowAdmin(p === "/admin" || p === "/en/admin");
-      setShowCreator(p === "/creador" || p === "/en/creador");
-      setShowCreatorsApp(p === "/creadores" || p === "/en/creadores");
+      const p = getPath();
+      setShowRanking(matchRoute(p, ROUTES.ranking));
+      setShowTournament(matchRoute(p, ROUTES.tournament));
+      setShowTournamentEvent(matchPrefix(p, ["/torneos/", "/en/torneos/"]));
+      setShowRoadmap(matchRoute(p, ROUTES.roadmap));
+      setShowProde(matchRoute(p, ROUTES.prode));
+      setShowDeck(matchRoute(p, ROUTES.deck));
+      setShowProfile(matchRoute(p, ROUTES.profile));
+      setShowAdmin(matchRoute(p, ROUTES.admin));
+      setShowCreator(matchRoute(p, ROUTES.creator));
+      setShowCreatorsApp(matchRoute(p, ROUTES.creatorsApp));
     };
     window.addEventListener("popstate", onPop);
     return () => window.removeEventListener("popstate", onPop);

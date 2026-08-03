@@ -1,13 +1,17 @@
+import type { User } from '@supabase/supabase-js';
 import { useState, useEffect } from "react";
 import { supabase } from "../../lib/supabase";
+import { ADMIN_EMAILS } from "../../lib/constants";
+
 
 export const useLandingAuth = () => {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [isApprovedCreator, setIsApprovedCreator] = useState(false);
 
-  const isSuperAdmin =
+  const isSuperAdmin = Boolean(
     user?.email &&
-    ["gonzagramaglia@gmail.com", "ciberportero@gmail.com"].includes(user.email);
+    ADMIN_EMAILS.includes(user.email)
+  );
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }: any) => {
@@ -42,8 +46,8 @@ export const useLandingAuth = () => {
           .eq("user_id", user.id)
           .eq("status", "approved")
           .single();
-        if (data) setIsApprovedCreator(true);
-      } catch (err) {
+        if (data) { setIsApprovedCreator(true); } else { setIsApprovedCreator(false); }
+      } catch {
         setIsApprovedCreator(false);
       }
     };

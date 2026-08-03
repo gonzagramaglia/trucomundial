@@ -28,11 +28,12 @@ import { UtilityButtons } from '../shared/UtilityButtons';
 import { UserStarsModal } from "./UserStarsModal";
 import { UserProdeModal } from "./UserProdeModal";
 import { Loader } from "../shared/Loader";
+import { ADMIN_EMAILS } from "../../lib/constants";
+
 import {
   normalizeTournamentPrizes,
 } from "../../lib/formatters";
 
-const ADMIN_EMAILS = ["gonzagramaglia@gmail.com", "ciberportero@gmail.com"];
 
 interface AdminScreenProps {
   user: any;

@@ -1,9 +1,10 @@
+import type { User } from '@supabase/supabase-js';
 import { useState, useEffect } from "react";
 import { supabase } from "../../lib/supabase";
 import { setTournamentVotesSnapshot } from "../../lib/votesStore";
 
 interface UseMatchmakingProps {
-  user: any;
+  user: User | null;
   sessionId: string;
   onStart: (
     mode: "1v1" | "2v2" | "multiplayer",
@@ -48,7 +49,7 @@ export const useMatchmaking = ({
   const [rivalData, setRivalData] = useState<{ name: string; id: string } | null>(null);
 
   useEffect(() => {
-    let timer: any;
+    let timer: ReturnType<typeof setInterval>;
     if (isWaiting && timeLeft > 0) {
       timer = setInterval(() => setTimeLeft((prev) => prev - 1), 1000);
     } else if (timeLeft === 0 && isWaiting) {
