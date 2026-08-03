@@ -4,15 +4,15 @@ This document outlines the strategic plan to decompose massive "God Components" 
 
 ## 🚨 The Giants (Technical Debt)
 
-The following components have grown beyond 1,000 lines and are the primary targets for decomposition, ordered by severity:
+The following components have grown beyond 1,000 lines and are the primary targets for decomposition, ordered by severity. Tournaments logic is deferred to the end:
 
-1. **`LandingPage.tsx` (2414 lines)** - Orchestrates multiple sub-screens, modals, user authentication, matchmaking logic, and room codes.
-2. **`TournamentScreen.tsx` (1733 lines)** - Complex state for brackets, active matches, and leaderboards.
-3. **`DeckScreen.tsx` (1673 lines)** - Deck building, card selection, and filtering logic.
-4. **`CreatorScreen.tsx` (1621 lines)** - Creator dashboard and tournament management.
-5. **`AdminScreen.tsx` (1474 lines)** - Administrative overrides and global state management.
-6. **`TournamentEventPage.tsx` (1216 lines)** - Specific event details and live updates.
-7. **`ProfileScreen.tsx` (1135 lines)** - User stats, matches history, and settings.
+1. **`LandingPage.tsx` (2414 lines)** - Orchestrates multiple sub-screens, modals, user authentication, matchmaking logic, and room codes. (In Progress)
+2. **`DeckScreen.tsx` (1673 lines)** - Deck building, card selection, and filtering logic.
+3. **`CreatorScreen.tsx` (1621 lines)** - Creator dashboard and tournament management.
+4. **`AdminScreen.tsx` (1474 lines)** - Administrative overrides and global state management.
+5. **`ProfileScreen.tsx` (1135 lines)** - User stats, matches history, and settings.
+6. **`TournamentScreen.tsx` (1733 lines)** - Complex state for brackets, active matches, and leaderboards.
+7. **`TournamentEventPage.tsx` (1216 lines)** - Specific event details and live updates.
 
 ---
 

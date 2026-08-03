@@ -13,6 +13,8 @@ import { TournamentChat } from "./chat/TournamentChat";
 import { TwitchButton } from "../../shared/TwitchButton";
 import { useTranslation } from "react-i18next";
 import type { Tournament } from "./types";
+import { ADMIN_EMAILS } from "../../../lib/constants";
+
 
 interface Props {
   user: any;
@@ -65,7 +67,7 @@ const TournamentEventPage: React.FC<Props> = ({ user, handleAuth, onBack, onPlay
         return;
       }
       
-      const isSuperAdmin = ["gonzagramaglia@gmail.com", "ciberportero@gmail.com"].includes(user.email || "");
+      const isSuperAdmin = ADMIN_EMAILS.includes(user.email || "");
       if (isSuperAdmin) {
         setIsCreatorOrAdmin(true);
         return;

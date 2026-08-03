@@ -561,5 +561,6 @@
   "error_code_length": "El código debe tener 4 caracteres.",
   "error_invalid_code": "Código inválido o ya usado.",
   "error_redeem_connection": "Error de conexión al canjear el código.",
-  "alert_all_cards_unlocked": "¡Ya tenés todas las cartas desbloqueadas!"
+  "alert_all_cards_unlocked": "¡Ya tenés todas las cartas desbloqueadas!",
+  "creator_panel": "Panel de Creador"
 }

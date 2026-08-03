@@ -561,5 +561,6 @@
   "error_code_length": "The code must be 4 characters long.",
   "error_invalid_code": "Invalid or already used code.",
   "error_redeem_connection": "Connection error while redeeming the code.",
-  "alert_all_cards_unlocked": "You already have all cards unlocked!"
+  "alert_all_cards_unlocked": "You already have all cards unlocked!",
+  "creator_panel": "Creator Panel"
 }
