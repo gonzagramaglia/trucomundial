@@ -218,6 +218,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         setShowDeck={nav.setShowDeck}
         setShowRoadmap={nav.setShowRoadmap}
         setShowProde={nav.setShowProde}
+        isWaiting={matchmaking.isWaiting}
       />
 
       {showNationalityModal && (

@@ -128,5 +128,7 @@ Whenever a PR is prepared, the AI assistant must generate a local markdown file 
 | #7 | `refactor/decompose-landing-page` | Extract LandingPage logic into components and hooks | ✅ Merged |
 | #8 | `refactor/decompose-deck-screen` | Extract DeckScreen logic into components and hooks | ✅ Merged |
 | #9 | `feat/prode-finals` | Update Prode with finals bracket/scores, limit votes to 3 | ✅ Merged |
+| #10 | `fix/landing-page-modal` | Restore modal overlay for point selection and deck composition | 🕒 Pending |
+| #11 | `refactor/decompose-admin-screen` | Extract AdminScreen logic into smaller hooks | 🕒 Pending |
 
 *(Update this table every time a PR is opened or merged.)*
