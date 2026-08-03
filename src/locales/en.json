@@ -11,7 +11,7 @@
   "back": "BACK",
   "join": "JOIN",
   "create": "CREATE",
-  "private_match": "PRIVATE\nMATCH",
+  "private_match": "FRIENDLY\nMATCH",
   "enter_match": "ENTER MATCH",
   "start": "START",
   "code": "CODE",
@@ -361,7 +361,7 @@
   "not_found_title": "Folded!",
   "not_found_desc": "The route you are looking for does not exist or has folded. Go back to home to shuffle and deal again.",
   "not_found_btn": "Back to Home",
-  "creator_panel": "CREATOR DASHBOARD",
+  "creator_panel": "Creator Panel",
   "tournament_management": "Tournament Management",
   "create_tournament": "Create Tournament",
   "my_tournaments": "My Tournaments",
@@ -562,5 +562,6 @@
   "error_invalid_code": "Invalid or already used code.",
   "error_redeem_connection": "Connection error while redeeming the code.",
   "alert_all_cards_unlocked": "You already have all cards unlocked!",
-  "creator_panel": "Creator Panel"
+  "join_room": "JOIN ROOM",
+  "enter_code": "CODE"
 }

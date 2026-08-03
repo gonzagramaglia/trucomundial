@@ -11,7 +11,7 @@
   "back": "VOLVER",
   "join": "UNIRSE",
   "create": "CREAR",
-  "private_match": "PARTIDA\nPRIVADA",
+  "private_match": "PARTIDA\nAMISTOSA",
   "enter_match": "ENTRAR A LA PARTIDA",
   "start": "JUGAR",
   "code": "CODE",
@@ -361,7 +361,7 @@
   "not_found_title": "¡Se fue al mazo!",
   "not_found_desc": "La ruta que estás buscando no existe o se retiró del partido. Volvé al inicio para mezclar y repartir de nuevo.",
   "not_found_btn": "Volver al Inicio",
-  "creator_panel": "PANEL DE CREADOR",
+  "creator_panel": "Panel de Creador",
   "tournament_management": "Gestión de Torneos",
   "create_tournament": "Crear Torneo",
   "my_tournaments": "Mis Torneos",
@@ -562,5 +562,6 @@
   "error_invalid_code": "Código inválido o ya usado.",
   "error_redeem_connection": "Error de conexión al canjear el código.",
   "alert_all_cards_unlocked": "¡Ya tenés todas las cartas desbloqueadas!",
-  "creator_panel": "Panel de Creador"
+  "join_room": "UNIRSE A SALA",
+  "enter_code": "CÓDIGO"
 }

@@ -28,7 +28,7 @@ export const PointSelector: React.FC<PointSelectorProps> = ({ onSelect }) => {
   });
 
   return (
-    <div style={{ display: "flex", gap: "1.5rem", marginBottom: "2rem", width: "100%", justifyContent: "center" }}>
+    <div style={{ display: "flex", gap: "1.5rem", marginBottom: "1.5rem", width: "100%", justifyContent: "center" }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', flex: 1, alignItems: 'center' }}>
         <Button
           onClick={() => onSelect(15)}
