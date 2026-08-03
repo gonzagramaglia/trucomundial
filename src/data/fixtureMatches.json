@@ -1164,7 +1164,9 @@
     "teamB": "España",
     "flagA": "🇫🇷",
     "flagB": "🇪🇸",
-    "status": "upcoming"
+    "status": "finished",
+    "scoreA": 0,
+    "scoreB": 2
   },
   {
     "id": "102",
@@ -1175,6 +1177,34 @@
     "teamB": "Argentina",
     "flagA": "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
     "flagB": "🇦🇷",
-    "status": "upcoming"
+    "status": "finished",
+    "scoreA": 1,
+    "scoreB": 2
+  },
+  {
+    "id": "103",
+    "date": "sábado 18 de julio",
+    "time": "04:00 p. m.",
+    "group": "Tercer puesto",
+    "teamA": "Inglaterra",
+    "teamB": "Francia",
+    "flagA": "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
+    "flagB": "🇫🇷",
+    "status": "finished",
+    "scoreA": 6,
+    "scoreB": 4
+  },
+  {
+    "id": "104",
+    "date": "domingo 19 de julio",
+    "time": "04:00 p. m.",
+    "group": "Final",
+    "teamA": "España",
+    "teamB": "Argentina",
+    "flagA": "🇪🇸",
+    "flagB": "🇦🇷",
+    "status": "finished",
+    "scoreA": 1,
+    "scoreB": 0
   }
 ]

@@ -125,7 +125,8 @@ Whenever a PR is prepared, the AI assistant must generate a local markdown file 
 | #3 | `feat/unit-tests` | Vitest setup & 56 unit tests for core logic | ✅ Merged |
 | #4 | `fix/prode-semifinals` | Update initial tab and semifinal dates in ProdeScreen | ✅ Merged |
 | #6 | `refactor/ranking-screen` | Extract RankingScreen logic into components and hook | ✅ Merged |
-| #7 | `refactor/decompose-landing-page` | Extract LandingPage logic into components and hooks | 🟡 Open |
-| #8 | `refactor/decompose-deck-screen` | Extract DeckScreen logic into components and hooks | 🟡 Open |
+| #7 | `refactor/decompose-landing-page` | Extract LandingPage logic into components and hooks | ✅ Merged |
+| #8 | `refactor/decompose-deck-screen` | Extract DeckScreen logic into components and hooks | ✅ Merged |
+| #9 | `feat/prode-finals` | Update Prode with finals bracket/scores, limit votes to 3 | ✅ Merged |
 
 *(Update this table every time a PR is opened or merged.)*

@@ -40,7 +40,7 @@ export function useRankingVotes(user: RankingUser | null, isAdmin: boolean) {
   const baseStarsByCountry = useBaseStars();
 
   const LOCAL_STORAGE_KEY = `trucomundial-uservotes-${user?.id || 'anonymous'}`;
-  const maxTotalVotes = 78;
+  const maxTotalVotes = 3;
   const totalMyVotes = Object.values(myVotes).reduce((sum, v) => sum + v, 0);
   const availableVotes = maxTotalVotes - totalMyVotes;
 

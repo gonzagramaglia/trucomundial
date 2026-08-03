@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Calendar, Globe, Search, Home, Trophy, ExternalLink, AlertCircle, Star } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -26,10 +26,17 @@ interface ProdeScreenProps {
 export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBack }) => {
   const { t, i18n } = useTranslation();
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
-  const [activeTab, setActiveTab] = useState<TabType>('semifinals');
+  const [activeTab, setActiveTab] = useState<TabType>('final');
   const [searchQuery, setSearchQuery] = useState('');
   const [showFinishedOnly, setShowFinishedOnly] = useState(false);
   const [liveResults, setLiveResults] = useState<Record<string, { scoreA: number, scoreB: number, status: string }>>({});
+  const tabsScrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (tabsScrollRef.current) {
+      tabsScrollRef.current.scrollLeft = tabsScrollRef.current.scrollWidth;
+    }
+  }, []);
 
   // Prode states
   const [predictions, setPredictions] = useState<Record<string, { scoreA: number, scoreB: number, rewarded?: boolean }>>({});
@@ -370,7 +377,10 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
         </div>
       </div>
 
-      <div style={{ display: 'flex', justifyContent: 'flex-start', gap: '0.75rem', marginBottom: '1rem', overflowX: 'auto', paddingBottom: '0.5rem', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+      <div 
+        ref={tabsScrollRef}
+        style={{ display: 'flex', justifyContent: 'flex-start', gap: '0.75rem', marginBottom: '1rem', overflowX: 'auto', paddingBottom: '0.5rem', scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+      >
         <div style={{ display: 'flex', gap: '0.5rem', width: 'max-content', margin: '0 auto', padding: '0 2px' }}>
           {renderTab('groups', t('group_stage'), Globe)}
           {renderTab('round_32', t('round_of_32'), Trophy)}
@@ -552,7 +562,7 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
           </motion.div>
         ))}
 
-        {(activeTab === 'groups' || activeTab === 'round_32' || activeTab === 'round_16' || activeTab === 'quarterfinals') && groupedMatches.length === 0 && (
+        {groupedMatches.length === 0 && (
           <div style={{ textAlign: 'center', padding: '4rem 1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '1.5rem', border: '1px dashed rgba(255,255,255,0.1)' }}>
             <Search size={48} style={{ color: 'rgba(255,255,255,0.2)', marginBottom: '1rem' }} />
             <h3 style={{ fontSize: '1.5rem', fontWeight: 800, margin: '0 0 0.5rem 0', color: 'rgba(255,255,255,0.6)' }}>
@@ -561,41 +571,6 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
             <p style={{ opacity: 0.5, fontSize: '0.9rem', maxWidth: '400px', margin: '0 auto' }}>
               {t('no_matches_desc', 'No hay partidos que coincidan con tu búsqueda.')}
             </p>
-          </div>
-        )}
-
-        {activeTab !== 'groups' && activeTab !== 'round_32' && activeTab !== 'round_16' && activeTab !== 'quarterfinals' && activeTab !== 'semifinals' && (
-          <div style={{ textAlign: 'center', padding: '4rem 1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '1.5rem', border: '1px dashed rgba(255,255,255,0.1)' }}>
-            <Trophy size={48} style={{ color: 'rgba(255,255,255,0.2)', marginBottom: '1rem' }} />
-            <h3 style={{ fontSize: '1.5rem', fontWeight: 800, margin: '0 0 0.5rem 0', color: 'rgba(255,255,255,0.6)' }}>
-              {t('prode_stage_tbd')}
-            </h3>
-            <p style={{ opacity: 0.5, fontSize: '0.9rem', maxWidth: '400px', margin: '0 auto 1.5rem auto' }}>
-              {t('prode_stage_tbd_desc')}
-            </p>
-            <a 
-              href="https://www.fifa.com/es/tournaments/mens/worldcup/canadamexicousa2026/standings" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-                background: 'rgba(255, 255, 255, 0.1)',
-                color: '#fff',
-                padding: '0.6rem 1.25rem',
-                borderRadius: '1rem',
-                textDecoration: 'none',
-                fontWeight: 800,
-                fontSize: '0.9rem',
-                border: '1px solid rgba(255, 255, 255, 0.3)',
-                transition: 'all 0.2s ease'
-              }}
-              className="btn-hover-dark"
-            >
-              <ExternalLink size={16} />
-              {t('prode_view_standings')} FIFA.com
-            </a>
           </div>
         )}
       </div>
