@@ -13,6 +13,20 @@ interface WorldCupBracketProps {
 export const WorldCupBracket: React.FC<WorldCupBracketProps> = ({ fixtureMatches, liveResults }) => {
   const { t } = useTranslation();
   const roundNames = [t("bracket_round_32"), t("bracket_round_16"), t("bracket_quarterfinals"), t("bracket_semifinals")];
+  
+  const scrollRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    if (scrollRef.current) {
+      const center = (scrollRef.current.scrollWidth - scrollRef.current.clientWidth) / 2;
+      scrollRef.current.scrollLeft = center;
+      
+      const bottom = scrollRef.current.parentElement?.querySelector('[data-bracket-bottom-scroll]') as HTMLElement;
+      if (bottom) {
+        bottom.scrollLeft = center;
+      }
+    }
+  }, []);
 
   const rounds = buildBracketRounds(fixtureMatches, liveResults);
   const finalMatch = rounds[4][0];
@@ -141,6 +155,7 @@ export const WorldCupBracket: React.FC<WorldCupBracketProps> = ({ fixtureMatches
 
       <div
         className="bracket-scroll"
+        ref={scrollRef}
         style={{
           overflowX: "auto",
           paddingBottom: "0.25rem",
@@ -155,7 +170,7 @@ export const WorldCupBracket: React.FC<WorldCupBracketProps> = ({ fixtureMatches
           }
         }}
       >
-        <div style={{ height: "1px", minWidth: "1600px" }} />
+        <div style={{ height: "1px", width: "1750px" }} />
       </div>
 
       <div
@@ -174,7 +189,7 @@ export const WorldCupBracket: React.FC<WorldCupBracketProps> = ({ fixtureMatches
           }
         }}
       >
-        <div style={{ display: "flex", gap: "1rem", alignItems: "stretch", minWidth: "1600px", margin: "0 auto", padding: "0 1rem" }}>
+        <div style={{ display: "flex", gap: "1rem", alignItems: "stretch", width: "1750px", margin: "0 auto", padding: "0 1rem" }}>
           
           {/* LEFT SIDE */}
           <div style={{ display: "flex", gap: "0", flex: 1 }}>
@@ -227,13 +242,22 @@ export const WorldCupBracket: React.FC<WorldCupBracketProps> = ({ fixtureMatches
              <div style={{ fontSize: "0.8rem", fontWeight: 900, color: "#fbbf24", textAlign: "center", marginBottom: "0.75rem", textTransform: "uppercase" }}>
                {t("champion")}
              </div>
-             <div style={{
-                background: "rgba(251, 191, 36, 0.1)", border: "2px solid rgba(251, 191, 36, 0.4)",
-                borderRadius: "1rem", padding: "1rem", display: "flex", flexDirection: "column",
-                alignItems: "center", justifyContent: "center", gap: "0.5rem",
-                boxShadow: champion.team !== "?" ? "0 0 20px rgba(251, 191, 36, 0.2)" : "none",
-                marginBottom: "2rem"
-             }}>
+             <a
+               href={champion.team === 'España' ? "https://youtu.be/1y1qrh58MlA" : undefined}
+               target={champion.team === 'España' ? "_blank" : undefined}
+               rel="noopener noreferrer"
+               style={{
+                  textDecoration: "none",
+                  background: "rgba(251, 191, 36, 0.1)", border: "2px solid rgba(251, 191, 36, 0.4)",
+                  borderRadius: "1rem", padding: "1rem", display: "flex", flexDirection: "column",
+                  alignItems: "center", justifyContent: "center", gap: "0.5rem",
+                  boxShadow: champion.team !== "?" ? "0 0 20px rgba(251, 191, 36, 0.2)" : "none",
+                  marginBottom: "2rem",
+                  cursor: champion.team === 'España' ? "pointer" : "default",
+                  transition: "all 0.2s ease"
+               }}
+               className={champion.team === 'España' ? "btn-hover-dark" : ""}
+             >
                 <Trophy size={28} color="#fbbf24" />
                 {champion.team !== "?" ? (
                   <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontWeight: 800, color: "#fbbf24" }}>
@@ -243,7 +267,7 @@ export const WorldCupBracket: React.FC<WorldCupBracketProps> = ({ fixtureMatches
                 ) : (
                   <span style={{ color: "#fbbf24", fontWeight: 800, fontSize: "1rem" }}>?</span>
                 )}
-             </div>
+             </a>
 
              <div style={{ fontSize: "0.8rem", fontWeight: 900, color: "#a1a1aa", textAlign: "center", marginBottom: "0.75rem", textTransform: "uppercase" }}>
                {t("third_place", "3er y 4to Puesto")}
