@@ -131,4 +131,3 @@ Whenever a PR is prepared, the AI assistant must generate a local markdown file 
 | #10 | `fix/landing-page-modal` | Restore modal overlay for point selection and deck composition | ✅ Merged |
 | #11 | `refactor/decompose-admin-screen` | Extract AdminScreen logic into smaller hooks | ✅ Merged |
 
-*(Update this table every time a PR is opened or merged.)*
