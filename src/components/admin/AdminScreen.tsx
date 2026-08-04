@@ -1,12 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, react-hooks/exhaustive-deps, react-hooks/set-state-in-effect */
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import { PlayersTab } from "./tabs/PlayersTab";
 import { MatchesTab } from "./tabs/MatchesTab";
 import { TournamentsTab } from "./tabs/TournamentsTab";
 import { ApplicationsTab } from "./tabs/ApplicationsTab";
 import { TicketsTab } from "./tabs/TicketsTab";
 import { FixtureTab } from "./tabs/FixtureTab";
-import { motion, AnimatePresence } from "framer-motion";
 import {
   ShieldAlert,
   Users,
@@ -28,12 +27,15 @@ import { UtilityButtons } from '../shared/UtilityButtons';
 import { UserStarsModal } from "./UserStarsModal";
 import { UserProdeModal } from "./UserProdeModal";
 import { Loader } from "../shared/Loader";
-import { ADMIN_EMAILS } from "../../lib/constants";
+import { MatchLogModal } from "./MatchLogModal";
 
-import {
-  normalizeTournamentPrizes,
-} from "../../lib/formatters";
-
+// Custom Hooks
+import { useAdminData } from "./hooks/useAdminData";
+import type { MatchSummary } from "./hooks/useAdminData";
+import { useAdminUsers } from "./hooks/useAdminUsers";
+import { useAdminTournaments } from "./hooks/useAdminTournaments";
+import { useAdminApplications } from "./hooks/useAdminApplications";
+import { useAdminTickets } from "./hooks/useAdminTickets";
 
 interface AdminScreenProps {
   user: any;
@@ -41,70 +43,58 @@ interface AdminScreenProps {
   onBack: () => void;
 }
 
-interface MatchSummary {
-  id: string;
-  match_id: string;
-  userId: string;
-  rivalName: string;
-  myScore: number;
-  rivalScore: number;
-  winner: "player" | "cpu";
-  date: string;
-  log: string[];
-  isTournament?: boolean;
-  tournamentId?: string;
-  tournamentName?: string;
-}
-
-interface PlayerStats {
-  userId: string;
-  userName: string;
-  email: string;
-  totalGames: number;
-  wins: number;
-  losses: number;
-  lastPlayed: string;
-  votes: Record<string, number>;
-  createdAt?: string;
-  prodePredictions?: any[];
-}
-
-interface CreatorApplication {
-  id: string;
-  user_id: string;
-  email: string;
-  channel_name: string;
-  social_link?: string;
-  streaming_link?: string;
-  motivation?: string;
-  status: "pending" | "approved" | "rejected";
-  created_at: string;
-}
-
 export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
   const { t } = useTranslation();
-  const [loading, setLoading] = useState(true);
-  const [history, setHistory] = useState<MatchSummary[]>([]);
-  const [applications, setApplications] = useState<CreatorApplication[]>([]);
-  const [tournaments, setTournaments] = useState<any[]>([]);
-  const [tickets, setTickets] = useState<any[]>([]);
-  const [usedCodes, setUsedCodes] = useState<
-    Record<string, { code: string; userId: string }[]>
-  >({});
+  
+  const {
+    loading,
+    rpcError,
+    history,
+    applications,
+    tournaments,
+    tickets,
+    usedCodes,
+    profiles,
+    globalVotesData,
+    prodePredictions,
+    userRoles,
+    fetchGlobalData,
+    setApplications,
+    setTickets,
+    setUserRoles,
+  } = useAdminData(user);
+
+  const { playerStats, getPlayerRole, handleRoleChange } = useAdminUsers(
+    history,
+    globalVotesData,
+    applications,
+    prodePredictions,
+    userRoles,
+    profiles,
+    setUserRoles
+  );
+
+  const { handleApproveTournament } = useAdminTournaments(fetchGlobalData);
+  
+  const { handleApplicationStatus } = useAdminApplications(
+    applications,
+    setApplications,
+    userRoles,
+    setUserRoles
+  );
+
+  const { handleTicketStatus, handleDeleteTicket } = useAdminTickets(tickets, setTickets);
+
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   console.log(deleteConfirmId); // keep typescript happy
   const [selectedMatch, setSelectedMatch] = useState<MatchSummary | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [formTournament, setFormTournament] = useState<any>(null);
-  const [isCreatorProfileModalOpen, setIsCreatorProfileModalOpen] =
-    useState(false);
+  const [isCreatorProfileModalOpen, setIsCreatorProfileModalOpen] = useState(false);
   const [editingCreator, setEditingCreator] = useState<any>(null);
-  const [profiles, setProfiles] = useState<any[]>([]);
-  const [globalVotesData, setGlobalVotesData] = useState<any[]>([]);
-  const [prodePredictions, setProdePredictions] = useState<any[]>([]);
   const [selectedUserStars, setSelectedUserStars] = useState<any | null>(null);
   const [selectedUserProde, setSelectedUserProde] = useState<any | null>(null);
-  const [userRoles, setUserRoles] = useState<any[]>([]);
+  
   const [activeTab, setActiveTab] = useState<
     "players" | "matches" | "tournaments" | "applications" | "suggestions" | "support" | "fixture" | "settings"
   >("fixture");
@@ -112,9 +102,6 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
   const [isMobile, setIsMobile] = useState(
     typeof window !== "undefined" ? window.innerWidth < 768 : false,
   );
-  const [rpcError, setRpcError] = useState(false);
-
-  const isAdmin = user && user.email && ADMIN_EMAILS.includes(user.email);
 
   useEffect(() => {
     document.title = "Admin de Truco Mundial";
@@ -122,581 +109,27 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
       setIsMobile(window.innerWidth < 768);
     };
     window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  const fetchGlobalData = async () => {
-    if (!isAdmin) {
-      setLoading(false);
-      return;
-    }
-    setLoading(true);
-
-    try {
-      // 1. Fetch Profiles via RPC (to get emails and auth data safely)
-      let { data: profilesData, error: profilesError } = await supabase
-        .rpc("get_admin_users_data");
-
-      if (profilesError) {
-        console.warn("RPC get_admin_users_data failed (did you run the SQL script?), falling back to profiles table:", profilesError);
-        setRpcError(true);
-        const fallback = await supabase.from("profiles").select("*");
-        profilesData = fallback.data;
-        profilesError = fallback.error;
-      }
-
-      if (profilesError) {
-        console.error("Error fetching profiles:", profilesError);
-      } else if (profilesData) {
-        setProfiles(profilesData);
-      }
-
-      // 2. Fetch User Roles
-      const { data: rolesData, error: rolesError } = await supabase
-        .from("user_roles")
-        .select("*");
-
-      if (rolesError) {
-        console.error("Error fetching user roles:", rolesError);
-      } else if (rolesData) {
-        setUserRoles(rolesData);
-      }
-
-      // 3. Fetch Matches and Votes
-      const { data: syncData, error: syncError } = await supabase
-        .from("game_sync")
-        .select("id, match_id, last_move, updated_at")
-        .or("match_id.like.user_history_%,match_id.like.user_votes_%");
-
-      if (syncError) {
-        console.error("Error fetching global sync data:", syncError);
-      } else if (syncData) {
-        const historyData = syncData.filter(item => item.match_id.startsWith("user_history_"));
-        const votesData = syncData.filter(item => item.match_id.startsWith("user_votes_"));
-
-        setGlobalVotesData(votesData);
-
-        const formattedHistory: MatchSummary[] = historyData
-          .map((item: any) => {
-            const summary = item.last_move;
-            return {
-              id: item.id,
-              match_id: item.match_id,
-              userId: summary.userId || "Desconocido",
-              rivalName: summary.rivalName || t("rival"),
-              myScore: summary.myScore || 0,
-              rivalScore: summary.rivalScore || 0,
-              winner: summary.winner || "cpu",
-              date: summary.date || item.updated_at,
-              log: summary.log || [],
-              isTournament: summary.isTournament,
-              tournamentId: summary.tournamentId,
-              tournamentName: summary.tournamentName,
-            };
-          })
-          .sort(
-            (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
-          );
-
-        setHistory(formattedHistory);
-      }
-
-      // Fetch Applications
-      const { data: appsData, error: appsError } = await supabase
-        .from("creator_applications")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (appsError) {
-        console.error("Error fetching applications:", appsError);
-      } else if (appsData) {
-        setApplications(appsData);
-      }
-
-      // Fetch Tournaments
-      const { data: tourneysData, error: tourneysError } = await supabase
-        .from("tournaments")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (tourneysError) {
-        console.error("Error fetching tournaments:", tourneysError);
-      } else if (tourneysData) {
-        setTournaments(
-          tourneysData.map((tournament: any) => ({
-            ...tournament,
-            prize: normalizeTournamentPrizes(tournament.prize),
-          })),
-        );
-        if (tourneysData.length > 0) {
-          const tIds = tourneysData.map((t: any) => t.id);
-          const { data: regData } = await supabase
-            .from("tournament_registrations")
-            .select("tournament_id, code_used, user_id")
-            .in("tournament_id", tIds);
-
-          if (regData) {
-            const codeMap: Record<string, { code: string; userId: string }[]> =
-              {};
-            regData.forEach((r: any) => {
-              if (!codeMap[r.tournament_id]) codeMap[r.tournament_id] = [];
-              if (r.code_used)
-                codeMap[r.tournament_id].push({
-                  code: r.code_used,
-                  userId: r.user_id || "",
-                });
-            });
-            setUsedCodes(codeMap);
-          }
-        }
-      }
-
-      // Fetch Tickets
-      const { data: ticketsData, error: ticketsError } = await supabase
-        .from("tickets")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (ticketsError) {
-        console.error("Error fetching tickets:", ticketsError);
-      } else if (ticketsData) {
-        setTickets(ticketsData);
-      }
-
-      // Fetch Prode Predictions
-      const { data: prodeData, error: prodeError } = await supabase
-        .from("prode_predictions")
-        .select("*");
-
-      if (prodeError) {
-        console.error("Error fetching prode predictions:", prodeError);
-      } else if (prodeData) {
-        setProdePredictions(prodeData);
-      }
-    } catch (err) {
-      console.error("Unexpected error fetching global data:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
     fetchGlobalData();
-  }, [isAdmin]);
-
-  const handleApplicationStatus = async (
-    appId: string,
-    newStatus: "approved" | "rejected",
-  ) => {
-    try {
-      const { error } = await supabase
-        .from("creator_applications")
-        .update({ status: newStatus })
-        .eq("id", appId);
-
-      if (error) throw error;
-
-      setApplications((prev) =>
-        prev.map((app) =>
-          app.id === appId ? { ...app, status: newStatus } : app,
-        ),
-      );
-    } catch (err: any) {
-      alert("Error cambiando estado: " + err.message);
-    }
-  };
-
-  
-  
-  
-  /*
-  const handleDeleteTournament = async (id: string) => {
-    try {
-      const { error } = await supabase.from('tournaments').delete().eq('id', id);
-      if (error) throw error;
-      setTournaments(prev => prev.filter(t => t.id !== id));
-      setDeleteConfirmId(null);
-    } catch (err: any) {
-      alert('Error al eliminar torneo: ' + err.message);
-    }
-  };
-  */
-
-  
-  const handleApproveTournament = async (id: string) => {
-    try {
-      const { error } = await supabase
-        .from("tournaments")
-        .update({ is_approved: true })
-        .eq("id", id);
-      if (error) throw error;
-      setTournaments((prev) =>
-        prev.map((t) => (t.id === id ? { ...t, is_approved: true } : t)),
-      );
-    } catch (err: any) {
-      alert("Error al aprobar torneo: " + err.message);
-    }
-  };
-
-  const handleTicketStatus = async (
-    ticketId: string,
-    newStatus: "open" | "closed",
-  ) => {
-    try {
-      const { error } = await supabase
-        .from("tickets")
-        .update({ status: newStatus })
-        .eq("id", ticketId);
-
-      if (error) throw error;
-
-      setTickets((prev) =>
-        prev.map((t) => (t.id === ticketId ? { ...t, status: newStatus } : t)),
-      );
-    } catch (err: any) {
-      alert("Error cambiando estado del ticket: " + err.message);
-    }
-  };
-
-  const handleDeleteTicket = async (ticketId: string) => {
-    if (!confirm("¿Estás seguro de eliminar este ticket permanentemente?")) return;
-    try {
-      const { data, error } = await supabase
-        .from("tickets")
-        .delete()
-        .eq("id", ticketId)
-        .select();
-        
-      if (error) throw error;
-      
-      // Si RLS bloquea silenciosamente el borrado, data viene vacío
-      if (!data || data.length === 0) {
-        throw new Error("Permiso denegado: falta la política (policy) de DELETE en la tabla 'tickets' de Supabase.");
-      }
-      
-      setTickets((prev) => prev.filter((t) => t.id !== ticketId));
-    } catch (err: any) {
-      alert("Error al eliminar ticket: " + err.message);
-    }
-  };
-
-  const playerStats = useMemo(() => {
-    const statsMap = new Map<string, PlayerStats>();
-
-    // 1. Initialize with all profiles (users logged in at least once)
-    profiles.forEach((profile) => {
-      statsMap.set(profile.id, {
-        userId: profile.id,
-        userName: profile.username || "Usuario",
-        email: profile.email || "Sin Email",
-        totalGames: 0,
-        wins: 0,
-        losses: 0,
-        lastPlayed: profile.last_sign_in_at || profile.created_at || new Date().toISOString(),
-        votes: {},
-        createdAt: profile.created_at || new Date().toISOString()
-      });
-    });
-
-    const getOrCreatePlayer = (pId: string, defaultName: string = "Usuario", lastActiveDate: string = ""): PlayerStats => {
-      if (!statsMap.has(pId)) {
-        statsMap.set(pId, {
-          userId: pId,
-          userName: defaultName,
-          email: "Sin Email",
-          totalGames: 0,
-          wins: 0,
-          losses: 0,
-          lastPlayed: lastActiveDate || new Date().toISOString(),
-          votes: {},
-          createdAt: new Date().toISOString()
-        });
-      }
-      return statsMap.get(pId)!;
-    };
-
-    // 2. Add Match History data
-    history.forEach((match) => {
-      const pId = match.userId;
-      const pStats = getOrCreatePlayer(pId, "Usuario", match.date);
-      pStats.totalGames += 1;
-      if (match.winner === "player") {
-        pStats.wins += 1;
-      } else {
-        pStats.losses += 1;
-      }
-
-      if (new Date(match.date) > new Date(pStats.lastPlayed)) {
-        pStats.lastPlayed = match.date;
-      }
-    });
-
-    // 3. Add Star distribution data (user_votes_*)
-    globalVotesData.forEach((item) => {
-      const userId = item.match_id.replace(/^user_votes_/, '');
-      const votes = item.last_move?.votes || {};
-      const userName = item.last_move?.userName || "Usuario";
-      const updatedAt = item.last_move?.updatedAt || item.updated_at;
-
-      const pStats = getOrCreatePlayer(userId, userName, updatedAt);
-      pStats.votes = votes;
-
-      if (updatedAt && new Date(updatedAt) > new Date(pStats.lastPlayed)) {
-        pStats.lastPlayed = updatedAt;
-      }
-      if (item.last_move?.userName && pStats.userName === "Usuario") {
-        pStats.userName = item.last_move.userName;
-      }
-    });
-
-    // 4. Add Prode Predictions data
-    prodePredictions.forEach((pred) => {
-      const pStats = getOrCreatePlayer(pred.user_id, "Usuario", pred.updated_at);
-      if (!pStats.prodePredictions) pStats.prodePredictions = [];
-      pStats.prodePredictions.push(pred);
-    });
-
-    return Array.from(statsMap.values()).sort(
-      (a, b) => new Date(b.lastPlayed).getTime() - new Date(a.lastPlayed).getTime(),
-    );
-  }, [profiles, history, globalVotesData, prodePredictions]);
-
-  const getPlayerRole = (userId: string): "normal" | "mod" | "admin" | "creator" => {
-    const roleRecord = userRoles.find(r => r.user_id === userId);
-    if (roleRecord) return roleRecord.role;
-
-    const isCreator = applications.some(app => app.user_id === userId && app.status === "approved");
-    if (isCreator) return "creator";
-
-    return "normal";
-  };
-
-  const handleRoleChange = async (userId: string, newRole: string) => {
-    setLoading(true);
-    try {
-      if (newRole === "normal") {
-        // Delete from user_roles
-        await supabase.from("user_roles").delete().eq("user_id", userId);
-        // Delete from creator_applications
-        await supabase.from("creator_applications").delete().eq("user_id", userId);
-        alert("Rol de usuario restablecido a NORMAL.");
-      } else if (newRole === "admin" || newRole === "mod") {
-        // Delete from creator_applications
-        await supabase.from("creator_applications").delete().eq("user_id", userId);
-        // Upsert new role in user_roles
-        const { error } = await supabase
-          .from("user_roles")
-          .upsert([{ user_id: userId, role: newRole }], { onConflict: 'user_id' });
-        if (error) throw error;
-        alert(`Rol ${newRole.toUpperCase()} asignado con éxito.`);
-      } else if (newRole === "creator") {
-        // Delete from user_roles
-        await supabase.from("user_roles").delete().eq("user_id", userId);
-        // Manage creator applications
-        const existingApp = applications.find(app => app.user_id === userId);
-        if (existingApp) {
-          const { error } = await supabase
-            .from("creator_applications")
-            .update({ status: "approved" })
-            .eq("id", existingApp.id);
-          if (error) throw error;
-        } else {
-          const { error } = await supabase
-            .from("creator_applications")
-            .insert([{
-              user_id: userId,
-              email: "assigned-by-admin@trucomundial.com",
-              channel_name: "Nuevo Creador",
-              status: "approved",
-            }]);
-          if (error) throw error;
-        }
-        alert("Rol CREADOR asignado con éxito.");
-      }
-
-      await fetchGlobalData();
-    } catch (err: any) {
-      console.error("Error changing role:", err);
-      alert("Error al cambiar el rol: " + err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+    return () => window.removeEventListener("resize", handleResize);
+  }, [fetchGlobalData]);
 
   const formatDate = (dateStr: string) => {
+    if (!dateStr) return "N/A";
     try {
       const d = new Date(dateStr);
       const datePart = d.toLocaleDateString("en-US", {
         month: "short",
         day: "numeric",
-        year: "numeric",
       });
       const timePart = d.toLocaleTimeString("en-US", {
         hour: "2-digit",
         minute: "2-digit",
-        hour12: false,
       });
       return `${datePart}, ${timePart}`;
     } catch {
       return dateStr;
     }
   };
-
-  if (!user) {
-    return (
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          minHeight: "100vh",
-          padding: "2rem",
-        }}
-      >
-        <div
-          style={{
-            background: "rgba(145, 70, 255, 0.05)",
-            border: "2px dashed rgba(145, 70, 255, 0.45)",
-            borderRadius: "2rem",
-            padding: "3rem 2rem",
-            textAlign: "center",
-            backdropFilter: "blur(16px)",
-            maxWidth: "500px",
-            width: "100%",
-          }}
-        >
-          <ShieldAlert
-            size={48}
-            style={{
-              color: "#a855f7",
-              marginBottom: "1.5rem",
-              margin: "0 auto",
-            }}
-          />
-          <h3
-            className="text-display"
-            style={{
-              fontSize: "1.5rem",
-              marginBottom: "0.75rem",
-              color: "#a855f7",
-            }}
-          >
-            Acceso Restringido
-          </h3>
-          <p
-            style={{
-              margin: "0 auto 2rem auto",
-              opacity: 0.7,
-              lineHeight: 1.5,
-            }}
-          >
-            Debes haber iniciado sesión con una cuenta de administrador para
-            acceder a esta sección.
-          </p>
-          <div
-            style={{ display: "flex", gap: "1rem", justifyContent: "center" }}
-          >
-            <button
-              onClick={onBack}
-              className="btn-hover-dark"
-              style={{
-                background: "rgba(255, 255, 255, 0.1)",
-                border: "1px solid rgba(255, 255, 255, 0.2)",
-                color: "#fff",
-                height: "48px",
-                borderRadius: "1.25rem",
-                padding: "0 1.5rem",
-                fontSize: "1rem",
-                fontWeight: 950,
-                cursor: "pointer",
-                display: "flex",
-                alignItems: "center",
-                gap: "0.5rem",
-                boxShadow: "4px 4px 0px #000",
-              }}
-            >
-              <ArrowLeft size={18} />
-              Volver
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!isAdmin) {
-    return (
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          minHeight: "100vh",
-          padding: "2rem",
-        }}
-      >
-        <div
-          style={{
-            background: "rgba(239, 68, 68, 0.05)",
-            border: "2px dashed rgba(239, 68, 68, 0.45)",
-            borderRadius: "2rem",
-            padding: "3rem 2rem",
-            textAlign: "center",
-            backdropFilter: "blur(16px)",
-            maxWidth: "500px",
-            width: "100%",
-          }}
-        >
-          <ShieldAlert
-            size={48}
-            style={{
-              color: "#ef4444",
-              marginBottom: "1.5rem",
-              margin: "0 auto",
-            }}
-          />
-          <h3
-            className="text-display"
-            style={{
-              fontSize: "1.5rem",
-              marginBottom: "0.75rem",
-              color: "#ef4444",
-            }}
-          >
-            Acceso Denegado
-          </h3>
-          <p
-            style={{
-              margin: "0 auto 2rem auto",
-              opacity: 0.7,
-              lineHeight: 1.5,
-            }}
-          >
-            Tu cuenta ({user.email}) no tiene permisos de administrador.
-          </p>
-          <button
-            onClick={onBack}
-            className="btn-hover-dark"
-            style={{
-              background: "rgba(255, 255, 255, 0.1)",
-              border: "1px solid rgba(255, 255, 255, 0.2)",
-              color: "#fff",
-              height: "48px",
-              borderRadius: "1.25rem",
-              padding: "0 2rem",
-              fontSize: "1rem",
-              fontWeight: 950,
-              cursor: "pointer",
-              margin: "0 auto",
-              boxShadow: "4px 4px 0px #000",
-            }}
-          >
-            Volver al Inicio
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div
@@ -1250,184 +683,11 @@ export const AdminScreen: React.FC<AdminScreenProps> = ({ user, onBack }) => {
           </div>
         ) : null}
 
-        {/* DETAILED LOG MODAL */}
-        <AnimatePresence>
-          {selectedMatch && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              style={{
-                position: "fixed",
-                inset: 0,
-                background: "rgba(0, 0, 0, 0.85)",
-                backdropFilter: "blur(12px)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                zIndex: 3000,
-                padding: "1.5rem",
-              }}
-            >
-              <motion.div
-                initial={{ scale: 0.9, y: 20 }}
-                animate={{ scale: 1, y: 0 }}
-                exit={{ scale: 0.9, y: 20 }}
-                style={{
-                  background: "rgba(20, 15, 30, 0.95)",
-                  border: "1.5px solid rgba(168, 85, 247, 0.4)",
-                  borderRadius: "2.5rem",
-                  padding: "2.5rem",
-                  width: "100%",
-                  maxWidth: "600px",
-                  maxHeight: "80vh",
-                  display: "flex",
-                  flexDirection: "column",
-                  boxShadow: "0 0 40px rgba(168, 85, 247, 0.15)",
-                }}
-              >
-                {/* Modal Header */}
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "flex-start",
-                    marginBottom: "1.5rem",
-                  }}
-                >
-                  <div>
-                    <h3
-                      className="text-display"
-                      style={{
-                        fontSize: "1.5rem",
-                        color: "#a855f7",
-                        margin: 0,
-                        letterSpacing: "0.05em",
-                      }}
-                    >
-                      Match Log
-                    </h3>
-                    <div
-                      style={{
-                        opacity: 0.5,
-                        fontSize: "0.75rem",
-                        marginTop: "0.25rem",
-                      }}
-                    >
-                      vs {selectedMatch.rivalName} ·{" "}
-                      {formatDate(selectedMatch.date)}
-                    </div>
-                  </div>
-                  <div style={{ fontSize: "1.5rem", fontWeight: 900 }}>
-                    <span
-                      style={{
-                        color:
-                          selectedMatch.winner === "player"
-                            ? "#10b981"
-                            : "#fff",
-                      }}
-                    >
-                      {selectedMatch.myScore}
-                    </span>
-                    <span style={{ opacity: 0.3, margin: "0 0.4rem" }}>-</span>
-                    <span
-                      style={{
-                        color:
-                          selectedMatch.winner !== "player"
-                            ? "#ef4444"
-                            : "#fff",
-                      }}
-                    >
-                      {selectedMatch.rivalScore}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Log Timeline list */}
-                <div
-                  style={{
-                    flex: 1,
-                    overflowY: "auto",
-                    paddingRight: "8px",
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: "0.75rem",
-                    scrollbarWidth: "thin",
-                    scrollbarColor: "rgba(255, 255, 255, 0.1) transparent",
-                  }}
-                >
-                  {selectedMatch.log.length === 0 ? (
-                    <div
-                      style={{
-                        textAlign: "center",
-                        padding: "2rem 0",
-                        opacity: 0.5,
-                        fontSize: "0.85rem",
-                      }}
-                    >
-                      No hay registro detallado de eventos para esta partida.
-                    </div>
-                  ) : (
-                    selectedMatch.log.map((logItem, index) => {
-                      const isSystem =
-                        logItem.startsWith("★") ||
-                        logItem.toLowerCase().includes("gana");
-                      return (
-                        <div
-                          key={index}
-                          style={{
-                            background: isSystem
-                              ? "rgba(168, 85, 247, 0.1)"
-                              : "rgba(255, 255, 255, 0.02)",
-                            borderLeft: isSystem
-                              ? "3px solid #a855f7"
-                              : "2px solid rgba(255, 255, 255, 0.1)",
-                            padding: "0.6rem 1rem",
-                            borderRadius: "0.5rem",
-                            fontSize: "0.85rem",
-                            lineHeight: "1.4",
-                            color: isSystem
-                              ? "#e9d5ff"
-                              : "rgba(255, 255, 255, 0.85)",
-                            display: "flex",
-                            gap: "0.5rem",
-                            alignItems: "flex-start",
-                          }}
-                        >
-                          <span style={{ opacity: 0.3, fontWeight: "bold" }}>
-                            #{index + 1}
-                          </span>
-                          <span>{logItem}</span>
-                        </div>
-                      );
-                    })
-                  )}
-                </div>
-
-                {/* Close Button */}
-                <button
-                  onClick={() => setSelectedMatch(null)}
-                  className="btn-hover-dark"
-                  style={{
-                    background: "#fff",
-                    border: "none",
-                    color: "#000",
-                    height: "42px",
-                    borderRadius: "1rem",
-                    marginTop: "1.5rem",
-                    fontSize: "0.9rem",
-                    fontWeight: 900,
-                    cursor: "pointer",
-                    width: "100%",
-                    boxShadow: "4px 4px 0px #000",
-                  }}
-                >
-                  CERRAR
-                </button>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        <MatchLogModal 
+          selectedMatch={selectedMatch}
+          setSelectedMatch={setSelectedMatch}
+          formatDate={formatDate}
+        />
       </div>
 
       {/* Twitch Button - Way Down Bottom & Centered */}
