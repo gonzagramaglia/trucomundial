@@ -6,9 +6,10 @@ import { UtilityButtons } from '../../../shared/UtilityButtons';
 interface ProfileHeaderProps {
   onBack: () => void;
   isMobile: boolean;
+  user?: any;
 }
 
-export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ onBack, isMobile }) => {
+export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ onBack, isMobile, user }) => {
   const { t } = useTranslation();
 
   if (!isMobile) {
@@ -46,9 +47,9 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ onBack, isMobile }
         </button>
         {/* Fixed Utility Buttons (Desktop Right Corner) */}
         <UtilityButtons />
-        
+
         {/* Desktop Centered Header Layout */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', textAlign: 'center', marginBottom: '2.5rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0rem', textAlign: 'center', marginBottom: '1rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <User size={36} style={{ color: '#ffffff', filter: 'drop-shadow(0 0 10px rgba(255, 255, 255, 0.3))' }} />
             <h2 className="text-display" style={{
@@ -58,12 +59,25 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ onBack, isMobile }
               color: '#ffffff',
               textShadow: '0 0 15px rgba(255, 255, 255, 0.2)'
             }}>
-              {t("profile")}
+              {window.location.pathname.startsWith('/en') ? 'PROFILE OF' : 'PERFIL DE'}
             </h2>
           </div>
-          <div style={{ fontSize: '0.9rem', opacity: 0.6 }}>
-            {t("profile_desc")}
-          </div>
+          {user ? (
+            <h2 className="text-display" style={{
+              fontSize: '2.2rem',
+              margin: 0,
+              letterSpacing: '0.05em',
+              color: '#00f2ff',
+              textShadow: '0 0 15px rgba(0, 242, 255, 0.2)',
+              marginTop: '0.15rem'
+            }}>
+              {user.user_metadata?.custom_username || user.email?.split('@')[0]}
+            </h2>
+          ) : (
+            <div style={{ fontSize: '0.9rem', opacity: 0.6, marginTop: '0.5rem' }}>
+              {t("profile_desc")}
+            </div>
+          )}
         </div>
       </>
     );
@@ -109,7 +123,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ onBack, isMobile }
       </div>
 
       {/* Mobile Title */}
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.25rem', textAlign: 'center', marginBottom: '1.5rem' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.25rem', textAlign: 'center', marginBottom: '0.5rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <User size={24} style={{ color: '#ffffff', filter: 'drop-shadow(0 0 6px rgba(255, 255, 255, 0.25))' }} />
           <h2 className="text-display" style={{
@@ -119,12 +133,24 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ onBack, isMobile }
             color: '#ffffff',
             textShadow: '0 0 8px rgba(255, 255, 255, 0.1)'
           }}>
-            {t("profile")}
+            {window.location.pathname.startsWith('/en') ? 'PROFILE OF' : 'PERFIL DE'}
           </h2>
         </div>
-        <div style={{ fontSize: '0.75rem', opacity: 0.6 }}>
-          {t("profile_desc")}
-        </div>
+        {user ? (
+          <h2 className="text-display" style={{
+            fontSize: '1.4rem',
+            margin: 0,
+            letterSpacing: '0.05em',
+            color: '#00f2ff',
+            textShadow: '0 0 8px rgba(0, 242, 255, 0.2)'
+          }}>
+            {user.user_metadata?.custom_username || user.email?.split('@')[0]}
+          </h2>
+        ) : (
+          <div style={{ fontSize: '0.75rem', opacity: 0.6, marginTop: '0.25rem' }}>
+            {t("profile_desc")}
+          </div>
+        )}
       </div>
     </>
   );

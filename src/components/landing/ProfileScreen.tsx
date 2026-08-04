@@ -93,11 +93,11 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, handleAuth, 
       color: '#fff',
       boxSizing: 'border-box'
     }}>
-      <ProfileHeader onBack={onBack} isMobile={isMobile} />
+      <ProfileHeader onBack={onBack} isMobile={isMobile} user={user} />
 
       {/* Main Container */}
       <div style={{
-        background: 'rgba(20, 20, 25, 0.65)',
+        background: 'rgba(20, 20, 25, 0.43)',
         backdropFilter: 'blur(12px)',
         border: '1px solid rgba(255, 255, 255, 0.1)',
         borderRadius: '2rem',
@@ -105,34 +105,6 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, handleAuth, 
         boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
         marginTop: isMobile ? '0' : '1rem'
       }}>
-        {!isMobile && (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0rem', textAlign: 'center' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <h2 className="text-display" style={{
-                fontSize: '2.2rem',
-                margin: 0,
-                letterSpacing: '0.05em',
-                color: '#ffffff',
-                textShadow: '0 0 15px rgba(255, 255, 255, 0.2)'
-              }}>
-                {window.location.pathname.startsWith('/en') ? 'PROFILE OF' : 'PERFIL DE'}
-              </h2>
-            </div>
-            {user && (
-              <h2 className="text-display" style={{
-                fontSize: '2.2rem',
-                margin: 0,
-                letterSpacing: '0.05em',
-                color: '#00f2ff',
-                textShadow: '0 0 15px rgba(0, 242, 255, 0.2)',
-                marginTop: '0.15rem'
-              }}>
-                {user.user_metadata?.custom_username || user.email?.split('@')[0]}
-              </h2>
-            )}
-          </div>
-        )}
-
         {user ? (
           <>
             <ProfileSettings
