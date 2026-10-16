@@ -33,8 +33,8 @@ The game includes the complete Truco experience, featuring **Truco**, **Retruco*
 
 | Tool | Purpose |
 |------|---------|
-| [Vitest](vitest.config.ts) | Unit test runner (56 tests, all passing) |
-| [CodeRabbit](.coderabbit.yaml) | Automated AI code review on PRs to main |
+| [**Vitest**](vitest.config.ts) | Unit test runner (56 tests, all passing) |
+| [**CodeRabbit**](.coderabbit.yaml) | Automated AI code review on PRs to main |
 | Husky + Commitlint | Conventional Commits enforcement on every commit |
 | TypeScript strict | Full type checking, build fails on errors |
 
@@ -46,9 +46,8 @@ yarn build             # Type check + production build
 ```
 
 ## 🎨 Look & Feel
-- **Urban Freestyle** Aesthetics: Bold typography, high contrast, and vibrant colors.
+- Modern and energetic design.
 - Inspired by the **2026 World Cup Album**.
-- **Football stadium** style digital scoreboard.
 - Optimized for both mobile and desktop screens with a premium interface.
 
 ## 📚 Documentation

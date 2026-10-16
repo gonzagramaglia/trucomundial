@@ -105,7 +105,7 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
       style={{
         width: "100vw",
         height: "100dvh",
-        backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url("/playground.png")`,
+        backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url("/playground.jpeg")`,
         backgroundSize: "cover",
         backgroundPosition: "center",
         display: "flex",
