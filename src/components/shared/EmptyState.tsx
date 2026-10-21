@@ -8,6 +8,9 @@ interface EmptyStateProps {
   actionText?: string;
   onAction?: () => void;
   color?: string; // Hex color string, e.g., '#a855f7' or '#f97316'
+  iconSize?: string;
+  titleSize?: string;
+  padding?: string;
 }
 
 function hexToRgb(hex: string) {
@@ -23,7 +26,10 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   description,
   actionText,
   onAction,
-  color = '#a855f7'
+  color = '#a855f7',
+  iconSize,
+  titleSize,
+  padding
 }) => {
   return (
     <motion.div
@@ -34,7 +40,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
         background: 'rgba(255, 255, 255, 0.02)',
         border: '1px solid rgba(255, 255, 255, 0.05)',
         borderRadius: '2rem',
-        padding: '4rem 2rem',
+        padding: padding || '4rem 2rem',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
@@ -44,15 +50,17 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
         marginTop: '2rem'
       }}
     >
-      <div style={{ fontSize: '4rem', marginBottom: '1rem', opacity: 0.5 }}>
+      <div style={{ fontSize: iconSize || '4rem', marginBottom: iconSize ? '0.6rem' : '1rem', opacity: 0.5 }}>
         {icon}
       </div>
-      <h3 style={{ margin: '0 0 1rem 0', fontSize: '1.5rem', fontWeight: 900, color: 'rgba(255,255,255,0.9)' }}>
+      <h3 className="text-display" style={{ margin: description ? '0 0 1rem 0' : 0, fontSize: titleSize || '1.5rem', fontWeight: 900, color: 'rgba(255,255,255,0.9)', letterSpacing: '0.05em' }}>
         {title}
       </h3>
-      <p style={{ margin: 0, opacity: 0.6, maxWidth: '400px', lineHeight: 1.5, fontWeight: 500 }}>
-        {description}
-      </p>
+      {description ? (
+        <p style={{ margin: 0, opacity: 0.6, maxWidth: '400px', lineHeight: 1.5, fontWeight: 500 }}>
+          {description}
+        </p>
+      ) : null}
       {onAction && actionText && (
         <button
           onClick={onAction}

@@ -31,7 +31,15 @@ export const LandingSidebar: React.FC<LandingSidebarProps> = ({
   setShowRules,
 }) => {
   const { t } = useTranslation();
-  const hideRulesBtn = showRanking || showDeck || showProde;
+  const [isMobile, setIsMobile] = React.useState(typeof window !== "undefined" ? window.innerWidth < 768 : false);
+
+  React.useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const hideRulesBtn = showRanking || showDeck || showProde || (isMobile && showProfile);
 
   return (
     <div
@@ -40,37 +48,12 @@ export const LandingSidebar: React.FC<LandingSidebarProps> = ({
         top: offset ? "4.5rem" : "1.5rem",
         left: "1.5rem",
         display: "flex",
-        flexDirection: "column",
+        flexDirection: isMobile ? "row" : "column",
         gap: "0.5rem",
         zIndex: 6000,
       }}
     >
-      {!hideRulesBtn && (
-        <button
-          type="button"
-          onClick={() => setShowRules(true)}
-          className="btn-hover-dark"
-          style={{
-            background: "rgba(255, 255, 255, 0.1)",
-            border: "1px solid rgba(255, 255, 255, 0.2)",
-            color: "white",
-            height: "40px",
-            width: "40px",
-            borderRadius: "50%",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            backdropFilter: "blur(12px)",
-            transition: "none",
-          }}
-          title={t("rules")}
-        >
-          <BookOpen size={20} />
-        </button>
-      )}
-
-      {user && !showProfile && !showAdmin && (
+      {user && !showProfile && !showAdmin && (!isMobile || (!showRanking && !showDeck && !showProde)) && (
         <button
           onClick={() => {
             const isEn = window.location.pathname.startsWith("/en");
@@ -98,6 +81,31 @@ export const LandingSidebar: React.FC<LandingSidebarProps> = ({
           title={t("profile")}
         >
           <User size={20} style={{ color: "#ffffff" }} />
+        </button>
+      )}
+
+      {!hideRulesBtn && (
+        <button
+          type="button"
+          onClick={() => setShowRules(true)}
+          className="btn-hover-dark"
+          style={{
+            background: "rgba(255, 255, 255, 0.1)",
+            border: "1px solid rgba(255, 255, 255, 0.2)",
+            color: "white",
+            height: "40px",
+            width: "40px",
+            borderRadius: "50%",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backdropFilter: "blur(12px)",
+            transition: "none",
+          }}
+          title={t("rules")}
+        >
+          <BookOpen size={20} />
         </button>
       )}
 

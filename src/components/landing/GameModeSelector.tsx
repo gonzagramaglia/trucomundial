@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from '../ui/Button';
-import { User, Globe, Star, Lock, Calendar, Layers } from 'lucide-react';
+import { User, Star, Lock, Calendar, Layers } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { GameMode } from '../../lib/truco/types';
 
@@ -11,7 +11,7 @@ interface GameModeSelectorProps {
   hasUnlockedDeck?: boolean;
 }
 
-export const GameModeSelector: React.FC<GameModeSelectorProps> = ({ selectedMode, onSelect, user: _user, hasUnlockedDeck = true }) => {
+export const GameModeSelector: React.FC<GameModeSelectorProps> = ({ selectedMode, onSelect, user: _user }) => {
   const { t } = useTranslation();
   const showRoadmapAsLocked = false;
   const commonStyle = {
@@ -44,52 +44,23 @@ export const GameModeSelector: React.FC<GameModeSelectorProps> = ({ selectedMode
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "1rem", marginBottom: "2rem", width: "100%", maxWidth: "550px" }}>
-      {_user ? (
-        <Button
-          onClick={() => onSelect("multiplayer")}
-          className="btn-hover-dark"
-          style={{
-            ...getButtonStyle("multiplayer", !hasUnlockedDeck ? "rgba(0, 242, 255, 0.5)" : "#00f2ff"),
-            color: !hasUnlockedDeck ? "rgba(0,0,0,0.5)" : "#000",
-            width: "100%",
-            gap: "0.75rem",
-            cursor: !hasUnlockedDeck ? "pointer" : "pointer"
-          }}
-        >
-          {!hasUnlockedDeck ? <Lock size={22} /> : <Globe size={22} />}
-          {t("play_online")}
-        </Button>
-      ) : (
-        <Button
-          onClick={() => onSelect("login" as any)}
-          className="btn-hover-dark"
-          style={{
-            ...getButtonStyle("multiplayer", "#00f2ff"),
-            color: "#000",
-            width: "100%",
-            gap: "0.75rem",
-          }}
-        >
-          <img src="/google-icon.png" alt="Google" style={{ width: 24, height: 24 }} />
-          {t("login_with_google")}
-        </Button>
-      )}
+      {/* Primary button: VS CPU in CELESTE (#00f2ff) */}
+      <Button
+        onClick={() => onSelect("1v1")}
+        className="btn-hover-dark"
+        style={{
+          ...getButtonStyle("1v1", "#00f2ff"),
+          color: "#000",
+          width: "100%",
+          gap: "0.75rem",
+        }}
+      >
+        <User size={22} />
+        {t("vs_cpu")}
+      </Button>
 
-      {/* Secondary buttons: VS CPU + Mejorar Cartas stacked */}
+      {/* Secondary buttons: Votar + Personalizar Mazo */}
       <div style={{ display: "flex", flexDirection: "column", gap: "1rem", width: "100%" }}>
-        <Button
-          onClick={() => onSelect("1v1")}
-          className="btn-hover-dark"
-          style={{
-            ...getButtonStyle("1v1", "#ffffff"),
-            color: "#000",
-            width: "100%",
-            gap: "0.5rem",
-          }}
-        >
-          <User size={20} />
-          {t("vs_cpu")}
-        </Button>
         <Button
           onClick={() => onSelect("ranking" as any)}
           className="btn-hover-dark"

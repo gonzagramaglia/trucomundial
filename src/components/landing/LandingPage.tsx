@@ -91,6 +91,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     }
   }, [user]);
 
+  useEffect(() => {
+    const handleOpenRules = () => nav.setShowRules(true);
+    window.addEventListener("open_rules", handleOpenRules);
+    return () => window.removeEventListener("open_rules", handleOpenRules);
+  }, [nav]);
+
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -99,7 +105,14 @@ export const LandingPage: React.FC<LandingPageProps> = ({
 
   let ActiveScreen = null;
   if (nav.showProfile) {
-    ActiveScreen = <ProfileScreen onBack={nav.handleReturnHome} user={user} handleAuth={() => handleAuth(nav.handleReturnHome)} />;
+    ActiveScreen = (
+      <ProfileScreen
+        onBack={nav.handleReturnHome}
+        user={user}
+        handleAuth={() => handleAuth(nav.handleReturnHome)}
+        onOpenRules={() => nav.setShowRules(true)}
+      />
+    );
   } else if (nav.showAdmin && isSuperAdmin) {
     ActiveScreen = <AdminScreen onBack={nav.handleReturnHome} user={user} handleAuth={() => handleAuth(nav.handleReturnHome)} />;
   } else if (nav.showCreator && isApprovedCreator) {
@@ -137,6 +150,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
           setShowRules={nav.setShowRules}
         />
         {ActiveScreen}
+        {nav.showRules && (
+          <RulesModal isOpen={nav.showRules} onClose={() => nav.setShowRules(false)} />
+        )}
       </div>
     );
   }
@@ -168,19 +184,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         setShowRules={nav.setShowRules}
       />
 
-      <div
-        style={{
-          position: "fixed",
-          top: "1.5rem",
-          right: "1.5rem",
-          display: "flex",
-          flexDirection: "column",
-          gap: "0.75rem",
-          zIndex: 4000,
-        }}
-      >
-        <UtilityButtons />
-      </div>
+      <UtilityButtons />
 
       <MatchmakingOverlay
         isWaiting={matchmaking.isWaiting}

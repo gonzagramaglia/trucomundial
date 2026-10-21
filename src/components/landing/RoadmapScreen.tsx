@@ -227,7 +227,6 @@ export const RoadmapScreen: React.FC<RoadmapScreenProps> = ({ onBack }) => {
               alignItems: 'center',
               gap: '0.5rem',
               justifyContent: 'center',
-              marginTop: '1rem'
             }}>
               <Milestone size={24} style={{ color: '#ffffff', filter: 'drop-shadow(0 0 6px rgba(255, 255, 255, 0.25))' }} />
               <h2 className="text-display" style={{

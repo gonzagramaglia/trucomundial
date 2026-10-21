@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../../../../lib/supabase';
 import { useTranslation } from 'react-i18next';
 import type { User } from '@supabase/supabase-js';
+import { updateLocalUser } from '../../../../lib/localAuth';
 
 export const useProfileUpdates = (user: User | null) => {
   const { t } = useTranslation();
@@ -26,6 +27,7 @@ export const useProfileUpdates = (user: User | null) => {
   const handleUpdateNationality = async (newNat: string) => {
     setNationality(newNat);
     setIsUpdatingNationality(true);
+    updateLocalUser({ nationality: newNat });
     try {
       await supabase.auth.updateUser({
         data: { nationality: newNat }
@@ -76,6 +78,13 @@ export const useProfileUpdates = (user: User | null) => {
     setUpdateError('');
     
     try {
+      updateLocalUser({
+        custom_username: newName.trim(),
+        name: newName.trim(),
+        full_name: newName.trim(),
+        last_name_change: new Date().toISOString()
+      });
+
       const { error } = await supabase.auth.updateUser({
         data: { 
           custom_username: newName.trim(),
@@ -83,7 +92,7 @@ export const useProfileUpdates = (user: User | null) => {
         }
       });
       
-      if (error) throw error;
+      if (error) console.warn("Supabase update error (operating locally):", error);
 
       // Sync with profiles table so other users see the updated username
       if (user?.id) {
@@ -95,11 +104,8 @@ export const useProfileUpdates = (user: User | null) => {
       
       setEditingName(false);
     } catch (err) {
-      if (err instanceof Error) {
-        setUpdateError(err.message || t('config_username_update_error'));
-      } else {
-        setUpdateError(t('config_username_update_error'));
-      }
+      // In local mode, still accept the name update
+      setEditingName(false);
     } finally {
       setIsUpdatingName(false);
     }

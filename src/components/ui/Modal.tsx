@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 interface ModalProps {
   open: boolean;
@@ -8,33 +9,49 @@ interface ModalProps {
 }
 
 export const Modal: React.FC<ModalProps> = ({ open, onClose, children, showClose = true }) => {
-  if (!open) return null;
-  return (
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!open || !mounted) return null;
+
+  const content = (
     <div
       style={{
         position: "fixed",
-        top: 0,
-        left: 0,
+        inset: 0,
         width: "100vw",
         height: "100vh",
-        background: "rgba(0,0,0,0.6)",
-        zIndex: 9999,
+        background: "rgba(0, 0, 0, 0.75)",
+        backdropFilter: "blur(8px)",
+        WebkitBackdropFilter: "blur(8px)",
+        zIndex: 99999,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
+        padding: "1.5rem",
+        boxSizing: "border-box",
+        overflowY: "auto"
       }}
       onClick={onClose}
     >
       <div
         style={{
           background: "#181818",
-          borderRadius: 16,
-          padding: "1rem 2.5rem 2rem 2.5rem",
+          border: "1px solid rgba(255, 255, 255, 0.15)",
+          borderRadius: 20,
+          padding: "1.75rem 2rem",
           minWidth: 320,
-          maxWidth: "90vw",
-          boxShadow: "0 8px 32px rgba(0,0,0,0.5)",
+          maxWidth: "min(90vw, 420px)",
+          maxHeight: "calc(100vh - 3rem)",
+          margin: "auto",
+          overflowY: "auto",
+          boxShadow: "0 20px 60px rgba(0, 0, 0, 0.7)",
           color: "#fff",
           position: "relative",
+          boxSizing: "border-box"
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -76,4 +93,6 @@ export const Modal: React.FC<ModalProps> = ({ open, onClose, children, showClose
       </div>
     </div>
   );
+
+  return createPortal(content, document.body);
 };

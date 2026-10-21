@@ -2,10 +2,10 @@ import type { User } from '@supabase/supabase-js';
 import { useState, useEffect } from "react";
 import { supabase } from "../../lib/supabase";
 import { ADMIN_EMAILS } from "../../lib/constants";
-
+import { getLocalUser, subscribeToLocalUser } from "../../lib/localAuth";
 
 export const useLandingAuth = () => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | any>(() => getLocalUser());
   const [isApprovedCreator, setIsApprovedCreator] = useState(false);
 
   const isSuperAdmin = Boolean(
@@ -14,19 +14,38 @@ export const useLandingAuth = () => {
   );
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }: any) => {
-      const activeUser = session?.user ?? null;
-      setUser(activeUser);
+    const unsubscribeLocal = subscribeToLocalUser((updatedUser) => {
+      setUser(updatedUser);
     });
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
-      const activeUser = session?.user ?? null;
-      setUser(activeUser);
-    });
+    try {
+      supabase.auth.getSession().then(({ data: { session } }: any) => {
+        if (session?.user) {
+          setUser(session.user);
+        } else {
+          setUser(getLocalUser());
+        }
+      }).catch(() => {
+        setUser(getLocalUser());
+      });
 
-    return () => subscription.unsubscribe();
+      const {
+        data: { subscription },
+      } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
+        if (session?.user) {
+          setUser(session.user);
+        } else {
+          setUser(getLocalUser());
+        }
+      });
+
+      return () => {
+        unsubscribeLocal();
+        subscription?.unsubscribe?.();
+      };
+    } catch {
+      return () => unsubscribeLocal();
+    }
   }, []);
 
   useEffect(() => {
@@ -55,19 +74,7 @@ export const useLandingAuth = () => {
   }, [user, isSuperAdmin]);
 
   const handleAuth = async (redirectToProfile: () => void) => {
-    if (user) {
-      redirectToProfile();
-    } else {
-      await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: window.location.href,
-          queryParams: {
-            prompt: "select_account",
-          },
-        },
-      });
-    }
+    redirectToProfile();
   };
 
   return { user, isSuperAdmin, isApprovedCreator, handleAuth };

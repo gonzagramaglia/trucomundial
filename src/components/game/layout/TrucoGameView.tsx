@@ -12,6 +12,7 @@ import { Zap, BookOpen, X, Star } from "lucide-react";
 import { useTranslation, Trans } from "react-i18next";
 import { VolumeControl } from "../../shared/VolumeControl";
 import type { GameMode, PlayerRole } from "../../../lib/truco/types";
+import { getAssetUrl } from "../../../lib/assets";
 
 interface TrucoGameViewProps {
   user: any;
@@ -61,7 +62,7 @@ interface TrucoGameViewProps {
 }
 
 export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
-  user, gameMode, gameState, playerHand, playedCards, cpuHandCount, cpuPartnerHandCount,
+  user: _user, gameMode, gameState, playerHand, playedCards, cpuHandCount, cpuPartnerHandCount,
   score, activeCall, trucoState, envidoState, pendingAction, handWinners, handWinningCardIds,
   scorePopups, winnerModal, rivalName, isBusy, isRoundEnding, whoseTurn, maxPoints,
   showCountdown, isGameStarting, isCooldown, roundWinningCardId, cpuPartnerHandRef, showExitModal,
@@ -105,7 +106,7 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
       style={{
         width: "100vw",
         height: "100dvh",
-        backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url("/playground.jpeg")`,
+        backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url("${getAssetUrl('/playground.jpeg')}")`,
         backgroundSize: "cover",
         backgroundPosition: "center",
         display: "flex",
@@ -181,7 +182,7 @@ export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
           scoreA={score.cpu}
           scoreB={score.player}
           labelA={(rivalName || (gameMode === "multiplayer" ? t("rival") : "CPU")).toUpperCase()}
-          labelB={user ? (user.user_metadata.full_name?.split(' ')[0] || user.user_metadata.name?.split(' ')[0] || user.email.split('@')[0]).toUpperCase() : t("you")}
+          labelB={t("you")}
           popups={scorePopups}
         />
       </div>

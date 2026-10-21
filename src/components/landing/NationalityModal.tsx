@@ -4,6 +4,7 @@ import { Search, Globe, Check } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { CARDS } from '../../data/cards';
 import { getFlag } from '../../data/flags';
+import { updateLocalUser } from '../../lib/localAuth';
 
 
 interface NationalityModalProps {
@@ -24,6 +25,7 @@ export const NationalityModal: React.FC<NationalityModalProps> = ({ user, onSave
   const handleSave = async () => {
     if (!selected) return;
     setIsSaving(true);
+    updateLocalUser({ nationality: selected });
     try {
       await supabase.auth.updateUser({
         data: { nationality: selected }

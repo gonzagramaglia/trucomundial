@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { determineWinner, getCardValue } from "../../lib/truco/engine";
-import { supabase } from "../../lib/supabase";
 import { audioManager } from "../../lib/audio";
+import { saveMatchHistoryRecord } from "../../lib/matchHistory";
 
 export const useTrucoEffects = (state: any, logic: any) => {
   const {
@@ -17,39 +17,13 @@ export const useTrucoEffects = (state: any, logic: any) => {
     console.log("[SCORE CHECK]", score.player, score.cpu, "Target:", maxPoints);
     
     const saveMatchHistory = async (finalWinner: "player" | "cpu") => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        const user = session?.user;
-        if (!user || gameMode !== "multiplayer") return;
-
-        const uniqueHistoryId = `user_history_${user.id}_rem_${Date.now()}`;
-        const summary = {
-          type: "match_summary",
-          userId: user.id,
-          rivalName: state.rivalName || "CPU",
-          myScore: score.player,
-          rivalScore: score.cpu,
-          winner: finalWinner,
-          date: new Date().toISOString(),
-          log: matchLog
-        };
-
-        const { error } = await supabase
-          .from('game_sync')
-          .upsert({
-            match_id: uniqueHistoryId,
-            last_move: summary,
-            updated_at: new Date().toISOString()
-          }, { onConflict: 'match_id' });
-
-        if (error) {
-          console.error("Error saving match history to Supabase:", error);
-        } else {
-          console.log("Successfully saved match history to Supabase!");
-        }
-      } catch (err) {
-        console.error("Unexpected error saving match history:", err);
-      }
+      await saveMatchHistoryRecord(
+        finalWinner,
+        score,
+        state.rivalName || "CPU",
+        matchLog || [],
+        gameMode
+      );
     };
 
     if (score.player >= maxPoints) {

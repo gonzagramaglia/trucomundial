@@ -14,6 +14,7 @@ import { ProdeMatchCard } from './ProdeMatchCard';
 import { ProdeRewardModal } from './ProdeRewardModal';
 import { formatMatchTime } from '../../lib/matchTime';
 import { calculateRewardPacks } from '../../lib/prodeRewards';
+import { MOCK_PRODE_RESULTS } from '../../data/mockProdeResults';
 
 type TabType = 'groups' | 'round_32' | 'round_16' | 'quarterfinals' | 'semifinals' | 'final';
 
@@ -23,7 +24,7 @@ interface ProdeScreenProps {
   onBack: () => void;
 }
 
-export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBack }) => {
+export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth: _handleAuth, onBack }) => {
   const { t, i18n } = useTranslation();
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
   const [activeTab, setActiveTab] = useState<TabType>('final');
@@ -62,16 +63,16 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
 
   useEffect(() => {
     const fetchResults = async () => {
+      const map: Record<string, any> = { ...MOCK_PRODE_RESULTS };
       try {
         const { data, error } = await supabase.from('fixture_results').select('*');
-        if (!error && data) {
-          const map: Record<string, any> = {};
+        if (!error && data && data.length > 0) {
           data.forEach(r => {
             map[r.match_id] = { scoreA: r.score_a, scoreB: r.score_b, status: r.status };
           });
-          setLiveResults(map);
         }
       } catch (err) { }
+      setLiveResults(map);
     };
     fetchResults();
   }, []);
@@ -79,17 +80,32 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
   useEffect(() => {
     const fetchPredictions = async () => {
       if (!user) return;
+      const localKey = `trucomundial_prode_predictions_${user.id}`;
+      let map: Record<string, any> = {};
+      let inputMap: Record<string, any> = {};
+
+      try {
+        const cached = localStorage.getItem(localKey);
+        if (cached) {
+          map = JSON.parse(cached);
+          Object.entries(map).forEach(([matchId, p]: [string, any]) => {
+            inputMap[matchId] = { scoreA: p.scoreA?.toString() ?? '', scoreB: p.scoreB?.toString() ?? '' };
+          });
+          setPredictions(map);
+          setInputs(prev => ({ ...prev, ...inputMap }));
+        }
+      } catch (e) {}
+
       try {
         const { data, error } = await supabase.from('prode_predictions').select('*').eq('user_id', user.id);
-        if (!error && data) {
-          const map: Record<string, any> = {};
-          const inputMap: Record<string, any> = {};
+        if (!error && data && data.length > 0) {
           data.forEach(p => {
             map[p.match_id] = { scoreA: p.score_a, scoreB: p.score_b, rewarded: p.rewarded };
             inputMap[p.match_id] = { scoreA: p.score_a.toString(), scoreB: p.score_b.toString() };
           });
           setPredictions(map);
           setInputs(prev => ({ ...prev, ...inputMap }));
+          localStorage.setItem(localKey, JSON.stringify(map));
         }
       } catch (e) { }
     };
@@ -99,10 +115,28 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
   useEffect(() => {
     const fetchCodes = async () => {
       if (!user) return;
+      const localKey = `trucomundial_reward_codes_${user.id}`;
+      const statusMap: Record<string, { total: number, used: number }> = {};
+
+      try {
+        const cached = localStorage.getItem(localKey);
+        if (cached) {
+          const codes: any[] = JSON.parse(cached);
+          codes.forEach(c => {
+            if (c.source?.startsWith('prode_match_')) {
+              const matchId = c.source.replace('prode_match_', '');
+              if (!statusMap[matchId]) statusMap[matchId] = { total: 0, used: 0 };
+              statusMap[matchId].total += 1;
+              if (c.used) statusMap[matchId].used += 1;
+            }
+          });
+          setUsedCodesStatus(statusMap);
+        }
+      } catch (e) {}
+
       try {
         const { data, error } = await supabase.from('reward_codes').select('source, used').eq('user_id', user.id).like('source', 'prode_match_%');
-        if (data && !error) {
-           const statusMap: Record<string, { total: number, used: number }> = {};
+        if (data && !error && data.length > 0) {
            data.forEach(c => {
               const matchId = c.source.replace('prode_match_', '');
               if (!statusMap[matchId]) statusMap[matchId] = { total: 0, used: 0 };
@@ -120,6 +154,10 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
     const checkRewards = async () => {
       if (!user || Object.keys(liveResults).length === 0 || Object.keys(predictions).length === 0) return;
 
+      const predKey = `trucomundial_prode_predictions_${user.id}`;
+      let updatedAny = false;
+      const updatedMap = { ...predictions };
+
       for (const matchId in predictions) {
         const pred = predictions[matchId];
         const res = liveResults[matchId];
@@ -127,12 +165,21 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
           const { packs } = calculateRewardPacks(pred.scoreA, pred.scoreB, res.scoreA, res.scoreB);
 
           // If packs is 0, we can mark it as rewarded so we don't check again.
-          // If packs > 0, we wait for the user to manually claim it!
           if (packs === 0) {
-            await supabase.from('prode_predictions').update({ rewarded: true }).eq('user_id', user.id).eq('match_id', matchId);
-            setPredictions(prev => ({ ...prev, [matchId]: { ...prev[matchId], rewarded: true } }));
+            updatedMap[matchId] = { ...updatedMap[matchId], rewarded: true };
+            updatedAny = true;
+            try {
+              await supabase.from('prode_predictions').update({ rewarded: true }).eq('user_id', user.id).eq('match_id', matchId);
+            } catch (e) {}
           }
         }
+      }
+
+      if (updatedAny) {
+        setPredictions(updatedMap);
+        try {
+          localStorage.setItem(predKey, JSON.stringify(updatedMap));
+        } catch (e) {}
       }
     };
 
@@ -162,23 +209,26 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
     if (isNaN(scoreA) || isNaN(scoreB)) return;
 
     setIsSaving(prev => ({ ...prev, [matchId]: true }));
+    const localKey = `trucomundial_prode_predictions_${user.id}`;
+    const newPredictions = {
+      ...predictions,
+      [matchId]: { scoreA, scoreB, rewarded: predictions[matchId]?.rewarded || false }
+    };
+    setPredictions(newPredictions);
     try {
-      const { error } = await supabase.from('prode_predictions').upsert({
+      localStorage.setItem(localKey, JSON.stringify(newPredictions));
+    } catch (e) {}
+
+    try {
+      await supabase.from('prode_predictions').upsert({
         user_id: user.id,
         match_id: matchId,
         score_a: scoreA,
         score_b: scoreB,
         updated_at: new Date().toISOString()
       }, { onConflict: 'user_id,match_id' });
-
-      if (!error) {
-        setPredictions(prev => ({ ...prev, [matchId]: { scoreA, scoreB } }));
-      } else {
-        console.error("Error completo de Supabase:", error);
-        alert(`${t("error_save_prediction")} ${error.message}\n(Revisá la consola para más detalles)`);
-      }
     } catch (err) {
-      alert(t("error_connection"));
+      // In local mode, saving to localStorage is already done
     }
     setIsSaving(prev => ({ ...prev, [matchId]: false }));
   };
@@ -198,36 +248,73 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
       source: `prode_match_${matchId}`
     }));
 
-    const { error } = await supabase.from('reward_codes').insert(codeInserts);
-    if (!error) {
+    // Local storage persistence
+    const codesKey = `trucomundial_reward_codes_${user.id}`;
+    let existingCodes: any[] = [];
+    try {
+      const cached = localStorage.getItem(codesKey);
+      if (cached) existingCodes = JSON.parse(cached);
+    } catch (e) {}
+    existingCodes.push(...codeInserts);
+    try {
+      localStorage.setItem(codesKey, JSON.stringify(existingCodes));
+    } catch (e) {}
+
+    const predKey = `trucomundial_prode_predictions_${user.id}`;
+    const updatedPredictions = {
+      ...predictions,
+      [matchId]: { ...predictions[matchId], rewarded: true }
+    };
+    setPredictions(updatedPredictions);
+    try {
+      localStorage.setItem(predKey, JSON.stringify(updatedPredictions));
+    } catch (e) {}
+
+    setUsedCodesStatus(prev => ({ ...prev, [matchId]: { total: packs, used: 0 } }));
+
+    setRewardCodesModal({
+      codes: generatedCodes.map(c => ({ code: c, used: false })),
+      matchDesc: `${teamA} vs ${teamB}`,
+      packs: packs
+    });
+
+    try {
+      await supabase.from('reward_codes').insert(codeInserts);
       await supabase.from('prode_predictions').update({ rewarded: true }).eq('user_id', user.id).eq('match_id', matchId);
-      setPredictions(prev => ({ ...prev, [matchId]: { ...prev[matchId], rewarded: true } }));
-
-      setUsedCodesStatus(prev => ({ ...prev, [matchId]: { total: packs, used: 0 } }));
-
-      setRewardCodesModal({
-        codes: generatedCodes.map(c => ({ code: c, used: false })),
-        matchDesc: `${teamA} vs ${teamB}`,
-        packs: packs
-      });
-    } else {
-      alert(t("error_claim_reward"));
-    }
+    } catch (e) {}
   };
 
   const handleViewRewards = async (matchId: string, packs: number, teamA: string, teamB: string) => {
     if (!user) return;
-    const { data, error } = await supabase.from('reward_codes').select('code, used').eq('user_id', user.id).eq('source', `prode_match_${matchId}`);
+    const codesKey = `trucomundial_reward_codes_${user.id}`;
+    let foundCodes: any[] = [];
+    try {
+      const cached = localStorage.getItem(codesKey);
+      if (cached) {
+        const all: any[] = JSON.parse(cached);
+        foundCodes = all.filter(c => c.source === `prode_match_${matchId}`);
+      }
+    } catch (e) {}
 
-    if (data && !error) {
+    if (foundCodes.length > 0) {
       setRewardCodesModal({
-        codes: data.map(d => ({ code: d.code, used: d.used })),
+        codes: foundCodes.map(d => ({ code: d.code, used: d.used })),
         matchDesc: `${teamA} vs ${teamB}`,
         packs: packs
       });
-    } else {
-      alert(t("error_get_codes"));
+      return;
     }
+
+    try {
+      const { data, error } = await supabase.from('reward_codes').select('code, used').eq('user_id', user.id).eq('source', `prode_match_${matchId}`);
+      if (data && !error && data.length > 0) {
+        setRewardCodesModal({
+          codes: data.map(d => ({ code: d.code, used: d.used })),
+          matchDesc: `${teamA} vs ${teamB}`,
+          packs: packs
+        });
+      }
+    } catch (e) {}
   };
 
   const groupedMatches = useMemo(() => {
@@ -360,6 +447,7 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
               <Home size={14} />
               {t("home")}
             </button>
+
             <UtilityButtons isMobile={true} />
           </div>
         )}
@@ -390,55 +478,6 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth, onBa
           {renderTab('final', t('final'), Trophy)}
         </div>
       </div>
-
-      {!user && (
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          style={{
-            position: 'sticky',
-            top: '1rem',
-            zIndex: 3000,
-            background: 'linear-gradient(135deg, rgba(0, 242, 255, 0.15), rgba(0, 242, 255, 0.05))',
-            border: '2px dashed rgba(0, 242, 255, 0.4)',
-            borderRadius: '2rem', padding: '1.5rem 2rem', marginBottom: '1rem', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1.5rem', backdropFilter: 'blur(16px)'
-          }}
-        >
-          <div style={{ flex: '1 1 300px' }}>
-            <h3 style={{ margin: '0 0 0.5rem 0', color: '#00f2ff', fontSize: '1.1rem', fontWeight: 900 }}>
-              {t("prode_login_title")}
-            </h3>
-            <p style={{ margin: 0, opacity: 0.8, fontSize: '0.9rem', lineHeight: 1.5, maxWidth: isMobile ? '400px' : 'none' }}>
-              {t("prode_login_desc")}
-            </p>
-          </div>
-          <button
-            onClick={handleAuth}
-            className="btn-hover-dark"
-            style={{
-              background: '#00f2ff',
-              border: 'none',
-              color: '#000',
-              height: '46px',
-              borderRadius: '1.25rem',
-              padding: '0 1.5rem',
-              fontSize: '0.9rem',
-              fontWeight: 950,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.6rem',
-              cursor: 'pointer',
-              boxShadow: '4px 4px 0px #000',
-              marginTop: isMobile ? '-0.5rem' : 0,
-            }}
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" style={{ fill: 'currentColor' }}>
-              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" /><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" /><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" /><path d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
-            </svg>
-            {t('login_with_google')}
-          </button>
-        </motion.div>
-      )}
 
       {/* Rewards Banner */}
       <div style={{
