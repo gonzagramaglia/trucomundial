@@ -231,23 +231,32 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({
       setShowRedeemModal(false);
       setRedeemCode("");
 
-      await buyMysteryCard(3);
+      await buyMysteryCard(3, lastUnlockTime === null);
     } catch (err) {
       setRedeemError(t("error_invalid_code"));
       setRedeeming(false);
     }
   };
 
-  const handleResetCollection = () => {
-    if (confirm("¿Estás seguro de que querés reiniciar tus cartas y sobres? Podrás abrir los 8 sobres iniciales desde cero.")) {
+  const handleResetCollection = async () => {
+    if (confirm(t("reset_collection_confirm"))) {
       setUnlockedCards([]);
       localStorage.removeItem(LOCAL_STORAGE_KEY);
       localStorage.removeItem(LAST_UNLOCK_KEY);
       setLastUnlockTime(null);
+
+      if (user) {
+        const { error } = await supabase.from("user_decks").upsert({
+          id: user.id,
+          unlocked_cards: [],
+          updated_at: new Date().toISOString(),
+        });
+        if (error) console.error("Error reseteando colección:", error);
+      }
     }
   };
 
-  const buyMysteryCard = async (count: number = 3) => {
+  const buyMysteryCard = async (count: number = 3, updateCooldown: boolean = true) => {
     if (openingPack) return;
 
     const lockedCards = CARDS.map((c) => c.id).filter(
@@ -308,7 +317,7 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({
       setOpeningPack(false);
 
       // Start/reset 4-hour countdown if we have reached or exceeded 24 unlocked cards
-      if (newUnlocked.length >= 24) {
+      if (newUnlocked.length >= 24 && updateCooldown) {
         const now = Date.now();
         localStorage.setItem(LAST_UNLOCK_KEY, String(now));
         setLastUnlockTime(now);
@@ -647,7 +656,11 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({
             }}
           >
             <span>
-              Colección: {unlockedCards.length} / {CARDS.length} cartas ({Math.round((unlockedCards.length / CARDS.length) * 100)}%)
+              {t("collection_progress", {
+                unlocked: unlockedCards.length,
+                total: CARDS.length,
+                percentage: Math.round((unlockedCards.length / CARDS.length) * 100),
+              })}
             </span>
           </div>
         </div>
@@ -753,7 +766,7 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({
           {unlockedCards.length > 0 && (
             <button
               onClick={handleResetCollection}
-              title="Reiniciar cartas y sobres a estado inicial"
+              title={t("reset_collection_title")}
               className="btn-hover-dark"
               style={{
                 background: "rgba(255, 255, 255, 0.05)",
@@ -771,7 +784,7 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({
               }}
             >
               <RefreshCw size={16} />
-              Reiniciar
+              {t("reset_collection_btn")}
             </button>
           )}
         </div>

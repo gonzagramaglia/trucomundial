@@ -42,7 +42,17 @@ export const useProfileSuggestions = (user: any) => {
         // Fallback for guest/demo user ("local_player")
         try {
           const raw = localStorage.getItem('trucomundial_local_suggestions');
-          const existing = raw ? JSON.parse(raw) : [];
+          let existing: any[] = [];
+          if (raw) {
+            try {
+              const parsed = JSON.parse(raw);
+              if (Array.isArray(parsed)) {
+                existing = parsed;
+              }
+            } catch {
+              existing = [];
+            }
+          }
           existing.push({
             id: 'sug_' + Date.now(),
             user_id: user?.id || 'local_player',
@@ -54,6 +64,7 @@ export const useProfileSuggestions = (user: any) => {
           localStorage.setItem('trucomundial_local_suggestions', JSON.stringify(existing));
         } catch (storageErr) {
           console.warn('Could not save local suggestion', storageErr);
+          throw storageErr;
         }
       }
 

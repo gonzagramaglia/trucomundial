@@ -25,7 +25,10 @@ export const useProfileData = (user: User | null) => {
       const storageKey = `trucomundial_match_history_${user.id}`;
       const raw = localStorage.getItem(storageKey);
       if (raw) {
-        localMatches = JSON.parse(raw);
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          localMatches = parsed;
+        }
       }
     } catch (e) {
       console.error('Error reading match history from storage:', e);
@@ -42,7 +45,7 @@ export const useProfileData = (user: User | null) => {
           .map((item: any) => {
             const summary = item.last_move;
             return {
-              id: item.id,
+              id: item.match_id || item.id,
               match_id: item.match_id,
               rivalName: summary.rivalName || t('rival'),
               myScore: summary.myScore || 0,
@@ -76,11 +79,16 @@ export const useProfileData = (user: User | null) => {
   useEffect(() => {
     fetchMatchHistory();
     const handleUpdate = () => fetchMatchHistory();
+    const handleStorage = (e: StorageEvent) => {
+      if (!e.key || e.key.startsWith('trucomundial_match_history_')) {
+        fetchMatchHistory();
+      }
+    };
     window.addEventListener('trucomundial_history_updated', handleUpdate);
-    window.addEventListener('storage', handleUpdate);
+    window.addEventListener('storage', handleStorage);
     return () => {
       window.removeEventListener('trucomundial_history_updated', handleUpdate);
-      window.removeEventListener('storage', handleUpdate);
+      window.removeEventListener('storage', handleStorage);
     };
   }, [fetchMatchHistory]);
 

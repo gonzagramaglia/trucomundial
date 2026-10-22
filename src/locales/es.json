@@ -524,7 +524,6 @@
   "no_matches_found": "No se encontraron partidos",
   "deck_build_title": "ARMÁ TU MAZO COLECCIONABLE",
   "deck_build_subtitle": "Abrí tus 8 sobres iniciales y desbloqueá una nueva carta cada 4 horas.",
-  "deck_build_disclaimer": "",
   "deck_prode_promo_title": "¡CONSEGUÍ MÁS CARTAS!",
   "deck_prode_promo_text": "¿Querés sumar más cartas? Podés ganar sobres gratis participando en el",
   "deck_prode_promo_link": "Prode del Mundial",
@@ -573,5 +572,19 @@
   "error_redeem_connection": "Error de conexión al canjear el código.",
   "alert_all_cards_unlocked": "¡Ya tenés todas las cartas desbloqueadas!",
   "join_room": "UNIRSE A SALA",
-  "enter_code": "CÓDIGO"
+  "enter_code": "CÓDIGO",
+  "reset_collection_confirm": "¿Estás seguro de que querés reiniciar tus cartas y sobres? Podrás abrir los 8 sobres iniciales desde cero.",
+  "collection_progress": "Colección: {{unlocked}} / {{total}} cartas ({{percentage}}%)",
+  "reset_collection_title": "Reiniciar cartas y sobres a estado inicial",
+  "reset_collection_btn": "Reiniciar",
+  "greeting_prefix": "¡Dale ",
+  "greeting_guacho": "guachooo",
+  "greeting_suffix": "Vamo' a jugá' 🃏",
+  "guest_profile": "PERFIL DE INVITADO",
+  "config_nationality": "Nacionalidad",
+  "config_nationality_desc": "Selecciona tu país para resaltarlo en el fixture",
+  "language_label_en": "ENGLISH (EN)",
+  "language_label_es": "ESPAÑOL (ES)",
+  "suggestion_sent_title": "¡SUGERENCIA ENVIADA!",
+  "modal_ok": "ACEPTAR"
 }

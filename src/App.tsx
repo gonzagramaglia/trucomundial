@@ -14,12 +14,12 @@ import { TournamentResultModal } from "./components/game/modals/TournamentResult
 import { audioManager } from "./lib/audio";
 import { CARDS } from "./data/cards";
 import { fixtureMatches } from "./lib/fixtureData";
-import { getLocalUser, subscribeToLocalUser } from "./lib/localAuth";
+import { useCurrentUser } from "./hooks/useCurrentUser";
 import { MOCK_PRODE_RESULTS } from "./data/mockProdeResults";
 import { saveMatchHistoryRecord } from "./lib/matchHistory";
 
 function App() {
-  const [user, setUser] = useState<any>(() => getLocalUser());
+  const user = useCurrentUser();
   const [sessionId] = useState(
     () => `sess_${Math.random().toString(36).substr(2, 9)}`,
   );
@@ -41,12 +41,14 @@ function App() {
         let fixtureStars: Record<string, number> = {};
         const effectiveResults = resultsData && resultsData.length > 0
           ? resultsData
-          : Object.entries(MOCK_PRODE_RESULTS).map(([match_id, val]) => ({
-              match_id,
-              score_a: val.scoreA,
-              score_b: val.scoreB,
-              status: val.status,
-            }));
+          : (import.meta.env.VITE_DEMO_MODE === 'true'
+              ? Object.entries(MOCK_PRODE_RESULTS).map(([match_id, val]) => ({
+                  match_id,
+                  score_a: val.scoreA,
+                  score_b: val.scoreB,
+                  status: val.status,
+                }))
+              : []);
 
         effectiveResults.forEach(r => {
           const match = fixtureMatches.find(m => m.id === r.match_id);
@@ -172,37 +174,6 @@ function App() {
       }
     };
   }, [core.gameMode, actualIsHost, broadcastMove]);
-
-  useEffect(() => {
-    const unsub = subscribeToLocalUser((u) => setUser(u));
-    try {
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        if (session?.user) {
-          setUser(session.user);
-        } else {
-          setUser(getLocalUser());
-        }
-      }).catch(() => {
-        setUser(getLocalUser());
-      });
-
-      const {
-        data: { subscription },
-      } = supabase.auth.onAuthStateChange((_event, session) => {
-        if (session?.user) {
-          setUser(session.user);
-        } else {
-          setUser(getLocalUser());
-        }
-      });
-      return () => {
-        unsub();
-        subscription?.unsubscribe?.();
-      };
-    } catch {
-      return () => unsub();
-    }
-  }, []);
 
   const isPlayingRef = useRef(false);
 
@@ -364,7 +335,7 @@ function App() {
 
   const handleConfirmExit = () => {
     if (core.gameState === "playing" && !core.winnerModal) {
-      saveMatchHistoryRecord(
+      void saveMatchHistoryRecord(
         "abandoned",
         core.score,
         core.rivalName || "CPU",

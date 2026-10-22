@@ -13,10 +13,13 @@ describe('assets utility', () => {
   });
 
   it('prefixes local paths correctly', () => {
+    const base = import.meta.env.BASE_URL || './';
+    const normalizedBase = base.endsWith('/') ? base : `${base}/`;
+
     const url1 = getAssetUrl('/playground.jpeg');
-    expect(url1).toContain('playground.jpeg');
+    expect(url1).toBe(`${normalizedBase}playground.jpeg`);
 
     const url2 = getAssetUrl('stickers/argentina/figu.png');
-    expect(url2).toContain('stickers/argentina/figu.png');
+    expect(url2).toBe(`${normalizedBase}stickers/argentina/figu.png`);
   });
 });

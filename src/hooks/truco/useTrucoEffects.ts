@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { determineWinner, getCardValue } from "../../lib/truco/engine";
 import { audioManager } from "../../lib/audio";
 import { saveMatchHistoryRecord } from "../../lib/matchHistory";
@@ -12,33 +12,48 @@ export const useTrucoEffects = (state: any, logic: any) => {
 
   const { addPoints, resetRound, clearRoundData, triggerCall } = logic;
 
+  const hasSavedHistoryRef = useRef(false);
+
   // --- Match Winner Effect ---
   useEffect(() => {
+    if (score.player < maxPoints && score.cpu < maxPoints) {
+      hasSavedHistoryRef.current = false;
+      return;
+    }
+
+    if (hasSavedHistoryRef.current) return;
+
     console.log("[SCORE CHECK]", score.player, score.cpu, "Target:", maxPoints);
     
     const saveMatchHistory = async (finalWinner: "player" | "cpu") => {
-      await saveMatchHistoryRecord(
-        finalWinner,
-        score,
-        state.rivalName || "CPU",
-        matchLog || [],
-        gameMode
-      );
+      try {
+        await saveMatchHistoryRecord(
+          finalWinner,
+          score,
+          state.rivalName || "CPU",
+          matchLog || [],
+          gameMode
+        );
+      } catch (err) {
+        console.warn("Error saving match history:", err);
+      }
     };
 
     if (score.player >= maxPoints) {
+      hasSavedHistoryRef.current = true;
       console.log("[WINNER] Player Wins!");
       setTimeout(() => {
         setWinnerModal("player");
         setGameState("winner");
-        saveMatchHistory("player");
+        void saveMatchHistory("player");
       }, 1500);
     } else if (score.cpu >= maxPoints) {
+      hasSavedHistoryRef.current = true;
       console.log("[WINNER] CPU Wins!");
       setTimeout(() => {
         setWinnerModal("cpu");
         setGameState("winner");
-        saveMatchHistory("cpu");
+        void saveMatchHistory("cpu");
       }, 1500);
     }
   }, [score.player, score.cpu, maxPoints, setWinnerModal, setGameState, gameMode, matchLog, state.rivalName]);

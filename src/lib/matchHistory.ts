@@ -12,6 +12,18 @@ export interface MatchSummary {
   log: string[];
 }
 
+export const readHistory = (userId: string): MatchSummary[] => {
+  try {
+    const storageKey = `trucomundial_match_history_${userId}`;
+    const raw = localStorage.getItem(storageKey);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? (parsed as MatchSummary[]) : [];
+  } catch {
+    return [];
+  }
+};
+
 export const saveMatchHistoryRecord = async (
   finalWinner: 'player' | 'cpu' | 'abandoned',
   score: { player: number; cpu: number },
@@ -34,8 +46,7 @@ export const saveMatchHistoryRecord = async (
 
   try {
     const storageKey = `trucomundial_match_history_${localUser.id}`;
-    const raw = localStorage.getItem(storageKey);
-    const historyList: MatchSummary[] = raw ? JSON.parse(raw) : [];
+    const historyList = readHistory(localUser.id);
     historyList.unshift(summary);
     localStorage.setItem(storageKey, JSON.stringify(historyList));
     window.dispatchEvent(new Event('trucomundial_history_updated'));
@@ -67,12 +78,9 @@ export const saveMatchHistoryRecord = async (
 export const deleteMatchHistoryRecord = async (matchId: string, userId: string): Promise<void> => {
   try {
     const storageKey = `trucomundial_match_history_${userId}`;
-    const raw = localStorage.getItem(storageKey);
-    if (raw) {
-      const historyList: MatchSummary[] = JSON.parse(raw);
-      const filtered = historyList.filter(m => m.id !== matchId && m.match_id !== matchId);
-      localStorage.setItem(storageKey, JSON.stringify(filtered));
-    }
+    const historyList = readHistory(userId);
+    const filtered = historyList.filter(m => m.id !== matchId && m.match_id !== matchId);
+    localStorage.setItem(storageKey, JSON.stringify(filtered));
     window.dispatchEvent(new Event('trucomundial_history_updated'));
 
     if (matchId.startsWith('user_history_')) {
@@ -86,14 +94,10 @@ export const deleteMatchHistoryRecord = async (matchId: string, userId: string):
 export const clearAbandonedMatchesFromHistory = async (userId: string): Promise<void> => {
   try {
     const storageKey = `trucomundial_match_history_${userId}`;
-    const raw = localStorage.getItem(storageKey);
-    let abandonedIds: string[] = [];
-    if (raw) {
-      const historyList: MatchSummary[] = JSON.parse(raw);
-      abandonedIds = historyList.filter(m => m.winner === 'abandoned').map(m => m.match_id || m.id);
-      const filtered = historyList.filter(m => m.winner !== 'abandoned');
-      localStorage.setItem(storageKey, JSON.stringify(filtered));
-    }
+    const historyList = readHistory(userId);
+    const abandonedIds = historyList.filter(m => m.winner === 'abandoned').map(m => m.match_id || m.id);
+    const filtered = historyList.filter(m => m.winner !== 'abandoned');
+    localStorage.setItem(storageKey, JSON.stringify(filtered));
     window.dispatchEvent(new Event('trucomundial_history_updated'));
 
     for (const matchId of abandonedIds) {

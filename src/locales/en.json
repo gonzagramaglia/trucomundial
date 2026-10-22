@@ -524,7 +524,6 @@
   "no_matches_found": "No matches found",
   "deck_build_title": "BUILD YOUR COLLECTIBLE DECK",
   "deck_build_subtitle": "Open your 8 initial packs and unlock a new card every 4 hours.",
-  "deck_build_disclaimer": "",
   "deck_prode_promo_title": "GET MORE CARDS!",
   "deck_prode_promo_text": "Want more cards? Win free packs by playing the",
   "deck_prode_promo_link": "World Cup Prode",
@@ -573,5 +572,19 @@
   "error_redeem_connection": "Connection error while redeeming the code.",
   "alert_all_cards_unlocked": "You already have all cards unlocked!",
   "join_room": "JOIN ROOM",
-  "enter_code": "CODE"
+  "enter_code": "CODE",
+  "reset_collection_confirm": "Are you sure you want to reset your cards and packs? You will be able to open the 8 initial packs from scratch.",
+  "collection_progress": "Collection: {{unlocked}} / {{total}} cards ({{percentage}}%)",
+  "reset_collection_title": "Reset cards and packs to initial state",
+  "reset_collection_btn": "Reset",
+  "greeting_prefix": "Come on ",
+  "greeting_guacho": "guachooo",
+  "greeting_suffix": "Let's play! 🃏",
+  "guest_profile": "GUEST PROFILE",
+  "config_nationality": "Nationality",
+  "config_nationality_desc": "Select your country to highlight it in the fixture",
+  "language_label_en": "ENGLISH (EN)",
+  "language_label_es": "ESPAÑOL (ES)",
+  "suggestion_sent_title": "SUGGESTION SENT!",
+  "modal_ok": "OK"
 }

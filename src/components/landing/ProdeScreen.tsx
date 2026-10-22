@@ -18,6 +18,19 @@ import { MOCK_PRODE_RESULTS } from '../../data/mockProdeResults';
 
 type TabType = 'groups' | 'round_32' | 'round_16' | 'quarterfinals' | 'semifinals' | 'final';
 
+interface StoredPrediction {
+  scoreA: number;
+  scoreB: number;
+  rewarded?: boolean;
+}
+
+interface StoredRewardCode {
+  code: string;
+  user_id?: string;
+  used: boolean;
+  source?: string;
+}
+
 interface ProdeScreenProps {
   user?: any;
   handleAuth: () => void;
@@ -40,7 +53,7 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth: _han
   }, []);
 
   // Prode states
-  const [predictions, setPredictions] = useState<Record<string, { scoreA: number, scoreB: number, rewarded?: boolean }>>({});
+  const [predictions, setPredictions] = useState<Record<string, StoredPrediction>>({});
   const [inputs, setInputs] = useState<Record<string, { scoreA: string, scoreB: string }>>({});
   const [isSaving, setIsSaving] = useState<Record<string, boolean>>({});
   const [rewardCodesModal, setRewardCodesModal] = useState<{ codes: { code: string, used: boolean }[], matchDesc: string, packs: number } | null>(null);
@@ -63,7 +76,8 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth: _han
 
   useEffect(() => {
     const fetchResults = async () => {
-      const map: Record<string, any> = { ...MOCK_PRODE_RESULTS };
+      const isDemo = import.meta.env.VITE_DEMO_MODE === 'true';
+      const map: Record<string, { scoreA: number; scoreB: number; status: string }> = isDemo ? { ...MOCK_PRODE_RESULTS } : {};
       try {
         const { data, error } = await supabase.from('fixture_results').select('*');
         if (!error && data && data.length > 0) {
@@ -71,7 +85,9 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth: _han
             map[r.match_id] = { scoreA: r.score_a, scoreB: r.score_b, status: r.status };
           });
         }
-      } catch (err) { }
+      } catch (err) {
+        // Fallback to local/demo results when Supabase is unavailable
+      }
       setLiveResults(map);
     };
     fetchResults();
@@ -88,13 +104,15 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth: _han
         const cached = localStorage.getItem(localKey);
         if (cached) {
           map = JSON.parse(cached);
-          Object.entries(map).forEach(([matchId, p]: [string, any]) => {
+          Object.entries(map).forEach(([matchId, p]: [string, StoredPrediction]) => {
             inputMap[matchId] = { scoreA: p.scoreA?.toString() ?? '', scoreB: p.scoreB?.toString() ?? '' };
           });
           setPredictions(map);
           setInputs(prev => ({ ...prev, ...inputMap }));
         }
-      } catch (e) {}
+      } catch {
+        // In-memory fallback if cached predictions are unreadable
+      }
 
       try {
         const { data, error } = await supabase.from('prode_predictions').select('*').eq('user_id', user.id);
@@ -107,7 +125,9 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth: _han
           setInputs(prev => ({ ...prev, ...inputMap }));
           localStorage.setItem(localKey, JSON.stringify(map));
         }
-      } catch (e) { }
+      } catch {
+        // Retain local predictions if Supabase query fails
+      }
     };
     fetchPredictions();
   }, [user]);
@@ -209,39 +229,44 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth: _han
     if (isNaN(scoreA) || isNaN(scoreB)) return;
 
     setIsSaving(prev => ({ ...prev, [matchId]: true }));
-    const localKey = `trucomundial_prode_predictions_${user.id}`;
-    const newPredictions = {
-      ...predictions,
-      [matchId]: { scoreA, scoreB, rewarded: predictions[matchId]?.rewarded || false }
-    };
-    setPredictions(newPredictions);
     try {
-      localStorage.setItem(localKey, JSON.stringify(newPredictions));
-    } catch (e) {}
+      const localKey = `trucomundial_prode_predictions_${user.id}`;
+      const newPredictions = {
+        ...predictions,
+        [matchId]: { scoreA, scoreB, rewarded: predictions[matchId]?.rewarded || false }
+      };
+      setPredictions(newPredictions);
+      try {
+        localStorage.setItem(localKey, JSON.stringify(newPredictions));
+      } catch {
+        // Storage quota exceeded or disabled
+      }
 
-    try {
-      await supabase.from('prode_predictions').upsert({
-        user_id: user.id,
-        match_id: matchId,
-        score_a: scoreA,
-        score_b: scoreB,
-        updated_at: new Date().toISOString()
-      }, { onConflict: 'user_id,match_id' });
-    } catch (err) {
-      // In local mode, saving to localStorage is already done
+      try {
+        await supabase.from('prode_predictions').upsert({
+          user_id: user.id,
+          match_id: matchId,
+          score_a: scoreA,
+          score_b: scoreB,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'user_id,match_id' });
+      } catch (err) {
+        console.warn('Supabase prediction save error (operating locally):', err);
+      }
+    } finally {
+      setIsSaving(prev => ({ ...prev, [matchId]: false }));
     }
-    setIsSaving(prev => ({ ...prev, [matchId]: false }));
   };
 
   const handleClaimReward = async (matchId: string, packs: number, teamA: string, teamB: string) => {
-    if (!user) return;
+    if (!user || predictions[matchId]?.rewarded) return;
     const generatedCodes = [];
     for (let i = 0; i < packs; i++) {
       const code = Math.random().toString(36).substring(2, 6).toUpperCase();
       generatedCodes.push(code);
     }
 
-    const codeInserts = generatedCodes.map(code => ({
+    const codeInserts: StoredRewardCode[] = generatedCodes.map(code => ({
       code,
       user_id: user.id,
       used: false,
@@ -250,15 +275,19 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth: _han
 
     // Local storage persistence
     const codesKey = `trucomundial_reward_codes_${user.id}`;
-    let existingCodes: any[] = [];
+    let existingCodes: StoredRewardCode[] = [];
     try {
       const cached = localStorage.getItem(codesKey);
       if (cached) existingCodes = JSON.parse(cached);
-    } catch (e) {}
+    } catch {
+      // Storage read fallback
+    }
     existingCodes.push(...codeInserts);
     try {
       localStorage.setItem(codesKey, JSON.stringify(existingCodes));
-    } catch (e) {}
+    } catch {
+      // Storage write fallback
+    }
 
     const predKey = `trucomundial_prode_predictions_${user.id}`;
     const updatedPredictions = {
@@ -268,7 +297,9 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth: _han
     setPredictions(updatedPredictions);
     try {
       localStorage.setItem(predKey, JSON.stringify(updatedPredictions));
-    } catch (e) {}
+    } catch {
+      // Storage write fallback
+    }
 
     setUsedCodesStatus(prev => ({ ...prev, [matchId]: { total: packs, used: 0 } }));
 
@@ -279,9 +310,13 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth: _han
     });
 
     try {
-      await supabase.from('reward_codes').insert(codeInserts);
-      await supabase.from('prode_predictions').update({ rewarded: true }).eq('user_id', user.id).eq('match_id', matchId);
-    } catch (e) {}
+      const { error: codeErr } = await supabase.from('reward_codes').insert(codeInserts);
+      if (codeErr) console.warn('Supabase reward code insert warning:', codeErr);
+      const { error: predErr } = await supabase.from('prode_predictions').update({ rewarded: true }).eq('user_id', user.id).eq('match_id', matchId);
+      if (predErr) console.warn('Supabase prediction update warning:', predErr);
+    } catch (e) {
+      console.warn('Supabase reward claim sync error (operating locally):', e);
+    }
   };
 
   const handleViewRewards = async (matchId: string, packs: number, teamA: string, teamB: string) => {

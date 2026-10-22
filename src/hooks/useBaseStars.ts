@@ -30,7 +30,7 @@ export const useBaseStars = () => {
         // Fallback to mock results
       }
 
-      if (resultsList.length === 0) {
+      if (resultsList.length === 0 && import.meta.env.VITE_DEMO_MODE === 'true') {
         resultsList = Object.entries(MOCK_PRODE_RESULTS).map(([match_id, val]) => ({
           match_id,
           score_a: val.scoreA,

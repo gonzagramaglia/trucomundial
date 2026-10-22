@@ -60,7 +60,9 @@ export function getLocalUser(): LocalUser {
           };
           try {
             localStorage.setItem(LOCAL_USER_STORAGE_KEY, JSON.stringify(parsed));
-          } catch (e) { }
+          } catch {
+            // Storage quota exceeded or disabled; keep in-memory update
+          }
         }
         return {
           ...DEFAULT_USER,
@@ -79,7 +81,9 @@ export function getLocalUser(): LocalUser {
   // Save and return default user
   try {
     localStorage.setItem(LOCAL_USER_STORAGE_KEY, JSON.stringify(DEFAULT_USER));
-  } catch (e) { }
+  } catch {
+    // Storage quota exceeded or disabled; fall back to in-memory default
+  }
   return DEFAULT_USER;
 }
 
@@ -117,6 +121,11 @@ export function subscribeToLocalUser(callback: (user: LocalUser) => void) {
   if (typeof window === "undefined") return () => { };
 
   const handler = (e: Event) => {
+    if (e instanceof StorageEvent) {
+      if (e.key !== LOCAL_USER_STORAGE_KEY) return;
+      callback(getLocalUser());
+      return;
+    }
     const custom = e as CustomEvent<LocalUser>;
     if (custom.detail) {
       callback(custom.detail);

@@ -14,8 +14,6 @@ interface VotingHUDProps {
   saving: boolean;
   saveSuccess: boolean;
   handleSaveVotes: () => void;
-  handleAuth: () => void;
-  isMobile: boolean;
 }
 
 export const VotingHUD: React.FC<VotingHUDProps> = ({
@@ -27,8 +25,6 @@ export const VotingHUD: React.FC<VotingHUDProps> = ({
   saving,
   saveSuccess,
   handleSaveVotes,
-  handleAuth: _handleAuth,
-  isMobile: _isMobile,
 }) => {
   const { t } = useTranslation();
 

@@ -78,17 +78,18 @@ export const useProfileUpdates = (user: User | null) => {
     setUpdateError('');
     
     try {
+      const changedAt = new Date().toISOString();
       updateLocalUser({
         custom_username: newName.trim(),
         name: newName.trim(),
         full_name: newName.trim(),
-        last_name_change: new Date().toISOString()
+        last_name_change: changedAt
       });
 
       const { error } = await supabase.auth.updateUser({
         data: { 
           custom_username: newName.trim(),
-          last_name_change: new Date().toISOString()
+          last_name_change: changedAt
         }
       });
       
@@ -104,6 +105,7 @@ export const useProfileUpdates = (user: User | null) => {
       
       setEditingName(false);
     } catch (err) {
+      console.warn("Error updating user name:", err);
       // In local mode, still accept the name update
       setEditingName(false);
     } finally {

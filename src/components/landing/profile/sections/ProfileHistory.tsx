@@ -168,7 +168,11 @@ export const ProfileHistory: React.FC<ProfileHistoryProps> = ({
 
                     {onDeleteMatch && (
                       <button
-                        onClick={() => onDeleteMatch(match.id)}
+                        onClick={() => {
+                          if (window.confirm(t("delete_match"))) {
+                            onDeleteMatch(match.id);
+                          }
+                        }}
                         className="btn-hover-dark"
                         style={{
                           background: 'rgba(239, 68, 68, 0.1)',
@@ -184,6 +188,7 @@ export const ProfileHistory: React.FC<ProfileHistoryProps> = ({
                           boxShadow: '3px 3px 0px #000'
                         }}
                         title={t("delete_match")}
+                        aria-label={t("delete_match")}
                       >
                         <Trash2 size={15} />
                       </button>

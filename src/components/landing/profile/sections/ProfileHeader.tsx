@@ -6,11 +6,18 @@ import { UtilityButtons } from '../../../shared/UtilityButtons';
 interface ProfileHeaderProps {
   onBack: () => void;
   isMobile: boolean;
-  user?: any;
   onOpenRules?: () => void;
 }
 
-export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ onBack, isMobile, user: _user, onOpenRules }) => {
+/**
+ * Header section for the User Profile screen.
+ * Displays navigation buttons, utility controls, and the profile title.
+ *
+ * @param onBack Callback to navigate back to the previous screen.
+ * @param isMobile Whether the viewport is in mobile display mode.
+ * @param onOpenRules Optional callback to open the game rules panel.
+ */
+export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ onBack, isMobile, onOpenRules }) => {
   const { t } = useTranslation();
   const handleRulesClick = onOpenRules || (() => window.dispatchEvent(new CustomEvent('open_rules')));
 
@@ -69,7 +76,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ onBack, isMobile, 
               color: '#00f2ff',
               textShadow: '0 0 15px rgba(0, 242, 255, 0.2)'
             }}>
-              {window.location.pathname.startsWith('/en') ? 'GUEST PROFILE' : 'PERFIL DE INVITADO'}
+              {t('guest_profile')}
             </h2>
           </div>
         </div>

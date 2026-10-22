@@ -433,8 +433,6 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({
         saving={saving}
         saveSuccess={saveSuccess}
         handleSaveVotes={handleSaveVotes}
-        handleAuth={handleAuth}
-        isMobile={isMobile}
       />
 
       {/* INFO BOX */}

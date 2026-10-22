@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 
 interface ModalProps {
@@ -9,13 +9,58 @@ interface ModalProps {
 }
 
 export const Modal: React.FC<ModalProps> = ({ open, onClose, children, showClose = true }) => {
-  const [mounted, setMounted] = useState(false);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const prevActiveElement = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
+    if (!open) return;
 
-  if (!open || !mounted) return null;
+    if (typeof document !== "undefined") {
+      prevActiveElement.current = document.activeElement as HTMLElement | null;
+    }
+
+    const timer = setTimeout(() => {
+      dialogRef.current?.focus();
+    }, 0);
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+        return;
+      }
+
+      if (e.key === "Tab" && dialogRef.current) {
+        const focusable = dialogRef.current.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusable.length === 0) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+
+        if (e.shiftKey) {
+          if (document.activeElement === first) {
+            e.preventDefault();
+            last.focus();
+          }
+        } else {
+          if (document.activeElement === last) {
+            e.preventDefault();
+            first.focus();
+          }
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("keydown", handleKeyDown);
+      prevActiveElement.current?.focus?.();
+    };
+  }, [open, onClose]);
+
+  if (!open || typeof document === "undefined") return null;
 
   const content = (
     <div
@@ -38,6 +83,10 @@ export const Modal: React.FC<ModalProps> = ({ open, onClose, children, showClose
       onClick={onClose}
     >
       <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        tabIndex={-1}
         style={{
           background: "#181818",
           border: "1px solid rgba(255, 255, 255, 0.15)",
@@ -51,7 +100,8 @@ export const Modal: React.FC<ModalProps> = ({ open, onClose, children, showClose
           boxShadow: "0 20px 60px rgba(0, 0, 0, 0.7)",
           color: "#fff",
           position: "relative",
-          boxSizing: "border-box"
+          boxSizing: "border-box",
+          outline: "none"
         }}
         onClick={(e) => e.stopPropagation()}
       >

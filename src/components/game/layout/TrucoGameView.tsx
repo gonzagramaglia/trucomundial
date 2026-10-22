@@ -62,7 +62,7 @@ interface TrucoGameViewProps {
 }
 
 export const TrucoGameView: React.FC<TrucoGameViewProps> = ({
-  user: _user, gameMode, gameState, playerHand, playedCards, cpuHandCount, cpuPartnerHandCount,
+  gameMode, gameState, playerHand, playedCards, cpuHandCount, cpuPartnerHandCount,
   score, activeCall, trucoState, envidoState, pendingAction, handWinners, handWinningCardIds,
   scorePopups, winnerModal, rivalName, isBusy, isRoundEnding, whoseTurn, maxPoints,
   showCountdown, isGameStarting, isCooldown, roundWinningCardId, cpuPartnerHandRef, showExitModal,

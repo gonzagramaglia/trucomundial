@@ -81,7 +81,14 @@ export const LandingHeader: React.FC<LandingHeaderProps> = ({ user }) => {
           }}>
             <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#00f2ff', flexShrink: 0 }} />
             <span>
-              ¡Dale <strong>{user.user_metadata?.custom_username && user.user_metadata.custom_username.toLowerCase() !== 'guacho' ? user.user_metadata.custom_username : 'guachooo'}</strong>!{isMobile ? <br /> : ' '}Vamo' a jugá' 🃏
+              {t('greeting_prefix')}
+              <strong>
+                {user.user_metadata?.custom_username && user.user_metadata.custom_username.toLowerCase() !== 'guacho'
+                  ? user.user_metadata.custom_username
+                  : t('greeting_guacho')}
+              </strong>
+              !{isMobile ? <br /> : ' '}
+              {t('greeting_suffix')}
             </span>
           </div>
         )}

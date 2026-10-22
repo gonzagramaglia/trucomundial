@@ -3,15 +3,18 @@ import { MessageSquare, Send, Check } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Modal } from '../../../ui/Modal';
 
+import type { UseFormRegister, UseFormHandleSubmit, FieldErrors } from 'react-hook-form';
+import type { TicketFormData } from '../../../../lib/schemas';
+
 interface ProfileSuggestionsProps {
   isSubmittingSuggestion: boolean;
   suggestionSuccess: boolean;
-  setSuggestionSuccess?: (b: boolean) => void;
+  setSuggestionSuccess: (b: boolean) => void;
   suggestionError: string;
-  registerSuggestion: any;
-  handleSuggestionSubmit: any;
-  suggestionErrors: any;
-  onSuggestionSubmit: (data: any) => Promise<void>;
+  registerSuggestion: UseFormRegister<TicketFormData>;
+  handleSuggestionSubmit: UseFormHandleSubmit<TicketFormData>;
+  suggestionErrors: FieldErrors<TicketFormData>;
+  onSuggestionSubmit: (data: TicketFormData) => Promise<void>;
   getValidationMessage: (msg: string | undefined) => string;
 }
 
@@ -133,7 +136,7 @@ export const ProfileSuggestions: React.FC<ProfileSuggestionsProps> = ({
             color: '#fff',
             letterSpacing: '0.05em'
           }}>
-            {window.location.pathname.startsWith('/en') ? 'SUGGESTION SENT!' : '¡SUGERENCIA ENVIADA!'}
+            {t("suggestion_sent_title")}
           </h3>
           <p style={{
             margin: '0 0 1.5rem 0',
@@ -144,7 +147,7 @@ export const ProfileSuggestions: React.FC<ProfileSuggestionsProps> = ({
             {t("suggestion_success")}
           </p>
           <button
-            onClick={() => setSuggestionSuccess?.(false)}
+            onClick={() => setSuggestionSuccess(false)}
             className="btn-hover-dark"
             style={{
               background: '#10b981',
@@ -158,7 +161,7 @@ export const ProfileSuggestions: React.FC<ProfileSuggestionsProps> = ({
               boxShadow: '3px 3px 0px #000'
             }}
           >
-            {window.location.pathname.startsWith('/en') ? 'OK' : 'ACEPTAR'}
+            {t("modal_ok")}
           </button>
         </div>
       </Modal>

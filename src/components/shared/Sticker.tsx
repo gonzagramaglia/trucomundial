@@ -46,7 +46,7 @@ export const Sticker: React.FC<StickerProps> = ({
         className="sticker"
         style={{
           cursor: "default",
-          backgroundImage: "url('/card-back.png')",
+          backgroundImage: `url('${getAssetUrl('/card-back.png')}')`,
           backgroundSize: "cover",
           backgroundPosition: "center",
           border: '1.5px solid rgba(255, 255, 255, 0.3)',

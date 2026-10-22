@@ -13,18 +13,6 @@ interface ProfileSettingsProps {
   natSearch: string;
   setNatSearch: (search: string) => void;
   handleUpdateNationality: (nat: string) => void;
-  // Optional props retained for backward compatibility
-  user?: any;
-  onBack?: () => void;
-  canChangeName?: boolean;
-  updateError?: string;
-  setUpdateError?: (msg: string) => void;
-  editingName?: boolean;
-  setEditingName?: (b: boolean) => void;
-  newName?: string;
-  setNewName?: (name: string) => void;
-  isUpdatingName?: boolean;
-  handleUpdateName?: () => void;
 }
 
 export const ProfileSettings: React.FC<ProfileSettingsProps> = ({
@@ -36,7 +24,8 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({
   setNatSearch,
   handleUpdateNationality
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isEn = Boolean(i18n.language?.startsWith('en'));
 
   return (
     <>
@@ -70,10 +59,17 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({
           
           <button
             onClick={() => {
-              const isEn = window.location.pathname.startsWith('/en');
               const newLang = isEn ? "es" : "en";
+              i18n.changeLanguage(newLang);
               localStorage.setItem('lang', newLang);
-              window.location.href = newLang === "en" ? "/en/perfil" : "/perfil";
+              if (typeof window !== 'undefined') {
+                const currentPath = window.location.pathname;
+                if (newLang === 'en' && !currentPath.startsWith('/en')) {
+                  window.history.pushState({}, '', '/en' + (currentPath === '/' ? '' : currentPath));
+                } else if (newLang === 'es' && currentPath.startsWith('/en')) {
+                  window.history.pushState({}, '', currentPath.replace(/^\/en/, '') || '/');
+                }
+              }
             }}
             className="btn-hover-dark"
             style={{
@@ -95,7 +91,7 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({
             title={t('config_change_language')}
           >
             <Globe size={16} />
-            {window.location.pathname.startsWith('/en') ? 'ENGLISH (EN)' : 'ESPAÑOL (ES)'}
+            {isEn ? t('language_label_en') : t('language_label_es')}
           </button>
         </div>
 
@@ -108,10 +104,10 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({
         }}>
           <div>
             <div style={{ fontWeight: 800, fontSize: '0.95rem', color: '#fff', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              {window.location.pathname.startsWith('/en') ? 'Nationality' : 'Nacionalidad'}
+              {t('config_nationality')}
             </div>
             <div style={{ fontSize: '0.8rem', opacity: 0.6, marginTop: '0.2rem' }}>
-              {window.location.pathname.startsWith('/en') ? 'Select your country to highlight it in the fixture' : 'Selecciona tu país para resaltarlo en el fixture'}
+              {t('config_nationality_desc')}
             </div>
           </div>
           

@@ -2,7 +2,8 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import {
   saveMatchHistoryRecord,
   deleteMatchHistoryRecord,
-  clearAbandonedMatchesFromHistory
+  clearAbandonedMatchesFromHistory,
+  type MatchSummary
 } from '../../lib/matchHistory';
 
 describe('matchHistory helper', () => {
@@ -65,6 +66,6 @@ describe('matchHistory helper', () => {
     raw = localStorage.getItem(`trucomundial_match_history_${mockUserId}`);
     const remaining = JSON.parse(raw!);
     expect(remaining.length).toBe(2);
-    expect(remaining.every((m: any) => m.winner !== 'abandoned')).toBe(true);
+    expect(remaining.every((m: MatchSummary) => m.winner !== 'abandoned')).toBe(true);
   });
 });

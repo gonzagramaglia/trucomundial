@@ -1,11 +1,11 @@
-import type { User as SupabaseUser } from '@supabase/supabase-js';
+import type { AuthUser } from '../../../hooks/useCurrentUser';
 import React from "react";
 import { BookOpen, User, Trophy, ShieldAlert } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 interface LandingSidebarProps {
   offset?: boolean;
-  user: SupabaseUser | null;
+  user: AuthUser | null;
   isSuperAdmin: boolean;
   isApprovedCreator: boolean;
   showRanking: boolean;

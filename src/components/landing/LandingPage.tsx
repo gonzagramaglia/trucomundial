@@ -91,11 +91,12 @@ export const LandingPage: React.FC<LandingPageProps> = ({
     }
   }, [user]);
 
+  const setShowRules = nav.setShowRules;
   useEffect(() => {
-    const handleOpenRules = () => nav.setShowRules(true);
+    const handleOpenRules = () => setShowRules(true);
     window.addEventListener("open_rules", handleOpenRules);
     return () => window.removeEventListener("open_rules", handleOpenRules);
-  }, [nav]);
+  }, [setShowRules]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -109,7 +110,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
       <ProfileScreen
         onBack={nav.handleReturnHome}
         user={user}
-        handleAuth={() => handleAuth(nav.handleReturnHome)}
         onOpenRules={() => nav.setShowRules(true)}
       />
     );

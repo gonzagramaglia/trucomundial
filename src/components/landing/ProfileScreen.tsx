@@ -15,12 +15,11 @@ import { ProfileSuggestions } from './profile/sections/ProfileSuggestions';
 
 interface ProfileScreenProps {
   user: any;
-  handleAuth: () => void;
   onBack: () => void;
   onOpenRules?: () => void;
 }
 
-export const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, handleAuth: _handleAuth, onBack, onOpenRules }) => {
+export const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, onBack, onOpenRules }) => {
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
 
   useEffect(() => {
@@ -85,7 +84,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, handleAuth: 
       color: '#fff',
       boxSizing: 'border-box'
     }}>
-      <ProfileHeader onBack={onBack} isMobile={isMobile} user={user} onOpenRules={onOpenRules} />
+      <ProfileHeader onBack={onBack} isMobile={isMobile} onOpenRules={onOpenRules} />
 
       {/* Main Container */}
       <div style={{

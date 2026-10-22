@@ -47,11 +47,11 @@ export const NationalityModal: React.FC<NationalityModalProps> = ({ user, onSave
           }, { onConflict: 'id' });
         }
       }
-      onSaved(selected);
     } catch (e) {
       console.error('Error updating nationality', e);
     } finally {
       setIsSaving(false);
+      onSaved(selected);
     }
   };
 
