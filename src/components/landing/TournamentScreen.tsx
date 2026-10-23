@@ -450,7 +450,6 @@ export const TournamentScreen: React.FC<TournamentScreenProps> = ({
                 alignItems: "center",
                 gap: "0.5rem",
                 justifyContent: "center",
-                marginTop: "1rem",
               }}
             >
               <Trophy

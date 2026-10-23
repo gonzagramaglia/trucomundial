@@ -10,7 +10,7 @@ interface RulesModalProps {
   maxPoints?: 15 | 30;
 }
 
-export const RulesModal: React.FC<RulesModalProps> = ({ isOpen, onClose, maxPoints = 30 }) => {
+export const RulesModal: React.FC<RulesModalProps> = ({ isOpen, onClose, maxPoints }) => {
   const { t } = useTranslation();
 
   return (
@@ -26,7 +26,7 @@ export const RulesModal: React.FC<RulesModalProps> = ({ isOpen, onClose, maxPoin
             inset: 0,
             background: "rgba(0, 0, 0, 0.45)",
             backdropFilter: "blur(12px)",
-            zIndex: 3000,
+            zIndex: 7000,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",

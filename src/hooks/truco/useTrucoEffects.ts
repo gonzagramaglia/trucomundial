@@ -1,7 +1,7 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { determineWinner, getCardValue } from "../../lib/truco/engine";
-import { supabase } from "../../lib/supabase";
 import { audioManager } from "../../lib/audio";
+import { saveMatchHistoryRecord } from "../../lib/matchHistory";
 
 export const useTrucoEffects = (state: any, logic: any) => {
   const {
@@ -12,59 +12,48 @@ export const useTrucoEffects = (state: any, logic: any) => {
 
   const { addPoints, resetRound, clearRoundData, triggerCall } = logic;
 
+  const hasSavedHistoryRef = useRef(false);
+
   // --- Match Winner Effect ---
   useEffect(() => {
+    if (score.player < maxPoints && score.cpu < maxPoints) {
+      hasSavedHistoryRef.current = false;
+      return;
+    }
+
+    if (hasSavedHistoryRef.current) return;
+
     console.log("[SCORE CHECK]", score.player, score.cpu, "Target:", maxPoints);
     
     const saveMatchHistory = async (finalWinner: "player" | "cpu") => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
-        const user = session?.user;
-        if (!user || gameMode !== "multiplayer") return;
-
-        const uniqueHistoryId = `user_history_${user.id}_rem_${Date.now()}`;
-        const summary = {
-          type: "match_summary",
-          userId: user.id,
-          rivalName: state.rivalName || "CPU",
-          myScore: score.player,
-          rivalScore: score.cpu,
-          winner: finalWinner,
-          date: new Date().toISOString(),
-          log: matchLog
-        };
-
-        const { error } = await supabase
-          .from('game_sync')
-          .upsert({
-            match_id: uniqueHistoryId,
-            last_move: summary,
-            updated_at: new Date().toISOString()
-          }, { onConflict: 'match_id' });
-
-        if (error) {
-          console.error("Error saving match history to Supabase:", error);
-        } else {
-          console.log("Successfully saved match history to Supabase!");
-        }
+        await saveMatchHistoryRecord(
+          finalWinner,
+          score,
+          state.rivalName || "CPU",
+          matchLog || [],
+          gameMode
+        );
       } catch (err) {
-        console.error("Unexpected error saving match history:", err);
+        console.warn("Error saving match history:", err);
       }
     };
 
     if (score.player >= maxPoints) {
+      hasSavedHistoryRef.current = true;
       console.log("[WINNER] Player Wins!");
       setTimeout(() => {
         setWinnerModal("player");
         setGameState("winner");
-        saveMatchHistory("player");
+        void saveMatchHistory("player");
       }, 1500);
     } else if (score.cpu >= maxPoints) {
+      hasSavedHistoryRef.current = true;
       console.log("[WINNER] CPU Wins!");
       setTimeout(() => {
         setWinnerModal("cpu");
         setGameState("winner");
-        saveMatchHistory("cpu");
+        void saveMatchHistory("cpu");
       }, 1500);
     }
   }, [score.player, score.cpu, maxPoints, setWinnerModal, setGameState, gameMode, matchLog, state.rivalName]);

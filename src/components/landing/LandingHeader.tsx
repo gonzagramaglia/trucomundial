@@ -24,13 +24,13 @@ export const LandingHeader: React.FC<LandingHeaderProps> = ({ user }) => {
   const displayCard = topCard || CARDS.find(c => c.id === 'messi') || CARDS[0];
 
   return (
-    <div style={{ 
-      display: 'flex', 
-      flexDirection: 'row', 
-      alignItems: 'center', 
-      justifyContent: 'center', 
-      gap: isMobile ? '0.6rem' : '2rem', 
-      marginBottom: '1rem', 
+    <div style={{
+      display: 'flex',
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: isMobile ? '0.6rem' : '2rem',
+      marginBottom: '1rem',
       width: '100%',
       transform: 'translateX(-12px)'
     }}>
@@ -60,28 +60,36 @@ export const LandingHeader: React.FC<LandingHeaderProps> = ({ user }) => {
             letterSpacing: '0.1em',
             marginTop: '0.75rem',
             marginLeft: '-2.5rem'
-          }}>BETA</span>
+          }}>DEMO</span>
         </div>
 
         {user && (
-          <div style={{ 
-            color: '#00f2ff', 
-            fontSize: '0.75rem', 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: '0.35rem', 
-            background: 'rgba(0,242,255,0.1)', 
-            padding: '0.4rem 0.8rem', 
-            borderRadius: '1rem', 
+          <div style={{
+            color: '#00f2ff',
+            fontSize: '0.75rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.4rem',
+            background: 'rgba(0,242,255,0.1)',
+            padding: '0.4rem 0.8rem',
+            borderRadius: '1rem',
             border: '1px solid rgba(0,242,255,0.2)',
             fontFamily: 'var(--font-main)',
-            textTransform: 'uppercase',
             letterSpacing: '0.05em',
-            fontWeight: 700
+            fontWeight: 700,
+            lineHeight: 1.35
           }}>
-            <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#00f2ff' }} />
-            <span className="desktop-only">{t('hello')}</span>
-            <strong>{user.user_metadata?.custom_username || user.email?.split('@')[0]}!</strong>
+            <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#00f2ff', flexShrink: 0 }} />
+            <span>
+              {t('greeting_prefix')}
+              <strong>
+                {user.user_metadata?.custom_username && user.user_metadata.custom_username.toLowerCase() !== 'guacho'
+                  ? user.user_metadata.custom_username
+                  : t('greeting_guacho')}
+              </strong>
+              !{isMobile ? <br /> : ' '}
+              {t('greeting_suffix')}
+            </span>
           </div>
         )}
       </div>

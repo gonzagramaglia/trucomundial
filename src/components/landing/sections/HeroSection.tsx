@@ -1,4 +1,4 @@
-import type { User } from '@supabase/supabase-js';
+import type { AuthUser } from '../../../hooks/useCurrentUser';
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
@@ -10,7 +10,7 @@ import { PointSelector } from "../PointSelector";
 import { TwitchButton } from "../../shared/TwitchButton";
 
 interface HeroSectionProps {
-  user: User | null;
+  user: AuthUser | null;
   hasUnlockedDeck: boolean;
   selectedMode: "1v1" | "2v2" | "multiplayer" | null;
   setSelectedMode: (mode: "1v1" | "2v2" | "multiplayer" | null) => void;

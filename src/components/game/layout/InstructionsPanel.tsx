@@ -2,11 +2,14 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 interface InstructionsPanelProps {
-  maxPoints?: number;
+  maxPoints?: number | string;
 }
 
-export const InstructionsPanel: React.FC<InstructionsPanelProps> = ({ maxPoints = 30 }) => {
+export const InstructionsPanel: React.FC<InstructionsPanelProps> = ({ maxPoints }) => {
   const { t } = useTranslation();
+  const isEn = typeof window !== 'undefined' && window.location.pathname.startsWith('/en');
+  const pointsText = maxPoints !== undefined ? maxPoints : (isEn ? "15 or 30" : "15 o 30");
+
   return (
     <>
       <h3
@@ -117,7 +120,7 @@ export const InstructionsPanel: React.FC<InstructionsPanelProps> = ({ maxPoints 
             {t("game_over_title")}
           </p>
           <p>
-            <strong style={{ color: 'white', textTransform: 'uppercase', fontWeight: 900 }}>{t("game_over_desc", { points: maxPoints })}</strong>
+            <strong style={{ color: 'white', textTransform: 'uppercase', fontWeight: 900 }}>{t("game_over_desc", { points: pointsText })}</strong>
           </p>
         </div>
       </div>

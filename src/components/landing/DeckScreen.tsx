@@ -1,17 +1,16 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Save,
   Search,
   Lock,
   Home,
-  Check,
   Layers,
   Unlock,
   RefreshCw,
   AlertCircle,
   ExternalLink,
   Star,
+  Clock,
 } from "lucide-react";
 import { isTopCard, getCardVotes } from "../../lib/votesStore";
 import { useTranslation } from "react-i18next";
@@ -31,7 +30,7 @@ interface DeckScreenProps {
 
 export const DeckScreen: React.FC<DeckScreenProps> = ({
   user,
-  handleAuth,
+  handleAuth: _handleAuth,
   onBack,
 }) => {
   const { t } = useTranslation();
@@ -44,17 +43,11 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({
   const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
 
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [saveSuccess, setSaveSuccess] = useState(false);
-
   const [unlockedCards, setUnlockedCards] = useState<string[]>([]);
-  const [selectedDeck, setSelectedDeck] = useState<string[]>([]);
-  const lastSavedDeckRef = useRef<string[]>([]);
 
   const [isMobile, setIsMobile] = useState(
     typeof window !== "undefined" ? window.innerWidth < 768 : false,
   );
-  const [showUnsavedModal, setShowUnsavedModal] = useState(false);
   const [openingPack, setOpeningPack] = useState(false);
   const [newCardsRevealed, setNewCardsRevealed] = useState<string[]>([]);
   const [highlightingCards, setHighlightingCards] = useState(false);
@@ -76,106 +69,98 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({
   }, []);
 
   const LOCAL_STORAGE_KEY = `trucomundial-deck-${user?.id || "anonymous"}`;
+  const LAST_UNLOCK_KEY = `trucomundial-deck-last-unlock-${user?.id || "anonymous"}`;
+  const FOUR_HOURS_MS = 4 * 60 * 60 * 1000;
+
+  const [lastUnlockTime, setLastUnlockTime] = useState<number | null>(() => {
+    if (typeof window === "undefined") return null;
+    const stored = localStorage.getItem(
+      `trucomundial-deck-last-unlock-${user?.id || "anonymous"}`,
+    );
+    return stored ? parseInt(stored, 10) : null;
+  });
+  const [currentTime, setCurrentTime] = useState<number>(Date.now());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(Date.now());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    const stored = localStorage.getItem(LAST_UNLOCK_KEY);
+    if (stored) {
+      setLastUnlockTime(parseInt(stored, 10));
+    } else if (unlockedCards.length >= 24) {
+      const now = Date.now();
+      localStorage.setItem(LAST_UNLOCK_KEY, String(now));
+      setLastUnlockTime(now);
+    }
+  }, [user, unlockedCards.length, LAST_UNLOCK_KEY]);
+
+  const timeRemainingMs =
+    unlockedCards.length >= 24 && lastUnlockTime !== null
+      ? Math.max(0, lastUnlockTime + FOUR_HOURS_MS - currentTime)
+      : 0;
+
+  const isCardAvailable =
+    unlockedCards.length >= 24 && timeRemainingMs <= 0;
+
+  const formatCountdown = (ms: number): string => {
+    const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+  };
 
   useEffect(() => {
     const fetchDeck = async () => {
       setLoading(true);
       try {
-        if (!user) {
-          // Anonymous users cannot build decks anymore. Clean up any leftover local storage.
-          localStorage.removeItem(LOCAL_STORAGE_KEY);
-          setUnlockedCards([]);
-          setSelectedDeck([]);
-          lastSavedDeckRef.current = [];
-          return;
+        // Load from localStorage first
+        const cached = localStorage.getItem(LOCAL_STORAGE_KEY);
+        if (cached) {
+          try {
+            const parsed = JSON.parse(cached);
+            if (parsed) {
+              setUnlockedCards(parsed.unlockedCards || []);
+            }
+          } catch (e) {}
         }
 
-        // Try Supabase user_decks table
-        const { data, error } = await supabase
-          .from("user_decks")
-          .select("*")
-          .eq("id", user.id)
-          .single();
+        if (user) {
+          // Try Supabase user_decks table
+          try {
+            const { data, error } = await supabase
+              .from("user_decks")
+              .select("*")
+              .eq("id", user.id)
+              .single();
 
-        if (error) {
-          if (error.code === "PGRST116" || error.code === "42P01") {
-            // Not found, create initial (or table doesn't exist)
-            // Try inserting if table exists
-            if (error.code !== "42P01") {
-              const { error: insertErr } = await supabase
-                .from("user_decks")
-                .insert({
-                  id: user.id,
-                  unlocked_cards: [],
-                  selected_deck: [],
-                });
-              if (insertErr) {
-                console.error(
-                  "Error creating deck, falling back to local:",
-                  insertErr,
-                );
-              }
-            }
-
-            const cached = localStorage.getItem(LOCAL_STORAGE_KEY);
-            if (cached) {
-              const parsed = JSON.parse(cached);
-              setUnlockedCards(parsed.unlockedCards || []);
-              setSelectedDeck(parsed.selectedDeck || []);
-              lastSavedDeckRef.current = parsed.selectedDeck || [];
-            } else {
-              setUnlockedCards([]);
-              setSelectedDeck([]);
-              lastSavedDeckRef.current = [];
+            if (!error && data) {
+              setUnlockedCards(data.unlocked_cards || []);
               localStorage.setItem(
                 LOCAL_STORAGE_KEY,
-                JSON.stringify({ unlockedCards: [], selectedDeck: [] }),
+                JSON.stringify({
+                  unlockedCards: data.unlocked_cards,
+                }),
               );
             }
-          } else {
-            console.error("Error fetching deck:", error);
+          } catch (e) {
+            // Offline or table not configured; local storage is active
           }
-        } else if (data) {
-          setUnlockedCards(data.unlocked_cards || []);
-          setSelectedDeck(data.selected_deck || []);
-          lastSavedDeckRef.current = data.selected_deck || [];
-          localStorage.setItem(
-            LOCAL_STORAGE_KEY,
-            JSON.stringify({
-              unlockedCards: data.unlocked_cards,
-              selectedDeck: data.selected_deck,
-            }),
-          );
         }
       } catch (err) {
-        console.error("Unexpected error:", err);
+        console.error("Unexpected error fetching deck:", err);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchDeck().then(() => {
-      // If after loading, the deck is full, set it to saved state
-      if (lastSavedDeckRef.current && lastSavedDeckRef.current.length === 22) {
-        setSaveSuccess(true);
-      }
-    });
+    fetchDeck();
   }, [user]);
-
-  const toggleCardSelection = (cardId: string) => {
-    if (!unlockedCards.includes(cardId)) return; // Can't select locked
-
-    setSaveSuccess(false);
-
-    setSelectedDeck((prev) => {
-      if (prev.includes(cardId)) {
-        return prev.filter((id) => id !== cardId);
-      } else {
-        if (prev.length >= 22) return prev; // Max 22
-        return [...prev, cardId];
-      }
-    });
-  };
 
   const toggleCountryFilter = (country: string) => {
     setSelectedCountries((prev) => {
@@ -185,48 +170,6 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({
         return [...prev, country];
       }
     });
-  };
-
-  const handleSaveDeck = async () => {
-    if (!user) {
-      localStorage.setItem(
-        LOCAL_STORAGE_KEY,
-        JSON.stringify({ unlockedCards, selectedDeck }),
-      );
-      setSaveSuccess(true);
-      lastSavedDeckRef.current = selectedDeck;
-      return;
-    }
-
-    setSaving(true);
-    try {
-      const { error } = await supabase.from("user_decks").upsert({
-        id: user.id,
-        unlocked_cards: unlockedCards,
-        selected_deck: selectedDeck,
-        updated_at: new Date().toISOString(),
-      });
-
-      if (error) throw error;
-
-      setSaveSuccess(true);
-      lastSavedDeckRef.current = selectedDeck;
-      localStorage.setItem(
-        LOCAL_STORAGE_KEY,
-        JSON.stringify({ unlockedCards, selectedDeck }),
-      );
-    } catch (err) {
-      console.error("Error saving deck:", err);
-      // Fallback local
-      localStorage.setItem(
-        LOCAL_STORAGE_KEY,
-        JSON.stringify({ unlockedCards, selectedDeck }),
-      );
-      setSaveSuccess(true);
-      lastSavedDeckRef.current = selectedDeck;
-    } finally {
-      setSaving(false);
-    }
   };
 
   const handleRedeemCode = async () => {
@@ -240,6 +183,30 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({
     }
     setRedeeming(true);
     setRedeemError("");
+
+    // Check localStorage first (from Prode rewards)
+    const localCodesKey = `trucomundial_reward_codes_${user.id}`;
+    let redeemedLocal = false;
+    try {
+      const cached = localStorage.getItem(localCodesKey);
+      if (cached) {
+        const codes: any[] = JSON.parse(cached);
+        const matchIdx = codes.findIndex((c: any) => c.code === redeemCode.toUpperCase() && !c.used);
+        if (matchIdx !== -1) {
+          codes[matchIdx].used = true;
+          localStorage.setItem(localCodesKey, JSON.stringify(codes));
+          redeemedLocal = true;
+        }
+      }
+    } catch (e) {}
+
+    if (redeemedLocal) {
+      setShowRedeemModal(false);
+      setRedeemCode("");
+      setRedeeming(false);
+      await buyMysteryCard(3);
+      return;
+    }
 
     try {
       const { data, error } = await supabase
@@ -264,14 +231,32 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({
       setShowRedeemModal(false);
       setRedeemCode("");
 
-      await buyMysteryCard();
+      await buyMysteryCard(3, lastUnlockTime === null);
     } catch (err) {
-      setRedeemError(t("error_redeem_connection"));
+      setRedeemError(t("error_invalid_code"));
       setRedeeming(false);
     }
   };
 
-  const buyMysteryCard = async () => {
+  const handleResetCollection = async () => {
+    if (confirm(t("reset_collection_confirm"))) {
+      setUnlockedCards([]);
+      localStorage.removeItem(LOCAL_STORAGE_KEY);
+      localStorage.removeItem(LAST_UNLOCK_KEY);
+      setLastUnlockTime(null);
+
+      if (user) {
+        const { error } = await supabase.from("user_decks").upsert({
+          id: user.id,
+          unlocked_cards: [],
+          updated_at: new Date().toISOString(),
+        });
+        if (error) console.error("Error reseteando colección:", error);
+      }
+    }
+  };
+
+  const buyMysteryCard = async (count: number = 3, updateCooldown: boolean = true) => {
     if (openingPack) return;
 
     const lockedCards = CARDS.map((c) => c.id).filter(
@@ -297,9 +282,9 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({
       return { id, weight };
     });
 
-    // Pick up to 3 random cards based on weights
+    // Pick up to count random cards based on weights
     const cardsToUnlock: string[] = [];
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < count; i++) {
       if (availableLockedWithWeights.length === 0) break;
       
       const totalWeight = availableLockedWithWeights.reduce((sum, item) => sum + item.weight, 0);
@@ -317,12 +302,6 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({
     }
 
     const newUnlocked = [...unlockedCards, ...cardsToUnlock];
-    let newSelected = [...selectedDeck];
-    for (const cardId of cardsToUnlock) {
-      if (newSelected.length < 22 && !newSelected.includes(cardId)) {
-        newSelected.push(cardId);
-      }
-    }
 
     // Simulate animation delay
     setTimeout(async () => {
@@ -333,17 +312,22 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({
         audioManager.playSystemSound("rewarding-card");
       }
       setUnlockedCards(newUnlocked);
-      setSelectedDeck(newSelected);
       setNewCardsRevealed(cardsToUnlock);
       setShowRevealModal(true);
       setOpeningPack(false);
+
+      // Start/reset 4-hour countdown if we have reached or exceeded 24 unlocked cards
+      if (newUnlocked.length >= 24 && updateCooldown) {
+        const now = Date.now();
+        localStorage.setItem(LAST_UNLOCK_KEY, String(now));
+        setLastUnlockTime(now);
+      }
 
       // Save to db immediately
       if (user) {
         const { error } = await supabase.from("user_decks").upsert({
           id: user.id,
           unlocked_cards: newUnlocked,
-          selected_deck: newSelected,
           updated_at: new Date().toISOString(),
         });
         if (error) console.error("Error guardando sobre:", error);
@@ -352,27 +336,13 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({
         LOCAL_STORAGE_KEY,
         JSON.stringify({
           unlockedCards: newUnlocked,
-          selectedDeck: newSelected,
         }),
       );
-      lastSavedDeckRef.current = newSelected;
     }, 1500);
   };
 
-  const hasUnsavedChanges = () => {
-    if (selectedDeck.length !== lastSavedDeckRef.current.length) return true;
-    for (const id of selectedDeck) {
-      if (!lastSavedDeckRef.current.includes(id)) return true;
-    }
-    return false;
-  };
-
   const handleBackRequest = () => {
-    if (hasUnsavedChanges()) {
-      setShowUnsavedModal(true);
-    } else {
-      onBack();
-    }
+    onBack();
   };
 
   const handleCloseRevealModal = () => {
@@ -425,12 +395,7 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({
       cleanString(p.club).includes(q)
     );
   }).sort((a, b) => {
-    // Sort logic: selected first, then unlocked, then locked
-    const aSelected = selectedDeck.includes(a.id);
-    const bSelected = selectedDeck.includes(b.id);
-    if (aSelected && !bSelected) return -1;
-    if (!aSelected && bSelected) return 1;
-
+    // Sort logic: unlocked first, then locked, then by envido
     const aUnlocked = unlockedCards.includes(a.id);
     const bUnlocked = unlockedCards.includes(b.id);
     if (aUnlocked && !bUnlocked) return -1;
@@ -486,339 +451,344 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({
         </>
       )}
 
-      {isMobile && (
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            width: "100%",
-            gap: "0.75rem",
-            marginBottom: "1rem",
-          }}
-        >
-          <button
-            onClick={handleBackRequest}
-            className="btn-hover-dark"
-            style={{
-              background: "rgba(255, 255, 255, 0.08)",
-              border: "1px solid rgba(255, 255, 255, 0.15)",
-              color: "white",
-              height: "36px",
-              borderRadius: "0.75rem",
-              padding: "0 0.85rem",
-              display: "flex",
-              alignItems: "center",
-              gap: "0.4rem",
-              fontSize: "0.8rem",
-              fontWeight: 800,
-              cursor: "pointer",
-              boxShadow: "3px 3px 0px #000",
-            }}
-          >
-            <Home size={14} /> {t("home")}
-          </button>
-          <UtilityButtons isMobile={true} />
-        </div>
-      )}
-
+      {/* HEADER SECTION (Responsive Container) */}
       <div
         style={{
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          marginBottom: "2rem",
+          justifyContent: "center",
+          marginBottom: isMobile ? "1.5rem" : "2rem",
           width: "100%",
+          position: "relative",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-          <Layers
-            size={36}
-            style={{
-              color: "#f97316",
-              filter: "drop-shadow(0 0 10px rgba(249, 115, 22, 0.3))",
-            }}
-          />
-          <h2
-            style={{
-              fontSize: isMobile ? "1.4rem" : "2.2rem",
-              margin: 0,
-              letterSpacing: "0.05em",
-              color: "#f97316",
-              textShadow: "0 0 15px rgba(249, 115, 22, 0.2)",
-            }}
-          >
-            {t("deck_build_title")}
-          </h2>
-        </div>
-        <p
-          style={{
-            fontSize: "0.95rem",
-            opacity: 0.65,
-            margin: "4px 0 0 0",
-            fontWeight: 600,
-          }}
-        >
-          {t("deck_build_subtitle")}
-        </p>
-        <p
-          style={{
-            fontSize: "0.85rem",
-            opacity: 0.8,
-            margin: "8px 0 0 0",
-            fontWeight: 700,
-            color: "#f97316",
-          }}
-        >
-          {t("deck_build_disclaimer")}
-        </p>
-      </div>
-
-      {user && unlockedCards.length >= 24 && (
-        <div
-          style={{
-            position: "sticky",
-            top: "1rem",
-            zIndex: 3000,
-            background: "rgba(15, 10, 25, 0.9)",
-            border: "2px solid rgba(16, 185, 129, 0.45)",
-            borderRadius: "2rem",
-            padding: "1.25rem 2rem",
-            marginBottom: "2rem",
-            display: "flex",
-            flexWrap: "wrap",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: "1.5rem",
-            backdropFilter: "blur(16px)",
-          }}
-        >
-          <div style={{ flex: "1 1 300px" }}>
+        {isMobile ? (
+          <>
+            {/* Mobile Header Layout */}
             <div
               style={{
                 display: "flex",
                 justifyContent: "space-between",
-                marginBottom: "0.5rem",
-                fontSize: "0.9rem",
-                fontWeight: 800,
+                alignItems: "center",
+                width: "100%",
+                gap: "0.75rem",
+                marginBottom: "1rem",
               }}
             >
-              <span
+              <button
+                onClick={handleBackRequest}
+                className="btn-hover-dark"
                 style={{
-                  color: selectedDeck.length === 22 ? "#10b981" : "#fff",
+                  background: "rgba(255, 255, 255, 0.08)",
+                  border: "1px solid rgba(255, 255, 255, 0.15)",
+                  color: "white",
+                  height: "36px",
+                  borderRadius: "0.75rem",
+                  padding: "0 0.85rem",
                   display: "flex",
                   alignItems: "center",
-                  gap: "0.5rem",
+                  gap: "0.4rem",
+                  fontSize: "0.8rem",
+                  fontWeight: 800,
+                  cursor: "pointer",
+                  boxShadow: "3px 3px 0px #000",
                 }}
               >
-                <Layers size={18} />
-                {t("selected_cards")}
-              </span>
-              <span
-                style={{
-                  color: selectedDeck.length === 22 ? "#10b981" : "#fff",
-                }}
-              >
-                {selectedDeck.length} / 22
-              </span>
+                <Home size={14} /> {t("home")}
+              </button>
+              <UtilityButtons isMobile={true} />
             </div>
+
             <div
               style={{
-                width: "100%",
-                height: "8px",
-                background: "rgba(255,255,255,0.1)",
-                borderRadius: "4px",
-                overflow: "hidden",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: "0.25rem",
+                justifyContent: "center",
+                textAlign: "center",
               }}
             >
-              <motion.div
-                animate={{ width: `${(selectedDeck.length / 22) * 100}%` }}
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}
+              >
+                <Layers
+                  size={24}
+                  style={{
+                    color: "#f97316",
+                    filter: "drop-shadow(0 0 6px rgba(249, 115, 22, 0.25))",
+                  }}
+                />
+                <h2
+                  className="text-display"
+                  style={{
+                    fontSize: "1.4rem",
+                    margin: 0,
+                    letterSpacing: "0.05em",
+                    color: "#f97316",
+                    textShadow: "0 0 8px rgba(249, 115, 22, 0.15)",
+                  }}
+                >
+                  {t("deck_build_title")}
+                </h2>
+              </div>
+              <p
                 style={{
-                  height: "100%",
-                  background:
-                    selectedDeck.length === 22
-                      ? "linear-gradient(to right, #10b981, #059669)"
-                      : "#fff",
+                  fontSize: "0.75rem",
+                  opacity: 0.6,
+                  margin: "4px 0 0 0",
                 }}
-              />
+              >
+                {t("deck_build_subtitle")}
+              </p>
             </div>
-          </div>
-          <div
+          </>
+        ) : (
+          <>
+            {/* Desktop Centered Header Layout */}
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: "0.5rem",
+                textAlign: "center",
+              }}
+            >
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}
+              >
+                <Layers
+                  size={36}
+                  style={{
+                    color: "#f97316",
+                    filter: "drop-shadow(0 0 10px rgba(249, 115, 22, 0.3))",
+                  }}
+                />
+                <h2
+                  className="text-display"
+                  style={{
+                    fontSize: "2.2rem",
+                    margin: 0,
+                    letterSpacing: "0.05em",
+                    color: "#f97316",
+                    textShadow: "0 0 15px rgba(249, 115, 22, 0.2)",
+                  }}
+                >
+                  {t("deck_build_title")}
+                </h2>
+              </div>
+              <p
+                style={{
+                  fontSize: "0.95rem",
+                  opacity: 0.65,
+                  margin: "4px 0 0 0",
+                  fontWeight: 600,
+                }}
+              >
+                {t("deck_build_subtitle")}
+              </p>
+            </div>
+          </>
+        )}
+      </div>
+
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        style={{
+          position: "relative",
+          zIndex: 1,
+          background:
+            "linear-gradient(135deg, rgba(249, 115, 22, 0.15), rgba(234, 88, 12, 0.05))",
+          border: "2px dashed rgba(249, 115, 22, 0.4)",
+          borderRadius: "2rem",
+          padding: "1.5rem 2rem",
+          marginBottom: "2rem",
+          display: "flex",
+          flexWrap: "wrap",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: "1.5rem",
+          backdropFilter: "blur(16px)",
+        }}
+      >
+        <div style={{ flex: "1 1 300px" }}>
+          <h3
             style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "1rem",
-              flexWrap: "wrap",
+              margin: "0 0 0.5rem 0",
+              color: "#f97316",
+              fontSize: "1.1rem",
+              fontWeight: 900,
             }}
           >
-            <button
-              onClick={handleSaveDeck}
-              disabled={saving || saveSuccess || selectedDeck.length !== 22}
-              className="btn-hover-dark"
-              style={{
-                background: saveSuccess
-                  ? "#10b981"
-                  : "linear-gradient(135deg, #10b981, #059669)",
-                border: "none",
-                color: "#fff",
-                height: "48px",
-                borderRadius: "1.25rem",
-                padding: "0 2rem",
-                fontSize: "1rem",
-                fontWeight: 950,
-                display: "flex",
-                alignItems: "center",
-                gap: "0.75rem",
-                cursor:
-                  saving || saveSuccess || selectedDeck.length !== 22
-                    ? "default"
-                    : "pointer",
-                opacity: saving || selectedDeck.length !== 22 ? 0.5 : 1,
-              }}
-            >
-              {saveSuccess ? <Check size={18} /> : <Save size={18} />}
-              {saveSuccess ? t("saved") : saving ? t("saving") : t("save_deck")}
-            </button>
+            {unlockedCards.length >= 24
+              ? isCardAvailable
+                ? t("next_card_ready")
+                : t("next_card_on_the_way")
+              : unlockedCards.length > 0
+              ? t("continue_building_deck")
+              : t("start_building_deck")}
+          </h3>
+          <p
+            style={{
+              margin: 0,
+              opacity: 0.8,
+              fontSize: "0.9rem",
+              lineHeight: 1.5,
+              maxWidth: isMobile ? "400px" : "none",
+            }}
+          >
+            {unlockedCards.length >= 24
+              ? t("packs_completed_desc")
+              : t("new_user_packs_desc")}
+          </p>
+          <div
+            style={{
+              marginTop: "0.6rem",
+              fontSize: "0.85rem",
+              fontWeight: 800,
+              color: "#f97316",
+              display: "flex",
+              alignItems: "center",
+              gap: "0.5rem",
+            }}
+          >
+            <span>
+              {t("collection_progress", {
+                unlocked: unlockedCards.length,
+                total: CARDS.length,
+                percentage: Math.round((unlockedCards.length / CARDS.length) * 100),
+              })}
+            </span>
+          </div>
+        </div>
 
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "0.75rem",
+            flexWrap: "wrap",
+          }}
+        >
+          <button
+            onClick={() => {
+              if (unlockedCards.length < 24) {
+                buyMysteryCard(3);
+              } else if (isCardAvailable) {
+                buyMysteryCard(1);
+              }
+            }}
+            disabled={
+              openingPack ||
+              (unlockedCards.length >= 24 && !isCardAvailable) ||
+              CARDS.filter((c) => !unlockedCards.includes(c.id)).length === 0
+            }
+            className="btn-hover-dark"
+            style={{
+              background:
+                unlockedCards.length >= 24 && !isCardAvailable
+                  ? "rgba(249, 115, 22, 0.2)"
+                  : "#f97316",
+              border:
+                unlockedCards.length >= 24 && !isCardAvailable
+                  ? "1px solid rgba(249, 115, 22, 0.4)"
+                  : "none",
+              color:
+                unlockedCards.length >= 24 && !isCardAvailable
+                  ? "#fdba74"
+                  : "#fff",
+              height: "48px",
+              borderRadius: "1.25rem",
+              padding: "0 1.5rem",
+              fontSize: "0.9rem",
+              fontWeight: 900,
+              display: "flex",
+              alignItems: "center",
+              gap: "0.6rem",
+              cursor:
+                openingPack ||
+                (unlockedCards.length >= 24 && !isCardAvailable) ||
+                CARDS.filter((c) => !unlockedCards.includes(c.id)).length === 0
+                  ? "not-allowed"
+                  : "pointer",
+              opacity: openingPack ? 0.7 : 1,
+              boxShadow:
+                unlockedCards.length >= 24 && !isCardAvailable
+                  ? "none"
+                  : "4px 4px 0px #000",
+              transition: "all 0.2s ease",
+            }}
+          >
+            {openingPack ? (
+              <RefreshCw size={18} className="spin" />
+            ) : unlockedCards.length >= 24 && !isCardAvailable ? (
+              <Clock size={18} />
+            ) : (
+              <Unlock size={18} />
+            )}
+            {CARDS.filter((c) => !unlockedCards.includes(c.id)).length === 0
+              ? t("all_cards_unlocked_btn")
+              : unlockedCards.length < 24
+              ? t("open_free_pack", {
+                  count: Math.max(0, 8 - Math.floor(unlockedCards.length / 3)),
+                })
+              : isCardAvailable
+              ? t("unlock_free_card")
+              : t("next_card_in", { time: formatCountdown(timeRemainingMs) })}
+          </button>
+
+          <button
+            onClick={() => setShowRedeemModal(true)}
+            className="btn-hover-dark"
+            style={{
+              background: "rgba(255, 255, 255, 0.08)",
+              border: "1px solid rgba(255, 255, 255, 0.2)",
+              color: "#fff",
+              height: "48px",
+              borderRadius: "1.25rem",
+              padding: "0 1.25rem",
+              fontSize: "0.9rem",
+              fontWeight: 800,
+              display: "flex",
+              alignItems: "center",
+              gap: "0.5rem",
+              cursor: "pointer",
+              boxShadow: "3px 3px 0px #000",
+            }}
+          >
+            <Unlock size={16} />
+            {t("redeem_code")}
+          </button>
+
+          {unlockedCards.length > 0 && (
             <button
-              onClick={() => setShowRedeemModal(true)}
+              onClick={handleResetCollection}
+              title={t("reset_collection_title")}
               className="btn-hover-dark"
               style={{
-                background: "#f97316",
-                border: "1px solid rgba(255,255,255,0.1)",
-                color: "#fff",
+                background: "rgba(255, 255, 255, 0.05)",
+                border: "1px solid rgba(255,255,255,0.15)",
+                color: "#a0a0ab",
                 height: "48px",
                 borderRadius: "1.25rem",
-                padding: "0 1.5rem",
-                fontSize: "1rem",
-                fontWeight: 950,
+                padding: "0 1rem",
+                fontSize: "0.85rem",
+                fontWeight: 700,
                 display: "flex",
                 alignItems: "center",
                 gap: "0.5rem",
                 cursor: "pointer",
               }}
             >
-              <Unlock size={18} />
-              {t("redeem_code")}
-            </button>
-          </div>
-        </div>
-      )}
-
-      {unlockedCards.length < 24 && (
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          style={{
-            position: !user ? "sticky" : "relative",
-            top: !user ? "1rem" : undefined,
-            zIndex: !user ? 3000 : 1,
-            background:
-              "linear-gradient(135deg, rgba(249, 115, 22, 0.15), rgba(234, 88, 12, 0.05))",
-            border: "2px dashed rgba(249, 115, 22, 0.4)",
-            borderRadius: "2rem",
-            padding: "1.5rem 2rem",
-            marginBottom: "2rem",
-            display: "flex",
-            flexWrap: "wrap",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: "1.5rem",
-            backdropFilter: "blur(16px)",
-          }}
-        >
-          <div style={{ flex: "1 1 300px" }}>
-            <h3
-              style={{
-                margin: "0 0 0.5rem 0",
-                color: "#f97316",
-                fontSize: "1.1rem",
-                fontWeight: 900,
-              }}
-            >
-              {user && unlockedCards.length > 0
-                ? t("continue_building_deck")
-                : t("start_building_deck")}
-            </h3>
-            <p
-              style={{
-                margin: 0,
-                opacity: 0.8,
-                fontSize: "0.9rem",
-                lineHeight: 1.5,
-                maxWidth: isMobile ? "400px" : "none",
-              }}
-            >
-              {user ? t("new_user_packs_desc") : t("login_packs_desc")}
-            </p>
-          </div>
-          {user ? (
-            <button
-              onClick={buyMysteryCard}
-              disabled={openingPack}
-              className="btn-hover-dark"
-              style={{
-                background: "#f97316",
-                border: "none",
-                color: "#fff",
-                height: "48px",
-                borderRadius: "1.25rem",
-                padding: "0 1.5rem",
-                fontSize: "0.9rem",
-                fontWeight: 900,
-                display: "flex",
-                alignItems: "center",
-                gap: "0.6rem",
-                cursor: openingPack ? "default" : "pointer",
-                opacity: openingPack ? 0.7 : 1,
-              }}
-            >
-              {openingPack ? (
-                <RefreshCw size={18} className="spin" />
-              ) : (
-                <Unlock size={18} />
-              )}
-              {t("open_free_pack", {
-                count: Math.max(0, 8 - Math.floor(unlockedCards.length / 3)),
-              })}
-            </button>
-          ) : (
-            <button
-              onClick={handleAuth}
-              className="btn-hover-dark"
-              style={{
-                background: "#f97316",
-                border: "none",
-                color: "#fff",
-                height: "46px",
-                borderRadius: "1.25rem",
-                padding: "0 1.5rem",
-                fontSize: "0.9rem",
-                fontWeight: 950,
-                display: "flex",
-                alignItems: "center",
-                gap: "0.6rem",
-                cursor: "pointer",
-                boxShadow: "4px 4px 0px #000",
-                marginTop: isMobile ? "-0.5rem" : 0,
-              }}
-            >
-              <svg
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                style={{ fill: "currentColor" }}
-              >
-                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
-                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
-              </svg>
-              {t("login_with_google")}
+              <RefreshCw size={16} />
+              {t("reset_collection_btn")}
             </button>
           )}
-        </motion.div>
-      )}
+        </div>
+      </motion.div>
 
       <div
         style={{
@@ -1222,7 +1192,6 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({
           >
             {filteredPlayers.map((player) => {
               const isUnlocked = unlockedCards.includes(player.id);
-              const isSelected = selectedDeck.includes(player.id);
               const isRevealed = newCardsRevealed.includes(player.id);
 
               return (
@@ -1241,13 +1210,10 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({
                     zIndex: isRevealed && highlightingCards ? 20 : 1,
                     opacity: isUnlocked ? 1 : 0.5,
                     filter: isUnlocked ? "none" : "grayscale(100%)",
-                    cursor: isUnlocked ? "pointer" : "default",
-                    transform: isSelected ? "translateY(-5px)" : "none",
+                    cursor: "default",
                     transition:
                       "transform 0.2s ease, filter 0.2s ease, opacity 0.2s ease",
                   }}
-                  onClick={() => toggleCardSelection(player.id)}
-                  whileHover={isUnlocked ? "hover" : undefined}
                 >
                   <div style={{ position: "relative" }}>
                     {!isUnlocked && (
@@ -1270,30 +1236,6 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({
                       >
                         <Lock size={24} color="#fff" />
                       </div>
-                    )}
-                    {isSelected && (
-                      <motion.div
-                        variants={{ hover: { scale: 1.25 } }}
-                        style={{
-                          position: "absolute",
-                          top: -12,
-                          right: -12,
-                          zIndex: 2000,
-                          background: "#10b981",
-                          color: "white",
-                          width: "28px",
-                          height: "28px",
-                          borderRadius: "50%",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          border: "2px solid rgba(15,10,25,0.9)",
-                          boxShadow: "0 4px 10px rgba(16, 185, 129, 0.4)",
-                          pointerEvents: "none",
-                        }}
-                      >
-                        <Check size={16} strokeWidth={3} />
-                      </motion.div>
                     )}
                     <Sticker
                       card={player}
@@ -1323,71 +1265,6 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({
             })}
           </div>
         </>
-      )}
-
-      {showUnsavedModal && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            zIndex: 9999,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            background: "rgba(0,0,0,0.8)",
-          }}
-        >
-          <div
-            style={{
-              background: "#1a1a2e",
-              padding: "2rem",
-              borderRadius: "1.5rem",
-              maxWidth: "400px",
-              width: "90%",
-              textAlign: "center",
-              border: "1px solid rgba(255,184,0,0.3)",
-            }}
-          >
-            <h3 style={{ color: "#ffb800", marginTop: 0 }}>
-              {t("unsaved_changes")}
-            </h3>
-            <p>{t("unsaved_deck_changes_desc")}</p>
-            <div style={{ display: "flex", gap: "1rem", marginTop: "1.5rem" }}>
-              <button
-                onClick={() => setShowUnsavedModal(false)}
-                style={{
-                  flex: 1,
-                  padding: "0.75rem",
-                  background: "rgba(255,255,255,0.1)",
-                  border: "none",
-                  color: "#fff",
-                  borderRadius: "0.75rem",
-                  cursor: "pointer",
-                }}
-              >
-                {t("cancel")}
-              </button>
-              <button
-                onClick={() => {
-                  setShowUnsavedModal(false);
-                  onBack();
-                }}
-                style={{
-                  flex: 1,
-                  padding: "0.75rem",
-                  background: "#e11d48",
-                  border: "none",
-                  color: "#fff",
-                  borderRadius: "0.75rem",
-                  cursor: "pointer",
-                  fontWeight: "bold",
-                }}
-              >
-                {t("exit_without_saving_btn")}
-              </button>
-            </div>
-          </div>
-        </div>
       )}
 
       {showRevealModal && newCardsRevealed.length > 0 && (
@@ -1485,7 +1362,9 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({
                   letterSpacing: "1px",
                 }}
               >
-                {t("cards_unlocked")}
+                {newCardsRevealed.length === 1
+                  ? t("card_unlocked")
+                  : t("cards_unlocked")}
               </h2>
 
               <button
@@ -1657,11 +1536,7 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({
                   gap: "0.5rem",
                 }}
               >
-                {redeemCode.length === 4 ? (
-                  <Unlock size={18} />
-                ) : (
-                  <Lock size={18} />
-                )}
+                <Unlock size={18} />
                 {redeeming ? t("redeeming") : t("redeem_btn")}
               </button>
             </div>

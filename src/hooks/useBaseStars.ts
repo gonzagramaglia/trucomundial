@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { fixtureMatches } from '../lib/fixtureData';
+import { MOCK_PRODE_RESULTS } from '../data/mockProdeResults';
 
 const normalizeCountry = (teamName: string) => {
   if (teamName === 'Estados Unidos') return 'USA';
@@ -19,35 +20,47 @@ export const useBaseStars = () => {
 
   useEffect(() => {
     const fetchFixtureResults = async () => {
+      let resultsList: { match_id: string; score_a: number; score_b: number; status: string }[] = [];
       try {
         const { data, error } = await supabase.from('fixture_results').select('match_id, score_a, score_b, status');
-        if (!error && data) {
-          const starsMap: Record<string, number> = {};
-          data.forEach(r => {
-            const match = fixtureMatches.find(m => m.id === r.match_id);
-            if (match && r.status?.startsWith('finished')) {
-              const teamA = normalizeCountry(match.teamA);
-              const teamB = normalizeCountry(match.teamB);
-              
-              if (r.status ?.startsWith('finished_penalties_A')) {
-                starsMap[teamA] = (starsMap[teamA] || 0) + 2;
-              } else if (r.status ?.startsWith('finished_penalties_B')) {
-                starsMap[teamB] = (starsMap[teamB] || 0) + 2;
-              } else if (r.score_a > r.score_b) {
-                starsMap[teamA] = (starsMap[teamA] || 0) + 2;
-              } else if (r.score_b > r.score_a) {
-                starsMap[teamB] = (starsMap[teamB] || 0) + 2;
-              } else {
-                starsMap[teamA] = (starsMap[teamA] || 0) + 1;
-                starsMap[teamB] = (starsMap[teamB] || 0) + 1;
-              }
-            }
-          });
-          setBaseStarsByCountry(starsMap);
+        if (!error && data && data.length > 0) {
+          resultsList = data;
         }
       } catch (err) {
-        console.error("Error fetching fixture results for stars:", err);
+        // Fallback to mock results
       }
+
+      if (resultsList.length === 0 && import.meta.env.VITE_DEMO_MODE === 'true') {
+        resultsList = Object.entries(MOCK_PRODE_RESULTS).map(([match_id, val]) => ({
+          match_id,
+          score_a: val.scoreA,
+          score_b: val.scoreB,
+          status: val.status,
+        }));
+      }
+
+      const starsMap: Record<string, number> = {};
+      resultsList.forEach(r => {
+        const match = fixtureMatches.find(m => m.id === r.match_id);
+        if (match && r.status?.startsWith('finished')) {
+          const teamA = normalizeCountry(match.teamA);
+          const teamB = normalizeCountry(match.teamB);
+          
+          if (r.status?.startsWith('finished_penalties_A')) {
+            starsMap[teamA] = (starsMap[teamA] || 0) + 2;
+          } else if (r.status?.startsWith('finished_penalties_B')) {
+            starsMap[teamB] = (starsMap[teamB] || 0) + 2;
+          } else if (r.score_a > r.score_b) {
+            starsMap[teamA] = (starsMap[teamA] || 0) + 2;
+          } else if (r.score_b > r.score_a) {
+            starsMap[teamB] = (starsMap[teamB] || 0) + 2;
+          } else {
+            starsMap[teamA] = (starsMap[teamA] || 0) + 1;
+            starsMap[teamB] = (starsMap[teamB] || 0) + 1;
+          }
+        }
+      });
+      setBaseStarsByCountry(starsMap);
     };
 
     fetchFixtureResults();

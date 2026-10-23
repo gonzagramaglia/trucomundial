@@ -14,8 +14,12 @@ import { TournamentResultModal } from "./components/game/modals/TournamentResult
 import { audioManager } from "./lib/audio";
 import { CARDS } from "./data/cards";
 import { fixtureMatches } from "./lib/fixtureData";
+import { useCurrentUser } from "./hooks/useCurrentUser";
+import { MOCK_PRODE_RESULTS } from "./data/mockProdeResults";
+import { saveMatchHistoryRecord } from "./lib/matchHistory";
+
 function App() {
-  const [user, setUser] = useState<any>(null);
+  const user = useCurrentUser();
   const [sessionId] = useState(
     () => `sess_${Math.random().toString(36).substr(2, 9)}`,
   );
@@ -35,25 +39,34 @@ function App() {
         const { data: resultsData } = await supabase.from('fixture_results').select('match_id, score_a, score_b, status');
         
         let fixtureStars: Record<string, number> = {};
-        if (resultsData) {
-          resultsData.forEach(r => {
-            const match = fixtureMatches.find(m => m.id === r.match_id);
-            if (match && r.status?.startsWith('finished')) {
-              if (r.status ?.startsWith('finished_penalties_A')) {
-                fixtureStars[match.teamA] = (fixtureStars[match.teamA] || 0) + 2;
-              } else if (r.status ?.startsWith('finished_penalties_B')) {
-                fixtureStars[match.teamB] = (fixtureStars[match.teamB] || 0) + 2;
-              } else if (r.score_a > r.score_b) {
-                fixtureStars[match.teamA] = (fixtureStars[match.teamA] || 0) + 2;
-              } else if (r.score_b > r.score_a) {
-                fixtureStars[match.teamB] = (fixtureStars[match.teamB] || 0) + 2;
-              } else {
-                fixtureStars[match.teamA] = (fixtureStars[match.teamA] || 0) + 1;
-                fixtureStars[match.teamB] = (fixtureStars[match.teamB] || 0) + 1;
-              }
+        const effectiveResults = resultsData && resultsData.length > 0
+          ? resultsData
+          : (import.meta.env.VITE_DEMO_MODE === 'true'
+              ? Object.entries(MOCK_PRODE_RESULTS).map(([match_id, val]) => ({
+                  match_id,
+                  score_a: val.scoreA,
+                  score_b: val.scoreB,
+                  status: val.status,
+                }))
+              : []);
+
+        effectiveResults.forEach(r => {
+          const match = fixtureMatches.find(m => m.id === r.match_id);
+          if (match && r.status?.startsWith('finished')) {
+            if (r.status?.startsWith('finished_penalties_A')) {
+              fixtureStars[match.teamA] = (fixtureStars[match.teamA] || 0) + 2;
+            } else if (r.status?.startsWith('finished_penalties_B')) {
+              fixtureStars[match.teamB] = (fixtureStars[match.teamB] || 0) + 2;
+            } else if (r.score_a > r.score_b) {
+              fixtureStars[match.teamA] = (fixtureStars[match.teamA] || 0) + 2;
+            } else if (r.score_b > r.score_a) {
+              fixtureStars[match.teamB] = (fixtureStars[match.teamB] || 0) + 2;
+            } else {
+              fixtureStars[match.teamA] = (fixtureStars[match.teamA] || 0) + 1;
+              fixtureStars[match.teamB] = (fixtureStars[match.teamB] || 0) + 1;
             }
-          });
-        }
+          }
+        });
 
         const aggregate: Record<string, number> = {};
         if (data) {
@@ -161,18 +174,6 @@ function App() {
       }
     };
   }, [core.gameMode, actualIsHost, broadcastMove]);
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-    });
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    });
-    return () => subscription.unsubscribe();
-  }, []);
 
   const isPlayingRef = useRef(false);
 
@@ -333,6 +334,16 @@ function App() {
   };
 
   const handleConfirmExit = () => {
+    if (core.gameState === "playing" && !core.winnerModal) {
+      void saveMatchHistoryRecord(
+        "abandoned",
+        core.score,
+        core.rivalName || "CPU",
+        core.matchLog || [],
+        currentRoomCode ? "multiplayer" : (core.gameMode || "1v1")
+      );
+    }
+
     setGameActive(false);
     setTournamentVotesSnapshot(null);
     setShowExitModal(false);

@@ -4,6 +4,7 @@ import type { Card } from "../../data/cards";
 import { StickerBadge } from "./StickerBadge";
 import { StickerInfo } from "./StickerInfo";
 import { useCardVotes, useIsTopCard } from "../../lib/votesStore";
+import { getAssetUrl } from "../../lib/assets";
 
 interface StickerProps {
   card: Card;
@@ -45,7 +46,7 @@ export const Sticker: React.FC<StickerProps> = ({
         className="sticker"
         style={{
           cursor: "default",
-          backgroundImage: "url('/card-back.png')",
+          backgroundImage: `url('${getAssetUrl('/card-back.png')}')`,
           backgroundSize: "cover",
           backgroundPosition: "center",
           border: '1.5px solid rgba(255, 255, 255, 0.3)',
@@ -78,7 +79,7 @@ export const Sticker: React.FC<StickerProps> = ({
       <div className="sticker-glitter"></div>
 
       {/* Player Image */}
-      <div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", backgroundImage: `url(${card.image})`, backgroundSize: "100% 100%", zIndex: 1 }} />
+      <div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", backgroundImage: `url(${getAssetUrl(card.image)})`, backgroundSize: "100% 100%", zIndex: 1 }} />
 
       {/* Overlays */}
       <div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "35%", background: "linear-gradient(to bottom, rgba(0,0,0,0.75), transparent)", zIndex: 2 }} />

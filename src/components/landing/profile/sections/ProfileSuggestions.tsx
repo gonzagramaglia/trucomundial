@@ -1,21 +1,27 @@
 import React from 'react';
-import { MessageSquare, Send } from 'lucide-react';
+import { MessageSquare, Send, Check } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { Modal } from '../../../ui/Modal';
+
+import type { UseFormRegister, UseFormHandleSubmit, FieldErrors } from 'react-hook-form';
+import type { TicketFormData } from '../../../../lib/schemas';
 
 interface ProfileSuggestionsProps {
   isSubmittingSuggestion: boolean;
   suggestionSuccess: boolean;
+  setSuggestionSuccess: (b: boolean) => void;
   suggestionError: string;
-  registerSuggestion: any;
-  handleSuggestionSubmit: any;
-  suggestionErrors: any;
-  onSuggestionSubmit: (data: any) => Promise<void>;
+  registerSuggestion: UseFormRegister<TicketFormData>;
+  handleSuggestionSubmit: UseFormHandleSubmit<TicketFormData>;
+  suggestionErrors: FieldErrors<TicketFormData>;
+  onSuggestionSubmit: (data: TicketFormData) => Promise<void>;
   getValidationMessage: (msg: string | undefined) => string;
 }
 
 export const ProfileSuggestions: React.FC<ProfileSuggestionsProps> = ({
   isSubmittingSuggestion,
   suggestionSuccess,
+  setSuggestionSuccess,
   suggestionError,
   registerSuggestion,
   handleSuggestionSubmit,
@@ -33,26 +39,25 @@ export const ProfileSuggestions: React.FC<ProfileSuggestionsProps> = ({
       padding: '2.5rem',
       marginTop: '0'
     }}>
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '1rem', marginBottom: '1.5rem' }}>
-        <div style={{
-          background: 'rgba(168, 85, 247, 0.15)',
-          width: '48px', height: '48px',
-          borderRadius: '1.25rem',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          color: '#a855f7',
-          flexShrink: 0,
-          marginTop: '0.25rem'
-        }}>
-          <MessageSquare size={24} />
-        </div>
-        <div>
+      <div style={{ marginBottom: '1.5rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
+          <div style={{
+            background: 'rgba(168, 85, 247, 0.15)',
+            width: '40px', height: '40px',
+            borderRadius: '1rem',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: '#a855f7',
+            flexShrink: 0
+          }}>
+            <MessageSquare size={20} />
+          </div>
           <h3 className="text-display" style={{ fontSize: '1.4rem', margin: 0, color: '#a855f7', lineHeight: 1.2 }}>
             {t("suggestion_title")}
           </h3>
-          <p style={{ margin: '0.25rem 0 0 0', opacity: 0.7, fontSize: '0.9rem' }}>
-            {t("suggestion_desc")}
-          </p>
         </div>
+        <p style={{ margin: 0, opacity: 0.7, fontSize: '0.9rem' }}>
+          {t("suggestion_desc")}
+        </p>
       </div>
 
       <form onSubmit={handleSuggestionSubmit(onSuggestionSubmit)} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -83,7 +88,6 @@ export const ProfileSuggestions: React.FC<ProfileSuggestionsProps> = ({
         </div>
 
         {suggestionError && <div style={{ color: '#ef4444', fontSize: '0.85rem' }}>{suggestionError}</div>}
-        {suggestionSuccess && <div style={{ color: '#10b981', fontSize: '0.85rem', fontWeight: 800 }}>{t("suggestion_success")}</div>}
 
         <button
           type="submit"
@@ -100,6 +104,67 @@ export const ProfileSuggestions: React.FC<ProfileSuggestionsProps> = ({
           {isSubmittingSuggestion ? t("sending_suggestion") : t("send_suggestion")}
         </button>
       </form>
+
+      {/* Success Modal */}
+      <Modal open={suggestionSuccess} onClose={() => setSuggestionSuccess?.(false)} showClose={true}>
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          textAlign: 'center',
+          padding: '0.5rem 0.5rem 0 0.5rem',
+          maxWidth: '380px'
+        }}>
+          <div style={{
+            width: '68px',
+            height: '68px',
+            borderRadius: '50%',
+            background: 'rgba(16, 185, 129, 0.15)',
+            border: '2px solid rgba(16, 185, 129, 0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#10b981',
+            marginBottom: '1.25rem',
+            boxShadow: '0 0 25px rgba(16, 185, 129, 0.35)'
+          }}>
+            <Check size={38} strokeWidth={2.5} />
+          </div>
+          <h3 className="text-display" style={{
+            fontSize: '1.4rem',
+            margin: '0 0 0.5rem 0',
+            color: '#fff',
+            letterSpacing: '0.05em'
+          }}>
+            {t("suggestion_sent_title")}
+          </h3>
+          <p style={{
+            margin: '0 0 1.5rem 0',
+            color: 'rgba(255, 255, 255, 0.75)',
+            fontSize: '0.9rem',
+            lineHeight: 1.5
+          }}>
+            {t("suggestion_success")}
+          </p>
+          <button
+            onClick={() => setSuggestionSuccess(false)}
+            className="btn-hover-dark"
+            style={{
+              background: '#10b981',
+              border: 'none',
+              color: '#000',
+              fontWeight: 900,
+              fontSize: '0.9rem',
+              padding: '0.75rem 2.25rem',
+              borderRadius: '1rem',
+              cursor: 'pointer',
+              boxShadow: '3px 3px 0px #000'
+            }}
+          >
+            {t("modal_ok")}
+          </button>
+        </div>
+      </Modal>
     </div>
   );
 };

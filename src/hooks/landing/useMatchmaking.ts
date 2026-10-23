@@ -1,10 +1,10 @@
-import type { User } from '@supabase/supabase-js';
+import type { AuthUser } from '../useCurrentUser';
 import { useState, useEffect } from "react";
 import { supabase } from "../../lib/supabase";
 import { setTournamentVotesSnapshot } from "../../lib/votesStore";
 
 interface UseMatchmakingProps {
-  user: User | null;
+  user: AuthUser | null;
   sessionId: string;
   onStart: (
     mode: "1v1" | "2v2" | "multiplayer",

@@ -1,4 +1,5 @@
 import type { PlayerRole } from "./truco/types";
+import { getAssetUrl } from "./assets";
 
 /**
  * Singleton audio manager that handles all game sounds, theme music, and voice lines.
@@ -196,7 +197,7 @@ class AudioManager {
     if (!this.soundMap[key]) return null;
 
     if (!this.audioCache.has(key)) {
-      const audio = new Audio(this.soundMap[key]);
+      const audio = new Audio(getAssetUrl(this.soundMap[key]));
       audio.volume = key === 'theme' ? this.volume * 0.05 : this.volume * 0.45;
       this.audioCache.set(key, audio);
     }
