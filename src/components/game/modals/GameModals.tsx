@@ -83,7 +83,7 @@ export const GameModals: React.FC<GameModalsProps> = ({
               {t("exit_to_home")}
             </Button>
             <Button
-              variant="secondary"
+              variant="primary"
               className="btn-hover-dark"
               onClick={onContinue}
               style={{ flex: 1, fontSize: "1.2rem", padding: "0.6rem", display: "flex", alignItems: "center", justifyContent: "center" }}

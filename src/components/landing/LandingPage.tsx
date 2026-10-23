@@ -21,6 +21,7 @@ import { useLandingNavigation } from "../../hooks/landing/useLandingNavigation";
 import { useMatchmaking } from "../../hooks/landing/useMatchmaking";
 import { LandingSidebar } from "./sections/LandingSidebar";
 import { HeroSection } from "./sections/HeroSection";
+import { getValidTeams } from "../../lib/teams";
 
 interface LandingPageProps {
   onStart: (
@@ -46,15 +47,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
   
   const [selectedTeams, setSelectedTeams] = useState<string[]>(() => {
     if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("truco_selected_teams");
-      if (saved) {
-        try {
-          const parsed = JSON.parse(saved);
-          if (Array.isArray(parsed)) return parsed;
-        } catch (e) {}
-      }
+      return getValidTeams(localStorage.getItem("truco_selected_teams"));
     }
-    return [];
+    return getValidTeams(null);
   });
 
   useEffect(() => {
@@ -217,6 +212,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         initiateGame={(mode, points) => matchmaking.initiateGame(mode, points, () => handleAuth(nav.handleReturnHome))}
         handleAuth={() => handleAuth(nav.handleReturnHome)}
         navigateTo={nav.navigateTo}
+        selectedTeams={selectedTeams}
+        setSelectedTeams={setSelectedTeams}
         setShowRanking={nav.setShowRanking}
         setShowTournament={nav.setShowTournament}
         setShowDeck={nav.setShowDeck}

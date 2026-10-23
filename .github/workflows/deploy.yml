@@ -38,6 +38,8 @@ jobs:
 
       - name: Build project
         run: yarn build
+        env:
+          BASE_URL: /trucomundial/
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

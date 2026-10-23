@@ -106,6 +106,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({ user, onBack, onOp
               natSearch={natSearch}
               setNatSearch={setNatSearch}
               handleUpdateNationality={handleUpdateNationality}
+              isMobile={isMobile}
             />
 
             <ProfileHistory

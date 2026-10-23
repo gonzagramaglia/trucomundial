@@ -79,7 +79,7 @@ export const Sticker: React.FC<StickerProps> = ({
       <div className="sticker-glitter"></div>
 
       {/* Player Image */}
-      <div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", backgroundImage: `url(${getAssetUrl(card.image)})`, backgroundSize: "100% 100%", zIndex: 1 }} />
+      <div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", backgroundImage: `url("${getAssetUrl(card.image)}")`, backgroundSize: "100% 100%", zIndex: 1 }} />
 
       {/* Overlays */}
       <div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "35%", background: "linear-gradient(to bottom, rgba(0,0,0,0.75), transparent)", zIndex: 2 }} />

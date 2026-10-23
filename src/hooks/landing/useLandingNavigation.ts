@@ -23,7 +23,20 @@ export const useLandingNavigation = () => {
   const [selectedPoints, setSelectedPoints] = useState<number>(15);
   const [showRules, setShowRules] = useState(false);
 
-  const getPath = () => typeof window !== "undefined" ? window.location.pathname : "";
+  const getBasePath = () => {
+    if (typeof window === "undefined") return "";
+    return window.location.pathname.startsWith("/trucomundial") ? "/trucomundial" : "";
+  };
+
+  const getPath = () => {
+    if (typeof window === "undefined") return "";
+    const base = getBasePath();
+    const p = window.location.pathname;
+    if (base && p.startsWith(base)) {
+      return p.slice(base.length) || "/";
+    }
+    return p;
+  };
 
   const [showRanking, setShowRanking] = useState(() => matchRoute(getPath(), ROUTES.ranking));
   const [showTournament, setShowTournament] = useState(() => matchRoute(getPath(), ROUTES.tournament));
@@ -57,8 +70,10 @@ export const useLandingNavigation = () => {
   const navigateTo = (path: string, setScreen: (show: boolean) => void) => {
     setScreen(true);
     if (typeof window !== "undefined") {
-      const isEn = window.location.pathname.startsWith("/en");
-      window.history.pushState({}, "", isEn ? `/en${path}` : path);
+      const base = getBasePath();
+      const current = window.location.pathname;
+      const isEn = current.startsWith(`${base}/en`) || current.startsWith("/en");
+      window.history.pushState({}, "", `${base}${isEn ? `/en${path}` : path}`);
     }
   };
 
@@ -74,8 +89,10 @@ export const useLandingNavigation = () => {
     setShowCreator(false);
     setShowCreatorsApp(false);
     if (typeof window !== "undefined") {
-      const isEn = window.location.pathname.startsWith("/en");
-      window.history.pushState({}, "", isEn ? "/en" : "/");
+      const base = getBasePath();
+      const current = window.location.pathname;
+      const isEn = current.startsWith(`${base}/en`) || current.startsWith("/en");
+      window.history.pushState({}, "", `${base}${isEn ? "/en" : "/"}`);
     }
   };
 

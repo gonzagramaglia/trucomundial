@@ -13,6 +13,7 @@ interface ProfileSettingsProps {
   natSearch: string;
   setNatSearch: (search: string) => void;
   handleUpdateNationality: (nat: string) => void;
+  isMobile?: boolean;
 }
 
 export const ProfileSettings: React.FC<ProfileSettingsProps> = ({
@@ -22,7 +23,8 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({
   setIsNatDropdownOpen,
   natSearch,
   setNatSearch,
-  handleUpdateNationality
+  handleUpdateNationality,
+  isMobile = false
 }) => {
   const { t, i18n } = useTranslation();
   const isEn = Boolean(i18n.language?.startsWith('en'));
@@ -46,9 +48,10 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({
         {/* Language Config */}
         <div style={{
           display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'flex-start',
-          gap: '0.75rem',
+          flexDirection: isMobile ? 'column' : 'row',
+          alignItems: isMobile ? 'flex-start' : 'center',
+          justifyContent: isMobile ? 'flex-start' : 'space-between',
+          gap: '1rem',
           paddingBottom: '1.25rem',
           borderBottom: '1px solid rgba(255,255,255,0.1)'
         }}>
@@ -63,11 +66,19 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({
               i18n.changeLanguage(newLang);
               localStorage.setItem('lang', newLang);
               if (typeof window !== 'undefined') {
+                const base = window.location.pathname.startsWith('/trucomundial')
+                  ? '/trucomundial'
+                  : (import.meta.env.BASE_URL && import.meta.env.BASE_URL !== '/' && import.meta.env.BASE_URL !== './')
+                    ? (import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL.slice(0, -1) : import.meta.env.BASE_URL)
+                    : '';
                 const currentPath = window.location.pathname;
-                if (newLang === 'en' && !currentPath.startsWith('/en')) {
-                  window.history.pushState({}, '', '/en' + (currentPath === '/' ? '' : currentPath));
-                } else if (newLang === 'es' && currentPath.startsWith('/en')) {
-                  window.history.pushState({}, '', currentPath.replace(/^\/en/, '') || '/');
+                const subPath = currentPath.startsWith(base) ? currentPath.slice(base.length) || '/' : currentPath;
+                if (newLang === 'en' && !subPath.startsWith('/en')) {
+                  const nextSubPath = '/en' + (subPath === '/' ? '' : subPath);
+                  window.history.pushState({}, '', `${base}${nextSubPath}`);
+                } else if (newLang === 'es' && subPath.startsWith('/en')) {
+                  const nextSubPath = subPath.replace(/^\/en/, '') || '/';
+                  window.history.pushState({}, '', `${base}${nextSubPath}`);
                 }
               }
             }}
@@ -86,7 +97,8 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({
               fontWeight: 900,
               cursor: 'pointer',
               boxShadow: '3px 3px 0px #000',
-              transition: 'all 0.15s ease'
+              transition: 'all 0.15s ease',
+              flexShrink: 0
             }}
             title={t('config_change_language')}
           >
@@ -98,9 +110,10 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({
         {/* Nationality Config */}
         <div style={{
           display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'flex-start',
-          gap: '0.75rem'
+          flexDirection: isMobile ? 'column' : 'row',
+          alignItems: isMobile ? 'flex-start' : 'center',
+          justifyContent: isMobile ? 'flex-start' : 'space-between',
+          gap: '1rem'
         }}>
           <div>
             <div style={{ fontWeight: 800, fontSize: '0.95rem', color: '#fff', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -111,7 +124,7 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({
             </div>
           </div>
           
-          <div style={{ position: 'relative', width: '200px' }}>
+          <div style={{ position: 'relative', width: isMobile ? '100%' : '200px', flexShrink: 0 }}>
             <button
               onClick={() => setIsNatDropdownOpen(!isNatDropdownOpen)}
               disabled={isUpdatingNationality}
@@ -137,7 +150,7 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({
             >
               <span style={{ color: nationality ? '#fff' : 'rgba(255,255,255,0.5)', textAlign: 'left', flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: '0.5rem' }}>
                 {nationality ? <span style={{ fontSize: '1.2rem' }}>{getFlag(nationality)}</span> : null}
-                <span>{nationality || (window.location.pathname.startsWith('/en') ? 'Select...' : 'Seleccionar...')}</span>
+                <span>{nationality || (isEn ? 'Select...' : 'Seleccionar...')}</span>
               </span>
               <ChevronDown size={16} style={{ 
                 transform: isNatDropdownOpen ? 'rotate(180deg)' : 'none', 
@@ -162,7 +175,7 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({
                     style={{
                       position: 'absolute',
                       top: 'calc(100% + 0.5rem)',
-                      left: 0,
+                      right: 0,
                       minWidth: '220px',
                       background: 'rgba(20, 20, 25, 0.95)',
                       backdropFilter: 'blur(10px)',
@@ -182,7 +195,7 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({
                         type="text"
                         value={natSearch}
                         onChange={(e) => setNatSearch(e.target.value)}
-                        placeholder={window.location.pathname.startsWith('/en') ? 'Search country...' : 'Buscar país...'}
+                        placeholder={isEn ? 'Search country...' : 'Buscar país...'}
                         style={{
                           width: '100%',
                           background: 'rgba(255, 255, 255, 0.05)',
@@ -255,7 +268,7 @@ export const ProfileSettings: React.FC<ProfileSettingsProps> = ({
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-start', gap: '0.5rem' }}>
                         {nationality === 'Otra' && <Check size={14} />}
                         <span style={{ fontSize: '1.2rem' }}>{getFlag('Otra')}</span>
-                        <span>{window.location.pathname.startsWith('/en') ? 'Other' : 'Otra'}</span>
+                        <span>{isEn ? 'Other' : 'Otra'}</span>
                       </div>
                     </button>
                   </motion.div>

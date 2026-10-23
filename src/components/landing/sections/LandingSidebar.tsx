@@ -39,7 +39,8 @@ export const LandingSidebar: React.FC<LandingSidebarProps> = ({
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const hideRulesBtn = showRanking || showDeck || showProde || (isMobile && showProfile);
+  const isScreenWithRules = showRanking || showDeck || showProde;
+  const hideRulesBtn = isMobile && (showProfile || isScreenWithRules);
 
   return (
     <div
@@ -53,11 +54,12 @@ export const LandingSidebar: React.FC<LandingSidebarProps> = ({
         zIndex: 6000,
       }}
     >
-      {user && !showProfile && !showAdmin && (!isMobile || (!showRanking && !showDeck && !showProde)) && (
+      {user && !showProfile && !showAdmin && !showRanking && !showDeck && !showProde && (
         <button
           onClick={() => {
-            const isEn = window.location.pathname.startsWith("/en");
-            const target = isEn ? "/en/perfil" : "/perfil";
+            const base = window.location.pathname.startsWith("/trucomundial") ? "/trucomundial" : "";
+            const isEn = window.location.pathname.startsWith(`${base}/en`) || window.location.pathname.startsWith("/en");
+            const target = `${base}${isEn ? "/en/perfil" : "/perfil"}`;
             if (window.location.pathname !== target) {
               window.history.pushState({}, "", target);
               window.dispatchEvent(new PopStateEvent("popstate"));
@@ -112,8 +114,9 @@ export const LandingSidebar: React.FC<LandingSidebarProps> = ({
       {isApprovedCreator && !showCreator && !showAdmin && (
         <button
           onClick={() => {
-            const isEn = window.location.pathname.startsWith("/en");
-            const path = isEn ? "/en/creador" : "/creador";
+            const base = window.location.pathname.startsWith("/trucomundial") ? "/trucomundial" : "";
+            const isEn = window.location.pathname.startsWith(`${base}/en`) || window.location.pathname.startsWith("/en");
+            const path = `${base}${isEn ? "/en/creador" : "/creador"}`;
             window.history.pushState({}, "", path);
             window.dispatchEvent(new PopStateEvent("popstate"));
           }}
@@ -141,8 +144,9 @@ export const LandingSidebar: React.FC<LandingSidebarProps> = ({
       {isSuperAdmin && !showAdmin && (
         <button
           onClick={() => {
-            const isEn = window.location.pathname.startsWith("/en");
-            const path = isEn ? "/en/admin" : "/admin";
+            const base = window.location.pathname.startsWith("/trucomundial") ? "/trucomundial" : "";
+            const isEn = window.location.pathname.startsWith(`${base}/en`) || window.location.pathname.startsWith("/en");
+            const path = `${base}${isEn ? "/en/admin" : "/admin"}`;
             window.history.pushState({}, "", path);
             window.dispatchEvent(new PopStateEvent("popstate"));
           }}

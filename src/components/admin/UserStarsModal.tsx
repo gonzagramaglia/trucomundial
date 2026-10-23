@@ -2,6 +2,7 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Star } from 'lucide-react';
 import { CARDS } from '../../data/cards';
+import { getAssetUrl } from '../../lib/assets';
 
 interface UserStarsModalProps {
   isOpen: boolean;
@@ -196,7 +197,7 @@ export const UserStarsModal: React.FC<UserStarsModalProps> = ({
                       <div style={{
                         width: '42px',
                         height: '56px',
-                        backgroundImage: `url(${item.image})`,
+                        backgroundImage: `url("${getAssetUrl(item.image)}")`,
                         backgroundSize: '100% 100%',
                         borderRadius: '0.35rem',
                         border: '1.5px solid rgba(255, 255, 255, 0.2)',

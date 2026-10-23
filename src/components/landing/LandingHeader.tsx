@@ -85,7 +85,7 @@ export const LandingHeader: React.FC<LandingHeaderProps> = ({ user }) => {
               <strong>
                 {user.user_metadata?.custom_username && user.user_metadata.custom_username.toLowerCase() !== 'guacho'
                   ? user.user_metadata.custom_username
-                  : t('greeting_guacho')}
+                  : t('greeting')}
               </strong>
               !{isMobile ? <br /> : ' '}
               {t('greeting_suffix')}
