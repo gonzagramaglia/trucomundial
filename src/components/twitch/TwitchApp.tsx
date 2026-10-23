@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Home, BookOpen, Search } from "lucide-react";
+import { Home, BookOpen, Search, Video } from "lucide-react";
 import { VolumeControl } from "../shared/VolumeControl";
 import { audioManager } from "../../lib/audio";
 import { useTrucoGame } from "../../hooks/useTrucoGame";
@@ -11,9 +11,23 @@ import { motion, AnimatePresence } from "framer-motion";
 import type { PlayerRole } from "../../lib/truco/types";
 import { RulesModal } from "../shared/RulesModal";
 import { useTranslation } from "react-i18next";
+import { ALL_TEAMS_LIST, isValidTeamSelection, getValidTeams } from "../../lib/teams";
 
 export function TwitchApp() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const path = window.location.pathname;
+      const isEn =
+        path.startsWith("/en") ||
+        path.startsWith("/trucomundial/en") ||
+        path.includes("/en/");
+      if (isEn && i18n.language !== "en") {
+        i18n.changeLanguage("en");
+      }
+    }
+  }, [i18n]);
   const [channel, setChannel] = useState<string>("");
   const [points, setPoints] = useState<number>(30);
   const [opponentMode, setOpponentMode] = useState<"cpu" | "streamer">("cpu");
@@ -24,14 +38,10 @@ export function TwitchApp() {
       .replace(/[\u0300-\u036f]/g, "")
       .toLowerCase();
   const [selectedTeams, setSelectedTeams] = useState<string[]>(() => {
-    const saved = localStorage.getItem("truco_selected_teams_twitch");
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) return parsed;
-      } catch (e) {}
+    if (typeof window !== "undefined") {
+      return getValidTeams(localStorage.getItem("truco_selected_teams_twitch"));
     }
-    return [];
+    return getValidTeams(null);
   });
   const [showRules, setShowRules] = useState(false);
 
@@ -210,7 +220,7 @@ export function TwitchApp() {
   const startGame = async (e: React.FormEvent) => {
     e.preventDefault();
     if (channel.trim() === "") return;
-    if (selectedTeams.length < 2) return;
+    if (!isValidTeamSelection(selectedTeams)) return;
     setIsConfigured(true);
 
     if (opponentMode === "streamer") {
@@ -303,64 +313,69 @@ export function TwitchApp() {
           backgroundPosition: "center",
           backgroundSize: "cover",
           color: "white",
+          padding: isMobile ? "5.5rem 1rem 2rem 1rem" : "3.5rem 1rem 4.5rem 1rem",
+          boxSizing: "border-box",
         }}
       >
-        {/* Home Button */}
-        {!isConfigured && (
-          <button
-            onClick={() => (window.location.href = "/")}
-            className="btn-hover-dark"
-            style={{
-              position: "fixed",
-              top: "1.5rem",
-              left: "1.5rem",
-              background: "rgba(255, 255, 255, 0.1)",
-              backdropFilter: "blur(12px)",
-              zIndex: 2000,
-              height: "40px",
-              borderRadius: "1rem",
-              padding: "0 1.25rem",
-              display: "flex",
-              alignItems: "center",
-              gap: "0.5rem",
-              color: "white",
-              border: "1px solid rgba(255, 255, 255, 0.2)",
-              fontWeight: 900,
-              fontSize: "0.75rem",
-              letterSpacing: "0.05em",
-              textTransform: "uppercase",
-              cursor: "pointer",
-            }}
-          >
-            <Home size={18} />
-            <span>INICIO</span>
-          </button>
-        )}
-
-        {/* Top Right Controls */}
+        {/* Top Left Controls */}
         {!isConfigured && (
           <div
             style={{
               position: "fixed",
-              top: "1.5rem",
-              right: "1.5rem",
+              top: isMobile ? "1rem" : "1.5rem",
+              left: isMobile ? "1rem" : "1.5rem",
               zIndex: 2000,
               display: "flex",
-              flexDirection: "column",
-              gap: "0.75rem",
-              alignItems: "center",
+              flexDirection: isMobile ? "row" : "column",
+              gap: "0.5rem",
+              alignItems: isMobile ? "center" : "flex-start",
             }}
           >
-            <VolumeControl expandDirection="left" />
             <button
+              type="button"
+              onClick={() => {
+                const isEn =
+                  window.location.pathname.startsWith("/en") ||
+                  window.location.pathname.startsWith("/trucomundial/en") ||
+                  window.location.pathname.includes("/en/");
+                const base = window.location.pathname.startsWith("/trucomundial")
+                  ? "/trucomundial"
+                  : "";
+                window.location.href = `${base}${isEn ? "/en" : "/"}`;
+              }}
+              className="btn-hover-dark"
+              style={{
+                background: "rgba(255, 255, 255, 0.1)",
+                backdropFilter: "blur(12px)",
+                height: isMobile ? "36px" : "40px",
+                borderRadius: isMobile ? "0.75rem" : "1rem",
+                padding: isMobile ? "0 0.85rem" : "0 1.25rem",
+                display: "flex",
+                alignItems: "center",
+                gap: "0.4rem",
+                color: "white",
+                border: "1px solid rgba(255, 255, 255, 0.2)",
+                fontWeight: 900,
+                fontSize: isMobile ? "0.7rem" : "0.75rem",
+                letterSpacing: "0.05em",
+                textTransform: "uppercase",
+                cursor: "pointer",
+              }}
+            >
+              <Home size={isMobile ? 16 : 18} />
+              <span>{t("home")}</span>
+            </button>
+
+            <button
+              type="button"
               onClick={() => setShowRules(true)}
               className="btn-hover-dark"
               style={{
                 background: "rgba(255, 255, 255, 0.1)",
                 border: "1px solid rgba(255, 255, 255, 0.2)",
                 color: "white",
-                height: "40px",
-                width: "40px",
+                height: isMobile ? "36px" : "40px",
+                width: isMobile ? "36px" : "40px",
                 borderRadius: "50%",
                 cursor: "pointer",
                 display: "flex",
@@ -371,8 +386,82 @@ export function TwitchApp() {
               }}
               title={t("rules")}
             >
-              <BookOpen size={20} />
+              <BookOpen size={isMobile ? 18 : 20} />
             </button>
+          </div>
+        )}
+
+        {/* Top Right Controls */}
+        {!isConfigured && (
+          <div
+            style={{
+              position: "fixed",
+              top: isMobile ? "1rem" : "1.5rem",
+              right: isMobile ? "1rem" : "1.5rem",
+              zIndex: 2000,
+              display: "flex",
+              flexDirection: isMobile ? "row" : "column",
+              gap: "0.5rem",
+              alignItems: "center",
+            }}
+          >
+            {isMobile ? (
+              <>
+                <a
+                  href="https://youtu.be/228FtMaq8uY"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => audioManager.setVolume(0)}
+                  className="btn-hover-dark"
+                  style={{
+                    background: "rgba(255, 255, 255, 0.1)",
+                    border: "1px solid rgba(255, 255, 255, 0.2)",
+                    color: "white",
+                    height: "36px",
+                    width: "36px",
+                    borderRadius: "50%",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    backdropFilter: "blur(12px)",
+                    transition: "none",
+                  }}
+                  title="Video"
+                >
+                  <Video size={16} />
+                </a>
+                <VolumeControl size={36} expandDirection="left" />
+              </>
+            ) : (
+              <>
+                <VolumeControl size={40} expandDirection="left" />
+                <a
+                  href="https://youtu.be/228FtMaq8uY"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => audioManager.setVolume(0)}
+                  className="btn-hover-dark"
+                  style={{
+                    background: "rgba(255, 255, 255, 0.1)",
+                    border: "1px solid rgba(255, 255, 255, 0.2)",
+                    color: "white",
+                    height: "40px",
+                    width: "40px",
+                    borderRadius: "50%",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    backdropFilter: "blur(12px)",
+                    transition: "none",
+                  }}
+                  title="Video"
+                >
+                  <Video size={18} />
+                </a>
+              </>
+            )}
           </div>
         )}
 
@@ -407,15 +496,13 @@ export function TwitchApp() {
                 <path d="M21 2H3v16h5v4l4-4h5l4-4V2zm-10 9V7m5 4V7" />
               </svg>
               <h2 style={{ color: "#9146FF", margin: 0 }}>
-                Twitch Juega Truco Mundial
+                {t("twitch_title")}
               </h2>
               <p style={{ fontSize: "1.1rem", margin: 0 }}>
-                Este modo está diseñado para streamers y solo funciona en
-                pantallas grandes (PC o Tablets en horizontal).
+                {t("twitch_mobile_desc1")}
               </p>
               <p style={{ margin: 0, opacity: 0.8 }}>
-                Por favor, ingresá desde tu computadora para conectar tu canal
-                de Twitch.
+                {t("twitch_mobile_desc2")}
               </p>
             </div>
           ) : (
@@ -429,6 +516,8 @@ export function TwitchApp() {
                 maxWidth: "600px",
                 width: "100%",
                 textAlign: "center",
+                marginTop: isMobile ? "0" : "1.25rem",
+                marginBottom: isMobile ? "0" : "3rem",
               }}
             >
               <h2
@@ -455,7 +544,7 @@ export function TwitchApp() {
                 >
                   <path d="M21 2H3v16h5v4l4-4h5l4-4V2zm-10 9V7m5 4V7" />
                 </svg>
-                Twitch Juega Truco Mundial
+                {t("twitch_title")}
               </h2>
               <form onSubmit={startGame}>
                 <div style={{ marginBottom: "1rem", textAlign: "left" }}>
@@ -467,11 +556,11 @@ export function TwitchApp() {
                       color: "#ccc",
                     }}
                   >
-                    Canal de Twitch
+                    {t("twitch_channel_label")}
                   </label>
                   <input
                     type="text"
-                    placeholder="Ej: muchomovimiento"
+                    placeholder={t("twitch_channel_placeholder", "Ej: rubius")}
                     value={channel}
                     onChange={(e) => setChannel(e.target.value)}
                     style={{
@@ -495,7 +584,7 @@ export function TwitchApp() {
                       color: "#ccc",
                     }}
                   >
-                    ¿A cuántos puntos va a jugarse la partida?
+                    {t("twitch_points_label")}
                   </label>
                   <div style={{ display: "flex", gap: "0.5rem" }}>
                     <button
@@ -519,7 +608,7 @@ export function TwitchApp() {
                         fontSize: "0.9rem",
                       }}
                     >
-                      A 15 (Rápida)
+                      {t("points_15_fast")}
                     </button>
                     <button
                       type="button"
@@ -542,7 +631,7 @@ export function TwitchApp() {
                         fontSize: "0.9rem",
                       }}
                     >
-                      A 30 (Clásica)
+                      {t("points_30_classic")}
                     </button>
                   </div>
                 </div>
@@ -556,7 +645,7 @@ export function TwitchApp() {
                       color: "#ccc",
                     }}
                   >
-                    Modalidad
+                    {t("twitch_mode_label")}
                   </label>
                   <div style={{ display: "flex", gap: "0.5rem" }}>
                     <button
@@ -580,7 +669,7 @@ export function TwitchApp() {
                         fontSize: "0.9rem",
                       }}
                     >
-                      Chat vs CPU
+                      {t("twitch_mode_cpu")}
                     </button>
                     <button
                       type="button"
@@ -598,9 +687,9 @@ export function TwitchApp() {
                         fontSize: "0.9rem",
                       }}
                     >
-                      Chat vs Streamer{" "}
+                      {t("twitch_mode_streamer")}{" "}
                       <span style={{ opacity: 0.6, fontSize: "0.75rem" }}>
-                        (próximamente)
+                        ({t("coming_soon")})
                       </span>
                     </button>
                   </div>
@@ -615,61 +704,10 @@ export function TwitchApp() {
                       color: "#ccc",
                     }}
                   >
-                    Conformación del Mazo (Elegí 4 selecciones)
+                    {t("twitch_deck_label")}
                   </label>
 
                   {(() => {
-                    const ALL_TEAMS_LIST = [
-                      { id: "Argelia", flag: "🇩🇿", code: "ALG" },
-                      { id: "Argentina", flag: "🇦🇷", code: "ARG" },
-                      { id: "Australia", flag: "🇦🇺", code: "AUS" },
-                      { id: "Austria", flag: "🇦🇹", code: "AUT" },
-                      { id: "Bélgica", code: "BEL", flag: "🇧🇪" },
-                      { id: "Bosnia y Herz", flag: "🇧🇦", code: "BIH" },
-                      { id: "Brasil", flag: "🇧🇷", code: "BRA" },
-                      { id: "Canadá", flag: "🇨🇦", code: "CAN" },
-                      { id: "Costa de Marfil", code: "CIV", flag: "🇨🇮" },
-                      { id: "DR Congo", flag: "🇨🇩", code: "COD" },
-                      { id: "Colombia", flag: "🇨🇴", code: "COL" },
-                      { id: "Cabo Verde", flag: "🇨🇻", code: "CPV" },
-                      { id: "Croacia", flag: "🇭🇷", code: "CRO" },
-                      { id: "Curaçao", flag: "🇨🇼", code: "CUW" },
-                      { id: "República Checa", flag: "🇨🇿", code: "CZE" },
-                      { id: "Ecuador", flag: "🇪🇨", code: "ECU" },
-                      { id: "Egipto", flag: "🇪🇬", code: "EGY" },
-                      { id: "Inglaterra", flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", code: "ENG" },
-                      { id: "España", flag: "🇪🇸", code: "ESP" },
-                      { id: "Francia", flag: "🇫🇷", code: "FRA" },
-                      { id: "Alemania", code: "GER", flag: "🇩🇪" },
-                      { id: "Ghana", flag: "🇬🇭", code: "GHA" },
-                      { id: "Haití", flag: "🇭🇹", code: "HAI" },
-                      { id: "Irán", flag: "🇮🇷", code: "IRN" },
-                      { id: "Iraq", flag: "🇮🇶", code: "IRQ" },
-                      { id: "Jordania", flag: "🇯🇴", code: "JOR" },
-                      { id: "Japón", flag: "🇯🇵", code: "JPN" },
-                      { id: "Corea del Sur", flag: "🇰🇷", code: "KOR" },
-                      { id: "Arabia Saudita", flag: "🇸🇦", code: "KSA" },
-                      { id: "Marruecos", flag: "🇲🇦", code: "MAR" },
-                      { id: "México", flag: "🇲🇽", code: "MEX" },
-                      { id: "Países Bajos", flag: "🇳🇱", code: "NED" },
-                      { id: "Noruega", flag: "🇳🇴", code: "NOR" },
-                      { id: "Nueva Zelanda", flag: "🇳🇿", code: "NZL" },
-                      { id: "Panamá", flag: "🇵🇦", code: "PAN" },
-                      { id: "Paraguay", flag: "🇵🇾", code: "PAR" },
-                      { id: "Portugal", flag: "🇵🇹", code: "POR" },
-                      { id: "Qatar", flag: "🇶🇦", code: "QAT" },
-                      { id: "Sudáfrica", flag: "🇿🇦", code: "RSA" },
-                      { id: "Escocia", code: "SCO", flag: "🏴󠁧󠁢󠁳󠁣󠁴󠁿" },
-                      { id: "Senegal", flag: "🇸🇳", code: "SEN" },
-                      { id: "Suiza", flag: "🇨🇭", code: "SUI" },
-                      { id: "Suecia", code: "SWE", flag: "🇸🇪" },
-                      { id: "Túnez", flag: "🇹🇳", code: "TUN" },
-                      { id: "Türkiye", flag: "🇹🇷", code: "TUR" },
-                      { id: "Uruguay", flag: "🇺🇾", code: "URU" },
-                      { id: "USA", flag: "🇺🇸", code: "USA" },
-                      { id: "Uzbekistán", flag: "🇺🇿", code: "UZB" },
-                    ];
-
                     const pinnedTeams = ALL_TEAMS_LIST.filter((t) =>
                       selectedTeams.includes(t.id),
                     );
@@ -765,7 +803,7 @@ export function TwitchApp() {
                           />
                           <input
                             type="text"
-                            placeholder="Buscar país..."
+                            placeholder={t("search_country", "Buscar país...")}
                             value={countrySearch}
                             onChange={(e) => setCountrySearch(e.target.value)}
                             style={{
@@ -802,20 +840,20 @@ export function TwitchApp() {
 
                 <button
                   type="submit"
-                  disabled={selectedTeams.length !== 4 || channel.trim() === ""}
+                  disabled={!isValidTeamSelection(selectedTeams) || channel.trim() === ""}
                   style={{
                     width: "100%",
                     padding: "0.8rem",
                     borderRadius: "0.5rem",
                     border: "none",
                     background:
-                      selectedTeams.length !== 4 || channel.trim() === ""
+                      !isValidTeamSelection(selectedTeams) || channel.trim() === ""
                         ? "rgba(145, 70, 255, 0.5)"
                         : "#9146FF",
                     color: "white",
                     fontWeight: "bold",
                     cursor:
-                      selectedTeams.length !== 4 || channel.trim() === ""
+                      !isValidTeamSelection(selectedTeams) || channel.trim() === ""
                         ? "default"
                         : "pointer",
                     transition: "all 0.2s",
@@ -827,7 +865,7 @@ export function TwitchApp() {
                   }}
                 >
                   <span style={{ textTransform: "uppercase" }}>
-                    Conectar y Jugar
+                    {t("connect_and_play")}
                   </span>
                 </button>
               </form>
@@ -882,9 +920,12 @@ export function TwitchApp() {
         />
         {activeUser
           ? activeUser === "Streamer"
-            ? "Estás jugando esta ronda"
-            : `${activeUser} está jugando esta ronda`
-          : `Escribí !jugar en el chat para jugar la ronda`}
+            ? t("twitch_you_playing_round")
+            : t("twitch_user_playing_round", {
+                user: activeUser,
+                defaultValue: `${activeUser} está jugando esta ronda`,
+              })
+          : t("twitch_type_play_round")}
 
         {activeUser !== "Streamer" && opponentMode !== "streamer" && (
           <button
@@ -901,7 +942,7 @@ export function TwitchApp() {
               fontSize: "0.8rem",
             }}
           >
-            Jugar Yo
+            {t("twitch_play_myself")}
           </button>
         )}
       </div>
@@ -961,7 +1002,7 @@ export function TwitchApp() {
         }}
       >
         <h4 style={{ margin: "0 0 0.5rem 0", color: "#9146FF" }}>
-          Comandos del Chat
+          {t("twitch_chat_commands")}
         </h4>
         <ul
           style={{
@@ -972,10 +1013,10 @@ export function TwitchApp() {
           }}
         >
           <li>
-            <b>!jugar</b> - Reservar turno
+            <b>!jugar</b> - {t("twitch_cmd_reserve")}
           </li>
           <li>
-            <b>!carta 1/2/3</b> - Jugar carta
+            <b>!carta 1/2/3</b> - {t("twitch_cmd_play_card")}
           </li>
           <li>
             <b>!truco</b> / <b>!retruco</b> / <b>!valecuatro</b>
@@ -987,7 +1028,7 @@ export function TwitchApp() {
             <b>!quiero</b> / <b>!noquiero</b>
           </li>
           <li>
-            <b>!mazo</b> - Irse al mazo
+            <b>!mazo</b> - {t("twitch_cmd_fold")}
           </li>
         </ul>
       </div>
@@ -1032,13 +1073,12 @@ export function TwitchApp() {
                   marginBottom: "1rem",
                 }}
               >
-                Sala Creada
+                {t("twitch_waiting_title")}
               </h3>
-              <p style={{ opacity: 0.8, marginBottom: "2rem" }}>
-                Ingresa a la pantalla principal desde tu celular o pc, toca en{" "}
-                <strong>Jugar Online</strong> e ingresá este código para jugar
-                contra el chat:
-              </p>
+              <p
+                style={{ opacity: 0.8, marginBottom: "2rem" }}
+                dangerouslySetInnerHTML={{ __html: t("twitch_waiting_desc") }}
+              />
               <div
                 style={{
                   fontSize: "3rem",
@@ -1063,7 +1103,7 @@ export function TwitchApp() {
                 }}
                 className="animate-pulse"
               >
-                Esperando a que te unas...
+                {t("twitch_waiting_join")}
               </p>
             </motion.div>
           </motion.div>

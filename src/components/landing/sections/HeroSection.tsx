@@ -2,12 +2,13 @@ import type { AuthUser } from '../../../hooks/useCurrentUser';
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
-import { LogIn, Search, ArrowLeft } from "lucide-react";
+import { LogIn, Search, ArrowLeft, ArrowRight } from "lucide-react";
 
 import { LandingHeader } from "../LandingHeader";
 import { GameModeSelector } from "../GameModeSelector";
 import { PointSelector } from "../PointSelector";
 import { TwitchButton } from "../../shared/TwitchButton";
+import { ALL_TEAMS_LIST, isValidTeamSelection, getValidTeams, DEFAULT_TEAMS } from "../../../lib/teams";
 
 interface HeroSectionProps {
   user: AuthUser | null;
@@ -32,6 +33,8 @@ interface HeroSectionProps {
   setShowRoadmap: (val: boolean) => void;
   setShowProde: (val: boolean) => void;
   isWaiting: boolean;
+  selectedTeams?: string[];
+  setSelectedTeams?: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
 export const HeroSection: React.FC<HeroSectionProps> = ({
@@ -57,6 +60,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   setShowRoadmap,
   setShowProde,
   isWaiting,
+  selectedTeams: propSelectedTeams,
+  setSelectedTeams: propSetSelectedTeams,
 }) => {
   const { t } = useTranslation();
 
@@ -67,19 +72,22 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "")
       .toLowerCase();
-  const [selectedTeams, setSelectedTeams] = useState<string[]>(() => {
-    const saved = localStorage.getItem("truco_selected_teams");
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) return parsed;
-      } catch (e) {}
+
+  const [internalSelectedTeams, setInternalSelectedTeams] = useState<string[]>(() => {
+    if (typeof window !== "undefined") {
+      return getValidTeams(localStorage.getItem("truco_selected_teams"));
     }
-    return [];
+    return DEFAULT_TEAMS;
   });
+
+  const selectedTeams = propSelectedTeams ?? internalSelectedTeams;
+  const setSelectedTeams = propSetSelectedTeams ?? setInternalSelectedTeams;
+
   useEffect(() => {
-    localStorage.setItem("truco_selected_teams", JSON.stringify(selectedTeams));
-  }, [selectedTeams]);
+    if (!propSetSelectedTeams) {
+      localStorage.setItem("truco_selected_teams", JSON.stringify(selectedTeams));
+    }
+  }, [selectedTeams, propSetSelectedTeams]);
 
 
   return (
@@ -594,57 +602,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               </p>
 
               {(() => {
-                const ALL_TEAMS_LIST = [
-                  { id: "Argelia", flag: "🇩🇿", code: "ALG" },
-                  { id: "Argentina", flag: "🇦🇷", code: "ARG" },
-                  { id: "Australia", flag: "🇦🇺", code: "AUS" },
-                  { id: "Austria", flag: "🇦🇹", code: "AUT" },
-                  { id: "Bélgica", code: "BEL", flag: "🇧🇪" },
-                  { id: "Bosnia y Herz", flag: "🇧🇦", code: "BIH" },
-                  { id: "Brasil", flag: "🇧🇷", code: "BRA" },
-                  { id: "Canadá", flag: "🇨🇦", code: "CAN" },
-                  { id: "Costa de Marfil", code: "CIV", flag: "🇨🇮" },
-                  { id: "DR Congo", flag: "🇨🇩", code: "COD" },
-                  { id: "Colombia", flag: "🇨🇴", code: "COL" },
-                  { id: "Cabo Verde", flag: "🇨🇻", code: "CPV" },
-                  { id: "Croacia", flag: "🇭🇷", code: "CRO" },
-                  { id: "Curaçao", flag: "🇨🇼", code: "CUW" },
-                  { id: "República Checa", flag: "🇨🇿", code: "CZE" },
-                  { id: "Ecuador", flag: "🇪🇨", code: "ECU" },
-                  { id: "Egipto", flag: "🇪🇬", code: "EGY" },
-                  { id: "Inglaterra", flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", code: "ENG" },
-                  { id: "España", flag: "🇪🇸", code: "ESP" },
-                  { id: "Francia", flag: "🇫🇷", code: "FRA" },
-                  { id: "Alemania", code: "GER", flag: "🇩🇪" },
-                  { id: "Ghana", flag: "🇬🇭", code: "GHA" },
-                  { id: "Haití", flag: "🇭🇹", code: "HAI" },
-                  { id: "Irán", flag: "🇮🇷", code: "IRN" },
-                  { id: "Iraq", flag: "🇮🇶", code: "IRQ" },
-                  { id: "Jordania", flag: "🇯🇴", code: "JOR" },
-                  { id: "Japón", flag: "🇯🇵", code: "JPN" },
-                  { id: "Corea del Sur", flag: "🇰🇷", code: "KOR" },
-                  { id: "Arabia Saudita", flag: "🇸🇦", code: "KSA" },
-                  { id: "Marruecos", flag: "🇲🇦", code: "MAR" },
-                  { id: "México", flag: "🇲🇽", code: "MEX" },
-                  { id: "Países Bajos", flag: "🇳🇱", code: "NED" },
-                  { id: "Noruega", flag: "🇳🇴", code: "NOR" },
-                  { id: "Nueva Zelanda", flag: "🇳🇿", code: "NZL" },
-                  { id: "Panamá", flag: "🇵🇦", code: "PAN" },
-                  { id: "Paraguay", flag: "🇵🇾", code: "PAR" },
-                  { id: "Portugal", flag: "🇵🇹", code: "POR" },
-                  { id: "Qatar", flag: "🇶🇦", code: "QAT" },
-                  { id: "Sudáfrica", flag: "🇿🇦", code: "RSA" },
-                  { id: "Escocia", code: "SCO", flag: "🏴󠁧󠁢󠁳󠁣󠁴󠁿" },
-                  { id: "Senegal", flag: "🇸🇳", code: "SEN" },
-                  { id: "Suiza", flag: "🇨🇭", code: "SUI" },
-                  { id: "Suecia", code: "SWE", flag: "🇸🇪" },
-                  { id: "Túnez", flag: "🇹🇳", code: "TUN" },
-                  { id: "Türkiye", flag: "🇹🇷", code: "TUR" },
-                  { id: "Uruguay", flag: "🇺🇾", code: "URU" },
-                  { id: "USA", flag: "🇺🇸", code: "USA" },
-                  { id: "Uzbekistán", flag: "🇺🇿", code: "UZB" },
-                ];
-
                 const pinnedTeams = ALL_TEAMS_LIST.filter((t) =>
                   selectedTeams.includes(t.id),
                 );
@@ -797,7 +754,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                   display: "flex",
                   flexDirection: "row",
                   gap: "0.75rem",
-                  width: "100%",
+                  width: "85%",
+                  margin: "0 auto",
                 }}
               >
                 <button
@@ -817,7 +775,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                     alignItems: "center",
                     justifyContent: "center",
                     gap: "0.5rem",
-                    fontSize: "0.8rem",
+                    fontSize: "0.85rem",
                     fontWeight: 900,
                     cursor: "pointer",
                     transition: "none",
@@ -829,8 +787,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                 </button>
 
                 <button
-                  disabled={selectedTeams.length !== 4}
+                  disabled={!isValidTeamSelection(selectedTeams)}
                   onClick={() => {
+                    if (!isValidTeamSelection(selectedTeams)) return;
                     setIsSelectingTeams(false);
                     initiateGame(selectedMode!, parseInt(window.localStorage.getItem("truco_selected_points") || "15") as 15 | 30);
                   }}
@@ -838,25 +797,29 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                   style={{
                     flex: 1,
                     height: "50px",
-                    fontSize: "1.2rem",
-                    fontWeight: 950,
+                    fontSize: "0.85rem",
+                    fontWeight: 900,
                     backgroundColor:
-                      selectedTeams.length !== 4
+                      !isValidTeamSelection(selectedTeams)
                         ? "rgba(255,255,255,0.1)"
                         : "#00f2ff",
                     color:
-                      selectedTeams.length !== 4
+                      !isValidTeamSelection(selectedTeams)
                         ? "rgba(255,255,255,0.3)"
                         : "#000",
                     border: "none",
                     borderRadius: "1rem",
                     boxShadow:
-                      selectedTeams.length !== 4 ? "none" : "4px 4px 0px #000",
-                    fontStyle: "italic",
-                    cursor: selectedTeams.length !== 4 ? "default" : "pointer",
+                      !isValidTeamSelection(selectedTeams) ? "none" : "4px 4px 0px #000",
+                    cursor: !isValidTeamSelection(selectedTeams) ? "default" : "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "0.5rem",
                   }}
                 >
                   {t("play_now")}
+                  <ArrowRight size={18} />
                 </button>
               </div>
             </motion.div>

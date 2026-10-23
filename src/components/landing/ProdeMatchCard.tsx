@@ -162,21 +162,67 @@ export const ProdeMatchCard: React.FC<ProdeMatchCardProps> = ({
             </div>
           )}
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <input
-              type="text" inputMode="numeric" maxLength={1} disabled={locked || !user}
-              aria-label={`${match.teamA} score`}
-              value={hasPrediction ? pScoreA : inScoreA}
-              onChange={(e) => onInputChange(match.id, 'scoreA', e.target.value.replace(/[^0-9]/g, '').slice(0, 1))}
-              style={{ width: '40px', height: '40px', textAlign: 'center', padding: 0, background: (locked || !user) ? 'transparent' : 'rgba(0,0,0,0.5)', border: (locked || !user) ? 'none' : '1px solid rgba(255,255,255,0.2)', color: '#fff', borderRadius: '0.5rem', fontWeight: 800, fontSize: '1.2rem' }}
-            />
-            <span style={{ fontWeight: 800, color: 'rgba(255,255,255,0.4)' }}>-</span>
-            <input
-              type="text" inputMode="numeric" maxLength={1} disabled={locked || !user}
-              aria-label={`${match.teamB} score`}
-              value={hasPrediction ? pScoreB : inScoreB}
-              onChange={(e) => onInputChange(match.id, 'scoreB', e.target.value.replace(/[^0-9]/g, '').slice(0, 1))}
-              style={{ width: '40px', height: '40px', textAlign: 'center', padding: 0, background: (locked || !user) ? 'transparent' : 'rgba(0,0,0,0.5)', border: (locked || !user) ? 'none' : '1px solid rgba(255,255,255,0.2)', color: '#fff', borderRadius: '0.5rem', fontWeight: 800, fontSize: '1.2rem' }}
-            />
+            {!hasPrediction && (locked || match.status?.startsWith('finished') || finishedAuto || !user) ? (
+              <>
+                <div
+                  style={{
+                    width: '40px',
+                    height: '40px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid rgba(255, 255, 255, 0.15)',
+                    color: 'rgba(255, 255, 255, 0.45)',
+                    borderRadius: '0.5rem',
+                    fontWeight: 800,
+                    fontSize: '1.1rem',
+                    userSelect: 'none',
+                  }}
+                  title={t("no_prediction", "No participó")}
+                >
+                  N
+                </div>
+                <span style={{ fontWeight: 800, color: 'rgba(255,255,255,0.3)' }}>-</span>
+                <div
+                  style={{
+                    width: '40px',
+                    height: '40px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid rgba(255, 255, 255, 0.15)',
+                    color: 'rgba(255, 255, 255, 0.45)',
+                    borderRadius: '0.5rem',
+                    fontWeight: 800,
+                    fontSize: '1.1rem',
+                    userSelect: 'none',
+                  }}
+                  title={t("no_prediction", "No participó")}
+                >
+                  N
+                </div>
+              </>
+            ) : (
+              <>
+                <input
+                  type="text" inputMode="numeric" maxLength={1} disabled={locked || !user}
+                  aria-label={`${match.teamA} score`}
+                  value={hasPrediction ? pScoreA : inScoreA}
+                  onChange={(e) => onInputChange(match.id, 'scoreA', e.target.value.replace(/[^0-9]/g, '').slice(0, 1))}
+                  style={{ width: '40px', height: '40px', textAlign: 'center', padding: 0, background: (locked || !user) ? 'transparent' : 'rgba(0,0,0,0.5)', border: (locked || !user) ? 'none' : '1px solid rgba(255,255,255,0.2)', color: '#fff', borderRadius: '0.5rem', fontWeight: 800, fontSize: '1.2rem' }}
+                />
+                <span style={{ fontWeight: 800, color: 'rgba(255,255,255,0.4)' }}>-</span>
+                <input
+                  type="text" inputMode="numeric" maxLength={1} disabled={locked || !user}
+                  aria-label={`${match.teamB} score`}
+                  value={hasPrediction ? pScoreB : inScoreB}
+                  onChange={(e) => onInputChange(match.id, 'scoreB', e.target.value.replace(/[^0-9]/g, '').slice(0, 1))}
+                  style={{ width: '40px', height: '40px', textAlign: 'center', padding: 0, background: (locked || !user) ? 'transparent' : 'rgba(0,0,0,0.5)', border: (locked || !user) ? 'none' : '1px solid rgba(255,255,255,0.2)', color: '#fff', borderRadius: '0.5rem', fontWeight: 800, fontSize: '1.2rem' }}
+                />
+              </>
+            )}
           </div>
           {match.status?.startsWith('finished') && packsWon > 0 && (
             <div style={{ color: '#ff8c00', fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase', textAlign: 'center', whiteSpace: 'nowrap' }}>

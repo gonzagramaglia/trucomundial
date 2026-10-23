@@ -1,7 +1,8 @@
 import React from 'react';
-import { ArrowLeft, User, BookOpen } from 'lucide-react';
+import { User, BookOpen } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { UtilityButtons } from '../../../shared/UtilityButtons';
+import { HomeButton } from '../../../shared/HomeButton';
 
 interface ProfileHeaderProps {
   onBack: () => void;
@@ -25,35 +26,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ onBack, isMobile, 
     return (
       <>
         {/* Fixed Home Button (Desktop Left Corner) */}
-        <button
-          onClick={onBack}
-          className="home-btn-fixed btn-hover-dark profile-nav-btn"
-          style={{
-            position: 'fixed',
-            top: '1.5rem',
-            left: '1.5rem',
-            background: 'rgba(255, 255, 255, 0.1)',
-            backdropFilter: 'blur(12px)',
-            zIndex: 2000,
-            height: '36px',
-            borderRadius: '0.85rem',
-            padding: '0 0.85rem',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.4rem',
-            color: 'white',
-            border: '1px solid rgba(255, 255, 255, 0.1)',
-            boxShadow: 'none',
-            fontWeight: 900,
-            fontSize: '0.7rem',
-            letterSpacing: '0.05em',
-            textTransform: 'uppercase',
-            cursor: 'pointer'
-          }}
-        >
-          <ArrowLeft size={14} />
-          <span>{t("back")}</span>
-        </button>
+        <HomeButton onClick={onBack} />
 
         {/* Fixed Utility Buttons (Desktop Right Corner) */}
         <UtilityButtons />
@@ -98,29 +71,8 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ onBack, isMobile, 
       }}>
         {/* Left: Volver + Reglas */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          {/* Back Button */}
-          <button
-            onClick={onBack}
-            className="btn-hover-dark"
-            style={{
-              background: 'rgba(255, 255, 255, 0.08)',
-              border: '1px solid rgba(255, 255, 255, 0.15)',
-              color: 'white',
-              height: '36px',
-              borderRadius: '0.75rem',
-              padding: '0 0.85rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.4rem',
-              fontSize: '0.8rem',
-              fontWeight: 800,
-              cursor: 'pointer',
-              boxShadow: '3px 3px 0px #000'
-            }}
-          >
-            <ArrowLeft size={14} />
-            {t("back")}
-          </button>
+          {/* Home Button */}
+          <HomeButton onClick={onBack} isMobile={true} />
 
           {/* Rules Button to the right of Volver on Mobile */}
           <button
@@ -168,7 +120,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ onBack, isMobile, 
             color: '#00f2ff',
             textShadow: '0 0 8px rgba(0, 242, 255, 0.2)'
           }}>
-            {window.location.pathname.startsWith('/en') ? 'GUEST PROFILE' : 'PERFIL DE INVITADO'}
+            {t('guest_profile')}
           </h2>
         </div>
       </div>

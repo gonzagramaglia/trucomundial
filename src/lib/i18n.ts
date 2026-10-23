@@ -8,7 +8,11 @@ const resources = {
   es: { translation: es },
 };
 
-const isEnglish = window.location.pathname.startsWith('/en');
+const isEnglish = typeof window !== 'undefined' && (
+  window.location.pathname.startsWith('/en') ||
+  window.location.pathname.startsWith('/trucomundial/en') ||
+  window.location.pathname.includes('/en/')
+);
 
 i18n
   .use(initReactI18next)

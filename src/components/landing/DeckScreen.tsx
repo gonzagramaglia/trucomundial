@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Search,
   Lock,
-  Home,
   Layers,
   Unlock,
   RefreshCw,
@@ -11,6 +10,7 @@ import {
   ExternalLink,
   Star,
   Clock,
+  BookOpen,
 } from "lucide-react";
 import { isTopCard, getCardVotes } from "../../lib/votesStore";
 import { useTranslation } from "react-i18next";
@@ -20,6 +20,8 @@ import { EmptyState } from "../shared/EmptyState";
 import { supabase } from "../../lib/supabase";
 import { audioManager } from "../../lib/audio";
 import { UtilityButtons } from "../shared/UtilityButtons";
+import { HomeButton } from "../shared/HomeButton";
+import { getAppRoute } from "../../lib/assets";
 
 interface DeckScreenProps {
   user: any;
@@ -359,7 +361,7 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({
         setTimeout(() => {
           setHighlightingCards(false);
           setNewCardsRevealed([]);
-        }, 2000);
+        }, 1500);
       }
     }, 300);
   };
@@ -420,33 +422,7 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({
     >
       {!isMobile && (
         <>
-          <button
-            onClick={handleBackRequest}
-            className="home-btn-fixed btn-hover-dark profile-nav-btn"
-            style={{
-              position: "fixed",
-              top: "1.5rem",
-              left: "1.5rem",
-              background: "rgba(255, 255, 255, 0.1)",
-              backdropFilter: "blur(12px)",
-              zIndex: 2000,
-              height: "40px",
-              borderRadius: "1rem",
-              padding: "0 1.25rem",
-              display: "flex",
-              alignItems: "center",
-              gap: "0.5rem",
-              color: "white",
-              border: "1px solid rgba(255, 255, 255, 0.2)",
-              fontWeight: 900,
-              fontSize: "0.75rem",
-              letterSpacing: "0.05em",
-              cursor: "pointer",
-            }}
-          >
-            <Home size={18} />
-            <span>{t("home")}</span>
-          </button>
+          <HomeButton onClick={handleBackRequest} />
           <UtilityButtons />
         </>
       )}
@@ -476,27 +452,31 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({
                 marginBottom: "1rem",
               }}
             >
-              <button
-                onClick={handleBackRequest}
-                className="btn-hover-dark"
-                style={{
-                  background: "rgba(255, 255, 255, 0.08)",
-                  border: "1px solid rgba(255, 255, 255, 0.15)",
-                  color: "white",
-                  height: "36px",
-                  borderRadius: "0.75rem",
-                  padding: "0 0.85rem",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.4rem",
-                  fontSize: "0.8rem",
-                  fontWeight: 800,
-                  cursor: "pointer",
-                  boxShadow: "3px 3px 0px #000",
-                }}
-              >
-                <Home size={14} /> {t("home")}
-              </button>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                <HomeButton onClick={handleBackRequest} isMobile={true} />
+
+                <button
+                  type="button"
+                  onClick={() => window.dispatchEvent(new CustomEvent('open_rules'))}
+                  className="btn-hover-dark"
+                  style={{
+                    background: "rgba(255, 255, 255, 0.08)",
+                    border: "1px solid rgba(255, 255, 255, 0.15)",
+                    color: "white",
+                    height: "36px",
+                    width: "36px",
+                    borderRadius: "0.75rem",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    cursor: "pointer",
+                    boxShadow: "3px 3px 0px #000",
+                  }}
+                  title={t("rules")}
+                >
+                  <BookOpen size={18} />
+                </button>
+              </div>
               <UtilityButtons isMobile={true} />
             </div>
 
@@ -674,6 +654,29 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({
           }}
         >
           <button
+            onClick={() => setShowRedeemModal(true)}
+            className="btn-hover-dark"
+            style={{
+              background: "rgba(255, 255, 255, 0.08)",
+              border: "1px solid rgba(255, 255, 255, 0.2)",
+              color: "#fff",
+              height: "48px",
+              borderRadius: "1.25rem",
+              padding: "0 1.25rem",
+              fontSize: "0.9rem",
+              fontWeight: 800,
+              display: "flex",
+              alignItems: "center",
+              gap: "0.5rem",
+              cursor: "pointer",
+              boxShadow: "3px 3px 0px #000",
+            }}
+          >
+            <Unlock size={16} />
+            {t("redeem_code")}
+          </button>
+
+          <button
             onClick={() => {
               if (unlockedCards.length < 24) {
                 buyMysteryCard(3);
@@ -740,29 +743,6 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({
               : t("next_card_in", { time: formatCountdown(timeRemainingMs) })}
           </button>
 
-          <button
-            onClick={() => setShowRedeemModal(true)}
-            className="btn-hover-dark"
-            style={{
-              background: "rgba(255, 255, 255, 0.08)",
-              border: "1px solid rgba(255, 255, 255, 0.2)",
-              color: "#fff",
-              height: "48px",
-              borderRadius: "1.25rem",
-              padding: "0 1.25rem",
-              fontSize: "0.9rem",
-              fontWeight: 800,
-              display: "flex",
-              alignItems: "center",
-              gap: "0.5rem",
-              cursor: "pointer",
-              boxShadow: "3px 3px 0px #000",
-            }}
-          >
-            <Unlock size={16} />
-            {t("redeem_code")}
-          </button>
-
           {unlockedCards.length > 0 && (
             <button
               onClick={handleResetCollection}
@@ -807,26 +787,27 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({
       >
         <Star size={24} color="#ffdf00" style={{ flexShrink: 0 }} />
         <div>
-          <h4
-            style={{
-              margin: "0 0 0.25rem 0",
-              color: "#ffdf00",
-              textAlign: "left",
-            }}
-          >
-            {t("deck_ranking_promo_title")}
-          </h4>
           <p
             style={{
               margin: 0,
               fontSize: "0.85rem",
               color: "rgba(255,255,255,0.8)",
               textAlign: "left",
+              lineHeight: 1.4,
             }}
           >
+            <strong
+              style={{
+                color: "#ffdf00",
+                marginRight: "0.4rem",
+                fontWeight: 800,
+              }}
+            >
+              {t("deck_ranking_promo_title")}
+            </strong>
             <span>{t("deck_ranking_promo_text")} </span>
             <a
-              href="/votar"
+              href={getAppRoute("/votar")}
               style={{
                 color: "#ffdf00",
                 fontWeight: 800,
@@ -866,26 +847,27 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({
       >
         <AlertCircle size={24} color="#00f2ff" style={{ flexShrink: 0 }} />
         <div>
-          <h4
-            style={{
-              margin: "0 0 0.25rem 0",
-              color: "#00f2ff",
-              textAlign: "left",
-            }}
-          >
-            {t("deck_prode_promo_title")}
-          </h4>
           <p
             style={{
               margin: 0,
               fontSize: "0.85rem",
               color: "rgba(255,255,255,0.8)",
               textAlign: "left",
+              lineHeight: 1.4,
             }}
           >
+            <strong
+              style={{
+                color: "#00f2ff",
+                marginRight: "0.4rem",
+                fontWeight: 800,
+              }}
+            >
+              {t("deck_prode_promo_title")}
+            </strong>
             <span>{t("deck_prode_promo_text")} </span>
             <a
-              href="/prode"
+              href={getAppRoute("/prode")}
               style={{
                 color: "#00f2ff",
                 fontWeight: 800,
@@ -1439,7 +1421,7 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({
             >
               <span>{t("redeem_code_desc_1")}</span>{" "}
               <a
-                href="/prode"
+                href={getAppRoute("/prode")}
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{

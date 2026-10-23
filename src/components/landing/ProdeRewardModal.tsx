@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Layers, ExternalLink } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { getAppRoute } from '../../lib/assets';
 
 interface RewardCode {
   code: string;
@@ -44,9 +45,9 @@ export const ProdeRewardModal: React.FC<ProdeRewardModalProps> = ({
         </p>
         <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.9rem', marginBottom: '1rem' }}>
           {packs === 1 ? (
-            <>{t('prode_reward_code_single')} <a href="/mazo" target="_blank" rel="noopener noreferrer" style={{ color: '#ff8c00', textDecoration: 'none', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '0.2rem', verticalAlign: 'middle' }} className="hover-underline"><ExternalLink size={14} />{t('prode_deck_screen')}</a>!</>
+            <>{t('prode_reward_code_single')} <a href={getAppRoute("/mazo")} target="_blank" rel="noopener noreferrer" style={{ color: '#ff8c00', textDecoration: 'none', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '0.2rem', verticalAlign: 'middle' }} className="hover-underline"><ExternalLink size={14} />{t('prode_deck_screen')}</a>!</>
           ) : (
-            <>{t('prode_reward_code_plural')} <a href="/mazo" target="_blank" rel="noopener noreferrer" style={{ color: '#ff8c00', textDecoration: 'none', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '0.2rem', verticalAlign: 'middle' }} className="hover-underline"><ExternalLink size={14} />{t('prode_deck_screen')}</a>!</>
+            <>{t('prode_reward_code_plural')} <a href={getAppRoute("/mazo")} target="_blank" rel="noopener noreferrer" style={{ color: '#ff8c00', textDecoration: 'none', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '0.2rem', verticalAlign: 'middle' }} className="hover-underline"><ExternalLink size={14} />{t('prode_deck_screen')}</a>!</>
           )}
         </p>
         <div style={{ display: 'grid', gridTemplateColumns: codes.length === 1 ? 'minmax(180px, 250px)' : 'repeat(3, 1fr)', justifyContent: 'center', gap: '0.75rem', marginBottom: '2rem' }}>

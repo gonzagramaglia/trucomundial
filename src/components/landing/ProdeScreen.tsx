@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Calendar, Globe, Search, Home, Trophy, ExternalLink, AlertCircle, Star } from 'lucide-react';
+import { Calendar, Globe, Search, Trophy, ExternalLink, AlertCircle, Star } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { WorldCupBracket } from './WorldCupBracket';
 import { GroupStandings } from './GroupStandings';
@@ -10,6 +10,8 @@ import type { FixtureMatch } from '../../lib/fixtureData';
 import { supabase } from '../../lib/supabase';
 import { audioManager } from '../../lib/audio';
 import { UtilityButtons } from '../shared/UtilityButtons';
+import { HomeButton } from '../shared/HomeButton';
+import { getAppRoute } from '../../lib/assets';
 import { ProdeMatchCard } from './ProdeMatchCard';
 import { ProdeRewardModal } from './ProdeRewardModal';
 import { formatMatchTime } from '../../lib/matchTime';
@@ -457,16 +459,7 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth: _han
     }}>
       <style>{hideSpinnersCSS}</style>
       {!isMobile && (
-        <button
-          onClick={onBack}
-          className="home-btn-fixed btn-hover-dark profile-nav-btn"
-          style={{
-            position: "fixed", top: "1.5rem", left: "1.5rem", background: "rgba(255, 255, 255, 0.1)", backdropFilter: "blur(12px)", zIndex: 2000, height: "40px", borderRadius: "1rem", padding: "0 1.25rem", display: "flex", alignItems: "center", gap: "0.5rem", color: "white", border: "1px solid rgba(255, 255, 255, 0.2)", boxShadow: "none", fontWeight: 900, fontSize: "0.75rem", letterSpacing: "0.05em", textTransform: "uppercase", cursor: "pointer"
-          }}
-        >
-          <Home size={18} />
-          <span>{t("home")}</span>
-        </button>
+        <HomeButton onClick={onBack} />
       )}
 
       {!isMobile && <UtilityButtons />}
@@ -474,14 +467,7 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth: _han
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', marginBottom: isMobile ? '1.5rem' : '2.5rem', width: '100%', position: 'relative' }}>
         {isMobile && (
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', gap: '0.75rem', marginBottom: '1rem' }}>
-            <button
-              onClick={onBack}
-              className="btn-hover-dark"
-              style={{ background: 'rgba(255, 255, 255, 0.08)', border: '1px solid rgba(255, 255, 255, 0.15)', color: 'white', height: '36px', borderRadius: '0.75rem', padding: '0 0.85rem', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', fontWeight: 800, cursor: 'pointer', boxShadow: '3px 3px 0px #000' }}
-            >
-              <Home size={14} />
-              {t("home")}
-            </button>
+            <HomeButton onClick={onBack} isMobile={true} />
 
             <UtilityButtons isMobile={true} />
           </div>
@@ -520,11 +506,16 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth: _han
       }}>
         <AlertCircle size={24} color="#ff8c00" style={{ flexShrink: 0 }} />
         <div>
-          <h4 style={{ margin: '0 0 0.25rem 0', color: '#ff8c00' }}>{t("prode_rewards_title")}</h4>
-          <p style={{ margin: 0, fontSize: '0.85rem', color: 'rgba(255,255,255,0.8)' }}>
+          <p style={{ margin: 0, fontSize: '0.85rem', color: 'rgba(255,255,255,0.8)', textAlign: 'left', lineHeight: 1.4 }}>
+            <strong style={{ color: '#ff8c00', marginRight: '0.4rem', fontWeight: 800 }}>
+              {t("prode_rewards_title")}
+            </strong>
             <span dangerouslySetInnerHTML={{ __html: t("prode_rewards_desc_1") }} />
-            <span dangerouslySetInnerHTML={{ __html: t("prode_rewards_desc_2") }} />
-            {t("prode_rewards_desc_3")}<a href="/mazo" style={{ color: '#ff8c00', fontWeight: 900, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.2rem', verticalAlign: 'middle' }}><ExternalLink size={14} />{t("prode_build_deck_link")}</a>.
+            {t("prode_rewards_desc_3")}
+            <a href={getAppRoute("/mazo")} style={{ color: '#ff8c00', fontWeight: 900, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.2rem', verticalAlign: 'middle' }}>
+              <ExternalLink size={14} />
+              {t("prode_build_deck_link")}
+            </a>.
           </p>
         </div>
       </div>
@@ -537,7 +528,7 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth: _han
         padding: '1rem',
         marginBottom: '2rem',
         display: 'flex',
-        alignItems: 'flex-start',
+        alignItems: 'center',
         gap: '1rem',
         width: '100%',
         boxSizing: 'border-box'
@@ -554,14 +545,39 @@ export const ProdeScreen: React.FC<ProdeScreenProps> = ({ user, handleAuth: _han
         }}>
           <Star size={20} color="#ffdf00" />
         </div>
-        <p style={{ margin: 0, fontSize: '0.85rem', color: 'rgba(255,255,255,0.9)', lineHeight: 1.4, textAlign: 'left' }}>
-          <span>{t("prode_fixture_stars_info_1")}</span>
-          <a href="/votar" style={{ color: '#ffdf00', textDecoration: 'none', fontWeight: 'bold', whiteSpace: 'nowrap' }}>
-            <ExternalLink size={14} style={{ verticalAlign: 'middle', marginRight: '0.2rem', marginTop: '-0.1rem' }} />
-            {t("prode_fixture_stars_info_link")}
-          </a>
-          <span dangerouslySetInnerHTML={{ __html: t("prode_fixture_stars_info_2") }} />
-        </p>
+        <div>
+          <p style={{ margin: 0, fontSize: '0.85rem', color: 'rgba(255,255,255,0.9)', lineHeight: 1.4, textAlign: 'left' }}>
+            <strong
+              style={{
+                color: '#ffdf00',
+                marginRight: '0.4rem',
+                fontWeight: 800,
+              }}
+            >
+              {t("prode_fixture_stars_title")}
+            </strong>
+            <span dangerouslySetInnerHTML={{ __html: t("prode_fixture_stars_desc") }} />
+            <a
+              href={getAppRoute("/votar")}
+              style={{
+                color: '#ffdf00',
+                textDecoration: 'none',
+                fontWeight: 'bold',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              <ExternalLink
+                size={14}
+                style={{
+                  verticalAlign: 'middle',
+                  marginRight: '0.2rem',
+                  marginTop: '-0.1rem',
+                }}
+              />
+              {t("prode_fixture_stars_link")}
+            </a>.
+          </p>
+        </div>
       </div>
 
 

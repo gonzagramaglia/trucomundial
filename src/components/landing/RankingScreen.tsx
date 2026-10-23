@@ -2,17 +2,19 @@ import React, { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import {
   Search,
-  Home,
   Star,
   Calendar,
   Loader2,
   ExternalLink,
+  BookOpen,
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { EmptyState } from "../shared/EmptyState";
 import { TwitchButton } from "../shared/TwitchButton";
 import { audioManager } from "../../lib/audio";
 import { UtilityButtons } from "../shared/UtilityButtons";
+import { HomeButton } from "../shared/HomeButton";
+import { getAppRoute } from "../../lib/assets";
 import { useRankingVotes } from "../../hooks/useRankingVotes";
 import type { RankingUser } from "../../hooks/useRankingVotes";
 import { RankingCard } from "./RankingCard";
@@ -238,35 +240,7 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({
       {!isMobile && (
         <>
           {/* Fixed Back Button (Desktop Left Corner) */}
-          <button
-            onClick={handleBackRequest}
-            className="home-btn-fixed btn-hover-dark profile-nav-btn"
-            style={{
-              position: "fixed",
-              top: "1.5rem",
-              left: "1.5rem",
-              background: "rgba(255, 255, 255, 0.1)",
-              backdropFilter: "blur(12px)",
-              zIndex: 2000,
-              height: "40px",
-              borderRadius: "1rem",
-              padding: "0 1.25rem",
-              display: "flex",
-              alignItems: "center",
-              gap: "0.5rem",
-              color: "white",
-              border: "1px solid rgba(255, 255, 255, 0.2)",
-              boxShadow: "none",
-              fontWeight: 900,
-              fontSize: "0.75rem",
-              letterSpacing: "0.05em",
-              textTransform: "uppercase",
-              cursor: "pointer",
-            }}
-          >
-            <Home size={18} />
-            <span>{t("home")}</span>
-          </button>
+          <HomeButton onClick={handleBackRequest} />
 
           <UtilityButtons />
         </>
@@ -297,28 +271,31 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({
                 marginBottom: "1rem",
               }}
             >
-              <button
-                onClick={handleBackRequest}
-                className="btn-hover-dark"
-                style={{
-                  background: "rgba(255, 255, 255, 0.08)",
-                  border: "1px solid rgba(255, 255, 255, 0.15)",
-                  color: "white",
-                  height: "36px",
-                  borderRadius: "0.75rem",
-                  padding: "0 0.85rem",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.4rem",
-                  fontSize: "0.8rem",
-                  fontWeight: 800,
-                  cursor: "pointer",
-                  boxShadow: "3px 3px 0px #000",
-                }}
-              >
-                <Home size={14} />
-                {t("home")}
-              </button>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                <HomeButton onClick={handleBackRequest} isMobile={true} />
+
+                <button
+                  type="button"
+                  onClick={() => window.dispatchEvent(new CustomEvent('open_rules'))}
+                  className="btn-hover-dark"
+                  style={{
+                    background: "rgba(255, 255, 255, 0.08)",
+                    border: "1px solid rgba(255, 255, 255, 0.15)",
+                    color: "white",
+                    height: "36px",
+                    width: "36px",
+                    borderRadius: "0.75rem",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    cursor: "pointer",
+                    boxShadow: "3px 3px 0px #000",
+                  }}
+                  title={t("rules")}
+                >
+                  <BookOpen size={18} />
+                </button>
+              </div>
 
               <UtilityButtons isMobile={true} />
             </div>
@@ -464,39 +441,47 @@ export const RankingScreen: React.FC<RankingScreenProps> = ({
         >
           <Calendar size={20} color="#00f2ff" />
         </div>
-        <p
-          style={{
-            margin: 0,
-            fontSize: "0.85rem",
-            color: "rgba(255,255,255,0.9)",
-            lineHeight: 1.4,
-            textAlign: "left",
-          }}
-        >
-          <span>{t("ranking_fixture_info_1")}</span>
-          <a
-            href="/prode"
+        <div>
+          <p
             style={{
-              color: "#00f2ff",
-              textDecoration: "none",
-              fontWeight: "bold",
-              whiteSpace: "nowrap",
+              margin: 0,
+              fontSize: "0.85rem",
+              color: "rgba(255,255,255,0.9)",
+              lineHeight: 1.4,
+              textAlign: "left",
             }}
           >
-            <ExternalLink
-              size={14}
+            <strong
               style={{
-                verticalAlign: "middle",
-                marginRight: "0.2rem",
-                marginTop: "-0.1rem",
+                color: "#00f2ff",
+                marginRight: "0.4rem",
+                fontWeight: 800,
               }}
-            />
-            {t("ranking_fixture_info_link")}
-          </a>
-          <span
-            dangerouslySetInnerHTML={{ __html: t("ranking_fixture_info_2") }}
-          />
-        </p>
+            >
+              {t("ranking_fixture_title")}
+            </strong>
+            <span dangerouslySetInnerHTML={{ __html: t("ranking_fixture_desc") }} />
+            <a
+              href={getAppRoute("/prode")}
+              style={{
+                color: "#00f2ff",
+                textDecoration: "none",
+                fontWeight: "bold",
+                whiteSpace: "nowrap",
+              }}
+            >
+              <ExternalLink
+                size={14}
+                style={{
+                  verticalAlign: "middle",
+                  marginRight: "0.2rem",
+                  marginTop: "-0.1rem",
+                }}
+              />
+              {t("ranking_fixture_link")}
+            </a>.
+          </p>
+        </div>
       </div>
 
       {/* SEARCH BOX & FILTERS */}
